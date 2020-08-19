@@ -12,6 +12,7 @@ import java.util.Map;
  */
 public class WorkFlowConfigs {
 
+	public static final String EDIT = "EDIT";
 	public static final String ACTION_OPEN = "open";
 	public static final String ACTION_ASSIGN = "ASSIGN";
 	public static final String ACTION_CLOSE = "close";

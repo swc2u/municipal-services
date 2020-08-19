@@ -60,7 +60,7 @@ public class SupplierAdvanceRequisitionService extends DomainService {
 					supplierAdvanceRequisitionRequest.getSupplierAdvanceRequisitions().size());
 			int i = 0;
 			for (SupplierAdvanceRequisition b : supplierAdvanceRequisitionRequest.getSupplierAdvanceRequisitions()) {
-				ArrayList<AdvanceRequisitionDetails> lard = new ArrayList<AdvanceRequisitionDetails>();
+				ArrayList<AdvanceRequisitionDetails> lard = new ArrayList<>();
 				// since there will be no debit in case of advance amount, only credit amount
 				// populated in details.
 				lard.add(AdvanceRequisitionDetails

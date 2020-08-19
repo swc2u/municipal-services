@@ -201,7 +201,8 @@ public class SepApplication {
 	private AuditDetails auditDetails ;
 
 	
-	
+	@JsonProperty("remark")
+	private String remark ;
 	
 	
 	

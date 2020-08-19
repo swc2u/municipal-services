@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import org.egov.assets.model.AuditDetails;
 import org.egov.assets.model.Material;
+import org.egov.assets.model.MaterialIssueDetail;
 import org.egov.assets.model.Scrap;
 import org.egov.assets.model.ScrapDetail;
 import org.egov.assets.model.Uom;
@@ -38,6 +39,8 @@ public class ScrapDetailEntity {
 
 	private String scrapReason;
 
+	private String issuedetailid;
+
 	private BigDecimal quantity;
 
 	private BigDecimal scrapQuantity;
@@ -62,7 +65,7 @@ public class ScrapDetailEntity {
 
 	public ScrapDetail toDomain() {
 		ScrapDetail scrapDetail = new ScrapDetail();
-
+		scrapDetail.setIssueDetail(new MaterialIssueDetail().id(issuedetailid));
 		return scrapDetail.id(id).scrapNumber(scrapNumber).expiryDate(expiryDate).material(buildMaterial())
 				.uom(new Uom().code(uom)).lotNumber(lotNumber)
 				.scrapReason(ScrapDetail.ScrapReasonEnum.fromValue(scrapReason)).quantity(quantity)
@@ -79,29 +82,29 @@ public class ScrapDetailEntity {
 	public ScrapDetailEntity toEntity(ScrapDetail scrapDetails) {
 		if (scrapDetails.getId() != null)
 			this.id = scrapDetails.getId();
-			this.tenantId = scrapDetails.getTenantId();
-			if(scrapDetails.getScrapNumber() != null)
-	        this.scrapNumber = scrapDetails.getScrapNumber();
-		    if(scrapDetails.getMaterial() != null)
-		    	if(scrapDetails.getMaterial().getCode() != null){
-		    		this.material = scrapDetails.getMaterial().getCode();
-		    	}
-		    if(scrapDetails.getUom() != null)
-		    	if(scrapDetails.getUom().getCode() != null){
-		    		this.uom = scrapDetails.getUom().getCode();
-		    	}
-		    if(scrapDetails.getLotNumber() != null)
-		    this.lotNumber = scrapDetails.getLotNumber();
-		    if(scrapDetails.getExpiryDate() != null)
-		    this.expiryDate = scrapDetails.getExpiryDate();
-		    if(scrapDetails.getScrapReason() != null)
-		    this.scrapReason = scrapDetails.getScrapReason().name();
-		    if(scrapDetails.getQuantity() != null)
-		    	this.quantity = scrapDetails.getQuantity();
-		    if(scrapDetails.getDisposalQuantity() != null)
-		    	this.disposalQuantity = scrapDetails.getDisposalQuantity();
-		    if(scrapDetails.getScrapValue() != null)
-		    	this.scrapValue = scrapDetails.getScrapValue();
+		this.tenantId = scrapDetails.getTenantId();
+		if (scrapDetails.getScrapNumber() != null)
+			this.scrapNumber = scrapDetails.getScrapNumber();
+		if (scrapDetails.getMaterial() != null)
+			if (scrapDetails.getMaterial().getCode() != null) {
+				this.material = scrapDetails.getMaterial().getCode();
+			}
+		if (scrapDetails.getUom() != null)
+			if (scrapDetails.getUom().getCode() != null) {
+				this.uom = scrapDetails.getUom().getCode();
+			}
+		if (scrapDetails.getLotNumber() != null)
+			this.lotNumber = scrapDetails.getLotNumber();
+		if (scrapDetails.getExpiryDate() != null)
+			this.expiryDate = scrapDetails.getExpiryDate();
+		if (scrapDetails.getScrapReason() != null)
+			this.scrapReason = scrapDetails.getScrapReason().name();
+		if (scrapDetails.getQuantity() != null)
+			this.quantity = scrapDetails.getQuantity();
+		if (scrapDetails.getDisposalQuantity() != null)
+			this.disposalQuantity = scrapDetails.getDisposalQuantity();
+		if (scrapDetails.getScrapValue() != null)
+			this.scrapValue = scrapDetails.getScrapValue();
 		return this;
 	}
 

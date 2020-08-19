@@ -1,19 +1,20 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>	
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.5.22.RELEASE</version>
 		<relativePath></relativePath>
-	</parent>	
+	</parent>
 	<groupId>org.egov</groupId>
 	<artifactId>store-asset-services</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>store-asset-services</name>
 	<description>Store Asset Services</description>
-	<url>http://maven.apache.org</url>	
+	<url>http://maven.apache.org</url>
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -22,7 +23,7 @@
 		<maven.version>3.3.9</maven.version>
 		<lombok.version>1.18.8</lombok.version>
 		<commons-lang-version>2.6</commons-lang-version>
-	</properties>	
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>io.springfox</groupId>
@@ -30,6 +31,14 @@
 			<version>2.6.1</version>
 			<scope>compile</scope>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-core</artifactId>
@@ -51,9 +60,9 @@
 			<version>1.1.5-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-		  <groupId>org.springframework.kafka</groupId>
-		  <artifactId>spring-kafka</artifactId>
-		  <version>1.1.2.RELEASE</version>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+			<version>1.1.2.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -86,7 +95,7 @@
 			<groupId>com.github.joschi.jackson</groupId>
 			<artifactId>jackson-datatype-threetenbp</artifactId>
 			<version>2.6.4</version>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -116,7 +125,7 @@
 			<groupId>org.elasticsearch</groupId>
 			<artifactId>elasticsearch</artifactId>
 			<version>5.4.0</version>
-		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-to-slf4j</artifactId>
@@ -129,34 +138,34 @@
 	</dependencies>
 	<repositories>
 		<repository>
-		  <id>repo.egovernments.org</id>
-		  <name>eGov ERP Releases Repository</name>
-		  <url>https://nexus-repo.egovernments.org/nexus/content/repositories/releases/</url>
+			<id>repo.egovernments.org</id>
+			<name>eGov ERP Releases Repository</name>
+			<url>https://nexus-repo.egovernments.org/nexus/content/repositories/releases/</url>
 		</repository>
 		<repository>
-		  <id>repo.egovernments.org.snapshots</id>
-		  <name>eGov ERP Releases Repository</name>
-		  <url>https://nexus-repo.egovernments.org/nexus/content/repositories/snapshots/</url>
+			<id>repo.egovernments.org.snapshots</id>
+			<name>eGov ERP Releases Repository</name>
+			<url>https://nexus-repo.egovernments.org/nexus/content/repositories/snapshots/</url>
 		</repository>
 	</repositories>
 	<build>
 		<plugins>
-		  <plugin>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-maven-plugin</artifactId>
-			<configuration>
-			  <excludes>
-				<exclude>
-				  <groupId>org.projectlombok</groupId>
-				  <artifactId>lombok</artifactId>
-				</exclude>
-				<exclude>
-				  <groupId>org.springframework.boot</groupId>
-				  <artifactId>spring-boot-devtools</artifactId>
-				</exclude>
-			  </excludes>
-			</configuration>
-		  </plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+						<exclude>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-devtools</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>

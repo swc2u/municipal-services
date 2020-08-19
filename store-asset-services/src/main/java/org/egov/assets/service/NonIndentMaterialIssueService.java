@@ -538,6 +538,10 @@ public class NonIndentMaterialIssueService extends DomainService {
 		Pagination<MaterialIssue> materialIssues = materialIssueJdbcRepository.search(searchContract,
 				IssueTypeEnum.NONINDENTISSUE.toString());
 		if (!materialIssues.getPagedData().isEmpty()) {
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, Material> materialMap = getMaterials(searchContract.getTenantId(), mapper, new RequestInfo());
+			Map<String, Uom> uoms = getUoms(searchContract.getTenantId(), mapper, new RequestInfo());
+
 			for (MaterialIssue materialIssue : materialIssues.getPagedData()) {
 
 				if (materialIssue.getFromStore() != null && materialIssue.getFromStore().getCode() != null) {
@@ -548,8 +552,6 @@ public class NonIndentMaterialIssueService extends DomainService {
 					materialIssue.toStore(getStore(materialIssue.getToStore().getCode(), searchContract.getTenantId()));
 				}
 
-				ObjectMapper mapper = new ObjectMapper();
-				Map<String, Uom> uoms = getUoms(materialIssue.getTenantId(), mapper, new RequestInfo());
 				Pagination<MaterialIssueDetail> materialIssueDetails = materialIssueDetailsJdbcRepository.search(
 						materialIssue.getIssueNumber(), materialIssue.getTenantId(),
 						IssueTypeEnum.NONINDENTISSUE.toString());
@@ -581,6 +583,12 @@ public class NonIndentMaterialIssueService extends DomainService {
 												: materialReceiptDetail.get(0));
 							}
 						}
+						if (materialIssueDetail.getMaterial() != null
+								&& materialIssueDetail.getMaterial().getCode() != null) {
+							materialIssueDetail
+									.setMaterial(materialMap.get(materialIssueDetail.getMaterial().getCode()));
+						}
+
 						materialIssueDetail.setMaterialIssuedFromReceipts(materialIssuedFromReceipts.getPagedData());
 					}
 					materialIssue.setMaterialIssueDetails(materialIssueDetails.getPagedData());
@@ -611,6 +619,13 @@ public class NonIndentMaterialIssueService extends DomainService {
 				.ids(Arrays.asList(ids)).tenantId(tenantId).build();
 		Pagination<MaterialReceiptDetail> materialReceiptDetails = materialReceiptDetailService
 				.search(materialReceiptDetailSearch);
+
+		if (!materialReceiptDetails.getPagedData().isEmpty()) {
+			Map<String, Material> materialMap = getMaterials(tenantId, new ObjectMapper(), new RequestInfo());
+			for (MaterialReceiptDetail details : materialReceiptDetails.getPagedData()) {
+				details.setMaterial(materialMap.get(details.getMaterial().getCode()));
+			}
+		}
 		return materialReceiptDetails.getPagedData().size() > 0 ? materialReceiptDetails.getPagedData()
 				: Collections.EMPTY_LIST;
 	}

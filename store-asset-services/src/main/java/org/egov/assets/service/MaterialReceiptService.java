@@ -14,6 +14,8 @@ import org.egov.assets.model.MaterialReceipt;
 import org.egov.assets.model.MaterialReceiptDetail;
 import org.egov.assets.model.MaterialReceiptDetailSearch;
 import org.egov.assets.model.MaterialReceiptSearch;
+import org.egov.assets.model.PurchaseOrderDetail;
+import org.egov.assets.model.PurchaseOrderDetailSearch;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.Supplier;
@@ -35,6 +37,9 @@ public class MaterialReceiptService extends DomainService {
 
 	@Autowired
 	private StoreJdbcRepository storeJdbcRepository;
+
+	@Autowired
+	private PurchaseOrderDetailService purchaseOrderDetailService;
 
 	@Autowired
 	private MaterialService materialService;
@@ -99,6 +104,19 @@ public class MaterialReceiptService extends DomainService {
 
 		if (!materialReceiptDetails.getPagedData().isEmpty()) {
 			for (MaterialReceiptDetail detail : materialReceiptDetails.getPagedData()) {
+
+				if (detail.getPurchaseOrderDetail() != null && detail.getPurchaseOrderDetail().getId() != null) {
+					PurchaseOrderDetailSearch purchaseOrderDetailSearch = new PurchaseOrderDetailSearch();
+					purchaseOrderDetailSearch.setIds(Arrays.asList(detail.getPurchaseOrderDetail().getId()));
+					purchaseOrderDetailSearch.setTenantId(tenantId);
+					Pagination<PurchaseOrderDetail> detailPagination = purchaseOrderDetailService
+							.search(purchaseOrderDetailSearch);
+
+					detail.setPurchaseOrderDetail(
+							!detailPagination.getPagedData().isEmpty() ? detailPagination.getPagedData().get(0) : null);
+
+				}
+
 				detail.setMaterial(materialService.fetchMaterial(tenantId, detail.getMaterial().getCode(),
 						new org.egov.common.contract.request.RequestInfo()));
 			}

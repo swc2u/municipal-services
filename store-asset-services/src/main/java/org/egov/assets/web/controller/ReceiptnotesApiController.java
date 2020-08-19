@@ -11,10 +11,13 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.egov.assets.model.IndentSearch;
 import org.egov.assets.model.MaterialBalanceRateResponse;
 import org.egov.assets.model.MaterialReceiptRequest;
 import org.egov.assets.model.MaterialReceiptResponse;
 import org.egov.assets.model.MaterialReceiptSearch;
+import org.egov.assets.model.PDFResponse;
+import org.egov.assets.model.PDFRequest;
 import org.egov.assets.service.ReceiptNoteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +68,16 @@ public class ReceiptnotesApiController {
 				.pageNumber(pageNumber).pageSize(pageSize).build();
 		MaterialReceiptResponse materialReceiptResponse = receiptNoteService.search(materialReceiptSearch);
 		return new ResponseEntity<>(materialReceiptResponse, HttpStatus.OK);
+	}
+
+	@PostMapping(value = "/_print", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<PDFResponse> receiptnotesPrintPost(@Valid @RequestBody PDFRequest pdfRequest,
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@RequestParam(value = "mrnNumber", required = false) String mrnNumber) {
+		MaterialReceiptSearch materialReceiptSearch = MaterialReceiptSearch.builder().tenantId(tenantId)
+				.mrnNumber(Arrays.asList(mrnNumber)).build();
+		PDFResponse response = receiptNoteService.printPdf(materialReceiptSearch, pdfRequest.getRequestInfo());
+		return new ResponseEntity(response, HttpStatus.OK);
 	}
 
 	@PostMapping(value = "/_balance", produces = { "application/json" }, consumes = { "application/json" })

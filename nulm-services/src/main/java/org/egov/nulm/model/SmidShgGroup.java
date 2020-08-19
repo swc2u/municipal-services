@@ -1,11 +1,8 @@
 package org.egov.nulm.model;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
-
-import org.egov.nulm.model.SmidApplication.StatusEnum;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -51,7 +48,7 @@ public class SmidShgGroup {
 	private StatusEnum status ;
 
 	public enum StatusEnum {
-	 
+		 DRAFTED("DRAFTED"),
 	    CREATED("CREATED"),
 	    APPROVED("APPROVED"),
 	    DELETED("DELETED"),

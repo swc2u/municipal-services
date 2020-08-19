@@ -3,15 +3,12 @@ package org.egov.nulm.repository.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.egov.nulm.common.CommonConstants;
 import org.egov.nulm.model.AuditDetails;
-import org.egov.nulm.model.SepApplication;
-import org.egov.nulm.model.SepApplicationDocument;
 import org.egov.nulm.model.SmidApplication;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +40,6 @@ public class SMIDRowMapper implements ResultSetExtractor<List<SmidApplication>> 
 				
 					SmidApplication smidapp = SmidApplication.builder().auditDetails(audit)
 							.accountNo(rs.getString("account_no"))
-							.accountOpenedThrough(rs.getString("account_opened_through"))
 							.address(rs.getString("address"))
 							.adharAcknowledgementNo(rs.getString("adhar_acknowledgement_no"))
 							.adharNo(rs.getString("adhar_no"))
@@ -76,7 +72,7 @@ public class SMIDRowMapper implements ResultSetExtractor<List<SmidApplication>> 
 							.nulmApplicationId(rs.getString("nulm_application_id"))
 							.phoneNo(rs.getString("phone_no"))
 							.qualification(rs.getString("qualification"))
-							.roType(rs.getString("ro_type"))
+							.remark(rs.getString("remark"))
 							.tenantId(rs.getString("tenant_id"))
 							.wardNo(rs.getString("ward_no")).build();
 							

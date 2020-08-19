@@ -95,7 +95,7 @@ public class SmidShgMemberService {
 					.responseBody(groupresult).build(), HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new CustomException(CommonConstants.SMID_SHG_APPLICATION_EXCEPTION_CODE, e.getMessage());
+			throw new CustomException(CommonConstants.SMID_SHG_MEMBER_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
 	public ResponseEntity<ResponseInfoWrapper> updateMembers(NulmShgMemberRequest memberrequest) {

@@ -51,6 +51,12 @@ public class NULMConfiguration {
 
 	@Value("${egov.idgen.path}")
 	private String idGenPath;
+	
+	@Value("${egov.user.host}")
+	private String userHost;
+
+	@Value("${egov.user.path}")
+	private String userPath;
 
 	@Value("${egov.idgen.nulm.sep.idname}")
 	private String sepapplicationNumberIdgenName;
@@ -69,6 +75,24 @@ public class NULMConfiguration {
 
 	@Value("${egov.idgen.nulm.smid.shg.idformat}")
 	private String SmidShgIdgenFormat;
+	
+	@Value("${egov.idgen.nulm.suh.idname}")
+	private String suhapplicationNumberIdgenName;
+
+	@Value("${egov.idgen.nulm.suh.idformat}")
+	private String suhapplicationNumberIdgenFormat;
+	
+	@Value("${egov.idgen.nulm.susv.idname}")
+	private String susvApplicationNumberIdgenName;
+
+	@Value("${egov.idgen.nulm.susv.idformat}")
+	private String susvApplicationNumberIdgenFormat;
+	
+	
+	//organization topic
+	
+	@Value("${persister.create.organization.topic}")
+	private String organizationCreateTopic;
 
 	// SEP Config topics
 	@Value("${persister.save.sepapplication.topic}")
@@ -90,10 +114,17 @@ public class NULMConfiguration {
 	// SEP Search parameter config
 	@Value("${egov.user.role.citizen}")
 	private String roleCitizenUser;
+	
+	@Value("${egov.user.role.employee}")
+	private String roleEmployee;
 
 	@Value("${egov.user.role.ngo}")
 	private String roleNgoUser;
+	
+	@Value("${nulm.suh.deleteDate.period}")
+	private String SuhDeleteDatePeriod;
 
+	
 	// SMID SHG Status
 	@Value("${smid.shg.awaitingforapproval.status}")
 	private String awaitingforapproval;
@@ -129,5 +160,29 @@ public class NULMConfiguration {
 
 	@Value("${persister.delete.smidshg.member.topic}")
 	private String SmidShgMemberDeleteTopic;
+	
+	@Value("${persister.save.suhapplication.topic}")
+	private String SuhApplicationSaveTopic;
+	
+	@Value("${persister.update.suhapplication.topic}")
+	private String SuhApplicationUpdateTopic;
+	
+	@Value("${persister.update.suhapplicationStatus.topic}")
+	private String SuhApplicationUpdateStatusTopic;
+	
+	@Value("${persister.save.suhLog.topic}")
+	private String SuhLogSaveTopic;
+	
+	@Value("${persister.delete.suhLog.topic}")
+	private String SuhLogDeleteTopic;
+	
+	@Value("${persister.save.susvapplication.topic}")
+	private String SusvApplicationSaveTopic;
+	
+	@Value("${persister.update.susvapplication.topic}")
+	private String SusvApplicationUpdateTopic;
 
+	
+	
+	
 }

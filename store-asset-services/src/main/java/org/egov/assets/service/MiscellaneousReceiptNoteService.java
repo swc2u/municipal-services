@@ -7,17 +7,28 @@ import org.egov.assets.common.Pagination;
 import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
 import org.egov.assets.model.*;
+import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.ReceiptNoteRepository;
 import org.egov.assets.repository.entity.MaterialIssueEntity;
 import org.egov.assets.repository.entity.MaterialReceiptEntity;
+import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.springframework.util.StringUtils.isEmpty;
@@ -36,6 +47,9 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 
 	@Autowired
 	private MaterialReceiptService materialReceiptService;
+
+	@Autowired
+	private PDFServiceReposistory pdfServiceReposistory;
 
 	@Autowired
 	private ReceiptNoteRepository receiptNoteRepository;
@@ -235,10 +249,10 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 	private String appendString(MaterialReceipt materialReceipt) {
 		Calendar cal = Calendar.getInstance();
 		int year = cal.get(Calendar.YEAR);
-		String code = "MRN/";
+		String code = "MRN-";
 		int id = Integer.valueOf(receiptNoteRepository.getSequence(materialReceipt));
 		String idgen = String.format("%05d", id);
-		String mrnNumber = code + idgen + "/" + year;
+		String mrnNumber = code + idgen + "-" + year;
 		return mrnNumber;
 	}
 
@@ -290,6 +304,80 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
 		String s2 = format.format(epoch);
 		return s2;
+	}
+
+	public PDFResponse printPdf(MaterialReceiptSearch materialReceiptSearch, RequestInfo requestInfo) {
+		MaterialReceiptResponse materialReceiptResponse = search(materialReceiptSearch);
+
+		if (!materialReceiptResponse.getMaterialReceipt().isEmpty()
+				&& materialReceiptResponse.getMaterialReceipt().size() == 1) {
+
+			JSONObject requestMain = new JSONObject();
+			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
+				requestMain.put("RequestInfo", reqInfo);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+
+			JSONArray materials = new JSONArray();
+			for (MaterialReceipt in : materialReceiptResponse.getMaterialReceipt()) {
+				JSONObject material = new JSONObject();
+				material.put("receiptNo", in.getMrnNumber());
+				material.put("storeName", in.getReceivingStore().getName());
+				material.put("receiptType", in.getReceiptType());
+				material.put("status", in.getMrnStatus());
+				material.put("department", in.getReceivingStore().getDepartment().getName());
+				if (in.getReceiptDate() != null) {
+					Instant receiptDate = Instant.ofEpochMilli(in.getReceiptDate());
+					material.put("receiptDate", fmt.format(receiptDate.atZone(ZoneId.systemDefault())));
+				} else {
+					material.put("receiptDate", in.getSupplierBillDate());
+				}
+				material.put("remarks", in.getDescription());
+				material.put("receivedBy", in.getReceivedBy());
+				material.put("designation", in.getDesignation());
+
+				JSONArray matsDetails = new JSONArray();
+				int i = 1;
+				for (MaterialReceiptDetail detail : in.getReceiptDetails()) {
+					JSONObject matsDetail = new JSONObject();
+					matsDetail.put("srNo", i++);
+					matsDetail.put("materialCode", detail.getMaterial().getCode());
+					matsDetail.put("materialName", detail.getMaterial().getName());
+					matsDetail.put("uomName", detail.getUom().getCode());
+					matsDetail.put("quantityReceived", detail.getReceivedQty());
+					matsDetail.put("unitRate", detail.getUnitRate());
+					matsDetail.put("totalValue", detail.getReceivedQty().multiply(detail.getUnitRate()));
+					matsDetails.add(matsDetail);
+				}
+				material.put("materialDetails", matsDetails);
+
+				// Need to integrate Workflow
+
+				JSONArray workflows = new JSONArray();
+				JSONObject jsonWork = new JSONObject();
+				jsonWork.put("reviewApprovalDate", "02-05-2020");
+				jsonWork.put("reviewerApproverName", "Aniket");
+				jsonWork.put("designation", "MD");
+				jsonWork.put("action", "Forwarded");
+				jsonWork.put("sendTo", "Prakash");
+				jsonWork.put("approvalStatus", "APPROVED");
+				workflows.add(jsonWork);
+				material.put("workflowDetails", workflows);
+
+				materials.add(material);
+				requestMain.put("MiscellaneousMaterialReceiptNote", materials);
+			}
+
+			return pdfServiceReposistory.getPrint(requestMain, "store-asset-misc-material-note",
+					materialReceiptSearch.getTenantId());
+		}
+		return PDFResponse.builder()
+				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
 	}
 
 }

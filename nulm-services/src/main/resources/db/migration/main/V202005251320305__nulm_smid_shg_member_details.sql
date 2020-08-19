@@ -1,10 +1,11 @@
--- Table: public.nulm_smid_application_detail
+-- Table: public.nulm_smid_shg_member_details
 
--- DROP TABLE public.nulm_smid_application_detail;
+-- DROP TABLE public.nulm_smid_shg_member_details;
 
-CREATE TABLE public.nulm_smid_application_detail
+CREATE TABLE public.nulm_smid_shg_member_details
 (
   application_uuid character varying(64) NOT NULL,
+  shg_uuid character varying(64) NOT NULL,
   application_id character varying(64) NOT NULL,
   nulm_application_id character varying(64),
   application_status character varying(64),
@@ -38,19 +39,18 @@ CREATE TABLE public.nulm_smid_application_detail
   account_no character varying(255),
   bank_name character varying(255),
   branch_name character varying(255),
-  account_opened_through character varying(255),
-  ro_type character varying(255),
+  remark character varying(255),
   tenant_id character varying(256),
   is_active boolean,
   created_by character varying(64),
   created_time bigint,
   last_modified_by character varying(64),
   last_modified_time bigint,
-  CONSTRAINT nulm_smid_application_detail_pkey PRIMARY KEY (application_uuid),
-  CONSTRAINT smid_application_id UNIQUE (application_id)
+  CONSTRAINT nulm_smid_shg_member_details_pkey PRIMARY KEY (application_uuid),
+  CONSTRAINT smid_shg_member_application_id UNIQUE (application_id, tenant_id)
 )
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE public.nulm_smid_application_detail
+ALTER TABLE public.nulm_smid_shg_member_details
   OWNER TO postgres;

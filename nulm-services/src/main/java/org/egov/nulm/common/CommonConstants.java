@@ -8,11 +8,29 @@ public class CommonConstants {
 
 
 	public static final String ID_GENERATION = "ID Generation Failed";
-	public static final String ROLE = "role may not be null";	
+	
+	public static final String ORGANIZATION_EXCEPTION_CODE="ORGANIZATION_EXCEPTION";
+	public static final String SUH_APPLICATION_EXCEPTION_CODE="SUH_APPLICATION_EXCEPTION";
 	public static final String SEP_APPLICATION_EXCEPTION_CODE = "SEP_APPLICATION_EXCEPTION";
 	public static final String SMID_APPLICATION_EXCEPTION_CODE = "SMID_APPLICATION_EXCEPTION";
 	public static final String  SMID_SHG_APPLICATION_EXCEPTION_CODE= "SMID_SHG_APPLICATION_EXCEPTION_CODE";
+	public static final String SUSV_APPLICATION_EXCEPTION_CODE="SUSV_APPLICATION_EXCEPTION";
 	public static final String  SMID_SHG_MEMBER_APPLICATION_EXCEPTION_CODE="SMID_SHG_MEMBER_APPLICATION_EXCEPTION_CODE";
+	public static final String  SUH_LOG_EXCEPTION_CODE="SUH_LOG_EXCEPTION_CODE";
+	public static final String  INVALID_SUH_LOG_REQUEST="INVALID_SUH_LOG_REQUEST";
+	public static final String  INVALID_SUH_LOG_REQUEST_MESSAGE="you can not delete record ";
+	public static final String  INVALID_SUH_LOG_UUID_REQUEST_MESSAGE="please provide valid log UUid";
+	
+	public static final String INVALID_ORGANIZATION_REQUEST="INVALID_ORGANIZATION_REQUEST";
+	public static final String INVALID_ORGANIZATION_REQUEST_MOBILE_MESSAGE="Mobile No already Exists";
+	public static final String INVALID_ORGANIZATION_REQUEST_ORG_NAME_MESSAGE="Organization Name already Exists";
+	
+	public static final String USER_CREATION = "User creation  Failed";
+	public static final String ROLE = "role may not be null";	
+	
+	public static final String INVALID_SUH_REQUEST= "INVALID_SUH_REQUEST";
+	public static final String INVALID_SUH_REQUEST_MESSAGE= "Shelter Name already exists";
+
 	public static final String APPLICATION_MINORITY_NULL_CODE = "SEP_APPLICATION_MINORITY_NULL_CODE";
 	public static final String APPLICATION_MINORITY_NULL_CODE_MESSAGE = "As Minority is Yes,please provide minority type";
 	public static final String SEP_APPLICATION_STATUS_EXCEPTION_CODE = "Invalid Application Status";

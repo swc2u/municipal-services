@@ -30,7 +30,6 @@ import org.egov.common.contract.request.Role;
 import org.egov.common.contract.request.User;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.hc.consumer.HCNotificationConsumer;
-import org.egov.hc.contract.Action;
 import org.egov.hc.contract.AuditDetails;
 
 import org.egov.hc.contract.RequestInfoWrapper;
@@ -68,7 +67,7 @@ import org.egov.hc.utils.WorkFlowConfigs;
 import org.egov.hc.web.models.Idgen.IdGenerationResponse;
 import org.egov.hc.workflow.Document;
 import org.egov.hc.workflow.WorkflowIntegrator;
-import org.egov.mdms.model.ModuleDetail;
+
 import org.egov.tracer.model.CustomException;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
@@ -137,18 +136,18 @@ public class ServiceRequestService {
 
 	}
 
-	// private Producer producer;
 
 	/***
 	 * Asynchronous method performs business logic if any and adds the data to
 	 * persister queue on create topic
 	 * 
 	 * @param request
+	 * @throws JSONException 
 	 */
 
-	public ServiceResponse create(ServiceRequest request, String requestHeader) {
+	public ServiceResponse create(ServiceRequest request, String requestHeader) throws JSONException {
 		log.info("Service layer for createss");
-
+		
 		// generate Service request id using IdGen
 
 		String service_request_id = generateServiceRequestId(request);
@@ -156,22 +155,28 @@ public class ServiceRequestService {
 		enrichserviceRequestForcreate(request, service_request_id);
 
 		// call workflow service if it's enable else uses internal workflow process
-		
+		boolean flag = false;
 		if (hcConfiguration.getIsExternalWorkFlowEnabled()) {
-			wfIntegrator.callWorkFlow(request, service_request_id);
+			flag = wfIntegrator.callWorkFlow(request, service_request_id);
 		}
+		if(flag)
+		{
+			String role = HCConstants.ROLE;
+			String status = HCConstants.INITIATED_STATUS;
+			String history_service_request_id = null;
+			String service_request_id_new_gen = null;
+			String action = HCConstants.ACTION_OPEN;		
 
-		String role = HCConstants.ROLE;
-		String status = HCConstants.INITIATED_STATUS;
-		String history_service_request_id = null;
-		String service_request_id_new_gen = null;
-		String action = HCConstants.ACTION_OPEN;
-
-		serviceRequest(request, service_request_id, requestHeader, role,
-				status, history_service_request_id, service_request_id_new_gen,action);
-
-		return getServiceResponse(request);
+			serviceRequest(request, service_request_id, requestHeader, role,
+					status, history_service_request_id, service_request_id_new_gen,action);
+		}
+		else
+		{
+			request.getServices().get(0).setService_request_id("null");
+		}
+		return getServiceResponse(request);	
 	}
+	
 
 	private String generateServiceRequestId(ServiceRequest request) {
 
@@ -235,11 +240,10 @@ public class ServiceRequestService {
 			serviceRequestData.setServicerequest_lang(servicerequest_lang);
 
 			String contactNumber = (String) serviceRequest.get("contact_number");
-			// System.out.println(contactNumber);
+			
 			serviceRequestData.setContactNumber(contactNumber);
 
 			String email = (String) serviceRequest.get("email_id");
-			// System.out.println(email);
 
 			serviceRequestData.setEmail(email);
 
@@ -442,7 +446,8 @@ public class ServiceRequestService {
 		List<ServiceRequestData> serviceReqs = request.getServices();
 		List<ActionInfo> actionInfos = new ArrayList<>();
 		String action = null;
-
+		String getroles = null;
+	
 		final AuditDetails auditDetail = hCUtils.getAuditDetail(String.valueOf(requestInfo.getUserInfo().getId()),
 				false);
 		
@@ -458,22 +463,25 @@ public class ServiceRequestService {
 				request.getServices().get(servReqCount).setRole(roleList.get(0));
 			}
 			if (request.getServices().get(servReqCount).getIsRoleSpecific().equals(true)) {
+
 				
+				String bussinessServiceData = getbussinessServiceDatafromprocesinstance(request);
 				
-				if ((request.getServices().get(servReqCount).getAction().equals(HCConstants.INSPECT))
-						|| (request.getServices().get(servReqCount).getAction().equals(HCConstants.APPROVE))) {
-					request.getServices().get(servReqCount).setRole(HCConstants.JUNIER_ENGINEERE);
+				if ((request.getServices().get(servReqCount).getAction().equals(HCConstants.APPROVE))
+						|| request.getServices().get(servReqCount).getAction().equals(HCConstants.VERIFY_AND_FORWARD_TO_SDO)
+						|| request.getServices().get(servReqCount).getAction().equals(HCConstants.FORWARD_FOR_INSPECTION))
+				{
+				 getroles = parseBussinessServiceData(bussinessServiceData,request);
+				
+				 request.getServices().get(servReqCount).setRole(getroles);
+				}
+				if(request.getServices().get(servReqCount).getAction().equals(HCConstants.INSPECT))
+				{
+					getroles = parseInspectedBussinessServiceData(bussinessServiceData,request);
+					 request.getServices().get(servReqCount).setRole(getroles);
 				}
 
-				if (request.getServices().get(servReqCount).getAction().equals(HCConstants.VERIFY_AND_FORWARD_TO_SDO)) {
-					request.getServices().get(servReqCount).setRole(HCConstants.SDO);
-				}
-				if (request.getServices().get(servReqCount).getAction().equals(HCConstants.FORWARD_FOR_INSPECTION)) {
-					request.getServices().get(servReqCount).setRole(HCConstants.JUNIER_ENGINEERE);
-				}
-				
 				log.info("Selected role depend upon the action");
-				
 
 				if (null != request.getServices().get(servReqCount).getRoleList()
 						&& request.getServices().get(servReqCount).getRoleList().size() > 0) {
@@ -493,8 +501,6 @@ public class ServiceRequestService {
 			requestData.setService_request_id(service_request_id);
 			requestData.setRequestInfo(request.getRequestInfo());
 
-			
-			
 			// get data from service request table with request id
 
 			ServiceRequestData serviceRequest = null;
@@ -510,19 +516,22 @@ public class ServiceRequestService {
 			request.getServices().get(servReqCount).setCity(request.getRequestInfo().getUserInfo().getTenantId());
 
 			// call workflow
-			
 
 			final AuditDetails auditDetails = hCUtils.getAuditDetails(String.valueOf(requestInfo.getUserInfo().getId()),
 					false);
 			
 			
 			String by = auditDetails.getCreatedBy() + ":" + requestInfo.getUserInfo().getRoles().get(0).getName();
+			Boolean flag = false;
 			
 
 			if (hcConfiguration.getIsExternalWorkFlowEnabled()) {
-				wfIntegrator.callWorkFlow(request, service_request_id);
+				flag = wfIntegrator.callWorkFlow(request, service_request_id);
 			}
-
+			
+			if(flag)
+			{
+				
 			// Update service request form
 
 			ServiceRequestData updateRequest = new ServiceRequestData();
@@ -543,7 +552,7 @@ public class ServiceRequestService {
 
 				jsonArray.add(formDetailsJson);
 			}
-			documentDetailsJson.put("document", jsonArray); // Here you can see the data in json forma
+			documentDetailsJson.put("document", jsonArray); 
 
 			serviceRequest.setServiceMedia(documentDetailsJson.toJSONString());
 
@@ -687,12 +696,16 @@ public class ServiceRequestService {
 							request.getRequestInfo());
 					String role = request.getServices().get(0).getRole();
 					
+					List<String> list = new ArrayList<String>(Arrays.asList(role.split(",")));
+					
+					for (int roleCnt = 0; roleCnt < list.size(); roleCnt++) 
+					{	
 					notificationConsumer.getRolewiseUserList(request, role, messageMap);
+					}
 				}
 				else
 				{
-
-					
+	
 				if (null != assigneeList && assigneeList.size() > 0) {
 					for (String assignee : assigneeList) {
 						ActionInfo newActionInfo = ActionInfo.builder().uuid(UUID.randomUUID().toString())
@@ -721,6 +734,182 @@ public class ServiceRequestService {
 			errorMap.keySet().forEach(key -> newMap.put(key, errorMap.get(key).toString()));
 			throw new CustomException(newMap);
 		}
+		}
+	}
+
+	private String parseInspectedBussinessServiceData(String bussinessServiceData, ServiceRequest request) throws JSONException {
+		String newactions = null;
+		String newState = null;
+
+		String roles = null;
+		Boolean found = false;
+		
+		for (int businessCnt = 0; businessCnt <= bussinessServiceData.length(); businessCnt++) 
+		{
+			org.json.JSONObject bussinessServiceDetails = new org.json.JSONObject(
+					bussinessServiceData.toString());
+
+			org.json.JSONArray businessServicesObj = bussinessServiceDetails.getJSONArray("BusinessServices");
+			
+			for (int businessServiceCnt = 0; businessServiceCnt <= businessServicesObj.length(); businessServiceCnt++) 
+			{
+			
+				org.json.JSONObject businessServicesSingleObj = new org.json.JSONObject(
+						businessServicesObj.get(businessServiceCnt).toString());
+				
+				org.json.JSONArray stateObj = businessServicesSingleObj.getJSONArray("states");
+				
+				for (int stateCnt = 0; stateCnt <= stateObj.length(); stateCnt++) 
+				{
+					org.json.JSONObject stateSingleObj = new org.json.JSONObject(
+							stateObj.get(stateCnt).toString());
+					
+					org.json.JSONArray actionsObj = stateSingleObj.getJSONArray("actions");
+					
+					for (int actionCnt = 0; actionCnt < actionsObj.length(); actionCnt++) 
+					{
+						org.json.JSONObject actionsSingleObj = new org.json.JSONObject(
+								actionsObj.get(actionCnt).toString());
+						
+						
+						newactions = actionsSingleObj.getString("action");
+
+						if(newactions.equals(request.getServices().get(0).getAction()))
+						{
+				
+							org.json.JSONArray roleObj = actionsSingleObj.getJSONArray("roles");
+	
+									for (int roleCnt = 0; roleCnt < roleObj.length(); roleCnt++) 
+										{
+											String role = roleObj.getString(roleCnt);
+											
+											if(null != roles)
+												{
+												roles = roles +","+role;
+												
+												}
+											else 
+												{	
+												roles = role;
+												}
+												found = true;
+												log.info("businessServicesObj" + actionsObj);
+												
+										 	}
+										break;
+							}
+							if(found) break; 
+						}
+						
+						if(found) break;
+					}	
+					if(found) break;
+			}
+			if(found) break;	
+		}
+		return roles ;
+	}
+
+
+	private String parseBussinessServiceData(String bussinessServiceData, ServiceRequest request) throws JSONException {
+	
+		String newactions = null;
+		String newState = null;
+		
+		String roles = null;
+		Boolean found = false;
+		
+		for (int businessCnt = 0; businessCnt <= bussinessServiceData.length(); businessCnt++) 
+		{
+			org.json.JSONObject bussinessServiceDetails = new org.json.JSONObject(
+					bussinessServiceData.toString());
+
+			org.json.JSONArray businessServicesObj = bussinessServiceDetails.getJSONArray("BusinessServices");
+			
+			for (int businessServiceCnt = 0; businessServiceCnt <= businessServicesObj.length(); businessServiceCnt++) 
+			{
+			
+				org.json.JSONObject businessServicesSingleObj = new org.json.JSONObject(
+						businessServicesObj.get(businessServiceCnt).toString());
+				
+				org.json.JSONArray stateObj = businessServicesSingleObj.getJSONArray("states");
+				
+				for (int stateCnt = 0; stateCnt <= stateObj.length(); stateCnt++) 
+				{
+					org.json.JSONObject stateSingleObj = new org.json.JSONObject(
+							stateObj.get(stateCnt).toString());
+					
+					org.json.JSONArray actionsObj = stateSingleObj.getJSONArray("actions");
+					
+					for (int actionCnt = 0; actionCnt < actionsObj.length(); actionCnt++) 
+					{
+						org.json.JSONObject actionsSingleObj = new org.json.JSONObject(
+								actionsObj.get(actionCnt).toString());
+						
+						
+						newactions = actionsSingleObj.getString("action");
+						newState = actionsSingleObj.getString("nextState");
+
+						if(newactions.equals(request.getServices().get(0).getAction()))
+						{
+							for (int stateCnt1 = 0; stateCnt1 <= stateObj.length(); stateCnt1++) 
+							{
+								
+								org.json.JSONObject stateSingleObj1 = new org.json.JSONObject(
+										stateObj.get(stateCnt1).toString());
+								
+								String uuid = stateSingleObj1.getString("uuid");
+								
+								if(newState.equals(uuid))
+								{
+								
+									org.json.JSONArray actionsObj1 = stateSingleObj1.getJSONArray("actions");
+									
+									for (int actionCnt1 = 0; actionCnt1 <= actionsObj1.length(); actionCnt1++) 
+									{
+										org.json.JSONObject actionsSingleObj1 = new org.json.JSONObject(
+												actionsObj1.get(actionCnt1).toString());
+										
+										org.json.JSONArray roleObj = actionsSingleObj1.getJSONArray("roles");
+										
+										
+										for (int roleCnt = 0; roleCnt < roleObj.length(); roleCnt++) 
+										{
+											String role = roleObj.getString(roleCnt);
+											
+											if(null != roles)
+												{
+												roles = roles +","+role;
+												
+												}
+											else 
+												{	
+												roles = role;
+												}
+												found = true;
+												log.info("businessServicesObj" + actionsObj);
+												
+										 }
+										break;
+										///if(found) break;
+									}
+									if(found) break;
+								}
+								if(found) break;
+							}
+							if(found) break; 
+						}
+						
+						if(found) break;
+					}	
+					if(found) break;
+				}	
+				if(found) break;
+			}
+			if(found) break;	
+		}
+		return roles ;
+		
 	}
 
 	/**
@@ -809,7 +998,6 @@ public class ServiceRequestService {
 					request.getServices().get(0).setServiceMedia(documentDetailsJson.toJSONString());
 					request.getServices().get(0).setService_request_id(service_request_id);
 					request.getServices().get(0).setHistory_service_request_id(history_service_request_id);
-//					request.getServices().get(0).setService_request_id_new(service_request_id_new_gen);
 
 				} else {
 
@@ -882,18 +1070,27 @@ public class ServiceRequestService {
 	}
 
 	public ResponseEntity<?> getServiceRequestDetails(RequestData requestData) {
-		JSONArray serviceRequest = serviceRepository.getServiceRequest(requestData);
+		
+		JSONArray serviceRequest = null;
+		try {
+		 serviceRequest = serviceRepository.getServiceRequest(requestData);
+		} catch (Exception e) {
+			log.info("null");
+		}
 		String bisinesssla = getBussinessServiceSla(requestData);
 
 		if (serviceRequest == null || serviceRequest.isEmpty()) {
+			
+		
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().msgId("Invalid service request Id").build())
+					.responseInfo(ResponseInfo.builder().ver("false").msgId("Invalid service request Id").build())
+					.responseBody(serviceRequest).build(), HttpStatus.OK);
+			
 
-					.responseBody(serviceRequest).build(), HttpStatus.BAD_REQUEST);
 		} else {
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
 					.responseInfo(ResponseInfo.builder().status(HCConstants.SUCCESS).resMsgId(bisinesssla).build())
-					.responseBody(serviceRequest).build(), HttpStatus.OK);
+				.responseBody(serviceRequest).build(), HttpStatus.OK);
 		}
 	}
 
@@ -903,10 +1100,10 @@ public class ServiceRequestService {
 		String serviceRequestStatus;
 		String serviceRequestId = requestData.getService_request_id();
 		String payloadData ="{\"RequestInfo\": {\"userInfo\": {\"roles\": [{ \"code\": \"EE\",\"name\": \"EE\",\"tenantId\": \"ch.chandigarh\"}]}}}" ;
-		
 
 		//String payloadData ="{\"RequestInfo\": {\"userInfo\": {\"roles\": [{ \"code\": \"role_code\",\"name\": \"role_name\",\"tenantId\": \"tenantId\"}]}}}" ;
 		//payloadData.replace("role_code", requestData.getRequestInfo().getUserInfo().getRoles().)(regex, replacement)
+		
 		try {
 			String procesinstanceData = sendPostRequest(
 					hcConfiguration.getWfHost().concat(hcConfiguration.getWfProcessSearch()).concat("?").concat("businessIds="
@@ -924,7 +1121,7 @@ public class ServiceRequestService {
 
 			serviceRequestStatus = stateObject.getString("applicationStatus");
 			sla = ProcessInstancesDetails.getLong("businesssServiceSla");
-			if (serviceRequestStatus.equalsIgnoreCase("REJECTED") || serviceRequestStatus.equalsIgnoreCase("COMPLETED"))
+			if (serviceRequestStatus.equalsIgnoreCase(HCConstants.REJECTED) || serviceRequestStatus.equalsIgnoreCase(HCConstants.COMPLETED_STATUS))
 				days = 0;
 			else
 				if(sla > 0)
@@ -941,7 +1138,6 @@ public class ServiceRequestService {
 		}
 
 		return days + "";
-
 	}
 
 	public static String sendPostRequest(String requestUrl, String payload) {
@@ -994,7 +1190,6 @@ public class ServiceRequestService {
 		try {
 			serviceRequest = serviceRepository.findRequest(requestData);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			log.info("Parse Exception");
 		}
 		if (serviceRequest == null) {
@@ -1009,35 +1204,26 @@ public class ServiceRequestService {
 		}
 	}
 
-	public ServiceResponse updateServiceRequest(ServiceRequest serviceRequest, String requestHeader) throws JSONException {
-		ServiceRequestData serviceRequestGet = null;
-		String role = null;
-		String status = null;
-		String service_request_id_new = null;
-		String service_request_uuid = null;
+	public ServiceResponse updateServiceRequest(ServiceRequest serviceRequest, String requestHeader) throws JSONException, InterruptedException {
+		
 		ResponseEntity<ServiceRequest> responseBody = null;
-		List<String> documentList = null;
+		String service_request_id_new = null;
 		
 		RequestInfo employeeInfo = new RequestInfo();
-
+		List<String> documentList = null;
 		
-
 		String service_request_id = serviceRequest.getServices().get(0).getService_request_id();
 
 		// making request data
 
-		RequestData requestdata = new RequestData();
-		requestdata.setService_request_id(service_request_id);
+		ServiceRequestData serviceRequestGet = getData(service_request_id);
+		String roleStatusId = getroleStatusId(serviceRequestGet);
 
-		// get service_request data for this id
-
-		JSONObject serviceRequestJson = serviceRepository.getServiceRequestData(requestdata);
-		serviceRequestGet = parseServiceRequestData(serviceRequestJson);
-		log.info("get deta : "+ serviceRequestGet);
+		String  roleStatusIdSplit[] = null;
+		if(roleStatusId != null) {
+			roleStatusIdSplit =roleStatusId.split("#");
+			}
 		
-		role = serviceRequestGet.getCurrent_assignee();
-		status = serviceRequestGet.getService_request_status();
-		service_request_uuid = serviceRequestGet.getService_request_uuid();
 		documentList = new ArrayList<>();
 		for (int docCnt = 0; docCnt < serviceRequestGet.getMediaList().size(); docCnt++) {
 
@@ -1047,19 +1233,16 @@ public class ServiceRequestService {
 		for (int docCnt = 0; docCnt < serviceRequest.getServices().get(0).getMedia().size(); docCnt++) {
 			documentList.add((String) serviceRequest.getServices().get(0).getMedia().get(docCnt).toString());
 		}
-
+		
 		serviceRequest.getServices().get(0).setMediaList(documentList);
 
 		serviceRequest.getAuditDetails().setCreatedBy(serviceRequestGet.getCreatedBy());
 		
+		deviceDetailSave(requestHeader,serviceRequest,service_request_id,serviceRequestGet);
 		
-
-		// add data in device source detail
-		log.info("Added data in deviceSource ");
-		deviceSource.saveDeviceDetails(requestHeader, HCConstants.DEVICE_HORTICULTURE,
-				serviceRequestGet.getTenantId(), HCConstants.MODULE_CODE, serviceRequest.getAuditDetails(),
-				service_request_id);
-
+		String servicetype = serviceRequestGet.getServiceType();
+		String requestType = serviceRequest.getServices().get(0).getServiceType();
+		
 		// service request type
 		String serviceRequestServiceType = serviceRequestGet.getServiceType().toUpperCase();
 		String requestdataServiceType = serviceRequest.getServices().get(0).getServiceType().toUpperCase();
@@ -1067,53 +1250,34 @@ public class ServiceRequestService {
 		serviceRequest.getServices().get(0).setService_request_uuid(serviceRequestGet.getService_request_uuid());
 
 		// checking service request type
+		
 
 		log.info("Checking service requet type");
 		if (serviceRequestServiceType.equals(requestdataServiceType)) {
+					
+			responseBody = updateServiceRequest(serviceRequest, service_request_id, requestHeader, roleStatusIdSplit[0], roleStatusIdSplit[1],
+					roleStatusIdSplit[2],servicetype);
+			updateServiceRequestStatusEdit(serviceRequest, service_request_id, serviceRequestServiceType);
 
-			responseBody = updateServiceRequest(serviceRequest, service_request_id, requestHeader, role, status,
-					service_request_uuid);
 		} else {
-
-			// generate id Split old Service Request id and append proper version
-
 			
-			String[] splitServiceRequestId = service_request_id.split("_");
-			int version = 1;
+			serviceRequest.getServices().get(0).setServiceType(requestdataServiceType);
 
-			if (null != splitServiceRequestId && splitServiceRequestId.length > 1) {
-				version = Integer.parseInt(splitServiceRequestId[1]);
-				version += 1;
-			}
-			String service_version = "_" + version;
-
-			if (splitServiceRequestId != null) {
-				service_request_id_new = splitServiceRequestId[0].concat(service_version);
-				log.info("Generate new service requet ID : " + service_request_id_new);
-			}
+			service_request_id_new = generateServiceRequestId(service_request_id);
 
 			// add entry in service request table with service_request_id = service_request_id_old_1
 			
 			employeeInfo.setUserInfo(serviceRequest.getRequestInfo().getUserInfo());
 			
 			ServiceRequest serviceRequestdata = getUserInfo(serviceRequest);
-			
-			String action = HCConstants.ACTION_UPDATE;
+
 			serviceRequestdata.getServices().get(0).setService_request_id_old(service_request_id);
-			responseBody = serviceRequestEdit(serviceRequestdata, service_request_id_new,  role, status,
-					service_request_id,service_request_id_new,action);
+			responseBody = serviceRequestEdit(serviceRequestdata, service_request_id_new,  roleStatusIdSplit[0], roleStatusIdSplit[1],
+					service_request_id,service_request_id_new,requestType);
 			
 			serviceRequest.setRequestInfo(employeeInfo);
 
-			// geting data from processinstance with service_request_id
-			ServiceRequest procesinstancedata = getProcesinstanceData(serviceRequest, service_request_id_new,
-					service_request_id); 
-
-			// service request id (old) this service request status update(mark as Rejected)
-			updateStatus(procesinstancedata, service_request_id_new,
-					service_request_id);
-
-			updateServiceRequestStatus(procesinstancedata, service_request_id, serviceRequestServiceType);
+			updateProcesinstancedata(serviceRequest,service_request_id,service_request_id_new,serviceRequestServiceType);
 
 			log.info("updated service request");
 			serviceRequest.getServices().get(0).setService_request_id(service_request_id_new);
@@ -1121,6 +1285,92 @@ public class ServiceRequestService {
 		serviceRequest.getServices().get(0).setService_request_id(service_request_id_new);
 
 		return getServiceResponse(responseBody);
+	}
+
+	private void updateServiceRequestStatusEdit(ServiceRequest serviceRequest, String service_request_id,
+			String serviceRequestServiceType) throws JSONException {
+		
+		serviceRequest.getRequestInfo().setAction(HCConstants.EDIT);
+		String comment = HCConstants.EDITED;
+		serviceRequest.getServices().get(0).setService_request_id(service_request_id);
+		serviceRequest.getServices().get(0).setServiceType(serviceRequestServiceType);
+		serviceRequest.getServices().get(0).setComment(comment);
+		serviceRequest.getServices().get(0).setAction(HCConstants.EDIT);
+
+		log.info("Update processinstance data : "+serviceRequest);
+		
+		if (hcConfiguration.getIsExternalWorkFlowEnabled()) {
+			wfIntegrator.callWorkFlow(serviceRequest, service_request_id);
+		}
+
+	}
+
+	private void updateProcesinstancedata(ServiceRequest serviceRequest, String service_request_id,
+			String service_request_id_new, String serviceRequestServiceType) throws JSONException {
+		
+		// geting data from processinstance with service_request_id
+		ServiceRequest procesinstancedata = getProcesinstanceData(serviceRequest, service_request_id_new,
+				service_request_id,serviceRequestServiceType); 
+
+		// service request id (old) this service request status update(mark as Rejected)
+		updateStatus(procesinstancedata, service_request_id_new,
+				service_request_id);
+		
+		updateServiceRequestStatus(procesinstancedata, service_request_id, serviceRequestServiceType);
+
+	}
+
+	private String generateServiceRequestId(String service_request_id) {
+		
+		// generate id Split old Service Request id and append proper version
+		
+		 String service_request_id_new = null;
+		
+		String[] splitServiceRequestId = service_request_id.split("_");
+		int version = 1;
+
+		if (null != splitServiceRequestId && splitServiceRequestId.length > 1) {
+			version = Integer.parseInt(splitServiceRequestId[1]);
+			version += 1;
+		}
+		String service_version = "_" + version;
+
+		if (splitServiceRequestId != null) {
+			  service_request_id_new = splitServiceRequestId[0].concat(service_version);
+			log.info("Generate new service requet ID : " + service_request_id_new);
+		}
+		return service_request_id_new;
+	}
+
+	private void deviceDetailSave(String requestHeader, ServiceRequest serviceRequest, String service_request_id, ServiceRequestData serviceRequestGet) {
+		// add data in device source detail
+		log.info("Added data in deviceSource ");
+		deviceSource.saveDeviceDetails(requestHeader, HCConstants.DEVICE_HORTICULTURE,
+						serviceRequestGet.getTenantId(), HCConstants.MODULE_CODE, serviceRequest.getAuditDetails(),
+						service_request_id);
+
+		
+	}
+
+	private String getroleStatusId(ServiceRequestData serviceRequestGet) {
+		
+		String role = serviceRequestGet.getCurrent_assignee();
+		String  status = serviceRequestGet.getService_request_status();
+		String service_request_uuid = serviceRequestGet.getService_request_uuid();
+		return role +"#"+ status +"#"+ service_request_uuid;
+	}
+
+	private ServiceRequestData getData(String service_request_id) {
+		ServiceRequestData serviceRequestGet = null;
+		RequestData requestdata = new RequestData();
+		requestdata.setService_request_id(service_request_id);
+
+		// get service_request data for this id
+
+		JSONObject serviceRequestJson = serviceRepository.getServiceRequestData(requestdata);
+		serviceRequestGet = parseServiceRequestData(serviceRequestJson);
+		log.info("get deta : "+ serviceRequestGet);
+		return serviceRequestGet;
 	}
 
 	private ServiceRequest getUserInfo(ServiceRequest serviceRequest) throws JSONException {
@@ -1192,7 +1442,7 @@ public class ServiceRequestService {
 	}
 
 	private void updateServiceRequestStatus(ServiceRequest serviceRequest, String serviceRequestId,
-			String serviceRequestTypeOld) {
+			String serviceRequestTypeOld) throws JSONException {
 
 		String comment = HCConstants.COMMENT;
 
@@ -1210,7 +1460,7 @@ public class ServiceRequestService {
 	}
 
 	private ResponseEntity<ServiceRequest> updateServiceRequest(ServiceRequest request, String service_request_id,
-			String requestHeader, String role, String status, String service_request_uuid) {
+			String requestHeader, String role, String status, String service_request_uuid, String type) {
 		RequestInfoWrapper infoWrapper = new RequestInfoWrapper();
 		try {
 
@@ -1232,8 +1482,9 @@ public class ServiceRequestService {
 				documentDetailsJson.put("document", jsonArray);
 				request.getServices().get(0).setServiceMedia(documentDetailsJson.toJSONString());
 				request.getServices().get(0).setService_request_id(service_request_id);
+				request.getServices().get(0).setServiceType(type);
 				request.getServices().get(0).setCurrent_assignee(role);
-				request.getServices().get(0).setService_request_status(status);
+				request.getServices().get(0).setService_request_status(HCConstants.EDITED);
 				request.getServices().get(0).setCreatedBy(request.getAuditDetails().getCreatedBy());
 				request.getServices().get(0).setCreatedTime(request.getAuditDetails().getCreatedTime());
 				request.getServices().get(0).setLastModifiedBy(request.getAuditDetails().getLastModifiedBy());
@@ -1293,309 +1544,488 @@ public class ServiceRequestService {
 	}
 
 	private ServiceRequest getProcesinstanceData(ServiceRequest serviceRequestGetData, String service_request_id_new,
-			String service_request_id) {
+			String service_request_id, String serviceRequestServiceType) {
 
-		
-		String procesinstanceData = null;
-		String bussinessServiceData = null;
-		
-		String tenentId = null;
-		String businessService = null;
-		String action = null;
-		String comment=null;
-		String nextState ="";
-		
-
-		User userData = new User();
-		
-		
-	//	RequestInfo userRequestInfo = new RequestInfo();
-		
-		String tenantId = serviceRequestGetData.getRequestInfo().getUserInfo().getTenantId();
-		String name = serviceRequestGetData.getRequestInfo().getUserInfo().getName();
-		String userName = serviceRequestGetData.getRequestInfo().getUserInfo().getUserName();
-		String uuid = serviceRequestGetData.getRequestInfo().getUserInfo().getUuid();
-		Long userId = serviceRequestGetData.getRequestInfo().getUserInfo().getId();
-		List<Role> userRoleList = serviceRequestGetData.getRequestInfo().getUserInfo().getRoles();
-		String userMobileNumer = serviceRequestGetData.getRequestInfo().getUserInfo().getMobileNumber();
-		String userEmail = serviceRequestGetData.getRequestInfo().getUserInfo().getEmailId();
-		String type = serviceRequestGetData.getRequestInfo().getUserInfo().getType();
-		String city = serviceRequestGetData.getServices().get(0).getCity();
-
-		userData.setType(type);
-		userData.setEmailId(userEmail);
-		userData.setName(name);
-		userData.setId(userId);
-		userData.setUuid(uuid);
-		userData.setRoles(userRoleList);
-		userData.setMobileNumber(userMobileNumer);
-		userData.setUserName(userName);
-		userData.setTenantId(tenantId);
-		
-		
-		ArrayList <ProcessInstance> ProcessInstanceList = new ArrayList<>();
-		
+		User employeeData = employeeStoredData(serviceRequestGetData);
 
 		try {
-			procesinstanceData = rest.postForObject(
-					hcConfiguration.getWfHost().concat(hcConfiguration.getWfProcessSearch()).concat("?").concat(
-							"businessIds=" + service_request_id + "&history=true&tenantId=" + serviceRequestGetData.getServices().get(0).getCity()
+			String procesinstanceData = getProcesinstanceDataFromprocesinstance(service_request_id,serviceRequestGetData);
+			String bussinessServiceData = getbussinessServiceDatafromprocesinstanceEdit(serviceRequestGetData);
+			String bussinessServiceDataOld = getbussinessServiceDataOldServiceType(serviceRequestGetData,serviceRequestServiceType);
+			
+			serviceRequestGetData = procesinstanceBulkData(procesinstanceData,bussinessServiceData,serviceRequestGetData,service_request_id,service_request_id_new,bussinessServiceDataOld);
+	
+		} catch (HttpClientErrorException e) {
+			System.out.print("Handled exception");
+		}
+
+		serviceRequestGetData.getRequestInfo().setUserInfo(employeeData);
+		return serviceRequestGetData;
+	}
+	
+	
+
+	private String getbussinessServiceDataOldServiceType(ServiceRequest serviceRequestGetData,
+			String serviceRequestServiceType) {
+		
+		String bussinessServiceData = null;
+		{
+			
+			 bussinessServiceData = rest.postForObject(
+					hcConfiguration.getWfHost().concat(hcConfiguration.getWfBusinessServiceSearchPath()).concat("?").concat(
+							"tenantId=" + serviceRequestGetData.getServices().get(0).getTenantId() + "&businessServices=" + serviceRequestServiceType.toUpperCase()
 							),
 					serviceRequestGetData, String.class);
 			
+		}
+		return bussinessServiceData;
+	}
+
+
+	private String getbussinessServiceDatafromprocesinstanceEdit(ServiceRequest serviceRequestGetData) {
+		
+		String bussinessServiceData = null;
+		{
 			
-			bussinessServiceData = rest.postForObject(
+			 bussinessServiceData = rest.postForObject(
 					hcConfiguration.getWfHost().concat(hcConfiguration.getWfBusinessServiceSearchPath()).concat("?").concat(
 							"tenantId=" + serviceRequestGetData.getServices().get(0).getTenantId() + "&businessServices=" + serviceRequestGetData.getServices().get(0).getServiceType().toUpperCase()
 							),
 					serviceRequestGetData, String.class);
 			
-			try { 
-				
-				log.info("get data from procesinstance :" +procesinstanceData );
-				org.json.JSONObject obj = new org.json.JSONObject(procesinstanceData);
-				org.json.JSONArray ProcessInstances = obj.getJSONArray("ProcessInstances");
+		}
+		return bussinessServiceData;
+	}
 
-				
-				ServiceRequest serviceRequestData = serviceRequestGetData.clone();
+	
 
-				for (int i = ProcessInstances.length() - 1; i >= 0; i--) 
-				{
-					//RequestInfo wfRequestInfo = new RequestInfo();
-					System.out.println(ProcessInstances.get(i).toString());
-					org.json.JSONObject ProcessInstancesDetails = new org.json.JSONObject(
-							ProcessInstances.get(i).toString());
-
-					List<Document> wfAddDocument = new ArrayList<>();
-
-					org.json.JSONObject wfAssigner = ProcessInstancesDetails.getJSONObject("assigner");
-
-					User wfUser = new User();
-					if (null != wfAssigner.getString("mobileNumber"))
-						wfUser.setMobileNumber(wfAssigner.getString("mobileNumber"));
-					else
-						wfUser.setMobileNumber("");
-					if (null != wfAssigner.getString("name"))
-						wfUser.setName(wfAssigner.getString("name"));
-					else
-						wfUser.setName("");
-					if (null != wfAssigner.getString("tenantId"))
-						wfUser.setTenantId(wfAssigner.getString("tenantId"));
-					else
-						wfUser.setTenantId("");
-					if (null != wfAssigner.getString("type"))
-						wfUser.setType(wfAssigner.getString("type"));
-					else
-						wfUser.setType("");
-					if (!wfAssigner.isNull("emailId"))
-						wfUser.setEmailId(wfAssigner.getString("emailId").toString());
-					else
-						wfUser.setEmailId("");
-					wfUser.setUuid(wfAssigner.getString("uuid"));
-					long id = wfAssigner.getLong("id");
-					wfUser.setId(id);
-					if (!wfAssigner.isNull("userName"))
-						wfUser.setUserName(wfAssigner.getString("userName"));
-					else
-						wfUser.setUserName("");
-
-					org.json.JSONArray wfRoles = wfAssigner.getJSONArray("roles");
-					List<Role> roleList = new ArrayList();
-					if (null != wfRoles) {
-						org.json.JSONObject roleDetails = null;
-						for (int roleCnt = 0; roleCnt < wfRoles.length(); roleCnt++) {
-							roleDetails = new org.json.JSONObject(wfRoles.get(roleCnt).toString());
-							Role role = new Role();
-							role.setCode(roleDetails.getString("code"));
-							role.setName(roleDetails.getString("name"));
-							roleList.add(role);
-
-						}
-						wfUser.setRoles(roleList);
-						
-
-					}
-
-					if (!ProcessInstancesDetails.isNull("documents")) {
-						org.json.JSONArray wfDocuments = ProcessInstancesDetails.getJSONArray("documents");
-						if (null != wfDocuments) {
-							for (int docCnt = 0; docCnt < wfDocuments.length(); docCnt++) {
-
-								org.json.JSONObject docDetails = new org.json.JSONObject(
-										wfDocuments.get(docCnt).toString());
-								Document doc = new Document();
-								doc.setId(docDetails.getString("id"));
-
-								if (!docDetails.isNull("documentType"))
-									doc.setDocumentType(docDetails.getString("documentType"));
-								else
-									doc.setDocumentType("");
-								doc.setFileStoreId(docDetails.getString("fileStoreId"));
-								doc.setTenantId(docDetails.getString("tenantId"));
-
-								wfAddDocument.add(doc);
-
-							}
-						}
-					}
-
-					
-					if (!ProcessInstancesDetails.isNull("tenantId"))
-						tenentId = ProcessInstancesDetails.getString("tenantId");
-					else
-						tenentId = "";
-					if (!ProcessInstancesDetails.isNull("action"))
-						action = ProcessInstancesDetails.getString("action");
-					else
-						action = "";
-
-					businessService = serviceRequestData.getServices().get(0).getServiceType();
-
-					if (!ProcessInstancesDetails.isNull("comment"))
-						comment = ProcessInstancesDetails.getString("comment");
-					else
-						comment = "";
-				
-					long businesssServiceSla = ProcessInstancesDetails.getLong("businesssServiceSla");
-					long stateSla = ProcessInstancesDetails.getLong("stateSla");
-					
-					org.json.JSONObject auditDetails = ProcessInstancesDetails.getJSONObject("auditDetails");
-					
-					String createdBy = auditDetails.getString("createdBy");
-					String lastModifiedBy = auditDetails.getString("lastModifiedBy");
-					long createdTime = auditDetails.getLong("createdTime");
-					long lastModifiedTime = auditDetails.getLong("lastModifiedTime");
-					
-					AuditDetails details = new AuditDetails();
-					details.setCreatedBy(createdBy);
-					details.setLastModifiedBy(lastModifiedBy);
-					details.setCreatedTime(createdTime);
-					details.setLastModifiedTime(lastModifiedTime);
-					
-					String newactions = null;
-					String newState = null;
-					Boolean found = false;
-					
-					for (int businessCnt = 0; businessCnt <= bussinessServiceData.length(); businessCnt++) 
-					{
-						org.json.JSONObject bussinessServiceDetails = new org.json.JSONObject(
-								bussinessServiceData.toString());
-
-						org.json.JSONArray businessServicesObj = bussinessServiceDetails.getJSONArray("BusinessServices");
-						
-						for (int businessServiceCnt = 0; businessServiceCnt <= businessServicesObj.length(); businessServiceCnt++) 
-						{
-						
-							org.json.JSONObject businessServicesSingleObj = new org.json.JSONObject(
-									businessServicesObj.get(businessServiceCnt).toString());
-							
-							org.json.JSONArray stateObj = businessServicesSingleObj.getJSONArray("states");
-							
-							for (int stateCnt = 0; stateCnt <= stateObj.length(); stateCnt++) 
-							{
-								org.json.JSONObject stateSingleObj = new org.json.JSONObject(
-										stateObj.get(stateCnt).toString());
-								
-								org.json.JSONArray actionsObj = stateSingleObj.getJSONArray("actions");
-								
-								for (int actionCnt = 0; actionCnt < actionsObj.length(); actionCnt++) 
-								{
-									org.json.JSONObject actionsSingleObj = new org.json.JSONObject(
-											actionsObj.get(actionCnt).toString());
-									
-									newactions = actionsSingleObj.getString("action");
-									newState = actionsSingleObj.getString("nextState");
-
-									if(newactions.equals(action))
-									{
-										  nextState = newState;
-										  found = true;
-										  System.out.println("businessServicesObj" + newState);
-										  System.out.println("businessServicesObj" + actionsObj);
-										  break;
-										  
-									}
-									
-									if(found) break;
-								}	
-								if(found) break;
-							}	
-							if(found) break;
-						}
-						if(found) break;	
-					}
-					
-					ProcessInstance process = new ProcessInstance();
-					User user = new User();
-					user.setUuid(wfUser.getUuid());
+	private ServiceRequest procesinstanceBulkData(String procesinstanceData, String bussinessServiceData, ServiceRequest serviceRequestGetData, 
+			String service_request_id,
+			String service_request_id_new , String bussinessServiceDataOld) {
 		
-					State state = new State();
-					
-					String proccessId = UUID.randomUUID().toString();
-					  state.setUuid(nextState);
-					  state.setTenantId(tenentId);
-					  
-					List<Document> wfDocument = new ArrayList<>();
-					  
-					 for(Document wf: wfAddDocument)
-					 {
-						 String documentId = UUID.randomUUID().toString();
-						 wf.setId(documentId);
-						 wfDocument.add(wf);
-					 }
-					  
 
-				        process.setId(proccessId);
-						process.setTenantId(serviceRequestGetData.getServices().get(0).getCity());
-						process.setBusinessService(businessService.toUpperCase());
-						process.setBusinessId(service_request_id_new);
-						process.setModuleName(HCConstants.MODULENAMEVALUE);
-						process.setAction(action);
-						process.setState(state);
-						process.setComment(comment);
-						process.setAssigner(user);
-						process.setBusinesssServiceSla(businesssServiceSla);
-						process.setStateSla(stateSla);
-						process.setDocuments(wfDocument);
-						process.setAuditDetails(details);
+		String businessService = null;
+		String nextStateAndSla =null;
+		ArrayList <ProcessInstance> ProcessInstanceList = new ArrayList<>();
+		
+		try { 
+			
+			log.info("get data from procesinstance :" + procesinstanceData );
+			log.info("bussinessService Data :" + bussinessServiceData );
+			org.json.JSONObject obj = new org.json.JSONObject(procesinstanceData);
+			org.json.JSONArray ProcessInstances = obj.getJSONArray("ProcessInstances");
+
+			
+			ServiceRequest serviceRequestData = serviceRequestGetData.clone();
+
+			for (int i = ProcessInstances.length() - 1; i >= 0; i--) 
+			{
 				
-					RequestInfo requestInfo = new RequestInfo();
-					requestInfo.setUserInfo(wfUser);
+				System.out.println(ProcessInstances.get(i).toString());
+				org.json.JSONObject ProcessInstancesDetails = new org.json.JSONObject(
+						ProcessInstances.get(i).toString());
+
+				org.json.JSONObject wfAssigner = ProcessInstancesDetails.getJSONObject("assigner");
+
+				User wfUser = new User();
+				wfUser = getUserdata(wfAssigner);
 				
-					List<ProcessInstance> processInstances = new ArrayList<>();
-					processInstances.add(process);
-					ProcessInstanceList.addAll(processInstances);
-					
+				List<Document> wfAddDocument = new ArrayList<>();
+				wfAddDocument = getDocument(ProcessInstancesDetails);
+				
+				ServiceRequestData request = new ServiceRequestData();
+				request = getProcessData(ProcessInstancesDetails);
+
+			
+				businessService = serviceRequestData.getServices().get(0).getServiceType();	
+				
+				if(request.getAction().equals(HCConstants.EDIT))
+				{
+					nextStateAndSla = getNextStateEditAction(request,bussinessServiceData);
 				}
-				ProcessInstanceRequest processInstanceRequest=new ProcessInstanceRequest();
-				processInstanceRequest.setProcessInstances(ProcessInstanceList);
-				hCProducer.push(hcConfiguration.getSaveTransitionTopic(),processInstanceRequest);
+				else
+				{
+					nextStateAndSla = getNextState(bussinessServiceData,request);
+				}
 				
-				List<ActionInfo> actionInfos = new ArrayList<>();
-				ActionInfo newActionInfo = ActionInfo.builder().uuid(UUID.randomUUID().toString())
-						.businessKey(serviceRequestData.getServices().get(0).getBusinessService())
-						.action(serviceRequestData.getServices().get(0).getAction())
+				List<ProcessInstance> processInstances = new ArrayList<>();
+				ProcessInstance process = new ProcessInstance();
+				process = setProcessInstanceData(wfUser,nextStateAndSla,wfAddDocument,request,serviceRequestGetData,businessService,service_request_id_new);
+				
+				processInstances.add(process);
+				ProcessInstanceList.addAll(processInstances);
+				
+			}
+			
+			saveBulkProcessInstance(ProcessInstanceList);
+			
+			serviceRequestGetData = setActionInfo(serviceRequestGetData,serviceRequestData);
+	
+		} catch (Exception ex) {
 
-						.tenantId(serviceRequestData.getServices().get(0).getTenantId())
-						.status(serviceRequestData.getServices().get(0).getAction()).build();
-				actionInfos.add(newActionInfo);
-				serviceRequestGetData.setActionInfo(actionInfos);
+		}
+		return serviceRequestGetData;
+	}
 
-			} catch (Exception ex) {
+	private String getNextStateEditAction(ServiceRequestData request, String bussinessServiceData) throws JSONException {
+		String nextState = null;
+		String newactions = null;
+		String newState = null;
+		long sla = 0;
+		Boolean found = false;
+		
+		for (int businessCnt = 0; businessCnt <= bussinessServiceData.length(); businessCnt++) 
+		{
+			org.json.JSONObject bussinessServiceDetails = new org.json.JSONObject(
+					bussinessServiceData.toString());
+
+			org.json.JSONArray businessServicesObj = bussinessServiceDetails.getJSONArray("BusinessServices");
+			
+			for (int businessServiceCnt = 0; businessServiceCnt <= businessServicesObj.length(); businessServiceCnt++) 
+			{
+			
+				org.json.JSONObject businessServicesSingleObj = new org.json.JSONObject(
+						businessServicesObj.get(businessServiceCnt).toString());
+				
+				org.json.JSONArray stateObj = businessServicesSingleObj.getJSONArray("states");
+				
+				for (int stateCnt = 0; stateCnt <= stateObj.length(); stateCnt++) 
+				{
+					org.json.JSONObject stateSingleObj = new org.json.JSONObject(
+							stateObj.get(stateCnt).toString());
+					
+					 String businessserviceState = stateSingleObj.getString("state");
+					 sla = stateSingleObj.getLong("sla");
+					 org.json.JSONArray actionsObj = stateSingleObj.getJSONArray("actions");
+					
+					for (int actionCnt = 0; actionCnt < actionsObj.length(); actionCnt++) 
+					{
+						org.json.JSONObject actionsSingleObj = new org.json.JSONObject(
+								actionsObj.get(actionCnt).toString());
+						
+						newactions = actionsSingleObj.getString("action");
+						newState = actionsSingleObj.getString("nextState");
+						if(businessserviceState.isEmpty())
+						{
+							businessserviceState = HCConstants.INITIATED_STATUS;
+						}
+
+						if(newactions.equals(request.getAction()) && businessserviceState.equalsIgnoreCase(request.getState()))
+						{
+							  nextState = newState;
+							  found = true;
+							  
+							  log.info("businessServicesObj" + actionsObj);
+							  break;  
+						}
+						
+						if(found) break;
+					}	
+					if(found) break;
+				}	
+				if(found) break;
+			}
+			if(found) break;	
+		}
+		return nextState + "#" + sla;
+	}
+
+
+	private String getbussinessServiceDatafromprocesinstance(ServiceRequest serviceRequestGetData) {
+		
+		String bussinessServiceData = rest.postForObject(
+				hcConfiguration.getWfHost().concat(hcConfiguration.getWfBusinessServiceSearchPath()).concat("?").concat(
+						"tenantId=" + serviceRequestGetData.getServices().get(0).getLocality() + "&businessServices=" + serviceRequestGetData.getServices().get(0).getServiceType().toUpperCase()
+						),
+				serviceRequestGetData, String.class);
+		return bussinessServiceData;
+	}
+
+	private String getProcesinstanceDataFromprocesinstance(String service_request_id,
+			ServiceRequest serviceRequestGetData) {
+		
+
+		String procesinstanceData = rest.postForObject(
+				hcConfiguration.getWfHost().concat(hcConfiguration.getWfProcessSearch()).concat("?").concat(
+						"businessIds=" + service_request_id + "&history=true&tenantId=" + serviceRequestGetData.getServices().get(0).getCity()
+						),
+				serviceRequestGetData, String.class);
+		
+		
+		return procesinstanceData;
+	}
+
+	private ServiceRequest setActionInfo(ServiceRequest serviceRequestGetData, ServiceRequest serviceRequestData) {
+		
+		List<ActionInfo> actionInfos = new ArrayList<>();
+		ActionInfo newActionInfo = ActionInfo.builder().uuid(UUID.randomUUID().toString())
+				.businessKey(serviceRequestData.getServices().get(0).getBusinessService())
+				.action(serviceRequestData.getServices().get(0).getAction())
+
+				.tenantId(serviceRequestData.getServices().get(0).getTenantId())
+				.status(serviceRequestData.getServices().get(0).getAction()).build();
+		actionInfos.add(newActionInfo);
+		serviceRequestGetData.setActionInfo(actionInfos);
+		return serviceRequestGetData;
+	}
+
+	private void saveBulkProcessInstance(ArrayList<ProcessInstance> processInstanceList) {
+
+		ProcessInstanceRequest processInstanceRequest=new ProcessInstanceRequest();
+		processInstanceRequest.setProcessInstances(processInstanceList);
+		hCProducer.push(hcConfiguration.getSaveTransitionTopic(),processInstanceRequest);
+		
+	}
+
+	private ProcessInstance setProcessInstanceData(User wfUser, String nextStateAndSla, List<Document> wfAddDocument,
+			ServiceRequestData request, ServiceRequest serviceRequestGetData, String businessService,
+			String service_request_id_new) {
+		
+		
+		String  nextStateAndSlaSplit[] = null;
+		if(nextStateAndSla != null) {
+			nextStateAndSlaSplit = nextStateAndSla.split("#");
+			}
+		
+		long sla = Long.parseLong(nextStateAndSlaSplit[1]);
+		ProcessInstance process = new ProcessInstance();
+		User user = new User();
+		user.setUuid(wfUser.getUuid());
+
+		State state = new State();
+		state.setUuid(nextStateAndSlaSplit[0]);
+		
+		String proccessId = UUID.randomUUID().toString();
+		  
+		 // state.setTenantId(tenentId);
+		  
+		List<Document> wfDocument = new ArrayList<>();
+		  
+		 for(Document wf: wfAddDocument)
+		 {
+			 String documentId = UUID.randomUUID().toString();
+			 wf.setId(documentId);
+			 wfDocument.add(wf);
+		 }
+		  
+
+	        process.setId(proccessId);
+			process.setTenantId(serviceRequestGetData.getServices().get(0).getCity());
+			process.setBusinessService(businessService.toUpperCase());
+			process.setBusinessId(service_request_id_new);
+			process.setModuleName(HCConstants.MODULENAMEVALUE);
+			process.setAction(request.getAction());
+			process.setState(state);
+			process.setComment(request.getComment());
+			process.setAssigner(user);
+			process.setBusinesssServiceSla(request.getBusinessservicesla());
+			process.setStateSla(sla);
+			process.setDocuments(wfDocument);
+			process.setAuditDetails(request.getAuditDetails());
+
+
+		return process;
+	}
+
+	private String getNextState(String bussinessServiceData, ServiceRequestData request) throws JSONException {
+		
+		String nextState = null;
+		String newactions = null;
+		String newState = null;
+		long sla = 0;
+		Boolean found = false;
+		
+		for (int businessCnt = 0; businessCnt <= bussinessServiceData.length(); businessCnt++) 
+		{
+			org.json.JSONObject bussinessServiceDetails = new org.json.JSONObject(
+					bussinessServiceData.toString());
+
+			org.json.JSONArray businessServicesObj = bussinessServiceDetails.getJSONArray("BusinessServices");
+			
+			for (int businessServiceCnt = 0; businessServiceCnt <= businessServicesObj.length(); businessServiceCnt++) 
+			{
+			
+				org.json.JSONObject businessServicesSingleObj = new org.json.JSONObject(
+						businessServicesObj.get(businessServiceCnt).toString());
+				
+				org.json.JSONArray stateObj = businessServicesSingleObj.getJSONArray("states");
+				
+				for (int stateCnt = 0; stateCnt <= stateObj.length(); stateCnt++) 
+				{
+					org.json.JSONObject stateSingleObj = new org.json.JSONObject(
+							stateObj.get(stateCnt).toString());
+					
+					 String businessserviceState = stateSingleObj.getString("state");
+					 sla = stateSingleObj.getLong("sla");
+					 org.json.JSONArray actionsObj = stateSingleObj.getJSONArray("actions");
+					
+					for (int actionCnt = 0; actionCnt < actionsObj.length(); actionCnt++) 
+					{
+						org.json.JSONObject actionsSingleObj = new org.json.JSONObject(
+								actionsObj.get(actionCnt).toString());
+						
+						newactions = actionsSingleObj.getString("action");
+						newState = actionsSingleObj.getString("nextState");
+						
+						
+						if(newactions.equals(request.getAction()))
+						{
+							  nextState = newState;
+							  found = true;
+							  
+							  log.info("businessServicesObj" + actionsObj);
+							  break;  
+						}
+						
+						if(found) break;
+					}	
+					if(found) break;
+				}	
+				if(found) break;
+			}
+			if(found) break;	
+		}
+		return nextState + "#" + sla;
+	}
+
+	private ServiceRequestData getProcessData(org.json.JSONObject processInstancesDetails) throws JSONException {
+		
+		ServiceRequestData data = new ServiceRequestData();
+		
+		if (!processInstancesDetails.isNull("tenantId"))
+			
+			data.setTenantId(processInstancesDetails.getString("tenantId"));
+		else
+			data.setTenantId("");
+		if (!processInstancesDetails.isNull("action"))
+			data.setAction(processInstancesDetails.getString("action"));
+		else
+			data.setAction("");
+
+		if (!processInstancesDetails.isNull("comment"))
+			data.setComment(processInstancesDetails.getString("comment"));
+		else
+			data.setComment("");
+		
+		org.json.JSONObject auditDetails = processInstancesDetails.getJSONObject("auditDetails");
+		
+		AuditDetails details = new AuditDetails();
+		details.setCreatedBy(auditDetails.getString("createdBy"));
+		details.setLastModifiedBy(auditDetails.getString("lastModifiedBy"));
+		details.setCreatedTime(auditDetails.getLong("createdTime"));
+		details.setLastModifiedTime(auditDetails.getLong("lastModifiedTime"));
+		data.setAuditDetails(details);
+
+		long businesssServiceSla = processInstancesDetails.getLong("businesssServiceSla");
+		
+		//long businesssServiceSlaGet = 604800000;
+		//long lastModifiedTime = auditDetails.getLong("lastModifiedTime");
+				
+		//Long timeSinceLastAction = System.currentTimeMillis() - lastModifiedTime;
+		//long businesssServiceSla = (604800000 - timeSinceLastAction);
+		data.setBusinessservicesla(businesssServiceSla);
+		
+		org.json.JSONObject stateDetails = processInstancesDetails.getJSONObject("state"); //no try to use current state and check it works or not
+		
+	
+		String state = stateDetails.getString("state");
+		data.setState(state);
+		
+		return data;
+	}
+
+	private List<Document> getDocument(org.json.JSONObject processInstancesDetails) throws JSONException {
+		
+		List<Document> wfAddDocument = new ArrayList<>();
+		
+		if (!processInstancesDetails.isNull("documents")) {
+			org.json.JSONArray wfDocuments = processInstancesDetails.getJSONArray("documents");
+			if (null != wfDocuments) {
+				for (int docCnt = 0; docCnt < wfDocuments.length(); docCnt++) {
+
+					org.json.JSONObject docDetails = new org.json.JSONObject(
+							wfDocuments.get(docCnt).toString());
+					Document doc = new Document();
+					doc.setId(docDetails.getString("id"));
+
+					if (!docDetails.isNull("documentType"))
+						doc.setDocumentType(docDetails.getString("documentType"));
+					else
+						doc.setDocumentType("");
+					doc.setFileStoreId(docDetails.getString("fileStoreId"));
+					doc.setTenantId(docDetails.getString("tenantId"));
+
+					wfAddDocument.add(doc);
+
+				}
+			}
+		}
+		return wfAddDocument;
+	}
+
+	private User getUserdata(org.json.JSONObject wfAssigner) throws JSONException {
+		User wfUser = new User();
+		if (null != wfAssigner.getString("mobileNumber"))
+			wfUser.setMobileNumber(wfAssigner.getString("mobileNumber"));
+		else
+			wfUser.setMobileNumber("");
+		if (null != wfAssigner.getString("name"))
+			wfUser.setName(wfAssigner.getString("name"));
+		else
+			wfUser.setName("");
+		if (null != wfAssigner.getString("tenantId"))
+			wfUser.setTenantId(wfAssigner.getString("tenantId"));
+		else
+			wfUser.setTenantId("");
+		if (null != wfAssigner.getString("type"))
+			wfUser.setType(wfAssigner.getString("type"));
+		else
+			wfUser.setType("");
+		if (!wfAssigner.isNull("emailId"))
+			wfUser.setEmailId(wfAssigner.getString("emailId").toString());
+		else
+			wfUser.setEmailId("");
+		wfUser.setUuid(wfAssigner.getString("uuid"));
+		long id = wfAssigner.getLong("id");
+		wfUser.setId(id);
+		if (!wfAssigner.isNull("userName"))
+			wfUser.setUserName(wfAssigner.getString("userName"));
+		else
+			wfUser.setUserName("");
+
+		org.json.JSONArray wfRoles = wfAssigner.getJSONArray("roles");
+		List<Role> roleList = new ArrayList();
+		if (null != wfRoles) {
+			org.json.JSONObject roleDetails = null;
+			for (int roleCnt = 0; roleCnt < wfRoles.length(); roleCnt++) {
+				roleDetails = new org.json.JSONObject(wfRoles.get(roleCnt).toString());
+				Role role = new Role();
+				role.setCode(roleDetails.getString("code"));
+				role.setName(roleDetails.getString("name"));
+				roleList.add(role);
 
 			}
+			wfUser.setRoles(roleList);
+			
 
-		} catch (HttpClientErrorException e) {
-			System.out.print("Handled exception");
 		}
-
-		serviceRequestGetData.getRequestInfo().setUserInfo(userData);
-		
-		return serviceRequestGetData;
-
+		return wfUser;
 	}
-	
-	
+
+	private User employeeStoredData(ServiceRequest serviceRequestGetData) {
+
+		User userData = new User();
+		userData.setType(serviceRequestGetData.getRequestInfo().getUserInfo().getType());
+		userData.setEmailId(serviceRequestGetData.getRequestInfo().getUserInfo().getEmailId());
+		userData.setName(serviceRequestGetData.getRequestInfo().getUserInfo().getName());
+		userData.setId(serviceRequestGetData.getRequestInfo().getUserInfo().getId());
+		userData.setUuid(serviceRequestGetData.getRequestInfo().getUserInfo().getUuid());
+		userData.setRoles(serviceRequestGetData.getRequestInfo().getUserInfo().getRoles());
+		userData.setMobileNumber(serviceRequestGetData.getRequestInfo().getUserInfo().getMobileNumber());
+		userData.setUserName(serviceRequestGetData.getRequestInfo().getUserInfo().getUserName());
+		userData.setTenantId(serviceRequestGetData.getRequestInfo().getUserInfo().getTenantId());
+		return userData;
+	}
 
 	public ServiceResponse scheduler(ServiceRequest requestInfo, String tenantId) {
 		
@@ -1786,9 +2216,7 @@ public class ServiceRequestService {
 			List Actioninfolist= new ArrayList();
 	 		RequestInfoWrapper infoWrapper = null;
 			String employeeDetails = null;
-			
-			List<ModuleDetail> moduleDetail = new ArrayList<ModuleDetail>();
-			
+
 		    RequestInfo requestInfo = new RequestInfo();
 		    
 		    String requestData = null;
@@ -1948,10 +2376,7 @@ public class ServiceRequestService {
 			    	serviceRequestobj.setActionInfo(Actioninfolist);
 			    	serviceRequestobj.setRequestInfo(requestInfoDetails);
 
-			    	
 			    	notificationConsumer.sendSchedulerNotification(serviceRequestobj,action,serviceRequestDate,tenantId,days);
-			    	
-			    	
 
 			        }
 			        }
@@ -2023,8 +2448,10 @@ public class ServiceRequestService {
 	    }
 		
 		private ResponseEntity<ServiceRequest> serviceRequestEdit(ServiceRequest request, String service_request_id,
-				 String role, String status, String history_service_request_id, String service_request_id_new_gen, String action) {
+				 String role, String status, String history_service_request_id, String service_request_id_new_gen, String requestType) {
 
+			String action = HCConstants.ACTION_UPDATE;
+			
 			RequestInfoWrapper infoWrapper = new RequestInfoWrapper();
 			try {
 
@@ -2053,7 +2480,6 @@ public class ServiceRequestService {
 						request.getServices().get(0).setServiceMedia(documentDetailsJson.toJSONString());
 						request.getServices().get(0).setService_request_id(service_request_id);
 						request.getServices().get(0).setHistory_service_request_id(history_service_request_id);
-//						request.getServices().get(0).setService_request_id_new(service_request_id_new_gen);
 
 					} else {
 
@@ -2069,7 +2495,7 @@ public class ServiceRequestService {
 
 							jsonArray.add(formDetailsJson);
 						}
-						documentDetailsJson.put("document", jsonArray); // Here you can see the data in json forma
+						documentDetailsJson.put("document", jsonArray); 
 
 						request.getServices().get(0).setServiceMedia(documentDetailsJson.toJSONString());
 
@@ -2079,8 +2505,7 @@ public class ServiceRequestService {
 
 					request.getServices().get(0).setServicerequest_lang(langDataSplit[1]);
 
-					request.getServices().get(0)
-							.setServiceType(request.getServices().get(0).getServiceType());
+					request.getServices().get(0).setServiceType(requestType);
 					request.getServices().get(0).setService_request_uuid(service_request_uuid);
 					request.getServices().get(0).setCurrent_assignee(role);
 					request.getServices().get(0).setService_request_status(status);
@@ -2103,7 +2528,7 @@ public class ServiceRequestService {
 
 							.action(action).assignee(request.getServices().get(0).getCreatedBy())
 							.by(by).when(request.getServices().get(0).getCreatedTime())
-							.tenantId(request.getServices().get(0).getTenantId()).status(action)
+							.tenantId(request.getServices().get(0).getTenantId()).status(status)
 							.build();
 					actionInfos.add(newActionInfo);
 
@@ -2124,7 +2549,5 @@ public class ServiceRequestService {
 					HttpStatus.OK);
 
 		}
-
-
 
 }

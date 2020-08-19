@@ -71,13 +71,10 @@ public class DisposalEntity {
 		disposal.setDescription(description);
 		disposal.setDisposalStatus(DisposalStatusEnum.valueOf(disposalStatus));
 		disposal.setStateId(stateId);
-		if(totalDisposalValue != null)
-		disposal.setTotalDisposalValue(BigDecimal.valueOf(totalDisposalValue));
-		AuditDetails auditDetails = new AuditDetails();
-		auditDetails.setCreatedBy(createdBy);
-		auditDetails.setCreatedTime(createdTime);
-		auditDetails.setLastModifiedBy(lastModifiedBy);
-		auditDetails.setLastModifiedTime(lastModifiedTime);
+		if (totalDisposalValue != null)
+			disposal.setTotalDisposalValue(BigDecimal.valueOf(totalDisposalValue));
+
+		disposal.auditDetails(buildAuditDetails());
 		return disposal;
 	}
 
@@ -106,4 +103,9 @@ public class DisposalEntity {
 		return this;
 	}
 
+	private AuditDetails buildAuditDetails() {
+		AuditDetails auditDetails = new AuditDetails();
+		return auditDetails.createdBy(createdBy).createdTime(createdTime).lastModifiedBy(lastModifiedBy)
+				.lastModifiedTime(lastModifiedTime);
+	}
 }

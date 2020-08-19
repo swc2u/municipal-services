@@ -10,8 +10,9 @@ public class HCConstants {
 	
 	public static final String CITIZEN = "CITIZEN";
 	
-	
 	public static final String TRUE = "true";
+	
+	public static final String SUCCESSFUL = "successful";
 	
 	//Scheduler
 	
@@ -29,6 +30,7 @@ public class HCConstants {
 	public static final String SDO = "SDO";
 	
 	// Actions
+	public static final String EDITED = "EDITED";
 	
 	public static final String SUBMITTED = "SUBMITTED";
 	public static final String VERIFY_AND_FORWARD = "VERIFY AND FORWARD";

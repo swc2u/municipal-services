@@ -4,9 +4,11 @@ import static org.springframework.util.StringUtils.isEmpty;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +23,6 @@ import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
 import org.egov.assets.model.FinancialYear;
 import org.egov.assets.model.Indent;
-import org.egov.assets.model.Indent.IndentPurposeEnum;
 import org.egov.assets.model.Indent.IndentStatusEnum;
 import org.egov.assets.model.Indent.IndentTypeEnum;
 import org.egov.assets.model.IndentDetail;
@@ -29,20 +30,25 @@ import org.egov.assets.model.IndentRequest;
 import org.egov.assets.model.IndentResponse;
 import org.egov.assets.model.IndentSearch;
 import org.egov.assets.model.Material;
-import org.egov.assets.model.MaterialTypeStoreMapping;
+import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
-import org.egov.assets.model.StoreResponse;
 import org.egov.assets.model.Tenant;
 import org.egov.assets.model.Uom;
 import org.egov.assets.repository.IndentDetailJdbcRepository;
 import org.egov.assets.repository.IndentJdbcRepository;
+import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.StoreJdbcRepository;
 import org.egov.assets.repository.entity.IndentDetailEntity;
 import org.egov.assets.repository.entity.IndentEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.assets.web.controller.AssetRepository;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.response.ResponseInfo;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +57,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import net.minidev.json.JSONArray;
 
 /**
  * 
@@ -93,6 +98,9 @@ public class IndentService extends DomainService {
 
 	@Autowired
 	private StoreService storeService;
+
+	@Autowired
+	private PDFServiceReposistory pdfServiceReposistory;
 
 	@Autowired
 	private IndentDetailJdbcRepository indentDetailJdbcRepository;
@@ -168,16 +176,16 @@ public class IndentService extends DomainService {
 	private String getIndentNumber(Indent b, RequestInfo info) {
 		InvalidDataException errors = new InvalidDataException();
 		ObjectMapper mapper = new ObjectMapper();
-		JSONArray tenantStr = mdmsRepository.getByCriteria(b.getTenantId(), "tenant", "tenants", "code",
-				b.getTenantId(), info);
+		net.minidev.json.JSONArray tenantStr = mdmsRepository.getByCriteria(b.getTenantId(), "tenant", "tenants",
+				"code", b.getTenantId(), info);
 
 		Tenant tenant = mapper.convertValue(tenantStr.get(0), Tenant.class);
 		if (tenant == null) {
 			errors.addDataError(ErrorCode.CITY_CODE_NOT_AVAILABLE.getCode(), b.getTenantId());
 		}
 		String finYearRange = "";
-		JSONArray finYears = mdmsRepository.getByCriteria(b.getTenantId(), "egf-master", "FinancialYear", null, null,
-				info);
+		net.minidev.json.JSONArray finYears = mdmsRepository.getByCriteria(b.getTenantId(), "egf-master",
+				"FinancialYear", null, null, info);
 		outer: for (int i = 0; i < finYears.size(); i++) {
 			FinancialYear fin = mapper.convertValue(finYears.get(i), FinancialYear.class);
 			LOG.info("Indentdate" + b.getIndentDate());
@@ -196,8 +204,8 @@ public class IndentService extends DomainService {
 			throw errors;
 		}
 
-		String seq = "IND/" + tenant.getCity().getCode() + "/" + b.getIndentStore().getCode() + "/" + finYearRange;
-		return seq + "/" + numberGenerator.getNextNumber(seq, 5);
+		String seq = "IND-" + tenant.getCity().getCode() + "-" + b.getIndentStore().getCode() + "-" + finYearRange;
+		return seq + "-" + numberGenerator.getNextNumber(seq, 5);
 	}
 
 	@Transactional
@@ -496,13 +504,12 @@ public class IndentService extends DomainService {
 			 */
 
 		}
-		LOG.info("8888888888888888");
 		return indentRequest;
 	}
 
 	private Map<String, Material> getMaterial(String tenantId, final ObjectMapper mapper, RequestInfo requestInfo) {
-		JSONArray responseJSONArray = mdmsRepository.getByCriteria(tenantId, "store-asset", "Material", null, null,
-				requestInfo);
+		net.minidev.json.JSONArray responseJSONArray = mdmsRepository.getByCriteria(tenantId, "store-asset", "Material",
+				null, null, requestInfo);
 		Map<String, Material> materialMap = new HashMap<>();
 
 		if (responseJSONArray != null && responseJSONArray.size() > 0) {
@@ -530,8 +537,8 @@ public class IndentService extends DomainService {
 	}
 
 	private Map<String, Uom> getUoms(String tenantId, final ObjectMapper mapper, RequestInfo requestInfo) {
-		JSONArray responseJSONArray = mdmsRepository.getByCriteria(tenantId, "common-masters", "UOM", null, null,
-				requestInfo);
+		net.minidev.json.JSONArray responseJSONArray = mdmsRepository.getByCriteria(tenantId, "common-masters", "UOM",
+				null, null, requestInfo);
 		Map<String, Uom> uomMap = new HashMap<>();
 
 		if (responseJSONArray != null && responseJSONArray.size() > 0) {
@@ -549,5 +556,89 @@ public class IndentService extends DomainService {
 		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
 		String s2 = format.format(epoch);
 		return s2;
+	}
+
+	public PDFResponse printPdf(IndentSearch is, RequestInfo requestInfo) {
+		IndentResponse indentResponse = search(is, requestInfo);
+		if (!indentResponse.getIndents().isEmpty() && indentResponse.getIndents().size() == 1) {
+			JSONObject requestMain = new JSONObject();
+			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
+				requestMain.put("RequestInfo", reqInfo);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+
+			JSONArray indents = new JSONArray();
+			for (Indent in : indentResponse.getIndents()) {
+				JSONObject indent = new JSONObject();
+				indent.put("indentNumber", in.getIndentNumber());
+				indent.put("storeName", in.getIndentStore().getName());
+				indent.put("indentingStoreName", in.getIndentStore().getName());
+				indent.put("indentingStoreDept", in.getIndentStore().getDepartment().getName());
+				if (in.getIndentDate() != null) {
+					Instant indentDate = Instant.ofEpochMilli(in.getIndentDate());
+					indent.put("indentDate", fmt.format(indentDate.atZone(ZoneId.systemDefault())));
+				} else {
+					indent.put("indentDate", in.getIndentDate());
+				}
+
+				if (in.getIssueStore() != null && in.getIssueStore().getCode() != null) {
+					indent.put("issuingStoreName", in.getIssueStore().getName());
+					indent.put("issuingStoreDept", in.getIssueStore().getDepartment().getName());
+				}
+				indent.put("indentStatus", in.getIndentStatus());
+				indent.put("indentPurpose", in.getIndentPurpose());
+				indent.put("narration", in.getNarration());
+				indent.put("inventoryType", in.getInventoryType());
+				indent.put("deliveryDate", in.getExpectedDeliveryDate());
+				indent.put("createdBy", in.getIndentCreatedBy());
+				indent.put("designation", in.getDesignation());
+
+				JSONArray indentDetails = new JSONArray();
+				int i = 1;
+				for (IndentDetail detail : in.getIndentDetails()) {
+					JSONObject indentDetail = new JSONObject();
+					indentDetail.put("srNo", i++);
+					indentDetail.put("materialCode", detail.getMaterial().getCode());
+					indentDetail.put("materialName", detail.getMaterial().getName());
+					indentDetail.put("materialDescription", detail.getMaterial().getDescription());
+					indentDetail.put("uomName", detail.getUom().getCode());
+					indentDetail.put("indentPurpose", in.getIndentPurpose());
+					indentDetail.put("workDetailsRemark", detail.getRemarks());
+					indentDetail.put("requiredQuantity", detail.getIndentQuantity());
+					indentDetails.add(indentDetail);
+				}
+				indent.put("materialDetails", indentDetails);
+
+				// Need to integrate Workflow
+
+				JSONArray workflows = new JSONArray();
+				JSONObject jsonWork = new JSONObject();
+				jsonWork.put("reviewApprovalDate", "02-05-2020");
+				jsonWork.put("reviewerApproverName", "Aniket");
+				jsonWork.put("designation", "MD");
+				jsonWork.put("action", "Forwarded");
+				jsonWork.put("sendTo", "Prakash");
+				jsonWork.put("approvalStatus", "APPROVED");
+				workflows.add(jsonWork);
+				indent.put("workflowDetails", workflows);
+
+				indents.add(indent);
+				if (is.getIndentType().equals(IndentTypeEnum.INDENTNOTE.toString()))
+					requestMain.put("IndentNote", indents);
+				if (is.getIndentType().equals(IndentTypeEnum.TRANSFERINDENT.toString()))
+					requestMain.put("IndentNoteTransfer", indents);
+			}
+			if (is.getIndentType().equals(IndentTypeEnum.INDENTNOTE.toString()))
+				return pdfServiceReposistory.getPrint(requestMain, "store-asset-indent-note", is.getTenantId());
+			if (is.getIndentType().equals(IndentTypeEnum.TRANSFERINDENT.toString()))
+				return pdfServiceReposistory.getPrint(requestMain, "store-asset-indent-transfer", is.getTenantId());
+
+		}
+		return PDFResponse.builder()
+				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
 	}
 }

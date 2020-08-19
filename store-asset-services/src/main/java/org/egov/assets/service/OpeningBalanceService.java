@@ -229,8 +229,8 @@ public class OpeningBalanceService extends DomainService {
 			throw errors;
 		}
 
-		String seq = "OPB/" + tenant.getCity().getCode() + "/" + finYearRange;
-		return seq + "/" + numberGenerator.getNextNumber(seq, 5);
+		String seq = "OPB-" + tenant.getCity().getCode() + "-" + finYearRange;
+		return seq + "-" + numberGenerator.getNextNumber(seq, 5);
 	}
 
 	private void validate(List<MaterialReceipt> receipt, String method, String tenantId, RequestInfo info) {

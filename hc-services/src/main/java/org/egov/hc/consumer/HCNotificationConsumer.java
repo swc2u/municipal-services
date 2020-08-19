@@ -823,6 +823,25 @@ public class HCNotificationConsumer {
 					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_DATE_KEY, genratedDate);
 			}
 			break;
+			
+		case WorkFlowConfigs.EDIT:
+
+			if (notifcationType.equals(HCConstants.SMS)) {
+				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_SMS_NOTIFICATION);
+			} else if (notifcationType.equals(HCConstants.EMAIL)) {
+
+				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_EMAIL_NOTIFICATION);
+			} else if (notifcationType.equals(HCConstants.PUSH)) {
+				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_PUSH_NOTIFICATION);
+			}
+			if(text != null)
+			{
+			text = text.replace(HCConstants.SMS_NOTIFICATION_EMP_NAME_KEY,  serviceReq.getOwnerName())
+					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_ID, serviceReq.getService_request_id_old())
+					.replace(HCConstants.NOTIFICATION_SERVICEREQUEST_ID_NEW, serviceReq.getService_request_id())
+					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_DATE_KEY, genratedDate);
+			}
+			break;
 		}
 		
 

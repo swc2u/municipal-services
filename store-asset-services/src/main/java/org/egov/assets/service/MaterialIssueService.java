@@ -838,14 +838,16 @@ public class MaterialIssueService extends DomainService {
 					materialIssue.toStore(getStore(materialIssue.getToStore().getCode(), searchContract.getTenantId()));
 				}
 
-				IndentSearch indentSearch = new IndentSearch();
-				indentSearch.setIndentNumber(materialIssue.getIndent().getIndentNumber());
-				indentSearch.setTenantId(searchContract.getTenantId());
-				IndentResponse indentResponse = indentService.search(indentSearch, new RequestInfo());
+				if (materialIssue.getIndent() != null && materialIssue.getIndent().getIndentNumber() != null) {
+					IndentSearch indentSearch = new IndentSearch();
+					indentSearch.setIndentNumber(materialIssue.getIndent().getIndentNumber());
+					indentSearch.setTenantId(searchContract.getTenantId());
+					IndentResponse indentResponse = indentService.search(indentSearch, new RequestInfo());
 
-				if (!indentResponse.getIndents().isEmpty())
-					materialIssue.setIndent(indentResponse.getIndents().get(0));
+					if (!indentResponse.getIndents().isEmpty())
+						materialIssue.setIndent(indentResponse.getIndents().get(0));
 
+				}
 				ObjectMapper mapper = new ObjectMapper();
 				Map<String, Uom> uoms = getUoms(materialIssue.getTenantId(), mapper, new RequestInfo());
 				Pagination<MaterialIssueDetail> materialIssueDetails = materialIssueDetailsJdbcRepository

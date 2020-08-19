@@ -8,6 +8,8 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.egov.assets.model.PDFResponse;
+import org.egov.assets.model.PDFRequest;
 import org.egov.assets.model.PurchaseOrderRequest;
 import org.egov.assets.model.PurchaseOrderResponse;
 import org.egov.assets.model.PurchaseOrderSearch;
@@ -21,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @RestController
 @RequestMapping(value = "/purchaseorders")
@@ -67,7 +68,19 @@ public class PurchaseordersApiController {
 		purchaseOrderSearch.setPageSize(pageSize);
 		purchaseOrderSearch.setPageNumber(pageNumber);
 
-		return new ResponseEntity<>(purchaseOrderService.search(purchaseOrderSearch),
+		return new ResponseEntity<>(purchaseOrderService.search(purchaseOrderSearch), HttpStatus.OK);
+	}
+
+	@PostMapping(value = "/_print", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<PDFResponse> purchaseordersSearchPost(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@Valid @RequestBody PDFRequest pdfRequest,
+			@RequestParam(value = "purchaseOrderNumber", required = false) String purchaseOrderNumber) {
+
+		PurchaseOrderSearch purchaseOrderSearch = new PurchaseOrderSearch();
+		purchaseOrderSearch.setTenantId(tenantId);
+		purchaseOrderSearch.setPurchaseOrderNumber(purchaseOrderNumber);
+		return new ResponseEntity<>(purchaseOrderService.printPdf(purchaseOrderSearch, pdfRequest.getRequestInfo()),
 				HttpStatus.OK);
 	}
 

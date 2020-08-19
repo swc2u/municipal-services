@@ -73,6 +73,7 @@ public class SEPRowMapper implements ResultSetExtractor<List<SepApplication>> {
 					sepapp.setProjectCost(rs.getBigDecimal("project_cost"));
 					sepapp.setQualification(rs.getString("qualification"));
 					sepapp.setRecommendedAmount(rs.getBigDecimal("recommended_amount"));
+					sepapp.setRemark(rs.getString("remark"));
 					sepapp.setRecommendedBy(rs.getString("recommended_by"));
 					sepapp.setRepresentativeAddress(rs.getString("representative_address"));
 					sepapp.setRepresentativeName(rs.getString("representative_name"));

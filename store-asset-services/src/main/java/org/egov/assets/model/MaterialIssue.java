@@ -529,8 +529,7 @@ public class MaterialIssue {
 	 * 
 	 * @return supplier
 	 **/
-	@Valid
-
+	
 	public Supplier getSupplier() {
 		return supplier;
 	}

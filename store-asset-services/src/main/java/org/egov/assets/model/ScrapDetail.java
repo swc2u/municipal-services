@@ -322,9 +322,6 @@ public class ScrapDetail {
 	 * 
 	 * @return scrapReason
 	 **/
-
-	@NotNull
-
 	public ScrapReasonEnum getScrapReason() {
 		return scrapReason;
 	}

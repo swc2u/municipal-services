@@ -38,10 +38,10 @@ public class ServiceController {
 
 	@RequestMapping(value = "/_create", method = RequestMethod.POST)
 	public ResponseEntity<?> create(@RequestBody ServiceRequest serviceRequest,
-			@RequestHeader("User-Agent") String request) throws JSONException {
+			@RequestHeader("User-Agent") String request) throws JSONException, InterruptedException {
 		ServiceResponse response = null;
 
-		if (serviceRequest.getServices().get(0).getIsEditState() == 1) {		
+		if (serviceRequest.getServices().get(0).getIsEditState() == 1) {	
 			response = service.updateServiceRequest(serviceRequest, request);
 		} else {
 			response = service.create(serviceRequest, request);
@@ -96,9 +96,8 @@ public class ServiceController {
 			@RequestHeader("User-Agent") String requestHeader) throws JSONException {
 
 		ServiceResponse response = service.update(serviceRequest, requestHeader);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);		
 	}
-	
 	
 	@RequestMapping(value = "/_scheduler", method = RequestMethod.POST)
 	public ResponseEntity<?> scheduler(@RequestParam("tenantId") String tenantId ,

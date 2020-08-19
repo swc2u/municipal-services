@@ -5,6 +5,9 @@ import static org.springframework.util.StringUtils.isEmpty;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -28,6 +31,7 @@ import org.egov.assets.model.MaterialReceiptDetailAddnlinfo;
 import org.egov.assets.model.MaterialReceiptRequest;
 import org.egov.assets.model.MaterialReceiptResponse;
 import org.egov.assets.model.MaterialReceiptSearch;
+import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.PurchaseOrderDetail;
 import org.egov.assets.model.PurchaseOrderDetailSearch;
 import org.egov.assets.model.PurchaseOrderSearch;
@@ -36,6 +40,7 @@ import org.egov.assets.model.StoreResponse;
 import org.egov.assets.model.SupplierGetRequest;
 import org.egov.assets.model.SupplierResponse;
 import org.egov.assets.model.Uom;
+import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.PurchaseOrderDetailJdbcRepository;
 import org.egov.assets.repository.PurchaseOrderJdbcRepository;
 import org.egov.assets.repository.ReceiptNoteRepository;
@@ -43,8 +48,12 @@ import org.egov.assets.repository.entity.PurchaseOrderDetailEntity;
 import org.egov.assets.repository.entity.PurchaseOrderEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
 import org.egov.tracer.model.CustomException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +61,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class ReceiptNoteService extends DomainService {
 
 	@Autowired
 	private LogAwareKafkaTemplate<String, Object> logAwareKafkaTemplate;
+
+	@Autowired
+	private PDFServiceReposistory pdfServiceReposistory;
 
 	@Value("${inv.materialreceiptnote.save.topic}")
 	private String createTopic;
@@ -287,8 +301,8 @@ public class ReceiptNoteService extends DomainService {
 					new RequestInfo());
 			BigDecimal rounded = new BigDecimal(materialBalanceRate2.getBalance().toString());
 			rounded = rounded.setScale(2, RoundingMode.CEILING);
-			materialBalanceRate2.setMaterialName(String.format("%s (Qty:%s, Rate:%s)", material.getName(),
-					rounded, materialBalanceRate2.getUnitRate()));
+			materialBalanceRate2.setMaterialName(String.format("%s (Qty:%s, Rate:%s)", material.getName(), rounded,
+					materialBalanceRate2.getUnitRate()));
 		}
 	}
 
@@ -669,10 +683,10 @@ public class ReceiptNoteService extends DomainService {
 	private String appendString(MaterialReceipt materialReceipt) {
 		Calendar cal = Calendar.getInstance();
 		int year = cal.get(Calendar.YEAR);
-		String code = "MRN/";
+		String code = "MRN-";
 		int id = Integer.valueOf(receiptNoteRepository.getSequence(materialReceipt));
 		String idgen = String.format("%05d", id);
-		String mrnNumber = code + idgen + "/" + year;
+		String mrnNumber = code + idgen + "-" + year;
 		return mrnNumber;
 	}
 
@@ -714,6 +728,108 @@ public class ReceiptNoteService extends DomainService {
 		} else {
 			materialReceiptDetail.setPurchaseOrderDetail(purchaseOrderDetails.getPagedData().get(0));
 		}
+	}
+
+	public PDFResponse printPdf(MaterialReceiptSearch materialReceiptSearch, RequestInfo requestInfo) {
+		MaterialReceiptResponse materialReceiptResponse = search(materialReceiptSearch);
+		if (!materialReceiptResponse.getMaterialReceipt().isEmpty()
+				&& materialReceiptResponse.getMaterialReceipt().size() == 1) {
+			JSONObject requestMain = new JSONObject();
+			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
+				requestMain.put("RequestInfo", reqInfo);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+
+			JSONArray materials = new JSONArray();
+			for (MaterialReceipt in : materialReceiptResponse.getMaterialReceipt()) {
+				JSONObject material = new JSONObject();
+				Instant receiptDate = Instant.ofEpochMilli(in.getReceiptDate());
+				material.put("mrnNumber", in.getMrnNumber());
+				material.put("storeName", in.getReceivingStore().getName());
+				material.put("receiptDate", fmt.format(receiptDate.atZone(ZoneId.systemDefault())));
+				material.put("mrnStatus", in.getMrnStatus());
+				material.put("receiptType", in.getReceiptType());
+				material.put("supplierName", in.getSupplier().getName());
+				material.put("supplierBillNo", in.getSupplierBillNo());
+				if (in.getSupplierBillDate() != null) {
+					Instant supplierBillDate = Instant.ofEpochMilli(in.getReceiptDate());
+					material.put("supplierBillDate", fmt.format(supplierBillDate.atZone(ZoneId.systemDefault())));
+				} else {
+					material.put("supplierBillDate", in.getSupplierBillDate());
+				}
+				material.put("challanNo", in.getChallanNo());
+				if (in.getSupplierBillDate() != null) {
+					Instant supplierBillDate = Instant.ofEpochMilli(in.getChallanDate());
+					material.put("challanDate", fmt.format(supplierBillDate.atZone(ZoneId.systemDefault())));
+				} else {
+					material.put("challanDate", in.getChallanDate());
+				}
+
+				material.put("remarks", in.getDescription());
+				material.put("receivedBy", in.getReceivedBy());
+				material.put("designation", in.getDesignation());
+				material.put("inspectedBy", in.getInspectedBy());
+				if (in.getInspectionDate() != null) {
+					Instant inspectedDate = Instant.ofEpochMilli(in.getInspectionDate());
+					material.put("inspectedDate", fmt.format(inspectedDate.atZone(ZoneId.systemDefault())));
+				} else {
+					material.put("inspectedDate", in.getInspectionDate());
+				}
+				material.put("inspectedRemarks", in.getInspectionRemarks());
+
+				JSONArray matsDetails = new JSONArray();
+				int i = 1;
+				for (MaterialReceiptDetail detail : in.getReceiptDetails()) {
+					JSONObject matsDetail = new JSONObject();
+					matsDetail.put("srNo", i++);
+					matsDetail.put("materialName", detail.getMaterial().getName());
+					matsDetail.put("poNumber", detail.getPurchaseOrderDetail().getPurchaseOrderNumber());
+					matsDetail.put("uomName", detail.getUom().getCode());
+					matsDetail.put("acceptedQty", detail.getAcceptedQty());
+					matsDetail.put("orderedQty", detail.getPurchaseOrderDetail().getOrderQuantity());
+					matsDetail.put("receivedQty", detail.getReceivedQty());
+					matsDetail.put("totalValueOfAcceptedQty", detail.getAcceptedQty().multiply(detail.getUnitRate()));
+					matsDetail.put("ratePerUnit", detail.getUnitRate());
+					matsDetail.put("lotNo", detail.getReceiptDetailsAddnInfo().get(0).getLotNo());
+					if (detail.getReceiptDetailsAddnInfo().get(0).getManufactureDate() != null) {
+						Instant mfgDate = Instant
+								.ofEpochMilli(detail.getReceiptDetailsAddnInfo().get(0).getManufactureDate());
+						matsDetail.put("mfgDate", fmt.format(mfgDate.atZone(ZoneId.systemDefault())));
+					} else {
+						matsDetail.put("mfgDate", detail.getReceiptDetailsAddnInfo().get(0).getManufactureDate());
+					}
+					matsDetails.add(matsDetail);
+				}
+				material.put("materialDetails", matsDetails);
+
+				// Need to integrate Workflow
+
+				JSONArray workflows = new JSONArray();
+				JSONObject jsonWork = new JSONObject();
+				jsonWork.put("reviewApprovalDate", "02-05-2020");
+				jsonWork.put("reviewerApproverName", "Aniket");
+				jsonWork.put("designation", "MD");
+				jsonWork.put("action", "Forwarded");
+				jsonWork.put("sendTo", "Prakash");
+				jsonWork.put("approvalStatus", "APPROVED");
+				workflows.add(jsonWork);
+				material.put("workflowDetails", workflows);
+
+				materials.add(material);
+				requestMain.put("MeterialReceiptNote", materials);
+			}
+
+			return pdfServiceReposistory.getPrint(requestMain, "store-asset-mrn-receipt",
+					materialReceiptSearch.getTenantId());
+		}
+		return PDFResponse.builder()
+				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+
 	}
 
 }

@@ -1,6 +1,5 @@
 package org.egov.nulm.model;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -39,6 +38,7 @@ public class SmidShgMemberApplication {
 	private StatusEnum applicationStatus ;
 
 	public enum StatusEnum {
+		DRAFTED("DRAFTED"),
 	    CREATED("CREATED"),
 	    APPROVED("APPROVED"),
 	    AWAITINGFORAPPROVAL("AWAITINGFORAPPROVAL"),

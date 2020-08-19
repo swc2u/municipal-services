@@ -40,6 +40,7 @@ CREATE TABLE public.nulm_sep_application_detail
   representative_name character varying(255),
   representative_address character varying(255),
   tenant_id character varying(256),
+  remark character varying(256),
   is_active boolean,
   created_by character varying(64),
   created_time bigint,

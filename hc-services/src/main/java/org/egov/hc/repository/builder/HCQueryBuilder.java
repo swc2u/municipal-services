@@ -20,12 +20,16 @@ public class HCQueryBuilder {
 
 	private static final String QUERY = "select service_request_id,service_type,owner_name,service_request_status,current_assignee,to_char(to_timestamp(cast(createdtime/1000 as bigint))::date ,'DD/MM/YYYY')as createdtime from eg_hc_service_request hc ";
 
+	public static final String SELECT_SERVICE_DETAIL_FOR_CITIZEN = "SELECT service_request_uuid, owner_name, tenant_id, location, latitude, longitude, locality, street_name, landmark, contact_number, email_id, tree_count, service_request_document, service_request_status, service_request_id, service_type, description,current_assignee, createdby, to_char(to_timestamp(cast(createdtime/1000 as bigint))::date,'DD/MM/YYYY') as createdtimes,servicerequest_lang ,lastmodifiedby,to_char(to_timestamp(cast(lastmodifiedtime/1000 as bigint))::date,'DD/MM/YYYY') as lastmodifiedtime from eg_hc_service_request WHERE service_request_id =? and createdby = ?";
+	
 	public static final String SELECT_SERVICE_DETAIL = "SELECT service_request_uuid, owner_name, tenant_id, location, latitude, longitude, locality, street_name, landmark, contact_number, email_id, tree_count, service_request_document, service_request_status, service_request_id, service_type, description,current_assignee, createdby, to_char(to_timestamp(cast(createdtime/1000 as bigint))::date,'DD/MM/YYYY') as createdtimes,servicerequest_lang ,lastmodifiedby,to_char(to_timestamp(cast(lastmodifiedtime/1000 as bigint))::date,'DD/MM/YYYY') as lastmodifiedtime from eg_hc_service_request WHERE service_request_id =?";
 	
 	public static final String GET_CREATED_TIME = "SELECT service_type,createdtime,service_request_id,current_assignee,to_char(to_timestamp(cast(createdtime/1000 as bigint))::date ,'DD-MM-YYYY')as serviceRequestDate \r\n" + 
 			"from eg_hc_service_request WHERE \r\n" + 
 			" service_request_status != '"+HCConstants.REJECTED_STATUS+"' AND\r\n" + 
 			" service_request_status != '"+HCConstants.COMPLETED_STATUS+"' AND \r\n" +
+			" service_request_status != '"+HCConstants.APPROVED_STATUS+"' AND \r\n" +
+			" service_request_status != '"+HCConstants.INITIATED_STATUS+"' AND \r\n" +
 			"current_assignee != ''";
 
 	private final String paginationWrapper = "SELECT * FROM "

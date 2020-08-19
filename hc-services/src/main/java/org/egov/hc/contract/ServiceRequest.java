@@ -37,7 +37,7 @@ public class ServiceRequest  implements Cloneable  {
 	public ServiceRequest clone() throws
     CloneNotSupportedException 
 { 
-return (ServiceRequest) super.clone(); 
+return (ServiceRequest) super.clone();
 } 
 
   @JsonProperty("RequestInfo")
@@ -61,6 +61,7 @@ return (ServiceRequest) super.clone();
   @JsonProperty("status")
 	String status;
   
+
   
   @JsonProperty("ResponseInfo")
 	private ResponseInfo responseInfo;

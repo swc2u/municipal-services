@@ -139,15 +139,14 @@ public class SepService {
 		try {
 			SepApplication sepapplication = objectMapper.convertValue(seprequest.getNulmSepRequest(),
 					SepApplication.class);
-			int i=0;
+			
 			checkValidation(sepapplication);
 			sepapplication.setIsActive(true);
 			sepapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(seprequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
 		   // update document to nulm_sep_application_document table
 			List<SepApplicationDocument> sepdoc = new ArrayList<>();
 			for (SepApplicationDocument docobj : sepapplication.getApplicationDocument()) {
-				i=repository.checkDocExist(docobj,sepapplication.getApplicationUuid(),sepapplication.getTenantId());
-				if(i==0) {
+							
 				SepApplicationDocument document = new SepApplicationDocument();
 				document.setDocumnetUuid(UUID.randomUUID().toString());
 				document.setApplicationUuid(sepapplication.getApplicationUuid());
@@ -157,7 +156,7 @@ public class SepService {
 				document.setIsActive(true);
 				document.setTenantId(sepapplication.getTenantId());
 				sepdoc.add(document);
-				}
+				
 
 			}
 			sepapplication.setApplicationDocument(sepdoc);

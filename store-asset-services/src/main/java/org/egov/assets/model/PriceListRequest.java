@@ -19,7 +19,7 @@ public class PriceListRequest   {
   private RequestInfo requestInfo = null;
 
   @JsonProperty("priceLists")
-  private List<PriceList> priceLists = new ArrayList<PriceList>();
+  private List<PriceList> priceLists = new ArrayList<>();
 
   public PriceListRequest requestInfo(RequestInfo requestInfo) {
     this.requestInfo = requestInfo;

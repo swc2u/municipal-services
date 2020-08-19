@@ -112,6 +112,7 @@ public class TransferinwardsService extends DomainService {
 						}
 					});
 				});
+				// Consider for workflow updateStatusAsReceipted(materialReceipt.getIssueNumber(), tenantId);
 			});
 			kafkaTemplate.send(createTopic, createTopicKey, inwardRequest);
 			TransferInwardResponse response = new TransferInwardResponse();
@@ -158,6 +159,7 @@ public class TransferinwardsService extends DomainService {
 					transferInwardRepository.markDeleted(materialReceiptDetailIds, tenantId, "materialreceiptdetail",
 							"mrnNumber", materialReceipt.getMrnNumber());
 				});
+				// Consider for workflow updateStatusAsReceipted(materialReceipt.getIssueNumber(), tenantId);
 			});
 			kafkaTemplate.send(updateTopic, updateTopicKey, inwardsRequest);
 			TransferInwardResponse response = new TransferInwardResponse();
@@ -238,8 +240,8 @@ public class TransferinwardsService extends DomainService {
 			throw errors;
 		}
 
-		String seq = "MRN/" + tenant.getCity().getCode() + "/" + finYearRange;
-		return seq + "/" + numberGenerator.getNextNumber(seq, 5);
+		String seq = "MRN-" + tenant.getCity().getCode() + "-" + finYearRange;
+		return seq + "-" + numberGenerator.getNextNumber(seq, 5);
 	}
 
 	// fetching material issue and building with receipt data
@@ -269,9 +271,11 @@ public class TransferinwardsService extends DomainService {
 						// converting and validating userReceivedqty with issuedqty
 						if (setConvertedQuantity(tenantId, detail, issuedQuantity, request.getRequestInfo())) {
 							errors.addDataError(ErrorCode.QTY1_EQ_QTY2.getCode(), "Received Qty", "Issued Qty", null);
-						} else
-							// updating material issue table status
-							updateStatusAsReceipted(receipt.getIssueNumber(), tenantId);
+						}
+						/*
+						 * else // updating material issue table status
+						 * updateStatusAsReceipted(receipt.getIssueNumber(), tenantId);
+						 */
 
 						for (MaterialReceiptDetailAddnlinfo info : detail.getReceiptDetailsAddnInfo()) {
 							if (info.getReceivedDate() <= issueDate) {

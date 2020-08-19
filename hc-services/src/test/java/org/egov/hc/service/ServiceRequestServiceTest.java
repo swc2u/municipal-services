@@ -1,7 +1,7 @@
 package org.egov.hc.service;
 
 
-import static org.mockito.Mockito.when;
+
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -24,9 +24,9 @@ import org.egov.hc.model.ProcessInstance;
 import org.egov.hc.model.ProcessInstanceRequest;
 import org.egov.hc.model.RequestData;
 import org.egov.hc.model.ServiceRequestData;
-import org.egov.hc.model.State;
 
-import org.egov.hc.producer.HCConfigurationTest;
+import org.egov.hc.model.State;
+import org.egov.hc.producer.HCConfiguration;
 import org.egov.hc.producer.HCProducer;
 
 import org.egov.hc.repository.IdGenRepository;
@@ -36,20 +36,17 @@ import org.egov.hc.utils.HCUtils;
 import org.egov.hc.utils.ResponseInfoFactory;
 import org.egov.hc.workflow.Document;
 
-import org.egov.hc.workflow.WorkflowIntegratortest;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.junit.Assert;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import org.springframework.http.HttpStatus;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,9 +61,7 @@ public class ServiceRequestServiceTest {
 	@Mock
 	private HCUtils hCUtils;
 	
-	@Mock
-	private WorkflowIntegratortest wfIntegrator;
-	
+
 	@Mock
 	private HCProducer hCProducer;
 
@@ -77,7 +72,7 @@ public class ServiceRequestServiceTest {
 	private ObjectMapper objectMapper;
 	
 	@Mock
-	private HCConfigurationTest hcConfiguration;
+	private HCConfiguration hcConfiguration;
 	
 	@Mock
 	private HCNotificationConsumer notificationConsumer;
@@ -176,7 +171,8 @@ public class ServiceRequestServiceTest {
 	    hCProducer.push(hcConfiguration.getSaveTopic(), infoWrapper);
 	}
 	
-	private void testUpdate()throws Exception {
+	@Test
+	public void testUpdate()throws Exception {
 		
 		ServiceRequestData updateRequest = new ServiceRequestData();
 		updateRequest.setService_request_id("CH-HC-2020-06-14-001432_1");
@@ -188,10 +184,7 @@ public class ServiceRequestServiceTest {
 		updateRequest.setCurrent_assignee("EE");
 		
 		ServiceRequest seerviceRequest = new ServiceRequest();
-		seerviceRequest.getServices().get(0).setContactNumber("9730502963");
-		seerviceRequest.getServices().get(0).setOwnerName("dhanaji");
-		seerviceRequest.getServices().get(0).setEmail("dhanaji@gmail.com");
-		seerviceRequest.getServices().get(0).setService_request_status("APPROVED");
+		//ServicerequestTest service = new ServicerequestTest();
 		
 		RequestInfoWrapper infowraperforupdate = RequestInfoWrapper.builder().requestBody(updateRequest).build();
 		RequestInfo requestInfo = seerviceRequest.getRequestInfo();
@@ -209,31 +202,29 @@ public class ServiceRequestServiceTest {
 				.requestBody(updateRequest).services(seerviceRequest.getServices()).build();
 
 		hCProducer.push(hcConfiguration.getUpdateTopic(), infowraperforupdate);
-		Assert.assertEquals(HttpStatus.CREATED, infowraperforupdate);
+		
 		
 	}
 	
-	private void testScheduler()throws Exception {
+	@Test
+	public void testScheduler()throws Exception {
 		String role = "EE";
 		String serviceRequestId="CH-HC-2020-06-14-001432_1";
 		ServiceRequestData request = new ServiceRequestData();
 		String tenantId = "ch";
 		int days = 2;
 		
-		sendReminderOverdueSlaNotification(role,serviceRequestId,HCConstants.REMINDER,request.getService_request_date(),tenantId,request.getServiceType(),days);
+		Mockito.when(objectMapper.convertValue(request, ServiceRequestData.class)).thenReturn(request);
+		//Mockito.when(sendReminderOverdueSlaNotification(role,serviceRequestId,HCConstants.REMINDER,request.getService_request_date(),tenantId,request.getServiceType(),days)).thenReturn(request);
+		
+		//sendReminderOverdueSlaNotification(role,serviceRequestId,HCConstants.REMINDER,request.getService_request_date(),tenantId,request.getServiceType(),days);
 
 	}
 	
-	private List<String> sendReminderOverdueSlaNotification(String role,String service_request_id,String action,String serviceRequestDate,String tenantId,String serviceType,int days) 
+	@Test
+	public void sendReminderOverdueSlaNotification() throws Exception
 	{
-		
-		List requestInfoList = new ArrayList();
-		String mobileNumber = null;
-		String uuid = null;
-		String emailId = null;
-		String userName =null;
-		String tenantid = null;
-		String type=null;
+	
 		ServiceRequestData serviceRequest = new ServiceRequestData();
 		ServiceRequest serviceRequestobj= new ServiceRequest();
 		List Actioninfolist= new ArrayList();
@@ -246,23 +237,16 @@ public class ServiceRequestServiceTest {
     	serviceRequestobj.setServices(serviceRequestList);
     	serviceRequestobj.setActionInfo(Actioninfolist);
     	serviceRequestobj.setRequestInfo(requestInfoDetails);
-		return requestInfoList;
-		
+    	String action = " OVERDAYS";
+    	String tenantId = "ch.chandigarh";
+    	int days = 7;
+    	String serviceRequestDate = "10/07/2020";
+    	Mockito.when(objectMapper.convertValue(serviceRequestobj, ServiceRequest.class)).thenReturn(serviceRequestobj);
+    	notificationConsumer.sendSchedulerNotification(serviceRequestobj,action,serviceRequestDate,tenantId,days);
+    	//Mockito.when(sendReminderOverdueSlaNotification(role,serviceRequestId,HCConstants.REMINDER,request.getService_request_date(),tenantId,request.getServiceType(),days)).thenReturn(request);
 	}
 	
-	private void testWorkflow()throws Exception {
-		
-		
-		ServiceRequest request = new ServiceRequest();
-		
-		
-		Mockito.when(objectMapper.convertValue(request, ServiceRequest.class)).thenReturn(request);
-		if (hcConfiguration.getIsExternalWorkFlowEnabled()) {
-			when(wfIntegrator.callWorkFlowTest(Matchers.any(ServiceRequest.class),Matchers.anyString()));
-		}
-		//Assert.assertEquals(HttpStatus.CREATED, request);
-	}
-	
+
 	@Test
 	public void testSaveDeviceDetails_1() {
 		

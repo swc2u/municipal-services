@@ -32,58 +32,66 @@ public class SmidRepository {
 	private NULMConfiguration config;
 
 	private SMIDRowMapper smidrowMapper;
-	
+
 	@Autowired
 	public SmidRepository(JdbcTemplate jdbcTemplate, Producer producer, NULMConfiguration config,
-			SMIDRowMapper smidrowMapper
-			) {
+			SMIDRowMapper smidrowMapper) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.producer = producer;
 		this.config = config;
 		this.smidrowMapper = smidrowMapper;
 	}
-	
+
 	public void createSMIDApplication(SmidApplication smidApplication) {
 		NulmSmidRequest infoWrapper = NulmSmidRequest.builder().nulmSmidRequest(smidApplication).build();
-	    producer.push(config.getSMIDApplicationSaveTopic(), infoWrapper);
+		producer.push(config.getSMIDApplicationSaveTopic(), infoWrapper);
 	}
-	
+
 	public void updateSMIDApplication(SmidApplication smidApplication) {
 		NulmSmidRequest infoWrapper = NulmSmidRequest.builder().nulmSmidRequest(smidApplication).build();
-	    producer.push(config.getSMIDApplicationUpdateTopic(), infoWrapper);	}
-	
-	public List<SmidApplication> getSMIDApplication(SmidApplication smidApplication,List<Role> role,Long userId) {
-		List<SmidApplication> smid=new ArrayList<>();
+		producer.push(config.getSMIDApplicationUpdateTopic(), infoWrapper);
+	}
+
+	public List<SmidApplication> getSMIDApplication(SmidApplication smidApplication, List<Role> role, Long userId) {
+		List<SmidApplication> smid = new ArrayList<>();
 		try {
 			for (Role roleobj : role) {
-				if((roleobj.getCode()).equalsIgnoreCase(config.getRoleCitizenUser())||(roleobj.getCode()).equalsIgnoreCase(config.getRoleNgoUser()))
-				{
-				return	smid= jdbcTemplate.query(
-							NULMQueryBuilder.GET_SMID_APPLICATION_QUERY, new Object[] { smidApplication.getApplicationUuid(),
-									smidApplication.getApplicationUuid(),userId.toString(),userId.toString(),smidApplication.getTenantId(),
-									smidApplication.getApplicationStatus() == null ? "" :smidApplication.getApplicationStatus().toString(),
-											smidApplication.getApplicationStatus() == null ? "" :smidApplication.getApplicationStatus().toString(),smidApplication.getFromDate(),smidApplication.getFromDate(),
-													smidApplication.getToDate(),smidApplication.getToDate()},
+				if ((roleobj.getCode()).equalsIgnoreCase(config.getRoleEmployee())) {
+					return smid = jdbcTemplate.query(NULMQueryBuilder.GET_SMID_APPLICATION_QUERY,
+							new Object[] { smidApplication.getApplicationUuid(), smidApplication.getApplicationUuid(),
+									"", "", smidApplication.getTenantId(),
+									smidApplication.getApplicationStatus() == null ? ""
+											: smidApplication.getApplicationStatus().toString(),
+									smidApplication.getApplicationStatus() == null ? ""
+											: smidApplication.getApplicationStatus().toString(),
+									smidApplication.getFromDate(), smidApplication.getFromDate(),
+									smidApplication.getToDate(), smidApplication.getToDate(),
+									smidApplication.getApplicationStatus() == null ? SmidApplication.StatusEnum.DRAFTED.toString()
+											: ""},
 							smidrowMapper);
-			     }
+				}
 			}
-				
-					return	smid= jdbcTemplate.query(
-							NULMQueryBuilder.GET_SMID_APPLICATION_QUERY, new Object[] { smidApplication.getApplicationUuid(),smidApplication.getApplicationUuid(),"","",smidApplication.getTenantId(),
-									smidApplication.getApplicationStatus() == null ? "" :smidApplication.getApplicationStatus().toString(),
-											smidApplication.getApplicationStatus() == null ? "" :smidApplication.getApplicationStatus().toString(),smidApplication.getFromDate(),smidApplication.getFromDate(),
-													smidApplication.getToDate(),smidApplication.getToDate()},
-							smidrowMapper);		
+
+			return smid = jdbcTemplate.query(NULMQueryBuilder.GET_SMID_APPLICATION_QUERY,
+					new Object[] { smidApplication.getApplicationUuid(), smidApplication.getApplicationUuid(),
+							userId.toString(), userId.toString(), smidApplication.getTenantId(),
+							smidApplication.getApplicationStatus() == null ? ""
+									: smidApplication.getApplicationStatus().toString(),
+							smidApplication.getApplicationStatus() == null ? ""
+									: smidApplication.getApplicationStatus().toString(),
+							smidApplication.getFromDate(), smidApplication.getFromDate(), smidApplication.getToDate(),
+							smidApplication.getToDate(),"" },
+					smidrowMapper);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new CustomException(CommonConstants.ROLE, e.getMessage());
 		}
-		 catch (Exception e) {
-				e.printStackTrace();
-				throw new CustomException(CommonConstants.ROLE, e.getMessage());
-			}
-		
-	
+
 	}
-	
+
 	public void updateSMIDApplicationStatus(SmidApplication smidapplication) {
 		NulmSmidRequest infoWrapper = NulmSmidRequest.builder().nulmSmidRequest(smidapplication).build();
-	    producer.push(config.getSMIDApplicationUpdateStatusTopic(), infoWrapper);	}
+		producer.push(config.getSMIDApplicationUpdateStatusTopic(), infoWrapper);
+	}
 }

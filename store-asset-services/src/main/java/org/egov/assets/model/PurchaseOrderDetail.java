@@ -26,6 +26,12 @@ public class PurchaseOrderDetail {
 	@JsonProperty("purchaseOrderNumber")
 	private String purchaseOrderNumber = null;
 
+	@JsonProperty("purchaseOrderPurpose")
+	private String purchaseOrderPurpose = null;
+
+	@JsonProperty("workDetailRemarks")
+	private String workDetailRemarks = null;
+
 	@JsonProperty("orderNumber")
 	private BigDecimal orderNumber = null;
 
@@ -90,6 +96,22 @@ public class PurchaseOrderDetail {
 	public PurchaseOrderDetail tenantId(String tenantId) {
 		this.tenantId = tenantId;
 		return this;
+	}
+
+	public String getPurchaseOrderPurpose() {
+		return purchaseOrderPurpose;
+	}
+
+	public void setPurchaseOrderPurpose(String purchaseOrderPurpose) {
+		this.purchaseOrderPurpose = purchaseOrderPurpose;
+	}
+
+	public String getWorkDetailRemarks() {
+		return workDetailRemarks;
+	}
+
+	public void setWorkDetailRemarks(String workDetailRemarks) {
+		this.workDetailRemarks = workDetailRemarks;
 	}
 
 	/**

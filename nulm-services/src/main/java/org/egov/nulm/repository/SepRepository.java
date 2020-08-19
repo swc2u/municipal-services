@@ -34,71 +34,75 @@ public class SepRepository {
 	private NULMConfiguration config;
 
 	private SEPRowMapper seprowMapper;
-	
+
 	@Autowired
 	public SepRepository(JdbcTemplate jdbcTemplate, Producer producer, NULMConfiguration config,
-			SEPRowMapper seprowMapper
-			) {
+			SEPRowMapper seprowMapper) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.producer = producer;
 		this.config = config;
 		this.seprowMapper = seprowMapper;
 	}
-	
+
 	public void createSEPApplication(SepApplication sepApplication) {
 		NulmSepRequest infoWrapper = NulmSepRequest.builder().nulmSepRequest(sepApplication).build();
-	    producer.push(config.getSEPApplicationSaveTopic(), infoWrapper);
+		producer.push(config.getSEPApplicationSaveTopic(), infoWrapper);
 	}
 
-	public List<SepApplication> getSEPApplication(SepApplication sepApplication,List<Role> role,Long userId) {
-		List<SepApplication> sep=new ArrayList<>();
+	public List<SepApplication> getSEPApplication(SepApplication sepApplication, List<Role> role, Long userId) {
+		List<SepApplication> sep = new ArrayList<>();
 		try {
 			for (Role roleobj : role) {
-				if((roleobj.getCode()).equalsIgnoreCase(config.getRoleCitizenUser())||(roleobj.getCode()).equalsIgnoreCase(config.getRoleNgoUser()))
-				{
-				return	sep= jdbcTemplate.query(
-							NULMQueryBuilder.GET_SEP_APPLICATION_QUERY, new Object[] { sepApplication.getApplicationId(),
-									sepApplication.getApplicationId(),userId.toString(),userId.toString(),sepApplication.getTenantId(),
-									sepApplication.getApplicationStatus() == null ? "" :sepApplication.getApplicationStatus().toString(),
-									sepApplication.getApplicationStatus() == null ? "" :sepApplication.getApplicationStatus().toString(),
-											sepApplication.getFromDate(),sepApplication.getFromDate(),
-											sepApplication.getToDate(),sepApplication.getToDate()},
+				if ((roleobj.getCode()).equalsIgnoreCase(config.getRoleEmployee())) {
+
+					return sep = jdbcTemplate.query(NULMQueryBuilder.GET_SEP_APPLICATION_QUERY,
+							new Object[] { sepApplication.getApplicationId(), sepApplication.getApplicationId(), "", "",
+									sepApplication.getTenantId(),
+									sepApplication.getApplicationStatus() == null ? ""
+											: sepApplication.getApplicationStatus().toString(),
+									sepApplication.getApplicationStatus() == null ? ""
+											: sepApplication.getApplicationStatus().toString(),
+									sepApplication.getFromDate(), sepApplication.getFromDate(),
+									sepApplication.getToDate(), sepApplication.getToDate() ,
+									sepApplication.getApplicationStatus() == null ? SepApplication.StatusEnum.DRAFTED.toString()
+											: ""},
 							seprowMapper);
-			     }
+
+				}
 			}
-				
-					return	sep= jdbcTemplate.query(
-							NULMQueryBuilder.GET_SEP_APPLICATION_QUERY, new Object[] { sepApplication.getApplicationId(),sepApplication.getApplicationId(),"","",sepApplication.getTenantId(),
-									sepApplication.getApplicationStatus() == null ? "" :sepApplication.getApplicationStatus().toString(),
-											sepApplication.getApplicationStatus() == null ? "" :sepApplication.getApplicationStatus().toString(),
-													sepApplication.getFromDate(),sepApplication.getFromDate(),
-													sepApplication.getToDate(),sepApplication.getToDate()},
-							seprowMapper);		
+
+			return sep = jdbcTemplate.query(NULMQueryBuilder.GET_SEP_APPLICATION_QUERY,
+					new Object[] { sepApplication.getApplicationId(), sepApplication.getApplicationId(),
+							userId.toString(), userId.toString(), sepApplication.getTenantId(),
+							sepApplication.getApplicationStatus() == null ? ""
+									: sepApplication.getApplicationStatus().toString(),
+							sepApplication.getApplicationStatus() == null ? ""
+									: sepApplication.getApplicationStatus().toString(),
+							sepApplication.getFromDate(), sepApplication.getFromDate(), sepApplication.getToDate(),
+							sepApplication.getToDate(),""},
+					seprowMapper);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new CustomException(CommonConstants.ROLE, e.getMessage());
 		}
-		 catch (Exception e) {
-				e.printStackTrace();
-				throw new CustomException(CommonConstants.ROLE, e.getMessage());
-			}
-		
-	
+
 	}
 
 	public void updateSEPApplication(SepApplication sepapplication) {
 		NulmSepRequest infoWrapper = NulmSepRequest.builder().nulmSepRequest(sepapplication).build();
-	    producer.push(config.getSEPApplicationUpdateTopic(), infoWrapper);	}
-	
-	
-	
-	public int checkDocExist(SepApplicationDocument sepApplication,String appId,String tenantId)
-	{
-	
-	return  jdbcTemplate.queryForObject(
-			NULMQueryBuilder.GET_SEP_DOCUMENT_QUERY, new Object[] {appId,tenantId,sepApplication.getFilestoreId(),sepApplication.getDocumentType() },
-			Integer.class);
+		producer.push(config.getSEPApplicationUpdateTopic(), infoWrapper);
 	}
-	
+
+	public int checkDocExist(SepApplicationDocument sepApplication, String appId, String tenantId) {
+
+		return jdbcTemplate.queryForObject(NULMQueryBuilder.GET_SEP_DOCUMENT_QUERY,
+				new Object[] { appId, tenantId, sepApplication.getFilestoreId(), sepApplication.getDocumentType() },
+				Integer.class);
+	}
+
 	public void updateSEPApplicationStatus(SepApplication sepapplication) {
 		NulmSepRequest infoWrapper = NulmSepRequest.builder().nulmSepRequest(sepapplication).build();
-	    producer.push(config.getSEPApplicationUpdateStatusTopic(), infoWrapper);	}
+		producer.push(config.getSEPApplicationUpdateStatusTopic(), infoWrapper);
+	}
 
 }

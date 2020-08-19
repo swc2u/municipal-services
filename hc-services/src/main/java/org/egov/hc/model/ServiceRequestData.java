@@ -53,6 +53,9 @@ public class ServiceRequestData {
 	@JsonProperty("address")
 	private String address;
 	
+    @JsonProperty("currentState")
+	String currentState;
+	
 	@Size(max=257)
 	@JsonProperty("latitude")
 	private String latitude;
@@ -72,6 +75,7 @@ public class ServiceRequestData {
 	@Size(max=259)
 	@JsonProperty("landmark")
 	private String landmark;
+	
 	
 	@JsonProperty("houseNoAndStreetName")
 	public String houseNoAndStreetName;
@@ -127,6 +131,10 @@ public class ServiceRequestData {
 	
 	@JsonProperty("createdTime")
 	private Long createdTime;
+	
+	@Size(max=256)
+	@JsonProperty("state")
+	private String state;
 	
 	@Size(max = 64)
 	@JsonProperty("lastModifiedBy")

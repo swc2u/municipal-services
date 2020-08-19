@@ -1,0 +1,31 @@
+
+CREATE TABLE public.nulm_suh_record_maintenance
+(
+  suh_uuid character varying(256),
+  record_uuid character varying(256) NOT NULL,
+  is_asset_inventory_register boolean,
+  asset_inventory_register_remark character varying(256),
+  is_acount_register boolean,
+  acount_register_remark character varying(256),
+  is_attendance_register_of_staff boolean,
+  attendance_register_of_staff_remark character varying(256),
+  is_shelter_management_committee_register boolean,
+  shelter_management_committee_register_remark character varying(256),
+  is_personnel_and_salary_register boolean,
+  personnel_and_salary_register_remark character varying(256),
+  is_housekeeping_and_maintenance_register boolean,
+  housekeeping_and_maintenance_register_remark character varying(256),
+  is_complaint_and_suggestion_register boolean,
+  complaint_and_suggestion_register_remark character varying(256),
+  is_visitor_register boolean,
+  visitor_register_remark character varying(256),
+  is_profile_register boolean,
+  profile_register_remark character varying(256),
+  tenant_id character varying(256) NOT NULL,
+  is_active boolean,
+  created_by character varying(64),
+  created_time bigint,
+  last_modified_by character varying(64),
+  last_modified_time bigint,
+  CONSTRAINT nulm_suh_record_maintenance_pkey PRIMARY KEY (record_uuid)
+)

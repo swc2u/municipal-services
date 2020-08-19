@@ -43,7 +43,9 @@ public class PriceList {
 
 		ONE_TIME_TENDER("One Time Tender"),
 
-		TENDER("Tender"), // Added By Prakash
+		TENDER("Tender"), 
+		
+		GEM("Gem"),
 
 		QUOTATION("Quotation");
 

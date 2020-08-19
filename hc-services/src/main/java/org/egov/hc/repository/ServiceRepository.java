@@ -90,16 +90,23 @@ public class ServiceRepository {
    		try {
    			if (!requestData.getService_request_id().isEmpty()) {
 
-   				JSONArray actualResult = (JSONArray) jdbcTemplate.query(queryBuilder.SELECT_SERVICE_DETAIL,
+   				JSONArray actualResult = null;
+   				if (requestData.getRequestInfo().getUserInfo().getType().equals("CITIZEN")) {
+   					 actualResult = (JSONArray) jdbcTemplate.query(queryBuilder.SELECT_SERVICE_DETAIL_FOR_CITIZEN,
+   	   						new Object[] { requestData.getService_request_id() ,requestData.getAuditDetails().getCreatedBy()  }, rowMapper);
+		
+				}
+   				else 
+   				{
+   					 actualResult = (JSONArray) jdbcTemplate.query(queryBuilder.SELECT_SERVICE_DETAIL,
    						new Object[] { requestData.getService_request_id() }, rowMapper);
-   				log.info("Get service getails ");
-   				JSONArray jsonArray = new JSONArray();
-   				JSONObject serviceDetailjsonObject = (JSONObject) actualResult.get(0);
-   				
-   		
+   					log.info("Get service getails ");
+   				}
+   					JSONArray jsonArray = new JSONArray();
+   					JSONObject serviceDetailjsonObject = (JSONObject) actualResult.get(0);
+
    				jsonArray.add(serviceDetailjsonObject);
-  
-   				return jsonArray;
+     				return jsonArray;
    			} else {
    				return null;
    			}

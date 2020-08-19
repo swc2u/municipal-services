@@ -13,6 +13,7 @@ import org.egov.hc.model.ServiceRequestData;
 import org.egov.hc.producer.HCConfiguration;
 import org.egov.hc.utils.HCConstants;
 import org.egov.tracer.model.CustomException;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
@@ -79,8 +80,9 @@ public class WorkflowIntegrator {
 	 * and sets the resultant status from wf-response back to horticulture object
 	 *
 	 * @param ServiceRequest
+	 * @throws JSONException 
 	 */
-	public  boolean callWorkFlow(ServiceRequest request, String service_request_id) {
+	public  boolean callWorkFlow(ServiceRequest request, String service_request_id) throws JSONException {
 		boolean status = false;
 		
 		if(!request.getServices().isEmpty())
@@ -217,8 +219,16 @@ public class WorkflowIntegrator {
 						DocumentContext instanceContext = JsonPath.parse(object);
 						idStatusMap.put(instanceContext.read(BUSINESSIDJOSNKEY), instanceContext.read(STATUSJSONKEY));
 					});
-
 			
+			org.json.JSONObject responseDetails = new org.json.JSONObject(response.toString());
+			org.json.JSONObject responseObj = responseDetails.getJSONObject("ResponseInfo");
+			String flagStatus = responseObj.getString("status");
+			if(flagStatus.equals(HCConstants.SUCCESSFUL))
+			{
+				status = true;
+			}
+		
+
 			request.getServices()
 					.forEach(hcObj -> hcObj.setService_request_status(idStatusMap.get(hcObj.getService_request_id())));
 

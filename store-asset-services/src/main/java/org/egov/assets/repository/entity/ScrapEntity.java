@@ -19,54 +19,53 @@ import lombok.Setter;
 @Builder
 public class ScrapEntity {
 	public static final String TABLE_NAME = "scrap";
-    public static final String SEQUENCE_NAME = "seq_scrap";
-    public static final String ALIAS = "scrap";
-    
-    private String id;
-    
-    private String scrapNumber;
-    
-    private String storeCode;
-    
-    private Long scrapDate;
-    
-    private String status;
-    
-    private Integer stateId;
-    
-    private String createdBy;
+	public static final String SEQUENCE_NAME = "seq_scrap";
+	public static final String ALIAS = "scrap";
 
-    private Long createdTime;
+	private String id;
 
-    private String lastModifiedBy;
+	private String scrapNumber;
 
-    private Long lastModifiedTime;
+	private String storeCode;
 
-    private String tenantId;
+	private Long scrapDate;
 
-    public Scrap toDomain() {
-    	Scrap scrap = new Scrap();
+	private String status;
 
-        return scrap.id(id)
-                .scrapNumber(scrapNumber)
-                .scrapDate(scrapDate)
-                .store(!isEmpty(storeCode)? buildStore(storeCode) : null)
-                .scrapStatus(Scrap.ScrapStatusEnum.fromValue(status))
-                .tenantId(tenantId)
-                .auditDetails(buildAuditDetails());
+	private Integer stateId;
 
-    }
-    private Store buildStore(String storeCode) {
-        Store store = new Store();
-        return store.code(storeCode);
-    }
-    
-    private AuditDetails buildAuditDetails() {
-        AuditDetails auditDetails = new AuditDetails();
-        return auditDetails
-                .createdBy(createdBy)
-                .createdTime(createdTime)
-                .lastModifiedBy(lastModifiedBy)
-                .lastModifiedTime(lastModifiedTime);
-    }
+	private String description;
+
+	private String designation;
+
+	private String createdBy;
+
+	private Long createdTime;
+
+	private String lastModifiedBy;
+
+	private Long lastModifiedTime;
+
+	private String tenantId;
+
+	public Scrap toDomain() {
+		Scrap scrap = new Scrap();
+
+		return scrap.id(id).scrapNumber(scrapNumber).scrapDate(scrapDate).description(description)
+				.designation(designation).store(!isEmpty(storeCode) ? buildStore(storeCode) : null)
+				.scrapStatus(Scrap.ScrapStatusEnum.fromValue(status)).tenantId(tenantId)
+				.auditDetails(buildAuditDetails());
+
+	}
+
+	private Store buildStore(String storeCode) {
+		Store store = new Store();
+		return store.code(storeCode);
+	}
+
+	private AuditDetails buildAuditDetails() {
+		AuditDetails auditDetails = new AuditDetails();
+		return auditDetails.createdBy(createdBy).createdTime(createdTime).lastModifiedBy(lastModifiedBy)
+				.lastModifiedTime(lastModifiedTime);
+	}
 }
