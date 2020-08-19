@@ -1252,7 +1252,11 @@ public class PurchaseOrderService extends DomainService {
 				purchaseOrder.put("storeName", po.getStore().getName());
 				purchaseOrder.put("poStatus", po.getStatus());
 				purchaseOrder.put("rateType", po.getRateType());
-				purchaseOrder.put("supplierName", po.getSupplier().getName());
+				if (po.getRateType().equals(RateTypeEnum.GEM.toString())) {
+					purchaseOrder.put("supplierName", po.getSupplier().getCode());
+				} else {
+					purchaseOrder.put("supplierName", po.getSupplier().getName());
+				}
 				purchaseOrder.put("advancePercentage", po.getAdvancePercentage());
 				purchaseOrder.put("advanceAmount", po.getAdvanceAmount());
 				if (po.getPurchaseOrderDate() != null) {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.egov.assets.model.PurchaseIndentDetail;
 import org.egov.assets.repository.entity.PurchaseIndentDetailEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class PurchaseIndentDetailJdbcRepository extends org.egov.assets.common.J
 
 	}
 
-	public PurchaseIndentDetailEntity findById(PurchaseIndentDetailEntity entity) {
+	public PurchaseIndentDetail findById(PurchaseIndentDetailEntity entity) {
 		List<String> list = allIdentitiferFields.get(entity.getClass().getSimpleName());
 
 		Map<String, Object> paramValues = new HashMap<>();
@@ -51,15 +52,42 @@ public class PurchaseIndentDetailJdbcRepository extends org.egov.assets.common.J
 			paramValues.put(s, getValue(getField(entity, s), entity));
 		}
 
+		System.out.println("Qouryr :::: " + getByIdQuery.get(entity.getClass().getSimpleName()).toString());
+
 		List<PurchaseIndentDetailEntity> poIndentDetails = namedParameterJdbcTemplate.query(
 				getByIdQuery.get(entity.getClass().getSimpleName()).toString(), paramValues,
 				new BeanPropertyRowMapper(PurchaseIndentDetailEntity.class));
+
 		if (poIndentDetails.isEmpty()) {
 			return null;
 		} else {
-			return poIndentDetails.get(0);
+			return poIndentDetails.get(0).toDomain();
 		}
 
 	}
 
+	public PurchaseIndentDetail findByPODetailId(PurchaseIndentDetailEntity entity) {
+		String query = "select * from  PurchaseIndentDetail where  purchaseorderdetail=:purchaseorderdetail and tenantId=:tenantId ";
+		Map<String, Object> paramValues = new HashMap<>();
+
+		if (entity.getTenantId().isEmpty() || entity.getPurchaseOrderDetail().isEmpty())
+			return null;
+
+		if (entity.getTenantId() != null) {
+			paramValues.put("tenantId", entity.getTenantId());
+		}
+		if (entity.getPurchaseOrderDetail() != null) {
+			paramValues.put("purchaseorderdetail", entity.getPurchaseOrderDetail());
+		}
+
+		List<PurchaseIndentDetailEntity> poIndentDetails = namedParameterJdbcTemplate.query(query, paramValues,
+				new BeanPropertyRowMapper(PurchaseIndentDetailEntity.class));
+
+		if (poIndentDetails.isEmpty()) {
+			return null;
+		} else {
+			return poIndentDetails.get(0).toDomain();
+		}
+
+	}
 }

@@ -2,6 +2,9 @@ package org.egov.assets.service;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -24,7 +27,9 @@ import org.egov.assets.model.Department;
 import org.egov.assets.model.Fifo;
 import org.egov.assets.model.FifoRequest;
 import org.egov.assets.model.FifoResponse;
+import org.egov.assets.model.Indent;
 import org.egov.assets.model.Indent.IndentStatusEnum;
+import org.egov.assets.model.Indent.IndentTypeEnum;
 import org.egov.assets.model.IndentDetail;
 import org.egov.assets.model.IndentResponse;
 import org.egov.assets.model.IndentSearch;
@@ -39,6 +44,7 @@ import org.egov.assets.model.MaterialIssueSearchContract;
 import org.egov.assets.model.MaterialIssuedFromReceipt;
 import org.egov.assets.model.MaterialReceiptDetail;
 import org.egov.assets.model.MaterialReceiptDetailSearch;
+import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.Uom;
@@ -46,6 +52,7 @@ import org.egov.assets.repository.IndentDetailJdbcRepository;
 import org.egov.assets.repository.MaterialIssueDetailJdbcRepository;
 import org.egov.assets.repository.MaterialIssueJdbcRepository;
 import org.egov.assets.repository.MaterialIssuedFromReceiptJdbcRepository;
+import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.entity.FifoEntity;
 import org.egov.assets.repository.entity.IndentDetailEntity;
 import org.egov.assets.repository.entity.IndentEntity;
@@ -53,8 +60,11 @@ import org.egov.assets.repository.entity.MaterialIssueDetailEntity;
 import org.egov.assets.repository.entity.MaterialIssueEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
 import org.egov.tracer.model.CustomException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +88,9 @@ public class MaterialIssueService extends DomainService {
 
 	@Autowired
 	private MdmsRepository mdmsRepository;
+
+	@Autowired
+	private PDFServiceReposistory pdfServiceReposistory;
 
 	@Autowired
 	private MaterialReceiptDetailService materialReceiptDetailService;
@@ -850,10 +863,13 @@ public class MaterialIssueService extends DomainService {
 				}
 				ObjectMapper mapper = new ObjectMapper();
 				Map<String, Uom> uoms = getUoms(materialIssue.getTenantId(), mapper, new RequestInfo());
+				Map<String, Material> materialMap = getMaterials(materialIssue.getTenantId(), mapper,
+						new RequestInfo());
 				Pagination<MaterialIssueDetail> materialIssueDetails = materialIssueDetailsJdbcRepository
 						.search(materialIssue.getIssueNumber(), materialIssue.getTenantId(), type);
 				if (materialIssueDetails.getPagedData().size() > 0) {
 					for (MaterialIssueDetail materialIssueDetail : materialIssueDetails.getPagedData()) {
+						materialIssueDetail.setMaterial(materialMap.get(materialIssueDetail.getMaterial().getCode()));
 						if (searchContract.getSearchPurpose() != null) {
 							if (searchContract.getSearchPurpose().equals("update")) {
 								materialIssueDetail.setBalanceQuantity(InventoryUtilities.getQuantityInSelectedUom(
@@ -1068,5 +1084,106 @@ public class MaterialIssueService extends DomainService {
 		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
 		String s2 = format.format(epoch);
 		return s2;
+	}
+
+	public PDFResponse printPdf(MaterialIssueSearchContract searchContract, String type, RequestInfo requestInfo) {
+		MaterialIssueResponse materialIssueResponse = search(searchContract, type);
+		if (!materialIssueResponse.getMaterialIssues().isEmpty()
+				&& materialIssueResponse.getMaterialIssues().size() == 1) {
+			JSONObject requestMain = new JSONObject();
+			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
+				requestMain.put("RequestInfo", reqInfo);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+
+			JSONArray indents = new JSONArray();
+			for (MaterialIssue in : materialIssueResponse.getMaterialIssues()) {
+				JSONObject indent = new JSONObject();
+
+				indent.put("outwardNumber", in.getIssueNumber());
+				if (in.getIssueDate() != null) {
+					Instant issueDate = Instant.ofEpochMilli(in.getIssueDate());
+					indent.put("outwardDate", fmt.format(issueDate.atZone(ZoneId.systemDefault())));
+				} else {
+					indent.put("outwardDate", in.getIssueDate());
+				}
+				indent.put("issuingStoreName", in.getFromStore().getName());
+				indent.put("issuingStoreDept", in.getFromStore().getDepartment().getName());
+
+				indent.put("indentNumber", in.getIndent().getIndentNumber());
+				indent.put("indentingStoreName", in.getToStore().getName());
+				indent.put("indentingStoreDept", in.getToStore().getDepartment().getName());
+				if (in.getIndent().getIndentDate() != null) {
+					Instant indentDate = Instant.ofEpochMilli(in.getIndent().getIndentDate());
+					indent.put("indentDate", fmt.format(indentDate.atZone(ZoneId.systemDefault())));
+				} else {
+					indent.put("indentDate", in.getIndent().getIndentDate());
+				}
+
+				indent.put("outwardStatus", in.getMaterialIssueStatus());
+				indent.put("indentPurpose", in.getIndent().getIndentPurpose());
+				indent.put("issuedToEmployee", in.getIssuedToEmployee());
+				indent.put("issuedToEmployeeDesignation", in.getIssuedToDesignation());
+				indent.put("remark", in.getDescription());
+				indent.put("createdBy", in.getCreatedByName());
+				indent.put("designation", in.getDesignation());
+
+				List<IndentDetail> indList = in.getIndent().getIndentDetails();
+
+				JSONArray indentDetails = new JSONArray();
+				int i = 1;
+				for (MaterialIssueDetail detail : in.getMaterialIssueDetails()) {
+					JSONObject indentDetail = new JSONObject();
+					indentDetail.put("srNo", i++);
+					indentDetail.put("materialCode", detail.getMaterial().getCode());
+					indentDetail.put("materialName", detail.getMaterial().getName());
+					indentDetail.put("materialDescription", detail.getMaterial().getDescription());
+					indentDetail.put("uomName", detail.getUom().getCode());
+					IndentDetail d = indList.stream()
+							.filter(predicate -> predicate.getId().equals(detail.getIndentDetail().getId())).findFirst()
+							.orElse(null);
+					indentDetail.put("requiredQuantity", d.getIndentQuantity());
+					indentDetail.put("quantityIssued", detail.getQuantityIssued());
+
+					BigDecimal totalUnitRate = BigDecimal.ZERO;
+					BigDecimal total = BigDecimal.ZERO;
+					for (MaterialIssuedFromReceipt rec : detail.getMaterialIssuedFromReceipts()) {
+						total = total.add(rec.getQuantity().multiply(rec.getMaterialReceiptDetail().getUnitRate()));
+						totalUnitRate = totalUnitRate.add(rec.getMaterialReceiptDetail().getUnitRate());
+					}
+					indentDetail.put("totalValue", total);
+					indentDetail.put("unitRate", totalUnitRate);
+					indentDetail.put("remark", detail.getDescription());
+					indentDetails.add(indentDetail);
+				}
+				indent.put("materialDetails", indentDetails);
+
+				// Need to integrate Workflow
+
+				JSONArray workflows = new JSONArray();
+				JSONObject jsonWork = new JSONObject();
+				jsonWork.put("reviewApprovalDate", "02-05-2020");
+				jsonWork.put("reviewerApproverName", "Aniket");
+				jsonWork.put("designation", "MD");
+				jsonWork.put("action", "Forwarded");
+				jsonWork.put("sendTo", "Prakash");
+				jsonWork.put("approvalStatus", "APPROVED");
+				workflows.add(jsonWork);
+				indent.put("workflowDetails", workflows);
+				indents.add(indent);
+				requestMain.put("IndentOutwardTransfer", indents);
+			}
+
+			return pdfServiceReposistory.getPrint(requestMain, "store-asset-indent-outward",
+					searchContract.getTenantId());
+
+		}
+		return PDFResponse.builder()
+				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+
 	}
 }

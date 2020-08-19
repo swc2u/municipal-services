@@ -2,6 +2,7 @@ package org.egov.assets.repository.entity;
 
 import java.math.BigDecimal;
 
+import org.egov.assets.model.AuditDetails;
 import org.egov.assets.model.IndentDetail;
 import org.egov.assets.model.PurchaseIndentDetail;
 
@@ -17,13 +18,17 @@ import lombok.Setter;
 @NoArgsConstructor
 
 @Builder
-public class PurchaseIndentDetailEntity  {
+public class PurchaseIndentDetailEntity {
 	public static final String TABLE_NAME = "PurchaseIndentDetail";
 	private String id;
 	private String tenantId;
 	private String indentDetail;
 	private BigDecimal quantity;
 	private String purchaseOrderDetail;
+	private Long createdTime;
+	private Long lastModifiedTime;
+	private String createdBy;
+	private String lastModifiedBy;
 
 	public PurchaseIndentDetail toDomain() {
 		PurchaseIndentDetail po = new PurchaseIndentDetail();
@@ -31,6 +36,8 @@ public class PurchaseIndentDetailEntity  {
 		po.setTenantId(this.tenantId);
 		po.setIndentDetail(new IndentDetail().id(indentDetail));
 		po.setQuantity(this.quantity);
+		po.setAuditDetails(AuditDetails.builder().createdBy(this.createdBy).lastModifiedBy(this.lastModifiedBy)
+				.createdTime(this.createdTime).lastModifiedTime(this.lastModifiedTime).build());
 		return po;
 	}
 

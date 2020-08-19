@@ -13,6 +13,8 @@ import org.egov.assets.model.MaterialIssue.IssueTypeEnum;
 import org.egov.assets.model.MaterialIssueRequest;
 import org.egov.assets.model.MaterialIssueResponse;
 import org.egov.assets.model.MaterialIssueSearchContract;
+import org.egov.assets.model.PDFRequest;
+import org.egov.assets.model.PDFResponse;
 import org.egov.assets.service.MaterialIssueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -62,6 +64,18 @@ public class MaterialIssueTransferOutwardApiController {
 				pageNumber, sortBy, pageSize, purpose);
 		MaterialIssueResponse materialIssueResponse = materialIssueService.search(searchContract,
 				IssueTypeEnum.MATERIALOUTWARD.toString());
+		return new ResponseEntity(materialIssueResponse, HttpStatus.OK);
+	}
+
+	@PostMapping(value = "/_print", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<PDFResponse> materialIssuePrintPost(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@Valid @RequestBody PDFRequest pdfRequest,
+			@RequestParam(value = "issueNoteNumber", required = false) String issueNoteNumber) {
+		MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(tenantId, null, null, null,
+				issueNoteNumber, null, null, null, null, null, null, null, null, null, null, null);
+		PDFResponse materialIssueResponse = materialIssueService.printPdf(searchContract,
+				IssueTypeEnum.MATERIALOUTWARD.toString(), pdfRequest.getRequestInfo());
 		return new ResponseEntity(materialIssueResponse, HttpStatus.OK);
 	}
 

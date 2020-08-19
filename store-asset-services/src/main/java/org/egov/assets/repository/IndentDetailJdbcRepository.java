@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.egov.assets.common.JdbcRepository;
+import org.egov.assets.model.IndentDetail;
 import org.egov.assets.repository.entity.IndentDetailEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,6 @@ public class IndentDetailJdbcRepository extends JdbcRepository {
 		return true;
 
 	}
- 
 
 	public IndentDetailEntity findById(IndentDetailEntity entity) {
 		List<String> list = allIdentitiferFields.get(entity.getClass().getSimpleName());
@@ -65,11 +65,9 @@ public class IndentDetailJdbcRepository extends JdbcRepository {
 
 	}
 
-	public List<IndentDetailEntity>  find(List<String> indentNumbers, String tenantId,String searchPurpose) {
+	public List<IndentDetailEntity> find(List<String> indentNumbers, String tenantId, String searchPurpose) {
 
-		 
-		if(indentNumbers.isEmpty())
-		{
+		if (indentNumbers.isEmpty()) {
 			return new ArrayList<>();
 		}
 		String query = "select * from indentdetail where indentnumber in (:indentNumbers) and tenantId=:tenantId and deleted is not true ";
@@ -77,11 +75,10 @@ public class IndentDetailJdbcRepository extends JdbcRepository {
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("indentNumbers", indentNumbers);
 		paramValues.put("tenantId", tenantId);
-		if(searchPurpose!=null && searchPurpose.equalsIgnoreCase("PurchaseOrder"))
-		{
-			query=query+(" and ( poOrderedQuantity is  null or indentQuantity - poOrderedQuantity > 0 )");
+		if (searchPurpose != null && searchPurpose.equalsIgnoreCase("PurchaseOrder")) {
+			query = query + (" and ( poOrderedQuantity is  null or indentQuantity - poOrderedQuantity > 0 )");
 		}
-		
+
 		LOG.info(query);
 
 		List<IndentDetailEntity> indentdetails = namedParameterJdbcTemplate.query(query, paramValues,
@@ -90,6 +87,26 @@ public class IndentDetailJdbcRepository extends JdbcRepository {
 			return null;
 		} else {
 			return indentdetails;
+		}
+
+	}
+
+	public IndentDetail findIndentDetailsId(List<String> ids, String tenantId) {
+		if (ids.isEmpty()) {
+			return null;
+		}
+		String query = "select * from indentdetail where id in (:id) and tenantId=:tenantId and deleted is not true ";
+
+		Map<String, Object> paramValues = new HashMap<>();
+		paramValues.put("id", ids);
+		paramValues.put("tenantId", tenantId);
+
+		List<IndentDetailEntity> indentdetails = namedParameterJdbcTemplate.query(query, paramValues,
+				new BeanPropertyRowMapper(IndentDetailEntity.class));
+		if (indentdetails.isEmpty()) {
+			return null;
+		} else {
+			return indentdetails.get(0).toDomain();
 		}
 
 	}

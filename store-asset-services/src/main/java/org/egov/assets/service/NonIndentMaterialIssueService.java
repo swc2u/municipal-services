@@ -37,6 +37,8 @@ import org.egov.assets.model.MaterialReceiptDetail;
 import org.egov.assets.model.MaterialReceiptDetailSearch;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
+import org.egov.assets.model.SupplierGetRequest;
+import org.egov.assets.model.SupplierResponse;
 import org.egov.assets.model.Uom;
 import org.egov.assets.repository.MaterialIssueDetailJdbcRepository;
 import org.egov.assets.repository.MaterialIssueJdbcRepository;
@@ -73,6 +75,9 @@ public class NonIndentMaterialIssueService extends DomainService {
 
 	@Autowired
 	private MdmsRepository mdmsRepository;
+
+	@Autowired
+	private SupplierService supplierService;
 
 	@Autowired
 	private MaterialReceiptDetailService materialReceiptDetailService;
@@ -552,6 +557,14 @@ public class NonIndentMaterialIssueService extends DomainService {
 					materialIssue.toStore(getStore(materialIssue.getToStore().getCode(), searchContract.getTenantId()));
 				}
 
+				if (materialIssue.getSupplier() != null && materialIssue.getSupplier().getCode() != null) {
+					SupplierGetRequest supplierGetRequest = new SupplierGetRequest();
+					supplierGetRequest.setTenantId(searchContract.getTenantId());
+					supplierGetRequest.setCode(Arrays.asList(materialIssue.getSupplier().getCode()));
+					SupplierResponse response = supplierService.search(supplierGetRequest);
+					materialIssue.setSupplier(response.getSuppliers().isEmpty() ? materialIssue.getSupplier()
+							: response.getSuppliers().get(0));
+				}
 				Pagination<MaterialIssueDetail> materialIssueDetails = materialIssueDetailsJdbcRepository.search(
 						materialIssue.getIssueNumber(), materialIssue.getTenantId(),
 						IssueTypeEnum.NONINDENTISSUE.toString());

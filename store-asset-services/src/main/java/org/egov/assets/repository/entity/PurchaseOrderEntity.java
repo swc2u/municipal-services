@@ -32,6 +32,7 @@ public class PurchaseOrderEntity {
 	private String purchaseType;
 	private String rateType;
 	private String supplier;
+	private String poCreatedBy;
 	private BigDecimal advanceAmount;
 	private BigDecimal totalAmount;
 	private BigDecimal advancePercentage;
@@ -56,7 +57,7 @@ public class PurchaseOrderEntity {
 		purchaseOrder.setPurchaseOrderNumber(this.purchaseOrderNumber);
 		purchaseOrder.setAdvanceAmount(this.advanceAmount);
 		purchaseOrder.setTotalAmount(this.totalAmount);
-
+		purchaseOrder.setPoCreatedBy(poCreatedBy);
 		AuditDetails auditDetail = new AuditDetails().createdBy(createdBy).lastModifiedBy(lastModifiedBy)
 				.createdTime(createdTime).lastModifiedTime(lastModifiedTime);
 		purchaseOrder.setAuditDetails(auditDetail);
