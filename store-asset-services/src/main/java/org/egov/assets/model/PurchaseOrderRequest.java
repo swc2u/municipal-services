@@ -22,6 +22,22 @@ public class PurchaseOrderRequest   {
   @JsonProperty("purchaseOrders")
   private List<PurchaseOrder> purchaseOrders = new ArrayList<PurchaseOrder>();
 
+	@JsonProperty("workFlowDetails")
+	private WorkFlowDetails workFlowDetails;
+
+	public PurchaseOrderRequest workFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+		return this;
+	}
+
+	public WorkFlowDetails getWorkFlowDetails() {
+		return workFlowDetails;
+	}
+
+	public void setWorkFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+	}
+
   public PurchaseOrderRequest requestInfo(RequestInfo requestInfo) {
     this.requestInfo = requestInfo;
     return this;

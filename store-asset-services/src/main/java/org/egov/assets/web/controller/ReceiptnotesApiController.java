@@ -101,4 +101,12 @@ public class ReceiptnotesApiController {
 		return new ResponseEntity<>(materialReceiptResponse, HttpStatus.OK);
 	}
 
+	@PostMapping(value = "/_updateStatus", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<MaterialReceiptResponse> receiptnotesUpdateStatusPost(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@Valid @RequestBody MaterialReceiptRequest materialReceipt) {
+		MaterialReceiptResponse materialReceiptResponse = receiptNoteService.updateStatus(materialReceipt, tenantId);
+		return new ResponseEntity<>(materialReceiptResponse, HttpStatus.OK);
+	}
+
 }

@@ -50,7 +50,7 @@ import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.Supplier;
 import org.egov.assets.model.SupplierGetRequest;
 import org.egov.assets.model.Uom;
-import org.egov.assets.model.Indent.IndentTypeEnum;
+import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.IndentJdbcRepository;
 import org.egov.assets.repository.MaterialReceiptJdbcRepository;
 import org.egov.assets.repository.PDFServiceReposistory;
@@ -60,6 +60,7 @@ import org.egov.assets.repository.StoreJdbcRepository;
 import org.egov.assets.repository.SupplierJdbcRepository;
 import org.egov.assets.repository.entity.IndentEntity;
 import org.egov.assets.util.InventoryUtilities;
+import org.egov.assets.wf.WorkflowIntegrator;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.model.CustomException;
@@ -131,6 +132,13 @@ public class PurchaseOrderService extends DomainService {
 	@Value("${inv.purchaseorders.update.key}")
 	private String updateKey;
 
+	@Value("${inv.purchaseorders.updatestatus.topic}")
+	private String updatestatusTopic;
+
+	@Value("${inv.purchaseorders.updatestatus.key}")
+	private String updatestatusKey;
+
+	
 	@Value("${inv.purchaseorders.nonindent.save.topic}")
 	private String saveNonIndentTopic;
 
@@ -151,6 +159,9 @@ public class PurchaseOrderService extends DomainService {
 
 	@Autowired
 	private MdmsRepository mdmsRepository;
+
+	@Autowired
+	WorkflowIntegrator workflowIntegrator;
 
 	private String INDENT_MULTIPLE = "Multiple";
 
@@ -344,6 +355,10 @@ public class PurchaseOrderService extends DomainService {
 					saveRateContractForGem(purchaseOrderRequest, tenantId);
 				}
 			}
+			WorkFlowDetails workFlowDetails = purchaseOrderRequest.getWorkFlowDetails();
+			workFlowDetails.setBusinessId(purchaseOrderRequest.getPurchaseOrders().get(0).getPurchaseOrderNumber());
+			workflowIntegrator.callWorkFlow(purchaseOrderRequest.getRequestInfo(), workFlowDetails,
+					purchaseOrderRequest.getPurchaseOrders().get(0).getTenantId());
 
 			if (purchaseOrders.size() > 0 && purchaseOrders.get(0).getPurchaseType() != null) {
 				if (purchaseOrders.get(0).getPurchaseType().toString()
@@ -1333,4 +1348,20 @@ public class PurchaseOrderService extends DomainService {
 
 	}
 
+	@Transactional
+	public PurchaseOrderResponse updateStatus(PurchaseOrderRequest purchaseOrderRequest, String tenantId) {
+
+		try {
+			workflowIntegrator.callWorkFlow(purchaseOrderRequest.getRequestInfo(),
+					purchaseOrderRequest.getWorkFlowDetails(), purchaseOrderRequest.getWorkFlowDetails().getTenantId());
+			kafkaQue.send(updatestatusTopic, updatestatusKey, purchaseOrderRequest);
+			PurchaseOrderResponse response = new PurchaseOrderResponse();
+			response.setPurchaseOrders(purchaseOrderRequest.getPurchaseOrders());
+			response.setResponseInfo(getResponseInfo(purchaseOrderRequest.getRequestInfo()));
+			return response;
+		} catch (CustomBindException e) {
+			throw e;
+		}
+
+	}
 }

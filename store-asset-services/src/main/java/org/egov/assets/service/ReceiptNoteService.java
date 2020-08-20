@@ -20,6 +20,7 @@ import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
 import org.egov.assets.common.MdmsRepository;
 import org.egov.assets.common.Pagination;
+import org.egov.assets.common.exception.CustomBindException;
 import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
 import org.egov.assets.model.Material;
@@ -34,12 +35,15 @@ import org.egov.assets.model.MaterialReceiptSearch;
 import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.PurchaseOrderDetail;
 import org.egov.assets.model.PurchaseOrderDetailSearch;
+import org.egov.assets.model.PurchaseOrderRequest;
+import org.egov.assets.model.PurchaseOrderResponse;
 import org.egov.assets.model.PurchaseOrderSearch;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.StoreResponse;
 import org.egov.assets.model.SupplierGetRequest;
 import org.egov.assets.model.SupplierResponse;
 import org.egov.assets.model.Uom;
+import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.PurchaseOrderDetailJdbcRepository;
 import org.egov.assets.repository.PurchaseOrderJdbcRepository;
@@ -47,6 +51,7 @@ import org.egov.assets.repository.ReceiptNoteRepository;
 import org.egov.assets.repository.entity.PurchaseOrderDetailEntity;
 import org.egov.assets.repository.entity.PurchaseOrderEntity;
 import org.egov.assets.util.InventoryUtilities;
+import org.egov.assets.wf.WorkflowIntegrator;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -59,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,8 +96,17 @@ public class ReceiptNoteService extends DomainService {
 	@Value("${inv.purchaseorders.cancelreceipt.topic}")
 	private String cancelReceiptPOTopic;
 
+	@Value("${inv.materialreceiptnote.updatestatus.topic}")
+	private String updateStatusTopic;
+
+	@Value("${inv.materialreceiptnote.updatestatus.key}")
+	private String updateStatusTopicKey;
+
 	@Autowired
 	private MaterialReceiptService materialReceiptService;
+
+	@Autowired
+	WorkflowIntegrator workflowIntegrator;
 
 	@Autowired
 	private ReceiptNoteRepository receiptNoteRepository;
@@ -136,7 +151,7 @@ public class ReceiptNoteService extends DomainService {
 			}
 		}
 
-		validate(materialReceipts, tenantId, Constants.ACTION_CREATE, materialReceiptRequest.getRequestInfo());
+//		validate(materialReceipts, tenantId, Constants.ACTION_CREATE, materialReceiptRequest.getRequestInfo());
 
 		materialReceipts.forEach(materialReceipt -> {
 			materialReceipt.setId(receiptNoteRepository.getSequence("seq_materialreceipt"));
@@ -144,7 +159,7 @@ public class ReceiptNoteService extends DomainService {
 				materialReceipt.setTenantId(tenantId);
 			}
 			materialReceipt.setMrnNumber(appendString(materialReceipt));
-			materialReceipt.setMrnStatus(MaterialReceipt.MrnStatusEnum.APPROVED);
+			materialReceipt.setMrnStatus(MaterialReceipt.MrnStatusEnum.CREATED);
 			materialReceipt
 					.setAuditDetails(getAuditDetails(materialReceiptRequest.getRequestInfo(), Constants.ACTION_CREATE));
 
@@ -155,11 +170,11 @@ public class ReceiptNoteService extends DomainService {
 			});
 
 			backUpdatePo(tenantId, materialReceipt);
-
+			WorkFlowDetails workFlowDetails = materialReceiptRequest.getWorkFlowDetails();
+			workFlowDetails.setBusinessId(materialReceipt.getMrnNumber());
+			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(), workFlowDetails, tenantId);
 		});
-
 		logAwareKafkaTemplate.send(createTopic, createTopicKey, materialReceiptRequest);
-
 		MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
 
 		return materialReceiptResponse.responseInfo(null).materialReceipt(materialReceipts);
@@ -830,6 +845,20 @@ public class ReceiptNoteService extends DomainService {
 		return PDFResponse.builder()
 				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
 
+	}
+
+	@Transactional
+	public MaterialReceiptResponse updateStatus(MaterialReceiptRequest materialReceiptRequest, String tenantId) {
+
+		try {
+			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
+					materialReceiptRequest.getWorkFlowDetails(), materialReceiptRequest.getWorkFlowDetails().getTenantId());
+			kafkaQue.send(updateStatusTopic, updateStatusTopicKey, materialReceiptRequest);
+			MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
+			return materialReceiptResponse.responseInfo(null).materialReceipt(materialReceiptRequest.getMaterialReceipt());
+		} catch (CustomBindException e) {
+			throw e;
+		}
 	}
 
 }

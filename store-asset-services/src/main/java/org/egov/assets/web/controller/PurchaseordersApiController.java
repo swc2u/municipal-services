@@ -107,4 +107,13 @@ public class PurchaseordersApiController {
 		PurchaseOrderResponse response = purchaseOrderService.getPOsForAdvanceRequisition(tenantId);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	@PostMapping(value = "/_updateStatus", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<PurchaseOrderResponse> purchaseordersUpdateStatusPost(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@Valid @RequestBody PurchaseOrderRequest purchaseOrderRequest) {
+		PurchaseOrderResponse response = purchaseOrderService.updateStatus(purchaseOrderRequest, tenantId);
+		return new ResponseEntity(response, HttpStatus.OK);
+	}
+
 }

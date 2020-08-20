@@ -1,8 +1,8 @@
 package org.egov.assets.model;
 
+import java.util.List;
 import java.util.Objects;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,17 +18,19 @@ public class WorkFlowDetails {
 	@JsonProperty("type")
 	private String type = null;
 
-	@JsonProperty("businessKey")
-	private String businessKey = null;
+	@JsonProperty("businessId")
+	private String businessId = null;
 
-	@JsonProperty("department")
-	private String department = null;
 
-	@JsonProperty("designation")
-	private String designation = null;
+	@JsonProperty("businessService")
+	private String businessService = null;
+
+	@JsonProperty("tenantId")
+	private String tenantId = null;
 
 	@JsonProperty("assignee")
-	private Long assignee = null;
+	private List<String> assignee = null;
+	
 
 	@JsonProperty("action")
 	private String action = null;
@@ -45,8 +47,9 @@ public class WorkFlowDetails {
 	@JsonProperty("details")
 	private String details = null;
 
-	@JsonProperty("workFlowDetails")
-	private WorkFlowDetails workFlowDetails = null;
+
+    @JsonProperty("wfDocuments")
+    private List<Document> wfDocuments;
 
 	@JsonProperty("stateId")
 	private String stateId = null;
@@ -70,27 +73,47 @@ public class WorkFlowDetails {
 		this.type = type;
 	}
 
-	public WorkFlowDetails businessKey(String businessKey) {
-		this.businessKey = businessKey;
+	public WorkFlowDetails businessId(String businessId) {
+		this.businessId = businessId;
 		return this;
 	}
 
 	/**
-	 * Businesskey of the workflow processing application
+	 * businessId of the workflow processing application
 	 * 
-	 * @return businessKey
+	 * @return businessId
 	 **/
 
-	public String getBusinessKey() {
-		return businessKey;
+	public String getBusinessId() {
+		return businessId;
 	}
 
-	public void setBusinessKey(String businessKey) {
-		this.businessKey = businessKey;
+	public void setBusinessId(String businessId) {
+		this.businessId = businessId;
 	}
 
-	public WorkFlowDetails department(String department) {
-		this.department = department;
+	
+	public WorkFlowDetails wfDocuments(List<Document> wfDocuments) {
+		this.wfDocuments = wfDocuments;
+		return this;
+	}
+
+	/**
+	 * businessId of the workflow processing application
+	 * 
+	 * @return businessId
+	 **/
+
+	public List<Document> getWfDocuments() {
+		return wfDocuments;
+	}
+
+	public void setWfDocuments(List<Document> wfDocuments) {
+		this.wfDocuments = wfDocuments;
+	}
+
+	public WorkFlowDetails businessService(String businessService) {
+		this.businessService = businessService;
 		return this;
 	}
 
@@ -100,35 +123,34 @@ public class WorkFlowDetails {
 	 * @return department
 	 **/
 
-	public String getDepartment() {
-		return department;
+	public String getBusinessService() {
+		return businessService;
 	}
 
-	public void setDepartment(String department) {
-		this.department = department;
+	public void setBusinessService(String businessService) {
+		this.businessService = businessService;
 	}
 
-	public WorkFlowDetails designation(String designation) {
-		this.designation = designation;
+	public WorkFlowDetails tenantId(String tenantId) {
+		this.tenantId = tenantId;
 		return this;
 	}
 
 	/**
-	 * Designation of the workflow processing authority
+	 * tenantId of the workflow 
 	 * 
 	 * @return designation
 	 **/
 
-	@Size(min = 3, max = 1024)
-	public String getDesignation() {
-		return designation;
+	public String getTenantId() {
+		return tenantId;
 	}
 
-	public void setDesignation(String designation) {
-		this.designation = designation;
+	public void setTenantId(String tenantId) {
+		this.tenantId = tenantId;
 	}
 
-	public WorkFlowDetails assignee(Long assignee) {
+	public WorkFlowDetails assignee(List<String> assignee) {
 		this.assignee = assignee;
 		return this;
 	}
@@ -139,11 +161,11 @@ public class WorkFlowDetails {
 	 * @return assignee
 	 **/
 
-	public Long getAssignee() {
+	public List<String> getAssignee() {
 		return assignee;
 	}
 
-	public void setAssignee(Long assignee) {
+	public void setAssignee(List<String> assignee) {
 		this.assignee = assignee;
 	}
 
@@ -238,25 +260,6 @@ public class WorkFlowDetails {
 		this.details = details;
 	}
 
-	public WorkFlowDetails workFlowDetails(WorkFlowDetails workFlowDetails) {
-		this.workFlowDetails = workFlowDetails;
-		return this;
-	}
-
-	/**
-	 * Get workFlowDetails
-	 * 
-	 * @return workFlowDetails
-	 **/
-	@Valid
-	public WorkFlowDetails getWorkFlowDetails() {
-		return workFlowDetails;
-	}
-
-	public void setWorkFlowDetails(WorkFlowDetails workFlowDetails) {
-		this.workFlowDetails = workFlowDetails;
-	}
-
 	public WorkFlowDetails stateId(String stateId) {
 		this.stateId = stateId;
 		return this;
@@ -285,23 +288,22 @@ public class WorkFlowDetails {
 		}
 		WorkFlowDetails workFlowDetails = (WorkFlowDetails) o;
 		return Objects.equals(this.type, workFlowDetails.type)
-				&& Objects.equals(this.businessKey, workFlowDetails.businessKey)
-				&& Objects.equals(this.department, workFlowDetails.department)
-				&& Objects.equals(this.designation, workFlowDetails.designation)
+				&& Objects.equals(this.businessId, workFlowDetails.businessId)
+				&& Objects.equals(this.businessService, workFlowDetails.businessService)
+				&& Objects.equals(this.tenantId, workFlowDetails.tenantId)
 				&& Objects.equals(this.assignee, workFlowDetails.assignee)
 				&& Objects.equals(this.action, workFlowDetails.action)
 				&& Objects.equals(this.status, workFlowDetails.status)
 				&& Objects.equals(this.comments, workFlowDetails.comments)
 				&& Objects.equals(this.senderName, workFlowDetails.senderName)
 				&& Objects.equals(this.details, workFlowDetails.details)
-				&& Objects.equals(this.workFlowDetails, workFlowDetails.workFlowDetails)
 				&& Objects.equals(this.stateId, workFlowDetails.stateId);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(type, businessKey, department, designation, assignee, action, status, comments, senderName,
-				details, workFlowDetails, stateId);
+		return Objects.hash(type, businessId, businessService, tenantId, assignee, action, status, comments, senderName,
+				details, stateId);
 	}
 
 	@Override
@@ -310,16 +312,15 @@ public class WorkFlowDetails {
 		sb.append("class WorkFlowDetails {\n");
 
 		sb.append("    type: ").append(toIndentedString(type)).append("\n");
-		sb.append("    businessKey: ").append(toIndentedString(businessKey)).append("\n");
-		sb.append("    department: ").append(toIndentedString(department)).append("\n");
-		sb.append("    designation: ").append(toIndentedString(designation)).append("\n");
+		sb.append("    businessId: ").append(toIndentedString(businessId)).append("\n");
+		sb.append("    businessService: ").append(toIndentedString(businessService)).append("\n");
+		sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
 		sb.append("    assignee: ").append(toIndentedString(assignee)).append("\n");
 		sb.append("    action: ").append(toIndentedString(action)).append("\n");
 		sb.append("    status: ").append(toIndentedString(status)).append("\n");
 		sb.append("    comments: ").append(toIndentedString(comments)).append("\n");
 		sb.append("    senderName: ").append(toIndentedString(senderName)).append("\n");
 		sb.append("    details: ").append(toIndentedString(details)).append("\n");
-		sb.append("    workFlowDetails: ").append(toIndentedString(workFlowDetails)).append("\n");
 		sb.append("    stateId: ").append(toIndentedString(stateId)).append("\n");
 		sb.append("}");
 		return sb.toString();

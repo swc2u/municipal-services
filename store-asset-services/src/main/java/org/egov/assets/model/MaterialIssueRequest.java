@@ -23,6 +23,23 @@ public class MaterialIssueRequest {
 	@JsonProperty("materialIssues")
 	private List<MaterialIssue> materialIssues = new ArrayList<MaterialIssue>();
 
+	
+	@JsonProperty("workFlowDetails")
+	private WorkFlowDetails workFlowDetails;
+
+	public MaterialIssueRequest workFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+		return this;
+	}
+
+	public WorkFlowDetails getWorkFlowDetails() {
+		return workFlowDetails;
+	}
+
+	public void setWorkFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+	}
+
 	public MaterialIssueRequest requestInfo(RequestInfo requestInfo) {
 		this.requestInfo = requestInfo;
 		return this;
