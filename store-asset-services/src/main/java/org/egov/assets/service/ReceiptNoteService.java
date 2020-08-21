@@ -151,7 +151,7 @@ public class ReceiptNoteService extends DomainService {
 			}
 		}
 
-		validate(materialReceipts, tenantId, Constants.ACTION_CREATE, materialReceiptRequest.getRequestInfo());
+//		validate(materialReceipts, tenantId, Constants.ACTION_CREATE, materialReceiptRequest.getRequestInfo());
 
 		materialReceipts.forEach(materialReceipt -> {
 			materialReceipt.setId(receiptNoteRepository.getSequence("seq_materialreceipt"));

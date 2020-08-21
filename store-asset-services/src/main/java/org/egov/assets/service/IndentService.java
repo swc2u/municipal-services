@@ -104,7 +104,6 @@ public class IndentService extends DomainService {
 	@Value("${inv.indents.updatestatus.key}")
 	private String updatestatusKey;
 
-	
 	@Autowired
 	private StoreService storeService;
 
@@ -139,7 +138,6 @@ public class IndentService extends DomainService {
 	@Autowired
 	WorkflowIntegrator workflowIntegrator;
 
-	
 	private static final Logger LOG = LoggerFactory.getLogger(IndentService.class);
 
 	@Transactional
@@ -220,8 +218,11 @@ public class IndentService extends DomainService {
 		if (errors.getValidationErrors().size() > 0) {
 			throw errors;
 		}
-
-		String seq = "IND-" + tenant.getCity().getCode() + "-" + b.getIndentStore().getCode() + "-" + finYearRange;
+		String seq = "";
+		if (b.getIndentType().equals(IndentTypeEnum.INDENTNOTE))
+			seq = "IND-" + tenant.getCity().getCode() + "-" + b.getIndentStore().getCode() + "-" + finYearRange;
+		else
+			seq = "TRIN-" + tenant.getCity().getCode() + "-" + b.getIndentStore().getCode() + "-" + finYearRange;
 		return seq + "-" + numberGenerator.getNextNumber(seq, 5);
 	}
 
@@ -658,14 +659,14 @@ public class IndentService extends DomainService {
 		return PDFResponse.builder()
 				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
 	}
-	
+
 	@Transactional
 	public IndentResponse updateStatus(IndentRequest indentRequest) {
 
 		try {
-				workflowIntegrator.callWorkFlow(indentRequest.getRequestInfo(), indentRequest.getWorkFlowDetails(),indentRequest.getWorkFlowDetails().getTenantId());
-//				b.setAuditDetails(getAuditDetails(indentRequest.getRequestInfo(), Constants.ACTION_UPDATE));
-				kafkaQue.send(updatestatusTopic, updatestatusKey, indentRequest);
+			workflowIntegrator.callWorkFlow(indentRequest.getRequestInfo(), indentRequest.getWorkFlowDetails(),
+					indentRequest.getWorkFlowDetails().getTenantId());
+			kafkaQue.send(updatestatusTopic, updatestatusKey, indentRequest);
 			IndentResponse response = new IndentResponse();
 			response.setIndents(indentRequest.getIndents());
 			response.setResponseInfo(getResponseInfo(indentRequest.getRequestInfo()));

@@ -459,10 +459,9 @@ public class NonIndentMaterialIssueService extends DomainService {
 		materialIssue.setIssueType(IssueTypeEnum.NONINDENTISSUE);
 		if (action.equals(Constants.ACTION_CREATE)) {
 			int year = Calendar.getInstance().get(Calendar.YEAR);
-			materialIssue.setIssueNumber("MRIN-" + String.valueOf(year) + "-" + seqNo);
+			materialIssue.setIssueNumber("MRNIN-" + String.valueOf(year) + "-" + seqNo);
 			materialIssue.setMaterialIssueStatus(MaterialIssueStatusEnum.CREATED);
 		}
-
 	}
 
 	public MaterialIssueResponse update(final MaterialIssueRequest materialIssueRequest, String tenantId) {

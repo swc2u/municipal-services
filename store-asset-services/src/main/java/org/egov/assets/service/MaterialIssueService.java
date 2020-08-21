@@ -318,8 +318,14 @@ public class MaterialIssueService extends DomainService {
 			materialIssue.setIssuedToDesignation(materialIssue.getIndent().getDesignation());
 		if (action.equals(Constants.ACTION_CREATE)) {
 			int year = Calendar.getInstance().get(Calendar.YEAR);
-			materialIssue.setIssueNumber("MRIN-" + String.valueOf(year) + "-" + seqNo);
+
 			materialIssue.setMaterialIssueStatus(MaterialIssueStatusEnum.CREATED);
+
+			if (type.equals(IssueTypeEnum.INDENTISSUE.toString())) {
+				materialIssue.setIssueNumber("MRIN-" + String.valueOf(year) + "-" + seqNo);
+			} else {
+				materialIssue.setIssueNumber("MROW-" + String.valueOf(year) + "-" + seqNo);
+			}
 		}
 	}
 
