@@ -49,9 +49,9 @@ public class NULMQueryBuilder {
 	 		"'bplNo',MB.bpl_no,'minority',MB.minority,'caste',MB.caste,'wardNo',MB.ward_no,'nameAsPerAdhar',MB.name_as_per_adhar,'adharAcknowledgementNo',\n" + 
 	 		"MB.adhar_acknowledgement_no,'insuranceThrough',MB.insurance_through,'documentAttachemnt',MB.document_attachemnt,'accountNo',MB.account_no,\n" + 
 	 		"'bankName',MB.bank_name,'branchName',MB.branch_name,'remark',MB.remark,'tenantId',MB.tenant_id,'isActive',MB.is_active,'createdBy',MB.created_by,'createdTime',MB.created_time\n" + 
-	 		",'lastModifiedBy',MB.last_modified_by,'lastModifiedTime',MB.last_modified_time) ))as member  from nulm_smid_shg_detail GP LEFT JOIN  nulm_smid_shg_member_details MB on GP.shg_uuid=MB.shg_uuid AND GP.tenant_id=MB.tenant_id AND (GP.status IN ('APPROVED','AWAITINGFORAPPROVAL') AND mb.application_status NOT IN ('DRAFTED','CREATED') OR (GP.status NOT IN ('APPROVED','AWAITINGFORAPPROVAL')  AND COALESCE(mb.application_status,'')=COALESCE(mb.application_status,''))) \n" + 
+	 		",'lastModifiedBy',MB.last_modified_by,'lastModifiedTime',MB.last_modified_time) ))as member  from nulm_smid_shg_detail GP LEFT JOIN  nulm_smid_shg_member_details MB on GP.shg_uuid=MB.shg_uuid AND GP.tenant_id=MB.tenant_id  \n" + 
 	 		"  where GP.created_by=(case when :createdBy <>'' then :createdBy else GP.created_by end) and GP.tenant_id=:tenantId and GP.is_active='true'AND\n" + 
-	 		"GP.status IN (:status) AND GP.shg_id=(case when :shgId <>'' then :shgId else GP.shg_id end)  AND TO_DATE(TO_CHAR(TO_TIMESTAMP(GP.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') >= CASE WHEN :fromDate<>'' THEN DATE(:fromDate) ELSE\n" + 
+	 		"GP.status IN (:status) AND MB.application_status IN(:applicationStatus) AND GP.shg_id=(case when :shgId <>'' then :shgId else GP.shg_id end)  AND TO_DATE(TO_CHAR(TO_TIMESTAMP(GP.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') >= CASE WHEN :fromDate<>'' THEN DATE(:fromDate) ELSE\n" + 
 	 		"		TO_DATE(TO_CHAR(TO_TIMESTAMP(GP.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(GP.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <= CASE WHEN :toDate<>'' THEN DATE(:toDate) ELSE \n" + 
 	 		"		TO_DATE(TO_CHAR(TO_TIMESTAMP(GP.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END  AND UPPER(GP.name) like concat('%',case when UPPER(:name)<>'' then UPPER(:name) else UPPER(GP.name) end,'%') \n" + 
 	 		" GROUP BY GP.shg_uuid ORDER BY created_time desc";
@@ -110,7 +110,7 @@ public class NULMQueryBuilder {
 	 		"'isSecurityStaff',is_security_staff,'securityStaffRemark',security_staff_remark,'isCleaner',is_cleaner,'cleanerRemark',cleaner_remark,'tenant_id',tenant_id,'is_active',is_active,'created_by',created_by,'created_time',created_time\n" + 
 	 		",'last_modified_by',last_modified_by,'last_modified_time',last_modified_time) ))as staff FROM nulm_suh_staff_maintenance GROUP BY suh_uuid ) SM\n" + 
 	 		"ON NA.suh_uuid=SM.suh_uuid and NA.tenant_id=SM.tenant_id \n" + 
-	 		"where NA.suh_uuid=(case when :suhUuid  <>'' then :suhUuid   else NA.suh_uuid end) and NA.created_by=(case when :createdBy  <>'' then :createdBy  else NA.created_by end) AND NA.tenant_id=:tenantId  AND NA.application_status IN (:status) \n" + 
+	 		"where NA.suh_id=(case when :suhId  <>'' then :suhId   else NA.suh_id end) and NA.created_by=(case when :createdBy  <>'' then :createdBy  else NA.created_by end) AND NA.tenant_id=:tenantId  AND NA.application_status IN (:status) \n" + 
 	 		"AND NA.is_active='true'  AND TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') >= CASE WHEN :fromDate<>'' THEN DATE(:fromDate) ELSE\n" + 
 	 		"TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <= CASE WHEN :toDate<>'' THEN DATE(:toDate) ELSE \n" + 
 	 		" TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END AND UPPER(na.name_of_shelter) like concat('%',case when UPPER(:nameOfShelter)<>'' then UPPER(:nameOfShelter) else UPPER(na.name_of_shelter) end,'%') ORDER BY created_time desc";

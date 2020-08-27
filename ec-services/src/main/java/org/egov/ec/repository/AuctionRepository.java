@@ -86,9 +86,16 @@ public class AuctionRepository {
 	public List<Auction> getAuctionChallan(Auction auction) {
 		log.info("Auction Repository - getAuctionChallan Method");
 		List<Auction> auctionList;
-
+		if(auction.getAuctionUuid() != null)
+		{
+			auctionList = jdbcTemplate.query(EcQueryBuilder.GET_AUCTION_UUID_CHALLAN_MASTER,
+					new Object[] { auction.getAuctionUuid(),auction.getTenantId() }, new BeanPropertyRowMapper<Auction>(Auction.class));
+		}
+		else
+		{
 		auctionList = jdbcTemplate.query(EcQueryBuilder.GET_AUCTION_CHALLAN_MASTER,
 				new Object[] { auction.getTenantId() }, new BeanPropertyRowMapper<Auction>(Auction.class));
+		}
 
 		return auctionList;
 	}
@@ -116,6 +123,20 @@ public class AuctionRepository {
 		List<Auction> auctionList;
 		auctionList= jdbcTemplate.query(EcQueryBuilder.GET_AUCTIONED_AVAILABLE_COUNT,
 				new Object[] {tenantId},new BeanPropertyRowMapper<Auction> (Auction.class));
-return auctionList;
+		return auctionList;
+	}
+	
+	/**
+	 * fetches the count of remaining auctioned items against challan
+	 *
+	 * @param Auction Auction request for challanId
+	 * @return Returns the count of pending and remaining auctions
+	 */
+	public List<Auction> getPendingForAuctionChallans(String tenantId) {
+		log.info("Auction Repository - getPendingForAuctionChallans Method");
+		List<Auction> auctionList;
+		auctionList= jdbcTemplate.query(EcQueryBuilder.GET_CHALLAN_PENDING_AUCTION,
+				new Object[] {tenantId},new BeanPropertyRowMapper<Auction> (Auction.class));
+		return auctionList;
 	}
 }

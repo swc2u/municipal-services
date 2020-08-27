@@ -82,7 +82,7 @@ public class ViolationRepository {
 		if (null != searchCriteria.getSearchText() && !searchCriteria.getSearchText().isEmpty()) {
 			try {
 			violationDetailList = jdbcTemplate.query(EcQueryBuilder.GET_VIOLATION_MASTER_SEARCH,
-					new Object[] { parameter, parameter, parameter, parameter, parameter, parameter, parameter,
+					new Object[] { parameter, parameter, parameter, parameter, parameter, parameter, parameter, parameter,
 							searchCriteria.getTenantId() },
 					rowMapper);
 			}catch(Exception e)

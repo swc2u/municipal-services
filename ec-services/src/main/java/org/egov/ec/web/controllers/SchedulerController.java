@@ -50,6 +50,13 @@ public class SchedulerController {
 		return new ResponseEntity<>(res, HttpStatus.CREATED);
 	}
 	
+	@PostMapping(value = "/_updateAuctionStatus")
+	public ResponseEntity<?> updateAuctionStatus(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper, 
+			@ModelAttribute @Valid EcSearchCriteria ecSearchCriteria) {
+		ResponseEntity<ResponseInfoWrapper> res = ecSchedulerService.updateAuctionStatus(requestInfoWrapper,ecSearchCriteria);
+		return new ResponseEntity<>(res, HttpStatus.CREATED);
+	}
+	
 
 
 }

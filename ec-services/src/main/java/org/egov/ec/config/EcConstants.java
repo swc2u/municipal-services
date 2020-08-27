@@ -55,6 +55,9 @@ public class EcConstants {
 	public static final String STATUS_CLOSED = "CLOSED";
 	
 	public static final String STATUS_FAILED = "FAILED";
+	
+	public static final String STATUS_AUCTION_PENDING = "PENDING FOR AUCTION";
+	
 	//workflows
 
 	public static final String WORKFLOW_AUCTION = "AUCTION WORKFLOW";

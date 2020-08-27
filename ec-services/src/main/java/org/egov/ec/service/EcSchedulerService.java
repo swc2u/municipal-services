@@ -371,7 +371,10 @@ System.out.println(urlResponse);
 		email.setAttachments(attachment);
 		emailList.stream().forEach((c) -> {
 			email.setEmail(c);
-			producer.push(config.getEmailNotificationTopic(), email);
+			if(config.getEchallanNotificationFlag().equalsIgnoreCase("ON"))
+			{
+				producer.push(config.getEmailNotificationTopic(), email);
+			}
 		});
 
 	}
@@ -415,5 +418,65 @@ System.out.println(urlResponse);
 	        else
 	            return AuditDetails.builder().lastModifiedBy(by).lastModifiedTime(time).build();
 	    }
+	  
+	  /**
+		 * Description : Closes Pending for Auction when items are lying for more than 30 days at Store
+		 * @param ecSearchCriteria 
+		 * 
+		 * @return httpstatus
+		 *
+		 */
+
+		public ResponseEntity<ResponseInfoWrapper> updateAuctionStatus(RequestInfoWrapper requestInfoWrapper, EcSearchCriteria ecSearchCriteria) {
+			try {
+				requestInfoWrapper.setAuditDetails(getAuditDetails(requestInfoWrapper.getRequestInfo().getUserInfo().getUuid(), false));
+			List	<Auction> auctionList = new ArrayList<Auction>();
+			Auction auction = new Auction();
+			Violation violation = new  Violation();
+			requestInfoWrapper.setRequestBody(violation);
+				 auctionList = auctionRepository.getPendingForAuctionChallans(ecSearchCriteria.getTenantId());
+				if (!auctionList.isEmpty()) {
+
+					auctionList.stream().forEach((c) -> {
+					ProcessInstance processInstance1 = new ProcessInstance();
+					processInstance1.setBusinessId(c.getChallanId());
+					processInstance1.setTenantId(ecSearchCriteria.getTenantId());
+					processInstance1.setBusinessService(EcConstants.WORKFLOW_CHALLAN);
+					processInstance1.setAction(EcConstants.STATUS_AUCTION_PENDING);
+					processInstance1.setModuleName(EcConstants.WORKFLOW_MODULE);
+					List<ProcessInstance> processList1 = Arrays.asList(processInstance1);
+
+					ResponseInfo response1 = wfIntegrator
+							.callWorkFlow(ProcessInstanceRequest.builder().processInstances(processList1)
+									.requestInfo(requestInfoWrapper.getRequestInfo()).build());
+
+					if (response1 != null
+							&& response1.getStatus().equalsIgnoreCase(EcConstants.STATUS_SUCCESSFULL)) {
+						Violation violationMaster = objectMapper.convertValue(requestInfoWrapper.getRequestBody(),
+								Violation.class);
+					
+						violationMaster.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
+						violationMaster
+								.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
+						violationMaster.setStatus(EcConstants.STATUS_AUCTION_PENDING);
+						violationMaster.setChallanUuid(c.getChallanUuid());
+						violationRepository.updateChallan(violationMaster);
+					}
+					});
+				}
+				return new ResponseEntity<>(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(EcConstants.STATUS_SUCCESS).build()).responseBody(auctionList)
+						.build(), HttpStatus.OK);
+
+			} catch (Exception e) {
+				log.error("EcScheduler Service - Update Auction Exception " + e.getMessage());
+				return new ResponseEntity<>(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(EcConstants.STATUS_FAILED).build())
+						.responseInfo(ResponseInfo.builder().msgId(e.getMessage()).build()).responseBody(null).build(),
+						HttpStatus.BAD_REQUEST);
+
+			}
+
+		}
 
 }

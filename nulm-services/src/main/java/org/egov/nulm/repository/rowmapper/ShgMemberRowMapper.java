@@ -49,6 +49,7 @@ public class ShgMemberRowMapper implements ResultSetExtractor<List<SmidShgMember
 							.applicationUuid(rs.getString("application_uuid")).bankName(rs.getString("bank_name"))
 							.bplNo(rs.getString("bpl_no")).branchName(rs.getString("branch_name"))
 							.caste(rs.getString("caste")).dateOfOpeningAccount(rs.getString("date_of_opening_account"))
+							.documentAttachemnt(rs.getString("document_attachemnt"))
 							.dob(rs.getString("dob")).emailId(rs.getString("email_id"))
 							.fatherOrHusbandName(rs.getString("father_or_husband_name")).gender(rs.getString("gender"))
 							.insuranceThrough(rs.getString("insurance_through")).isActive(rs.getBoolean("is_active"))

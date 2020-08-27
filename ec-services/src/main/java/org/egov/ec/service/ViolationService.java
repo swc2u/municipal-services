@@ -364,16 +364,20 @@ public class ViolationService {
 		log.info("Violation Service - Send Notification");
 		try {
 			NotificationTemplate email = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), NotificationTemplate.class)	;
-			if(email.getSubject().equalsIgnoreCase("Challan Issued"))
-			{
-			String body=email.getBody().replace("<Link>", config.getLoginUrl());
-			email.setBody(body);
-			}
-			producer.push(config.getEmailNotificationTopic(), email);
+			if(config.getEchallanNotificationFlag().equalsIgnoreCase("ON"))
+			{			
+				if(email.getSubject().equalsIgnoreCase("Challan Issued"))
+				{
+				String body=email.getBody().replace("<Link>", config.getLoginUrl());
+				email.setBody(body);
+				}
+				producer.push(config.getEmailNotificationTopic(), email);			
+			}			
 			return new ResponseEntity<>(
 					ResponseInfoWrapper.builder().responseInfo(ResponseInfo.builder().status(EcConstants.STATUS_SUCCESS).build())
 							.responseBody(email).build(),
 					HttpStatus.OK);
+			
 		} catch (Exception e) {
 			log.error("Violation Service - Send Notification Exception"+e.getMessage());
 			throw new CustomException("VIOLATION_NOTIFICATION_EXCEPTION", e.getMessage());

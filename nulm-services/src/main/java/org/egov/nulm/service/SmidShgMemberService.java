@@ -150,7 +150,8 @@ public class SmidShgMemberService {
 			JSONObject applicationData = (JSONObject) groupresult.get(0);
 			status = applicationData.get("application_status").toString();
 			for (Role roleobj : role) {
-				if ((roleobj.getCode()).equalsIgnoreCase(config.getRoleNgoUser())) {
+				if ((roleobj.getCode()).equalsIgnoreCase(config.getRoleNgoUser()) ||
+						(roleobj.getCode()).equalsIgnoreCase(config.getRoleCitizenUser())) {
 					
 					if (status.equalsIgnoreCase(SmidShgMemberApplication.StatusEnum.CREATED.toString())) {
 						repository.hardDeleteMembers(smidapplication);

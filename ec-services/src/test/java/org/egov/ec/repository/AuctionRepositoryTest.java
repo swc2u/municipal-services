@@ -51,7 +51,15 @@ public class AuctionRepositoryTest {
 	}
 
 	@Test
-	public void testGetAuctionChallan() {
+	public void testGetAuctionChallan1() {
+		
+		Auction searchCriteria = Auction.builder().auctionUuid("aasdjiasdu8ahs89asdy8a9h")
+				.build();
+		repository.getAuctionChallan(searchCriteria);
+	}
+	
+	@Test
+	public void testGetAuctionChallan2() {
 		
 		Auction searchCriteria = Auction.builder().build();
 		repository.getAuctionChallan(searchCriteria);
@@ -69,5 +77,12 @@ public class AuctionRepositoryTest {
 		
 		String tenant="ch";
 		repository.getQuantity(tenant);
+	}
+	
+	@Test
+	public void testGetPendingAuctionChallans() {
+		
+		String tenant="ch";
+		repository.getPendingForAuctionChallans(tenant);
 	}
 }

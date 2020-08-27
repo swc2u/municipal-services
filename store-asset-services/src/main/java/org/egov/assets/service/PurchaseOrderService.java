@@ -679,6 +679,7 @@ public class PurchaseOrderService extends DomainService {
 					}
 
 			// Second check for validating if Indent is valid for PO Creation
+
 			/*
 			 * if (method.equals(Constants.ACTION_CREATE)) for (PurchaseOrder purchaseOrder
 			 * : pos) if (purchaseOrder.getPurchaseType() != null) if
@@ -690,6 +691,21 @@ public class PurchaseOrderService extends DomainService {
 			 * indentNo); } } else errors.addDataError(ErrorCode.NULL_VALUE.getCode(),
 			 * "indentNumbers", null);
 			 */
+			if (method.equals(Constants.ACTION_CREATE))
+				for (PurchaseOrder purchaseOrder : pos)
+					if (purchaseOrder.getPurchaseType() != null)
+						if (purchaseOrder.getPurchaseType().toString().equals("Indent"))
+							if (purchaseOrder.getPurchaseOrderDetails() != null)
+								for (PurchaseOrderDetail details : purchaseOrder.getPurchaseOrderDetails()) {
+									if (!purchaseOrderRepository
+											.getIsIndentValidForPOCreate(details.getIndentNumber(),details.getMaterial().getCode())) {
+										errors.addDataError(ErrorCode.INVALID_INDENT_VALUE.getCode(), "indentNumber",
+												details.getIndentNumber());
+									}
+								}
+							else
+								errors.addDataError(ErrorCode.NULL_VALUE.getCode(), "indentNumbers", null);
+
 			// validate except during preparepofromindent
 			if (!method.equals(Constants.ACTION_SEARCH_INDENT_FOR_PO))
 				for (PurchaseOrder eachPurchaseOrder : pos) {
@@ -1000,11 +1016,12 @@ public class PurchaseOrderService extends DomainService {
 			// convert all items into purchase uom by referring each indent.
 
 			// Logic to check if indent lines are valid for PO Creation
-			for (String indentNo : purchaseOrder.getIndentNumbers()) {
-				if (!purchaseOrderRepository.getIsIndentValidForPOCreate(indentNo)) {
-					errors.addDataError(ErrorCode.INVALID_INDENT_VALUE.getCode(), "indentNumber", indentNo);
-				}
-			}
+			// for (String indentNo : purchaseOrder.getIndentNumbers()) {
+			// if (!purchaseOrderRepository.getIsIndentValidForPOCreate(indentNo)) {
+			// errors.addDataError(ErrorCode.INVALID_INDENT_VALUE.getCode(), "indentNumber",
+			// indentNo);
+			// }
+			// }
 
 			for (Indent indent : indentResponse.getIndents()) {
 

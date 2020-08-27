@@ -94,13 +94,22 @@ public class SmidShgRepository {
 			for (Role roleobj : role) {
 				if ((roleobj.getCode()).equalsIgnoreCase(config.getRoleEmployee())) {
 					List<Object> statusEmplyee = new ArrayList<>();
+					List<Object> status = new ArrayList<>();
 					if (shg.getStatus() == null) {
 						statusEmplyee.add(SmidShgGroup.StatusEnum.APPROVED.toString());
 						statusEmplyee.add(SmidShgGroup.StatusEnum.AWAITINGFORAPPROVAL.toString());
 						statusEmplyee.add(SmidShgGroup.StatusEnum.REJECTED.toString());
 					} else {
 						statusEmplyee.add(shg.getStatus().toString());
-					}
+					}					
+					status.add(SmidShgMemberApplication.StatusEnum.APPROVED.toString());
+					status.add(SmidShgMemberApplication.StatusEnum.AWAITINGFORAPPROVAL.toString());
+					status.add(SmidShgMemberApplication.StatusEnum.DELETED.toString());
+					status.add(SmidShgMemberApplication.StatusEnum.REJECTED.toString());
+					status.add(SmidShgMemberApplication.StatusEnum.UPDATED.toString());
+					status.add(SmidShgMemberApplication.StatusEnum.DELETIONINPROGRESS.toString());
+					status.add(SmidShgMemberApplication.StatusEnum.AWAITINGFORDELETION.toString());
+					paramValues.put("applicationStatus", status);
 					paramValues.put("status", statusEmplyee);
 					paramValues.put("createdBy", "");
 					paramValues.put("shgId", shg.getShgId());
@@ -111,6 +120,7 @@ public class SmidShgRepository {
 				}
 			}
 			List<Object> statusCitizen = new ArrayList<>();
+			List<Object> status = new ArrayList<>();
 			if (shg.getStatus() == null) {
 				statusCitizen.add(SmidShgGroup.StatusEnum.CREATED.toString());
 				statusCitizen.add(SmidShgGroup.StatusEnum.DRAFTED.toString());
@@ -122,6 +132,17 @@ public class SmidShgRepository {
 				statusCitizen.add(shg.getStatus().toString());
 			}
 			statusCitizen.add(shg.getStatus() == null ? "" : shg.getStatus().toString());
+			status.add(SmidShgMemberApplication.StatusEnum.CREATED.toString());
+			status.add(SmidShgMemberApplication.StatusEnum.DRAFTED.toString());
+			status.add(SmidShgMemberApplication.StatusEnum.APPROVED.toString());
+			status.add(SmidShgMemberApplication.StatusEnum.AWAITINGFORAPPROVAL.toString());
+			status.add(SmidShgMemberApplication.StatusEnum.DELETED.toString());
+			status.add(SmidShgMemberApplication.StatusEnum.REJECTED.toString());
+			status.add(SmidShgMemberApplication.StatusEnum.UPDATED.toString());
+			status.add(SmidShgMemberApplication.StatusEnum.DELETIONINPROGRESS.toString());
+			status.add(SmidShgMemberApplication.StatusEnum.AWAITINGFORDELETION.toString());
+	
+			paramValues.put("applicationStatus",status);
 			paramValues.put("status", statusCitizen);
 			paramValues.put("createdBy", userId.toString());
 			paramValues.put("shgId", shg.getShgId());
