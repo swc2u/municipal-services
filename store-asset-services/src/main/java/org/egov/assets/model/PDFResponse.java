@@ -2,8 +2,8 @@ package org.egov.assets.model;
 
 import java.util.List;
 
-import org.egov.assets.model.MaterialStoreMapping.MaterialStoreMappingBuilder;
 import org.egov.common.contract.response.ResponseInfo;
+import org.json.simple.JSONArray;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -43,5 +43,8 @@ public class PDFResponse {
 
 	@JsonProperty("totalcount")
 	private int totalcount;
+
+	@JsonProperty("printData")
+	private Object printData;
 
 }

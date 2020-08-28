@@ -58,7 +58,7 @@ public class SmidRepository {
 			for (Role roleobj : role) {
 				if ((roleobj.getCode()).equalsIgnoreCase(config.getRoleEmployee())) {
 					return smid = jdbcTemplate.query(NULMQueryBuilder.GET_SMID_APPLICATION_QUERY,
-							new Object[] { smidApplication.getApplicationUuid(), smidApplication.getApplicationUuid(),
+							new Object[] { smidApplication.getApplicationId(), smidApplication.getApplicationId(),
 									"", "", smidApplication.getTenantId(),
 									smidApplication.getApplicationStatus() == null ? ""
 											: smidApplication.getApplicationStatus().toString(),
@@ -66,6 +66,7 @@ public class SmidRepository {
 											: smidApplication.getApplicationStatus().toString(),
 									smidApplication.getFromDate(), smidApplication.getFromDate(),
 									smidApplication.getToDate(), smidApplication.getToDate(),
+									smidApplication.getName(),smidApplication.getName(),
 									smidApplication.getApplicationStatus() == null ? SmidApplication.StatusEnum.DRAFTED.toString()
 											: ""},
 							smidrowMapper);
@@ -73,14 +74,14 @@ public class SmidRepository {
 			}
 
 			return smid = jdbcTemplate.query(NULMQueryBuilder.GET_SMID_APPLICATION_QUERY,
-					new Object[] { smidApplication.getApplicationUuid(), smidApplication.getApplicationUuid(),
+					new Object[] { smidApplication.getApplicationId(), smidApplication.getApplicationId(),
 							userId.toString(), userId.toString(), smidApplication.getTenantId(),
 							smidApplication.getApplicationStatus() == null ? ""
 									: smidApplication.getApplicationStatus().toString(),
 							smidApplication.getApplicationStatus() == null ? ""
 									: smidApplication.getApplicationStatus().toString(),
 							smidApplication.getFromDate(), smidApplication.getFromDate(), smidApplication.getToDate(),
-							smidApplication.getToDate(),"" },
+							smidApplication.getToDate(),smidApplication.getName(),smidApplication.getName(),"" },
 					smidrowMapper);
 
 		} catch (Exception e) {

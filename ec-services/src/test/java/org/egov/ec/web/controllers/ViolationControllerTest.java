@@ -108,6 +108,20 @@ public class ViolationControllerTest {
 	  
 	  }
 	  
+@Test public void testSendNotification() throws Exception {
+		  
+		  Mockito.when(service.sendNotification(RequestInfoWrapper.builder().build()))
+		  .thenReturn(new ResponseEntity<ResponseInfoWrapper>(ResponseInfoWrapper.builder().build(),
+		  HttpStatus.OK));
+		  
+		  mockMvc.perform(MockMvcRequestBuilders.post("/violation/_notify")
+		  .content(getFileContents("testResources/addPaymentViolationRequest.json"))
+		  .header("User-Agent", "hbcbkb")
+		  .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).
+		  andExpect(status().isOk());
+	  
+	  }
+	  
 	  private String getFileContents(String fileName) throws IOException {
 			return IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream(fileName), "UTF-8");
 		}

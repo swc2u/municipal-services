@@ -44,7 +44,9 @@ public class SmidShgMemberApplication {
 	    AWAITINGFORAPPROVAL("AWAITINGFORAPPROVAL"),
 	    UPDATED("UPDATED"),
 	    DELETED("DELETED"),
-		REJECTED("REJECTED");
+		REJECTED("REJECTED"),
+		DELETIONINPROGRESS("DELETIONINPROGRESS"),
+		AWAITINGFORDELETION("AWAITINGFORDELETION");
 
 	    private String value;
 
@@ -181,4 +183,7 @@ public class SmidShgMemberApplication {
 			
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails ;
+	
+	private String groupName;
+	private String shgId;
 }

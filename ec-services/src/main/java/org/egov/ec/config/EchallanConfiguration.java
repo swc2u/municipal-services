@@ -157,4 +157,8 @@ public class EchallanConfiguration {
 
 	@Value("${persister.create.deviceSource.topic}")
 	public String RequestDeviceSource;
+	
+	@Value("${echallan.notification.flag}")
+	public String echallanNotificationFlag;
+	
 }

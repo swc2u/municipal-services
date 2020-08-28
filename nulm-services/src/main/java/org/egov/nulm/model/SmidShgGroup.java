@@ -51,8 +51,11 @@ public class SmidShgGroup {
 		 DRAFTED("DRAFTED"),
 	    CREATED("CREATED"),
 	    APPROVED("APPROVED"),
+	    REJECTED("REJECTED"),
 	    DELETED("DELETED"),
-	    AWAITINGFORAPPROVAL("AWAITINGFORAPPROVAL");
+	    UPDATED("UPDATED"),
+	    AWAITINGFORAPPROVAL("AWAITINGFORAPPROVAL"),
+	    AWAITINGFORDELETION("AWAITINGFORDELETION");
 
 	    private String value;
 
@@ -113,5 +116,12 @@ public class SmidShgGroup {
 	
 	@JsonProperty("smidShgMemberApplication")
 	private List<SmidShgMemberApplication> smidShgMemberApplication;
+	
+	@JsonProperty("fromDate")
+	private String fromDate;
+
+	@JsonProperty("toDate")
+	private String toDate;
+
 
 }

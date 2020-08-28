@@ -57,6 +57,12 @@ public class NULMConfiguration {
 
 	@Value("${egov.user.path}")
 	private String userPath;
+	
+	@Value("${egov.workflow.host}")
+	private String workFlowHost;
+
+	@Value("${egov.workflow.path}")
+	private String workFlowPath;
 
 	@Value("${egov.idgen.nulm.sep.idname}")
 	private String sepapplicationNumberIdgenName;
@@ -87,6 +93,10 @@ public class NULMConfiguration {
 
 	@Value("${egov.idgen.nulm.susv.idformat}")
 	private String susvApplicationNumberIdgenFormat;
+	
+	@Value("${nulm.businessservice}")
+	private String businessservice;
+	
 	
 	
 	//organization topic
@@ -123,6 +133,17 @@ public class NULMConfiguration {
 	
 	@Value("${nulm.suh.deleteDate.period}")
 	private String SuhDeleteDatePeriod;
+	
+	@Value("${egov.user.role.ja}")
+	private String roleJA;
+
+	
+	@Value("${egov.user.role.sdo}")
+	private String roleSDO;
+
+	
+	@Value("${egov.user.role.acmc}")
+	private String roleACMC;
 
 	
 	// SMID SHG Status
@@ -161,6 +182,9 @@ public class NULMConfiguration {
 	@Value("${persister.delete.smidshg.member.topic}")
 	private String SmidShgMemberDeleteTopic;
 	
+	@Value("${persister.hard.delete.smidshg.member.topic}")
+	private String SmidShgMemberHardDeleteTopic;
+	
 	@Value("${persister.save.suhapplication.topic}")
 	private String SuhApplicationSaveTopic;
 	
@@ -181,8 +205,14 @@ public class NULMConfiguration {
 	
 	@Value("${persister.update.susvapplication.topic}")
 	private String SusvApplicationUpdateTopic;
-
 	
+	@Value("${persister.update.susvapplication.status.topic}")
+	private String SusvApplicationUpdateStatusTopic;
 	
+	@Value("${persister.save.susvtransaction.topic}")
+	private String SusvTransactionSaveTopic;
+	
+	@Value("${persister.update.susvtransaction.topic}")
+	private String SusvTransactionUpdateTopic;
 	
 }

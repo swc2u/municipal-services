@@ -34,9 +34,14 @@ public class SusvController {
 		return service.updateSusvApplication(request);
 	}
 	
-	/*@PostMapping(value = "/_renew")
-	public ResponseEntity<ResponseInfoWrapper> renewSusvApplication(@Valid @RequestBody NulmSusvRequest request) {
-		return service.renewSusvApplication(request);
-	}*/
+    @PostMapping(value = "/_updateAppStatus")
+	public ResponseEntity<ResponseInfoWrapper> updateAppStatus(@Valid @RequestBody NulmSusvRequest request) {
+		return service.updateAppStatus(request);
+	}
+    
+    @PostMapping(value = "/_get")
+	public ResponseEntity<ResponseInfoWrapper> getSusvApplication( @RequestBody NulmSusvRequest request) {
+		return service.getSusvApplication(request);
+	}
 	
 }

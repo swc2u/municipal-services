@@ -21,7 +21,6 @@ public class PDFServiceReposistory {
 	}
 
 	public PDFResponse getPrint(Object request, String key, String tenantId) {
-
 		StringBuilder pathString = new StringBuilder(pdfServiceUrls);
 		pathString.append("?key=");
 		pathString.append(key);

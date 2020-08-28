@@ -86,4 +86,12 @@ public class IndentsApiController {
 		return new ResponseEntity(response, HttpStatus.OK);
 	}
 
+	@PostMapping(value = "/_updateStatus", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<IndentResponse> indentsUpdateStatusPost(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@Valid @RequestBody IndentRequest indentRequest) {
+		IndentResponse response = indentService.updateStatus(indentRequest);
+		return new ResponseEntity(response, HttpStatus.OK);
+	}
+
 }

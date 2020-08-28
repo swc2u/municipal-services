@@ -38,7 +38,10 @@ public class SusvApplication {
 	private StatusEnum applicationStatus;
 
 	public enum StatusEnum {
-		DRAFTED("DRAFTED"), CREATED("CREATED"), APPROVED("APPROVED"), REJECTED("REJECTED");
+		DRAFTED("DRAFTED"), CREATED("CREATED"), FORWARDEDTOJA("FORWARDEDTOJA"), FORWARDEDTOSDO(
+				"FORWARDEDTOSDO"), FORWARDEDTOACMC("FORWARDEDTOACMC"), REASSIGNTOJA("REASSIGNTOJA"), REASSIGNTOSDO(
+						"REASSIGNTOSDO"), REASSIGNTOCITIZEN(
+								"REASSIGNTOCITIZEN"), APPROVED("APPROVED"), REJECTED("REJECTED");
 
 		private String value;
 
@@ -66,8 +69,6 @@ public class SusvApplication {
 	@NotNull
 	@JsonProperty("tenantId")
 	private String tenantId;
-
-	
 
 	@JsonProperty("nameOfApplicant")
 	private String nameOfApplicant;
@@ -113,7 +114,7 @@ public class SusvApplication {
 
 	@JsonProperty("proposedLocationOfVending")
 	private String proposedLocationOfVending;
-	
+
 	@JsonProperty("proposedTimeOfVending")
 	private String proposedTimeOfVending;
 
@@ -125,16 +126,17 @@ public class SusvApplication {
 
 	@JsonProperty("isActive")
 	private Boolean isActive;
-	
-	@JsonProperty("dependentFamilyMembers")
-	private JSONArray dependentFamilyMembers;
-	private String dependentFamilyMembersArray;
+
 
 	@JsonProperty("applicationDocument")
 	private List<SusvApplicationDocument> applicationDocument;
+	
+	@JsonProperty("susvApplicationFamilyDetails")
+	private List<SusvApplicationFamilyDetails> susvApplicationFamilyDetails;
 
 	@JsonProperty("fromDate")
 	private String fromDate;
+	
 
 	@JsonProperty("toDate")
 	private String toDate;
@@ -144,5 +146,14 @@ public class SusvApplication {
 
 	@JsonProperty("remark")
 	private String remark;
+
+	@JsonProperty("isUndertaking")
+	private Boolean isUndertaking;
+
+	@JsonProperty("place")
+	private String place;
+
+	@JsonProperty("date")
+	private String date;
 
 }

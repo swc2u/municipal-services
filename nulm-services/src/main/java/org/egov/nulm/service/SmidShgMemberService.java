@@ -22,6 +22,8 @@ import org.egov.nulm.repository.SmidShgMemberRepository;
 import org.egov.nulm.util.AuditDetailsUtil;
 import org.egov.nulm.util.IdGenRepository;
 import org.egov.tracer.model.CustomException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -103,6 +105,27 @@ public class SmidShgMemberService {
 			SmidShgMemberApplication smidapplication = objectMapper.convertValue(memberrequest.getSmidShgMemberApplication(),
 					SmidShgMemberApplication.class);
 			checkValidation(smidapplication);
+			String status = "";
+			repository.checkMemberUuid(smidapplication);
+			List<Role> role = memberrequest.getRequestInfo().getUserInfo().getRoles();
+			JSONArray groupresult = repository.getMemmberStatus(smidapplication);
+			JSONObject applicationData = (JSONObject) groupresult.get(0);
+			status = applicationData.get("application_status").toString();
+			for (Role roleobj : role) {
+				if ((roleobj.getCode()).equalsIgnoreCase(config.getRoleNgoUser())) {
+					
+					if (status.equalsIgnoreCase(SmidShgMemberApplication.StatusEnum.CREATED.toString())) {
+						smidapplication.setApplicationStatus(SmidShgMemberApplication.StatusEnum.CREATED);
+					}
+					if (status.equalsIgnoreCase(SmidShgMemberApplication.StatusEnum.APPROVED.toString())
+							|| status.equalsIgnoreCase(SmidShgMemberApplication.StatusEnum.REJECTED.toString())) {
+						smidapplication.setApplicationStatus(SmidShgMemberApplication.StatusEnum.UPDATED);
+					}
+				}
+				else {
+					smidapplication.setApplicationStatus(SmidShgMemberApplication.StatusEnum.fromValue(status));
+				}
+			}
 			smidapplication.setIsActive(true);
 			smidapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(memberrequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
 		 	repository.updateMembers(smidapplication);
@@ -120,11 +143,29 @@ public class SmidShgMemberService {
 		try {
 			SmidShgMemberApplication smidapplication = objectMapper.convertValue(memberrequest.getSmidShgMemberApplication(),
 					SmidShgMemberApplication.class);
+			String status = "";
+			repository.checkMemberUuid(smidapplication);
+			List<Role> role = memberrequest.getRequestInfo().getUserInfo().getRoles();
+			JSONArray groupresult = repository.getMemmberStatus(smidapplication);
+			JSONObject applicationData = (JSONObject) groupresult.get(0);
+			status = applicationData.get("application_status").toString();
+			for (Role roleobj : role) {
+				if ((roleobj.getCode()).equalsIgnoreCase(config.getRoleNgoUser()) ||
+						(roleobj.getCode()).equalsIgnoreCase(config.getRoleCitizenUser())) {
+					
+					if (status.equalsIgnoreCase(SmidShgMemberApplication.StatusEnum.CREATED.toString())) {
+						repository.hardDeleteMembers(smidapplication);
+					}
+					if (status.equalsIgnoreCase(SmidShgMemberApplication.StatusEnum.APPROVED.toString())
+							|| status.equalsIgnoreCase(SmidShgMemberApplication.StatusEnum.REJECTED.toString())) {
+						smidapplication.setApplicationStatus(SmidShgMemberApplication.StatusEnum.DELETIONINPROGRESS);
+						smidapplication.setIsActive(true);
+						smidapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(memberrequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
+					 	repository.deleteMembers(smidapplication);
+					}
+				}
+			}
 			
-			smidapplication.setIsActive(false);
-			smidapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(memberrequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
-		 	repository.deleteMembers(smidapplication);
-
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
 					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
 					.responseBody(smidapplication).build(), HttpStatus.OK);
@@ -161,5 +202,20 @@ public class SmidShgMemberService {
 			throw new CustomException(errorMap);
 		}
 
+	}
+	
+	public ResponseEntity<ResponseInfoWrapper> memberCount(NulmShgMemberRequest   request) {
+		try {
+
+			SmidShgMemberApplication smidapplication = objectMapper.convertValue(request.getSmidShgMemberApplication(),
+					SmidShgMemberApplication.class);
+			List<SmidShgMemberApplication> groupresult = repository.getMemberCount(smidapplication);
+			return new ResponseEntity<>(ResponseInfoWrapper.builder()
+					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+					.responseBody(groupresult).build(), HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new CustomException(CommonConstants.SMID_SHG_APPLICATION_EXCEPTION_CODE, e.getMessage());
+		}
 	}
 }

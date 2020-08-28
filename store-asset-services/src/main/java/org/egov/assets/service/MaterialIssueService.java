@@ -27,9 +27,7 @@ import org.egov.assets.model.Department;
 import org.egov.assets.model.Fifo;
 import org.egov.assets.model.FifoRequest;
 import org.egov.assets.model.FifoResponse;
-import org.egov.assets.model.Indent;
 import org.egov.assets.model.Indent.IndentStatusEnum;
-import org.egov.assets.model.Indent.IndentTypeEnum;
 import org.egov.assets.model.IndentDetail;
 import org.egov.assets.model.IndentResponse;
 import org.egov.assets.model.IndentSearch;
@@ -48,6 +46,7 @@ import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.Uom;
+import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.IndentDetailJdbcRepository;
 import org.egov.assets.repository.MaterialIssueDetailJdbcRepository;
 import org.egov.assets.repository.MaterialIssueJdbcRepository;
@@ -59,6 +58,7 @@ import org.egov.assets.repository.entity.IndentEntity;
 import org.egov.assets.repository.entity.MaterialIssueDetailEntity;
 import org.egov.assets.repository.entity.MaterialIssueEntity;
 import org.egov.assets.util.InventoryUtilities;
+import org.egov.assets.wf.WorkflowIntegrator;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -70,6 +70,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -125,6 +126,15 @@ public class MaterialIssueService extends DomainService {
 	@Value("${inv.issues.update.key}")
 	private String updateKey;
 
+	@Value("${inv.issues.updatestatus.topic}")
+	private String updatestatusTopic;
+
+	@Value("${inv.issues.updatestatus.key}")
+	private String updatestatusKey;
+
+	@Autowired
+	WorkflowIntegrator workflowIntegrator;
+
 	@Autowired
 	private LogAwareKafkaTemplate<String, Object> kafkaTemplate;
 
@@ -161,6 +171,11 @@ public class MaterialIssueService extends DomainService {
 					}
 				}
 				materialIssue.setTotalIssueValue(totalIssueValue);
+				WorkFlowDetails workFlowDetails = materialIssueRequest.getWorkFlowDetails();
+				workFlowDetails.setBusinessId(materialIssue.getIssueNumber());
+				workflowIntegrator.callWorkFlow(materialIssueRequest.getRequestInfo(), workFlowDetails,
+						materialIssue.getTenantId());
+
 			}
 			kafkaTemplate.send(createTopic, createKey, materialIssueRequest);
 			MaterialIssueResponse response = new MaterialIssueResponse();
@@ -1125,7 +1140,6 @@ public class MaterialIssueService extends DomainService {
 				} else {
 					indent.put("issueDate", in.getIssueDate());
 				}
-
 				indent.put("issuingStoreName", in.getFromStore().getName());
 				indent.put("issuingStoreDept", in.getFromStore().getDepartment().getName());
 
@@ -1193,7 +1207,6 @@ public class MaterialIssueService extends DomainService {
 				workflows.add(jsonWork);
 				indent.put("workflowDetails", workflows);
 				indents.add(indent);
-
 				if (type.equals(IssueTypeEnum.MATERIALOUTWARD.toString())) {
 					requestMain.put("IndentOutwardTransfer", indents);
 				} else if (type.equals(IssueTypeEnum.INDENTISSUE.toString())) {
@@ -1208,10 +1221,26 @@ public class MaterialIssueService extends DomainService {
 				return pdfServiceReposistory.getPrint(requestMain, "store-asset-indent-issue-note",
 						searchContract.getTenantId());
 			}
-
 		}
 		return PDFResponse.builder()
 				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
 
 	}
+
+	@Transactional
+	public MaterialIssueResponse updateStatus(MaterialIssueRequest indentIssueRequest) {
+
+		try {
+			workflowIntegrator.callWorkFlow(indentIssueRequest.getRequestInfo(),
+					indentIssueRequest.getWorkFlowDetails(), indentIssueRequest.getWorkFlowDetails().getTenantId());
+			kafkaQue.send(updatestatusTopic, updatestatusKey, indentIssueRequest);
+			MaterialIssueResponse response = new MaterialIssueResponse();
+			response.setMaterialIssues(indentIssueRequest.getMaterialIssues());
+			response.setResponseInfo(getResponseInfo(indentIssueRequest.getRequestInfo()));
+			return response;
+		} catch (CustomBindException e) {
+			throw e;
+		}
+	}
+
 }

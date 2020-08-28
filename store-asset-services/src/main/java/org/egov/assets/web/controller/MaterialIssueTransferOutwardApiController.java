@@ -87,5 +87,13 @@ public class MaterialIssueTransferOutwardApiController {
 				IssueTypeEnum.MATERIALOUTWARD.toString());
 		return new ResponseEntity(materialIssueResponse, HttpStatus.OK);
 	}
+	
+	@PostMapping(value = "/_updateStatus", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<MaterialIssueResponse> materialIssueUpdateStatusPost(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@Valid @RequestBody MaterialIssueRequest indentIssueRequest) {
+		MaterialIssueResponse materialIssueResponse = materialIssueService.updateStatus(indentIssueRequest);
+		return new ResponseEntity(materialIssueResponse, HttpStatus.OK);
+	}
 
 }

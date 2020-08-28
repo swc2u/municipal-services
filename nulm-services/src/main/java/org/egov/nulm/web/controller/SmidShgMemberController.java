@@ -3,6 +3,7 @@ package org.egov.nulm.web.controller;
 import javax.validation.Valid;
 
 import org.egov.nulm.model.NulmShgMemberRequest;
+import org.egov.nulm.model.NulmShgRequest;
 import org.egov.nulm.model.ResponseInfoWrapper;
 import org.egov.nulm.service.SmidShgMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ public class SmidShgMemberController {
 	public ResponseEntity<ResponseInfoWrapper> deleteMembers(@Valid @RequestBody NulmShgMemberRequest memberrequest) {
 		return service.deleteMembers(memberrequest);
 	}
-	
+	@PostMapping(value = "/_memberCount")
+	public ResponseEntity<ResponseInfoWrapper> memberCount(@RequestBody NulmShgMemberRequest memberrequest) {
+		return service.memberCount(memberrequest);
+	}
 	
 }

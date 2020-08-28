@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -20,6 +21,7 @@ import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
 import org.egov.assets.common.MdmsRepository;
 import org.egov.assets.common.Pagination;
+import org.egov.assets.common.exception.CustomBindException;
 import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
 import org.egov.assets.model.Material;
@@ -34,12 +36,16 @@ import org.egov.assets.model.MaterialReceiptSearch;
 import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.PurchaseOrderDetail;
 import org.egov.assets.model.PurchaseOrderDetailSearch;
+import org.egov.assets.model.PurchaseOrderRequest;
+import org.egov.assets.model.PurchaseOrderResponse;
 import org.egov.assets.model.PurchaseOrderSearch;
+import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.StoreResponse;
 import org.egov.assets.model.SupplierGetRequest;
 import org.egov.assets.model.SupplierResponse;
 import org.egov.assets.model.Uom;
+import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.PurchaseOrderDetailJdbcRepository;
 import org.egov.assets.repository.PurchaseOrderJdbcRepository;
@@ -47,6 +53,7 @@ import org.egov.assets.repository.ReceiptNoteRepository;
 import org.egov.assets.repository.entity.PurchaseOrderDetailEntity;
 import org.egov.assets.repository.entity.PurchaseOrderEntity;
 import org.egov.assets.util.InventoryUtilities;
+import org.egov.assets.wf.WorkflowIntegrator;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -59,6 +66,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,8 +98,17 @@ public class ReceiptNoteService extends DomainService {
 	@Value("${inv.purchaseorders.cancelreceipt.topic}")
 	private String cancelReceiptPOTopic;
 
+	@Value("${inv.materialreceiptnote.updatestatus.topic}")
+	private String updateStatusTopic;
+
+	@Value("${inv.materialreceiptnote.updatestatus.key}")
+	private String updateStatusTopicKey;
+
 	@Autowired
 	private MaterialReceiptService materialReceiptService;
+
+	@Autowired
+	WorkflowIntegrator workflowIntegrator;
 
 	@Autowired
 	private ReceiptNoteRepository receiptNoteRepository;
@@ -144,7 +161,7 @@ public class ReceiptNoteService extends DomainService {
 				materialReceipt.setTenantId(tenantId);
 			}
 			materialReceipt.setMrnNumber(appendString(materialReceipt));
-			materialReceipt.setMrnStatus(MaterialReceipt.MrnStatusEnum.APPROVED);
+			materialReceipt.setMrnStatus(MaterialReceipt.MrnStatusEnum.CREATED);
 			materialReceipt
 					.setAuditDetails(getAuditDetails(materialReceiptRequest.getRequestInfo(), Constants.ACTION_CREATE));
 
@@ -155,11 +172,11 @@ public class ReceiptNoteService extends DomainService {
 			});
 
 			backUpdatePo(tenantId, materialReceipt);
-
+			WorkFlowDetails workFlowDetails = materialReceiptRequest.getWorkFlowDetails();
+			workFlowDetails.setBusinessId(materialReceipt.getMrnNumber());
+			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(), workFlowDetails, tenantId);
 		});
-
 		logAwareKafkaTemplate.send(createTopic, createTopicKey, materialReceiptRequest);
-
 		MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
 
 		return materialReceiptResponse.responseInfo(null).materialReceipt(materialReceipts);
@@ -832,4 +849,64 @@ public class ReceiptNoteService extends DomainService {
 
 	}
 
+	@Transactional
+	public MaterialReceiptResponse updateStatus(MaterialReceiptRequest materialReceiptRequest, String tenantId) {
+
+		try {
+			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
+					materialReceiptRequest.getWorkFlowDetails(),
+					materialReceiptRequest.getWorkFlowDetails().getTenantId());
+			kafkaQue.send(updateStatusTopic, updateStatusTopicKey, materialReceiptRequest);
+			MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
+			return materialReceiptResponse.responseInfo(null)
+					.materialReceipt(materialReceiptRequest.getMaterialReceipt());
+		} catch (CustomBindException e) {
+			throw e;
+		}
+	}
+
+	public PDFResponse printInventoryReportPdf(MaterialReceiptSearch materialReceiptSearch, RequestInfo requestInfo) {
+		JSONArray jsonArray = materialReceiptService.getInventoryReport(materialReceiptSearch);
+		JSONArray arrayPrintData = new JSONArray();
+		if (!jsonArray.isEmpty()) {
+			JSONObject requestMain = new JSONObject();
+
+			StoreGetRequest storeGetRequest = new StoreGetRequest();
+			storeGetRequest.setCode(Arrays.asList(materialReceiptSearch.getReceivingStore()));
+			storeGetRequest.setTenantId(materialReceiptSearch.getTenantId());
+			StoreResponse store = storeService.search(storeGetRequest);
+
+			Material material = materialService.fetchMaterial(materialReceiptSearch.getTenantId(),
+					materialReceiptSearch.getMaterials().get(0), new RequestInfo());
+			requestMain.put("storeName", store.getStores().isEmpty() ? materialReceiptSearch.getReceivingStore()
+					: store.getStores().get(0).getName());
+			requestMain.put("storeDepartment",
+					store.getStores().isEmpty() ? "" : store.getStores().get(0).getDepartment().getName());
+			requestMain.put("materialName", material.getName());
+			requestMain.put("invetoryDetails", jsonArray);
+			arrayPrintData.add(requestMain);
+		}
+
+		if (!arrayPrintData.isEmpty() && materialReceiptSearch.isForprint()) {
+			JSONObject finalDta = new JSONObject();
+
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
+				finalDta.put("RequestInfo", reqInfo);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			finalDta.put("InventoryReport", arrayPrintData);
+
+			return pdfServiceReposistory.getPrint(finalDta, "store-asset-report-inventory-register",
+					materialReceiptSearch.getTenantId());
+		} else if (!arrayPrintData.isEmpty() && !materialReceiptSearch.isForprint()) {
+			return PDFResponse.builder().responseInfo(ResponseInfo.builder().status("Success").build())
+					.printData(arrayPrintData).build();
+		} else {
+			return PDFResponse.builder()
+					.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+		}
+	}
 }

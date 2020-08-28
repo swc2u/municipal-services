@@ -11,17 +11,36 @@ import org.egov.common.contract.request.RequestInfo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.ToString;
+
 /**
  * Contract class for web request. Array of MaterialIssue items are used in case
  * of create or update
  */
-
+@ToString
 public class MaterialIssueRequest {
 	@JsonProperty("RequestInfo")
 	private RequestInfo requestInfo = null;
 
 	@JsonProperty("materialIssues")
 	private List<MaterialIssue> materialIssues = new ArrayList<MaterialIssue>();
+
+	
+	@JsonProperty("workFlowDetails")
+	private WorkFlowDetails workFlowDetails;
+
+	public MaterialIssueRequest workFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+		return this;
+	}
+
+	public WorkFlowDetails getWorkFlowDetails() {
+		return workFlowDetails;
+	}
+
+	public void setWorkFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+	}
 
 	public MaterialIssueRequest requestInfo(RequestInfo requestInfo) {
 		this.requestInfo = requestInfo;

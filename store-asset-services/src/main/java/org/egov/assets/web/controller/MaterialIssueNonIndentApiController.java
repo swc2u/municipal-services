@@ -37,7 +37,7 @@ public class MaterialIssueNonIndentApiController {
 	public ResponseEntity<MaterialIssueResponse> materialissuesNonIndentCreatePost(
 			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
 			@Valid @RequestBody MaterialIssueRequest nonIndentIssueRequest) {
-		MaterialIssueResponse materialIssueResponse = nonIndentMaterialIssueService.create(nonIndentIssueRequest);
+		MaterialIssueResponse materialIssueResponse = nonIndentMaterialIssueService.create(nonIndentIssueRequest,tenantId);
 		return new ResponseEntity(materialIssueResponse, HttpStatus.OK);
 	}
 
@@ -85,6 +85,14 @@ public class MaterialIssueNonIndentApiController {
 				tenantId);
 		return new ResponseEntity(materialIssueResponse, HttpStatus.OK);
 
+	}
+
+	@PostMapping(value = "/_updateStatus", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<MaterialIssueResponse> materialIssueUpdateStatusPost(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@Valid @RequestBody MaterialIssueRequest indentIssueRequest) {
+		MaterialIssueResponse materialIssueResponse = nonIndentMaterialIssueService.updateStatus(indentIssueRequest);
+		return new ResponseEntity(materialIssueResponse, HttpStatus.OK);
 	}
 
 }

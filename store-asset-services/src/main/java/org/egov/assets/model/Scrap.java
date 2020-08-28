@@ -23,6 +23,9 @@ public class Scrap {
 	@JsonProperty("tenantId")
 	private String tenantId = null;
 
+	@JsonProperty("issueNumber")
+	private String issueNumber = null;
+
 	@JsonProperty("store")
 	private Store store = null;
 
@@ -87,6 +90,25 @@ public class Scrap {
 
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
+
+	public Scrap issueNumber(String issueNumber) {
+		this.issueNumber = issueNumber;
+		return this;
+	}
+
+	/**
+	 * issue note number/outward note number.Auto generated number, read only.
+	 * 
+	 * @return issueNumber
+	 **/
+	@Size(max = 100)
+	public String getIssueNumber() {
+		return issueNumber;
+	}
+
+	public void setIssueNumber(String issueNumber) {
+		this.issueNumber = issueNumber;
+	}
 
 	public Scrap id(String id) {
 		this.id = id;

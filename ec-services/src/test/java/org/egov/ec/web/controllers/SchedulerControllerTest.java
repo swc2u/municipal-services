@@ -79,6 +79,18 @@ public class SchedulerControllerTest {
 		  andExpect(status().isCreated()); 
 		  }
 	  
+	  @Test public void testUpdateAuctionStatus() throws Exception {
+		  
+		  Mockito.when(service.updateAuctionStatus(Matchers.any(RequestInfoWrapper.class),Matchers.any(EcSearchCriteria.class)))
+		  .thenReturn(new ResponseEntity<ResponseInfoWrapper>(ResponseInfoWrapper.builder().build(),
+		  HttpStatus.OK));
+		  
+		  mockMvc.perform(MockMvcRequestBuilders.post("/scheduler/_updateAuctionStatus")
+		  .content(getFileContents("testResources/updateFineRequest.json"))
+		  .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).
+		  andExpect(status().isCreated()); 
+		  }
+	  
 	  private String getFileContents(String fileName) throws IOException {
 			return IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream(fileName), "UTF-8");
 		}

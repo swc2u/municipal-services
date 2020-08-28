@@ -1,16 +1,42 @@
 package org.egov.assets.service;
 
+import static org.springframework.util.StringUtils.isEmpty;
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
 import org.egov.assets.common.MdmsRepository;
 import org.egov.assets.common.Pagination;
+import org.egov.assets.common.exception.CustomBindException;
 import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
-import org.egov.assets.model.*;
+import org.egov.assets.model.Material;
+import org.egov.assets.model.MaterialReceipt;
+import org.egov.assets.model.MaterialReceiptDetail;
+import org.egov.assets.model.MaterialReceiptRequest;
+import org.egov.assets.model.MaterialReceiptResponse;
+import org.egov.assets.model.MaterialReceiptSearch;
+import org.egov.assets.model.PDFResponse;
+import org.egov.assets.model.Scrap;
+import org.egov.assets.model.Scrap.ScrapStatusEnum;
+import org.egov.assets.model.ScrapDetail;
+import org.egov.assets.model.ScrapRequest;
+import org.egov.assets.model.Uom;
+import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.ReceiptNoteRepository;
 import org.egov.assets.repository.entity.MaterialIssueEntity;
 import org.egov.assets.repository.entity.MaterialReceiptEntity;
+import org.egov.assets.wf.WorkflowIntegrator;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -20,18 +46,13 @@ import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
 
-import static org.springframework.util.StringUtils.isEmpty;
+
 
 @Service
 public class MiscellaneousReceiptNoteService extends DomainService {
@@ -45,6 +66,12 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 	@Value("${inv.miscellaneousreceiptnote.save.key}")
 	private String saveTopicKey;
 
+	@Value("${inv.miscellaneousreceiptnote.updatestatus.topic}")
+	private String updatestatusTopic;
+
+	@Value("${inv.miscellaneousreceiptnote.updatestatus.key}")
+	private String updatestatusTopicKey;
+
 	@Autowired
 	private MaterialReceiptService materialReceiptService;
 
@@ -53,6 +80,9 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 
 	@Autowired
 	private ReceiptNoteRepository receiptNoteRepository;
+
+	@Autowired
+	WorkflowIntegrator workflowIntegrator;
 
 	@Autowired
 	private MdmsRepository mdmsRepository;
@@ -64,7 +94,7 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 		materialReceipts.forEach(materialReceipt -> {
 			materialReceipt.setId(receiptNoteRepository.getSequence("seq_materialreceipt"));
 			materialReceipt.setMrnNumber(appendString(materialReceipt));
-			materialReceipt.setMrnStatus(MaterialReceipt.MrnStatusEnum.APPROVED);
+			materialReceipt.setMrnStatus(MaterialReceipt.MrnStatusEnum.CREATED);
 			materialReceipt.setReceiptType(MaterialReceipt.ReceiptTypeEnum.MISCELLANEOUS_RECEIPT);
 			materialReceipt.setAuditDetails(getAuditDetails(materialReceiptRequest.getRequestInfo(), tenantId));
 			if (StringUtils.isEmpty(materialReceipt.getTenantId())) {
@@ -74,6 +104,9 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 			materialReceipt.getReceiptDetails().forEach(materialReceiptDetail -> {
 				setMaterialDetails(tenantId, materialReceiptDetail);
 			});
+			WorkFlowDetails workFlowDetails = materialReceiptRequest.getWorkFlowDetails();
+			workFlowDetails.setBusinessId(materialReceipt.getMrnNumber());
+			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(), workFlowDetails, tenantId);
 		});
 
 		logAwareKafkaTemplate.send(saveTopic, saveTopicKey, materialReceiptRequest);
@@ -378,6 +411,20 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 		}
 		return PDFResponse.builder()
 				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+	}
+
+	@Transactional
+	public MaterialReceiptResponse updateStatus(MaterialReceiptRequest materialReceiptRequest, String tenantId) {
+
+		try {
+			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
+					materialReceiptRequest.getWorkFlowDetails(), materialReceiptRequest.getWorkFlowDetails().getTenantId());
+			kafkaQue.send(updatestatusTopic, updatestatusTopicKey, materialReceiptRequest);
+			MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
+			return materialReceiptResponse.responseInfo(null).materialReceipt(materialReceiptRequest.getMaterialReceipt());
+		} catch (CustomBindException e) {
+			throw e;
+		}
 	}
 
 }

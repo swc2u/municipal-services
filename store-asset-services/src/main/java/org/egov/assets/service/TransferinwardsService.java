@@ -24,6 +24,7 @@ import org.egov.assets.model.MaterialIssue;
 import org.egov.assets.model.MaterialIssue.IssueTypeEnum;
 import org.egov.assets.model.MaterialIssue.MaterialIssueStatusEnum;
 import org.egov.assets.model.MaterialIssueDetail;
+import org.egov.assets.model.MaterialIssueRequest;
 import org.egov.assets.model.MaterialIssueResponse;
 import org.egov.assets.model.MaterialIssueSearchContract;
 import org.egov.assets.model.MaterialIssuedFromReceipt;
@@ -38,10 +39,12 @@ import org.egov.assets.model.Tenant;
 import org.egov.assets.model.TransferInwardRequest;
 import org.egov.assets.model.TransferInwardResponse;
 import org.egov.assets.model.Uom;
+import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.MaterialIssueJdbcRepository;
 import org.egov.assets.repository.MaterialReceiptDetailAddInfoJdbcRepository;
 import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.TransferInwardRepository;
+import org.egov.assets.wf.WorkflowIntegrator;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -50,6 +53,7 @@ import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -97,6 +101,15 @@ public class TransferinwardsService extends DomainService {
 	@Value("${inv.transfer.inward.update.key}")
 	private String updateTopicKey;
 
+	@Value("${inv.transfer.inward.updatestatus.topic}")
+	private String updateStatusTopic;
+
+	@Value("${inv.transfer.inward.updatestatus.key}")
+	private String updateStatusTopicKey;
+
+	@Autowired
+	WorkflowIntegrator workflowIntegrator;
+
 	// creating inter-store transfer inwards
 	public TransferInwardResponse create(TransferInwardRequest inwardRequest, String tenantId) {
 		try {
@@ -128,6 +141,10 @@ public class TransferinwardsService extends DomainService {
 				});
 				// Consider for workflow
 				// updateStatusAsReceipted(materialReceipt.getIssueNumber(), tenantId);
+				WorkFlowDetails workFlowDetails = inwardRequest.getWorkFlowDetails();
+				workFlowDetails.setBusinessId(materialReceipt.getMrnNumber());
+				workflowIntegrator.callWorkFlow(inwardRequest.getRequestInfo(), workFlowDetails,
+						materialReceipt.getTenantId());
 			});
 			kafkaTemplate.send(createTopic, createTopicKey, inwardRequest);
 			TransferInwardResponse response = new TransferInwardResponse();
@@ -483,6 +500,23 @@ public class TransferinwardsService extends DomainService {
 		return PDFResponse.builder()
 				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
 
+	}
+
+	@Transactional
+	public TransferInwardResponse updateStatus(TransferInwardRequest transferInwardRequest) {
+
+		try {
+			workflowIntegrator.callWorkFlow(transferInwardRequest.getRequestInfo(),
+					transferInwardRequest.getWorkFlowDetails(),
+					transferInwardRequest.getWorkFlowDetails().getTenantId());
+			kafkaQue.send(updateStatusTopic, updateStatusTopicKey, transferInwardRequest);
+			TransferInwardResponse response = new TransferInwardResponse();
+			response.setResponseInfo(null);
+			response.setTransferInwards(transferInwardRequest.getTransferInwards());
+			return response;
+		} catch (CustomBindException e) {
+			throw e;
+		}
 	}
 
 }

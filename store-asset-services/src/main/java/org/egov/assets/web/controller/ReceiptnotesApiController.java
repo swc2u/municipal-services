@@ -19,6 +19,7 @@ import org.egov.assets.model.MaterialReceiptSearch;
 import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.PDFRequest;
 import org.egov.assets.service.ReceiptNoteService;
+import org.egov.common.contract.request.RequestInfo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -80,6 +81,20 @@ public class ReceiptnotesApiController {
 		return new ResponseEntity(response, HttpStatus.OK);
 	}
 
+	@PostMapping(value = "/_inventoryreport", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<PDFResponse> receiptnotesInventoryReportPrintPost(@Valid @RequestBody PDFRequest pdfRequest,
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@RequestParam(value = "storecode", required = true) String storecode,
+			@RequestParam(value = "material", required = true) String material,
+			@RequestParam(value = "isprint", required = true) boolean forprint) {
+		MaterialReceiptSearch materialReceiptSearch = MaterialReceiptSearch.builder().tenantId(tenantId)
+				.forprint(forprint).receivingStore(storecode).materials(Arrays.asList(material)).forprint(forprint)
+				.build();
+		PDFResponse response = receiptNoteService.printInventoryReportPdf(materialReceiptSearch,
+				pdfRequest.getRequestInfo());
+		return new ResponseEntity(response, HttpStatus.OK);
+	}
+
 	@PostMapping(value = "/_balance", produces = { "application/json" }, consumes = { "application/json" })
 	public ResponseEntity<MaterialBalanceRateResponse> balanceAndRateSearchPost(
 			@Valid @RequestBody org.egov.common.contract.request.RequestInfo requestInfo,
@@ -101,4 +116,11 @@ public class ReceiptnotesApiController {
 		return new ResponseEntity<>(materialReceiptResponse, HttpStatus.OK);
 	}
 
+	@PostMapping(value = "/_updateStatus", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<MaterialReceiptResponse> receiptnotesUpdateStatusPost(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@Valid @RequestBody MaterialReceiptRequest materialReceipt) {
+		MaterialReceiptResponse materialReceiptResponse = receiptNoteService.updateStatus(materialReceipt, tenantId);
+		return new ResponseEntity<>(materialReceiptResponse, HttpStatus.OK);
+	}
 }

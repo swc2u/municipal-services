@@ -93,7 +93,7 @@ public class SuhLogService {
 			repository.deleteSuhLog(suhLog);
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
 					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(suhLog).build(), HttpStatus.CREATED);
+					.responseBody(suhLog).build(), HttpStatus.OK);
 
 		} catch (Exception e) {
 			throw new CustomException(CommonConstants.SUH_LOG_EXCEPTION_CODE, e.getMessage());

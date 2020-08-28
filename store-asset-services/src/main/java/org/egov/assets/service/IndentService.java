@@ -35,6 +35,7 @@ import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.Tenant;
 import org.egov.assets.model.Uom;
+import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.IndentDetailJdbcRepository;
 import org.egov.assets.repository.IndentJdbcRepository;
 import org.egov.assets.repository.PDFServiceReposistory;
@@ -43,6 +44,7 @@ import org.egov.assets.repository.entity.IndentDetailEntity;
 import org.egov.assets.repository.entity.IndentEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.assets.web.controller.AssetRepository;
+import org.egov.assets.wf.WorkflowIntegrator;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.json.simple.JSONArray;
@@ -96,6 +98,12 @@ public class IndentService extends DomainService {
 	@Value("${inv.indents.update.key}")
 	private String updateKey;
 
+	@Value("${inv.indents.updatestatus.topic}")
+	private String updatestatusTopic;
+
+	@Value("${inv.indents.updatestatus.key}")
+	private String updatestatusKey;
+
 	@Autowired
 	private StoreService storeService;
 
@@ -127,6 +135,9 @@ public class IndentService extends DomainService {
 	@Autowired
 	private AssetRepository assetRepository;
 
+	@Autowired
+	WorkflowIntegrator workflowIntegrator;
+
 	private static final Logger LOG = LoggerFactory.getLogger(IndentService.class);
 
 	@Transactional
@@ -146,7 +157,11 @@ public class IndentService extends DomainService {
 				i++;
 				int j = 0;
 				// TO-DO : when workflow implemented change this to created
-				b.setIndentStatus(IndentStatusEnum.APPROVED);
+				WorkFlowDetails workFlowDetails = indentRequest.getWorkFlowDetails();
+				workFlowDetails.setBusinessId(b.getIndentNumber());
+				workflowIntegrator.callWorkFlow(indentRequest.getRequestInfo(), workFlowDetails, b.getTenantId());
+
+				b.setIndentStatus(IndentStatusEnum.CREATED);
 				b.setAuditDetails(getAuditDetails(indentRequest.getRequestInfo(), Constants.ACTION_CREATE));
 
 				List<String> detailSequenceNos = indentRepository.getSequence(IndentDetail.class.getSimpleName(),
@@ -644,4 +659,22 @@ public class IndentService extends DomainService {
 		return PDFResponse.builder()
 				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
 	}
+
+	@Transactional
+	public IndentResponse updateStatus(IndentRequest indentRequest) {
+
+		try {
+			workflowIntegrator.callWorkFlow(indentRequest.getRequestInfo(), indentRequest.getWorkFlowDetails(),
+					indentRequest.getWorkFlowDetails().getTenantId());
+			kafkaQue.send(updatestatusTopic, updatestatusKey, indentRequest);
+			IndentResponse response = new IndentResponse();
+			response.setIndents(indentRequest.getIndents());
+			response.setResponseInfo(getResponseInfo(indentRequest.getRequestInfo()));
+			return response;
+		} catch (CustomBindException e) {
+			throw e;
+		}
+
+	}
+
 }

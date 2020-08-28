@@ -26,7 +26,6 @@ import org.egov.assets.common.exception.InvalidDataException;
 import org.egov.assets.model.Fifo;
 import org.egov.assets.model.FifoRequest;
 import org.egov.assets.model.FifoResponse;
-import org.egov.assets.model.IndentDetail;
 import org.egov.assets.model.Material;
 import org.egov.assets.model.MaterialIssue;
 import org.egov.assets.model.MaterialIssue.IssuePurposeEnum;
@@ -40,11 +39,18 @@ import org.egov.assets.model.MaterialIssuedFromReceipt;
 import org.egov.assets.model.MaterialReceiptDetail;
 import org.egov.assets.model.MaterialReceiptDetailSearch;
 import org.egov.assets.model.PDFResponse;
+import org.egov.assets.model.Scrap;
+import org.egov.assets.model.Scrap.ScrapStatusEnum;
+import org.egov.assets.model.ScrapDetail;
+import org.egov.assets.model.ScrapRequest;
+import org.egov.assets.model.ScrapResponse;
+import org.egov.assets.model.ScrapSearch;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.SupplierGetRequest;
 import org.egov.assets.model.SupplierResponse;
 import org.egov.assets.model.Uom;
+import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.MaterialIssueDetailJdbcRepository;
 import org.egov.assets.repository.MaterialIssueJdbcRepository;
 import org.egov.assets.repository.MaterialIssuedFromReceiptJdbcRepository;
@@ -52,6 +58,7 @@ import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.entity.FifoEntity;
 import org.egov.assets.repository.entity.MaterialIssueEntity;
 import org.egov.assets.util.InventoryUtilities;
+import org.egov.assets.wf.WorkflowIntegrator;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -63,6 +70,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -84,6 +92,9 @@ public class NonIndentMaterialIssueService extends DomainService {
 
 	@Autowired
 	private PDFServiceReposistory pdfServiceReposistory;
+
+	@Autowired
+	private ScrapService scrapService;
 
 	@Autowired
 	private MdmsRepository mdmsRepository;
@@ -111,18 +122,32 @@ public class NonIndentMaterialIssueService extends DomainService {
 
 	@Value("${inv.issues.update.key}")
 	private String updateKey;
+	
+	@Value("${inv.issues.updatestatus.topic}")
+	private String updateStatusTopic;
+
+	@Value("${inv.issues.updatestatus.key}")
+	private String updateStatusKey;
+
+	@Autowired
+	WorkflowIntegrator workflowIntegrator;
 
 	@Autowired
 	private LogAwareKafkaTemplate<String, Object> kafkaTemplate;
 
-	public MaterialIssueResponse create(MaterialIssueRequest nonIndentIssueRequest) {
+	public MaterialIssueResponse create(MaterialIssueRequest nonIndentIssueRequest, String tenantId) {
 		try {
+
 			fetchRelated(nonIndentIssueRequest);
 			validate(nonIndentIssueRequest.getMaterialIssues(), Constants.ACTION_CREATE);
 			List<String> sequenceNos = materialIssueJdbcRepository.getSequence(MaterialIssue.class.getSimpleName(),
 					nonIndentIssueRequest.getMaterialIssues().size());
 			int i = 0;
+			String issuePurpose = "";
 			for (MaterialIssue materialIssue : nonIndentIssueRequest.getMaterialIssues()) {
+				if (materialIssue.getIssuePurpose() != null)
+					issuePurpose = materialIssue.getIssuePurpose().toString();
+
 				String seqNo = sequenceNos.get(i);
 				materialIssue.setId(seqNo);
 				setMaterialIssueValues(materialIssue, seqNo, Constants.ACTION_CREATE);
@@ -145,16 +170,278 @@ public class NonIndentMaterialIssueService extends DomainService {
 					}
 				}
 				materialIssue.setTotalIssueValue(totalIssueValue);
+				WorkFlowDetails workFlowDetails = nonIndentIssueRequest.getWorkFlowDetails();
+				workFlowDetails.setBusinessId(materialIssue.getIssueNumber());
+				workflowIntegrator.callWorkFlow(nonIndentIssueRequest.getRequestInfo(), workFlowDetails,
+						materialIssue.getTenantId());
 			}
 
 			kafkaTemplate.send(createTopic, createKey, nonIndentIssueRequest);
 			MaterialIssueResponse response = new MaterialIssueResponse();
 			response.setMaterialIssues(nonIndentIssueRequest.getMaterialIssues());
 			response.setResponseInfo(getResponseInfo(nonIndentIssueRequest.getRequestInfo()));
+
+			if ((issuePurpose != null && !issuePurpose.isEmpty())
+					&& issuePurpose.equals(IssuePurposeEnum.WRITEOFFORSCRAP.toString())) {
+				addScrapDetails(nonIndentIssueRequest, tenantId);
+			}
+
 			return response;
 		} catch (CustomBindException e) {
 			throw e;
 		}
+	}
+
+	// public void addScrapDetails(MaterialIssueRequest nonIndentIssueRequest,
+	// String tenantId) {
+	// ScrapRequest scrapRequest = new ScrapRequest();
+	// List<Scrap> scrapList = new ArrayList<>();
+	// for (MaterialIssue materialIssue : nonIndentIssueRequest.getMaterialIssues())
+	// {
+	// Scrap scrap = new Scrap();
+	// scrap.setIssueNumber(materialIssue.getIssueNumber());
+	// scrap.setScrapStatus(ScrapStatusEnum.fromValue(materialIssue.getMaterialIssueStatus().toString()));
+	// scrap.setStore(materialIssue.getFromStore());
+	// scrap.description(materialIssue.getDescription());
+	// scrap.setDesignation(materialIssue.getDesignation());
+	// scrap.setScrapDate(materialIssue.getIssueDate());
+	//
+	// List<ScrapDetail> listScrapDetail = new ArrayList<>();
+	// for (MaterialIssueDetail materialIssueDetail :
+	// materialIssue.getMaterialIssueDetails()) {
+	// materialIssueDetail.setScrapedQuantity(
+	// materialIssueDetail.getScrapedQuantity() != null ?
+	// materialIssueDetail.getScrapedQuantity()
+	// : BigDecimal.ZERO);
+	//
+	// ScrapDetail scrapDetail = new ScrapDetail();
+	// scrapDetail.setTenantId(tenantId);
+	// scrapDetail.setIssueDetail(materialIssueDetail);
+	// scrapDetail.setMaterial(materialIssueDetail.getMaterial());
+	// scrapDetail.setUom(materialIssueDetail.getUom());
+	// scrapDetail.setLotNumber("0");
+	// scrapDetail.setUserQuantity(materialIssueDetail.getUserQuantityIssued());
+	// scrapDetail.setScrapQuantity(materialIssueDetail.getUserQuantityIssued());
+	// scrapDetail.setScrapValue(materialIssueDetail.getScrapValue());
+	// scrapDetail.setExistingValue(materialIssueDetail.getValue());
+	// scrapDetail.setQuantity(
+	// materialIssueDetail.getQuantityIssued() != null ?
+	// materialIssueDetail.getQuantityIssued()
+	// : BigDecimal.ZERO);
+	//
+	// listScrapDetail.add(scrapDetail);
+	// }
+	// scrap.setScrapDetails(listScrapDetail);
+	// scrapList.add(scrap);
+	// }
+	// scrapRequest.setRequestInfo(nonIndentIssueRequest.getRequestInfo());
+	// scrapRequest.setScraps(scrapList);
+	// scrapService.create(scrapRequest, tenantId);
+	// }
+
+	public void addScrapDetails(MaterialIssueRequest nonIndentIssueRequest, String tenantId) {
+		ScrapRequest scrapRequest = new ScrapRequest();
+		List<Scrap> scrapList = new ArrayList<>();
+		boolean isUpdate = false;
+		for (MaterialIssue materialIssue : nonIndentIssueRequest.getMaterialIssues()) {
+			ScrapSearch scrapSearch = new ScrapSearch();
+			scrapSearch.setTenantId(tenantId);
+			scrapSearch.setIssueNumber(materialIssue.getIssueNumber());
+			ScrapResponse scrapResponse = scrapService.search(scrapSearch);
+			if (!scrapResponse.getScraps().isEmpty()) {
+				isUpdate = true;
+				for (Scrap d : scrapResponse.getScraps()) {
+					Scrap scrap = new Scrap();
+					scrap.setId(d.getId());
+					scrap.setScrapNumber(d.getScrapNumber());
+					scrap.setIssueNumber(materialIssue.getIssueNumber());
+					scrap.setScrapStatus(ScrapStatusEnum.fromValue(materialIssue.getMaterialIssueStatus().toString()));
+					scrap.setStore(materialIssue.getFromStore());
+					scrap.description(materialIssue.getDescription());
+					scrap.setDesignation(materialIssue.getDesignation());
+					scrap.setScrapDate(materialIssue.getIssueDate());
+
+					List<ScrapDetail> dd = d.getScrapDetails();
+					List<ScrapDetail> listScrapDetail = new ArrayList<>();
+					for (MaterialIssueDetail materialIssueDetail : materialIssue.getMaterialIssueDetails()) {
+						ScrapDetail scrapDetail = new ScrapDetail();
+
+						ScrapDetail e = dd.stream().filter(predicate -> predicate.getMaterial().getCode()
+								.equals(materialIssueDetail.getMaterial().getCode())).findAny().orElse(null);
+
+						if (e != null) {
+							scrapDetail.setId(e.getId());
+						}
+
+						scrapDetail.setScrapNumber(d.getScrapNumber());
+						materialIssueDetail.setScrapedQuantity(materialIssueDetail.getScrapedQuantity() != null
+								? materialIssueDetail.getScrapedQuantity()
+								: BigDecimal.ZERO);
+
+						scrapDetail.setTenantId(tenantId);
+						scrapDetail.setIssueDetail(materialIssueDetail);
+						scrapDetail.setMaterial(materialIssueDetail.getMaterial());
+						scrapDetail.setUom(materialIssueDetail.getUom());
+						scrapDetail.setLotNumber("0");
+						scrapDetail.setUserQuantity(
+								e != null ? e.getUserQuantity().add(materialIssueDetail.getUserQuantityIssued())
+										: materialIssueDetail.getUserQuantityIssued());
+						scrapDetail.setScrapQuantity(
+								e != null ? e.getScrapQuantity().add(materialIssueDetail.getUserQuantityIssued())
+										: materialIssueDetail.getUserQuantityIssued());
+						scrapDetail.setScrapValue(e != null ? e.getScrapValue().add(materialIssueDetail.getScrapValue())
+								: materialIssueDetail.getScrapValue());
+						scrapDetail
+								.setExistingValue(e != null ? e.getExistingValue().add(materialIssueDetail.getValue())
+										: materialIssueDetail.getValue());
+						scrapDetail.setQuantity(e != null ? e.getQuantity().add(materialIssueDetail.getQuantityIssued())
+								: materialIssueDetail.getQuantityIssued());
+
+						listScrapDetail.add(scrapDetail);
+					}
+					scrap.setScrapDetails(listScrapDetail);
+					scrapList.add(scrap);
+				}
+			} else {
+				Scrap scrap = new Scrap();
+				scrap.setIssueNumber(materialIssue.getIssueNumber());
+				scrap.setScrapStatus(ScrapStatusEnum.fromValue(materialIssue.getMaterialIssueStatus().toString()));
+				scrap.setStore(materialIssue.getFromStore());
+				scrap.description(materialIssue.getDescription());
+				scrap.setDesignation(materialIssue.getDesignation());
+				scrap.setScrapDate(materialIssue.getIssueDate());
+				List<ScrapDetail> listScrapDetail = new ArrayList<>();
+				for (MaterialIssueDetail materialIssueDetail : materialIssue.getMaterialIssueDetails()) {
+					ScrapDetail scrapDetail = new ScrapDetail();
+
+					materialIssueDetail.setScrapedQuantity(
+							materialIssueDetail.getScrapedQuantity() != null ? materialIssueDetail.getScrapedQuantity()
+									: BigDecimal.ZERO);
+
+					scrapDetail.setTenantId(tenantId);
+					scrapDetail.setIssueDetail(materialIssueDetail);
+					scrapDetail.setMaterial(materialIssueDetail.getMaterial());
+					scrapDetail.setUom(materialIssueDetail.getUom());
+					scrapDetail.setLotNumber("0");
+					scrapDetail.setUserQuantity(materialIssueDetail.getUserQuantityIssued());
+					scrapDetail.setScrapQuantity(materialIssueDetail.getUserQuantityIssued());
+					scrapDetail.setScrapValue(materialIssueDetail.getScrapValue());
+					scrapDetail.setExistingValue(materialIssueDetail.getValue());
+					scrapDetail.setQuantity(
+							materialIssueDetail.getQuantityIssued() != null ? materialIssueDetail.getQuantityIssued()
+									: BigDecimal.ZERO);
+
+					listScrapDetail.add(scrapDetail);
+				}
+				scrap.setScrapDetails(listScrapDetail);
+				scrapList.add(scrap);
+			}
+		}
+		scrapRequest.setRequestInfo(nonIndentIssueRequest.getRequestInfo());
+		scrapRequest.setScraps(scrapList);
+		if (isUpdate)
+			scrapService.update(scrapRequest, tenantId);
+		else
+			scrapService.create(scrapRequest, tenantId);
+	}
+
+	public void updateScrapDetails(MaterialIssueRequest nonIndentIssueRequest, String tenantId,
+			List<MaterialIssue> existingMaterialIssue) {
+		ScrapRequest scrapRequest = new ScrapRequest();
+		List<Scrap> scrapList = new ArrayList<>();
+		for (MaterialIssue materialIssue : nonIndentIssueRequest.getMaterialIssues()) {
+			MaterialIssue materialIssueExisting = existingMaterialIssue.stream()
+					.filter(predicate -> predicate.getIssueNumber().equals(materialIssue.getIssueNumber())).findAny()
+					.orElse(null);
+
+			ScrapSearch scrapSearch = new ScrapSearch();
+			scrapSearch.setTenantId(tenantId);
+			scrapSearch.setIssueNumber(materialIssue.getIssueNumber());
+			ScrapResponse scrapResponse = scrapService.search(scrapSearch);
+			if (!scrapResponse.getScraps().isEmpty()) {
+				for (Scrap d : scrapResponse.getScraps()) {
+					Scrap scrap = new Scrap();
+					scrap.setId(d.getId());
+					scrap.setScrapNumber(d.getScrapNumber());
+					scrap.setIssueNumber(materialIssue.getIssueNumber());
+					scrap.setScrapStatus(ScrapStatusEnum.fromValue(materialIssue.getMaterialIssueStatus().toString()));
+					scrap.setStore(materialIssue.getFromStore());
+					scrap.description(materialIssue.getDescription());
+					scrap.setDesignation(materialIssue.getDesignation());
+					scrap.setScrapDate(materialIssue.getIssueDate());
+
+					List<ScrapDetail> dd = d.getScrapDetails();
+					List<ScrapDetail> listScrapDetail = new ArrayList<>();
+
+					List<MaterialIssueDetail> listOfExistingIssue = materialIssueExisting != null
+							? materialIssueExisting.getMaterialIssueDetails()
+							: new ArrayList();
+
+					for (MaterialIssueDetail materialIssueDetail : materialIssue.getMaterialIssueDetails()) {
+						ScrapDetail scrapDetail = new ScrapDetail();
+
+						MaterialIssueDetail materialIssueDetailExisting = listOfExistingIssue.stream()
+								.filter(predicate -> predicate.getId().equalsIgnoreCase(materialIssueDetail.getId())
+										&& predicate.getMaterial().getCode()
+												.equals(materialIssueDetail.getMaterial().getCode()))
+								.findAny().orElse(null);
+
+						ScrapDetail e = dd.stream().filter(predicate -> predicate.getMaterial().getCode()
+								.equals(materialIssueDetail.getMaterial().getCode())).findAny().orElse(null);
+
+						if (e != null) {
+							scrapDetail.setId(e.getId());
+						}
+
+						scrapDetail.setScrapNumber(d.getScrapNumber());
+						materialIssueDetail.setScrapedQuantity(materialIssueDetail.getScrapedQuantity() != null
+								? materialIssueDetail.getScrapedQuantity()
+								: BigDecimal.ZERO);
+
+						scrapDetail.setTenantId(tenantId);
+						scrapDetail.setIssueDetail(materialIssueDetail);
+						scrapDetail.setMaterial(materialIssueDetail.getMaterial());
+						scrapDetail.setUom(materialIssueDetail.getUom());
+						scrapDetail.setLotNumber("0");
+
+						BigDecimal userQty = (materialIssueDetailExisting != null && e != null
+								? e.getScrapQuantity().subtract(materialIssueDetailExisting.getUserQuantityIssued())
+										.add(materialIssueDetail.getUserQuantityIssued())
+								: materialIssueDetail.getUserQuantityIssued());
+
+						scrapDetail.setUserQuantity(userQty);
+						scrapDetail.setScrapQuantity(userQty);
+
+						BigDecimal scrapValue = (materialIssueDetailExisting != null && e != null
+								? e.getScrapValue().subtract(materialIssueDetailExisting.getScrapValue()).add(
+										materialIssueDetail.getScrapValue())
+								: materialIssueDetail.getScrapValue());
+
+						scrapDetail.setScrapValue(scrapValue);
+
+						BigDecimal scrapValueExisting = (materialIssueDetailExisting != null && e != null
+								? e.getExistingValue().subtract(materialIssueDetailExisting.getValue()).add(
+										materialIssueDetail.getValue())
+								: materialIssueDetail.getValue());
+
+						scrapDetail.setExistingValue(scrapValueExisting);
+
+						BigDecimal quanity = (materialIssueDetailExisting != null && e != null
+								? e.getQuantity().subtract(materialIssueDetailExisting.getQuantityIssued())
+										.add(materialIssueDetail.getQuantityIssued())
+								: materialIssueDetail.getQuantityIssued());
+
+						scrapDetail.setQuantity(quanity);
+						listScrapDetail.add(scrapDetail);
+					}
+					scrap.setScrapDetails(listScrapDetail);
+					scrapList.add(scrap);
+				}
+			}
+		}
+		scrapRequest.setRequestInfo(nonIndentIssueRequest.getRequestInfo());
+		scrapRequest.setScraps(scrapList);
+		scrapService.update(scrapRequest, tenantId);
 	}
 
 	private BigDecimal getMaterialIssuedFromReceiptData(Store store, Material material, Long issueDate, String tenantId,
@@ -482,7 +769,13 @@ public class NonIndentMaterialIssueService extends DomainService {
 		validate(materialIssueRequest.getMaterialIssues(), Constants.ACTION_UPDATE);
 		List<MaterialIssue> materialIssues = materialIssueRequest.getMaterialIssues();
 		int i = 0;
+		String issuePurpose = "";
+
+		List<MaterialIssue> existingMaterialIssue = new ArrayList<>();
 		for (MaterialIssue materialIssue : materialIssues) {
+			if (materialIssue.getIssuePurpose() != null)
+				issuePurpose = materialIssue.getIssuePurpose().toString();
+
 			if (StringUtils.isEmpty(materialIssue.getTenantId()))
 				materialIssue.setTenantId(tenantId);
 			MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract();
@@ -491,6 +784,8 @@ public class NonIndentMaterialIssueService extends DomainService {
 			MaterialIssueResponse issueResponse = search(searchContract);
 			List<MaterialIssueDetail> materialIssueDetails = issueResponse.getMaterialIssues().get(0)
 					.getMaterialIssueDetails();
+
+			existingMaterialIssue.addAll(issueResponse.getMaterialIssues());
 			List<String> materialIssuedFromReceiptsIds = new ArrayList<>();
 			ObjectMapper objectMapper = new ObjectMapper();
 			Map<String, Uom> uoms = getUoms(tenantId, objectMapper, new RequestInfo());
@@ -542,6 +837,12 @@ public class NonIndentMaterialIssueService extends DomainService {
 		MaterialIssueResponse response = new MaterialIssueResponse();
 		response.setMaterialIssues(materialIssueRequest.getMaterialIssues());
 		response.setResponseInfo(getResponseInfo(materialIssueRequest.getRequestInfo()));
+
+		if ((issuePurpose != null && !issuePurpose.isEmpty())
+				&& issuePurpose.equals(IssuePurposeEnum.WRITEOFFORSCRAP.toString())) {
+			updateScrapDetails(materialIssueRequest, tenantId, existingMaterialIssue);
+		}
+
 		return response;
 	}
 
@@ -806,5 +1107,21 @@ public class NonIndentMaterialIssueService extends DomainService {
 		return PDFResponse.builder()
 				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
 
+	}
+
+	@Transactional
+	public MaterialIssueResponse updateStatus(MaterialIssueRequest indentIssueRequest) {
+
+		try {
+			workflowIntegrator.callWorkFlow(indentIssueRequest.getRequestInfo(),
+					indentIssueRequest.getWorkFlowDetails(), indentIssueRequest.getWorkFlowDetails().getTenantId());
+			kafkaQue.send(updateStatusTopic, updateStatusKey, indentIssueRequest);
+			MaterialIssueResponse response = new MaterialIssueResponse();
+			response.setMaterialIssues(indentIssueRequest.getMaterialIssues());
+			response.setResponseInfo(getResponseInfo(indentIssueRequest.getRequestInfo()));
+			return response;
+		} catch (CustomBindException e) {
+			throw e;
+		}
 	}
 }
