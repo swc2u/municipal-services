@@ -25,14 +25,19 @@ import org.egov.assets.model.MaterialReceiptDetailAddnlinfo;
 import org.egov.assets.model.MaterialReceiptSearch;
 import org.egov.assets.model.OpeningBalanceRequest;
 import org.egov.assets.model.OpeningBalanceResponse;
+import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.Tenant;
 import org.egov.assets.model.Uom;
 import org.egov.assets.repository.MaterialReceiptJdbcRepository;
+import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.StoreJdbcRepository;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -52,6 +57,9 @@ public class OpeningBalanceService extends DomainService {
 
 	@Autowired
 	private MdmsRepository mdmsRepository;
+
+	@Autowired
+	private PDFServiceReposistory pdfServiceReposistory;
 
 	@Autowired
 	private NumberGenerator numberGenerator;
@@ -448,5 +456,61 @@ public class OpeningBalanceService extends DomainService {
 		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
 		String s2 = format.format(epoch);
 		return s2;
+	}
+
+	public PDFResponse printOpeningBalanceReportPdf(MaterialReceiptSearch materialReceiptSearch,
+			RequestInfo requestInfo) {
+		OpeningBalanceResponse balanceResponse = search(materialReceiptSearch);
+
+		if (!balanceResponse.getMaterialReceipt().isEmpty()) {
+
+			JSONObject mainRequest = new JSONObject();
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
+				if (materialReceiptSearch.isForprint())
+					mainRequest.put("RequestInfo", reqInfo);
+				else
+					mainRequest.put("ResponseInfo", null);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("storeName", balanceResponse.getMaterialReceipt().get(0).getReceivingStore().getName());
+			jsonObject.put("financialYear", balanceResponse.getMaterialReceipt().get(0).getFinancialYear());
+
+			org.json.simple.JSONArray materialDetails = new org.json.simple.JSONArray();
+			org.json.simple.JSONArray mainMaterials = new org.json.simple.JSONArray();
+			int i = 0;
+			for (MaterialReceipt materialReceipt : balanceResponse.getMaterialReceipt()) {
+				for (MaterialReceiptDetail detail : materialReceipt.getReceiptDetails()) {
+					JSONObject materialDetail = new JSONObject();
+					materialDetail.put("srNo", i++);
+					materialDetail.put("materialCode", detail.getMaterial().getCode());
+					materialDetail.put("materialName", detail.getMaterial().getName());
+					materialDetail.put("materialType", detail.getMaterial().getMaterialType().getName());
+					materialDetail.put("uomName", detail.getMaterial().getPurchaseUom().getCode());
+					materialDetail.put("quantity", detail.getUserAcceptedQty());
+					materialDetail.put("unitRate", detail.getUnitRate());
+					materialDetail.put("totalAmount", detail.getUserAcceptedQty().multiply(detail.getUnitRate()));
+					materialDetail.put("remarks", detail.getRemarks());
+					materialDetails.add(materialDetail);
+				}
+			}
+			jsonObject.put("balanceDetails", materialDetails);
+			mainMaterials.add(jsonObject);
+			mainRequest.put("OpeningBalanceReport", mainMaterials);
+
+			if (materialReceiptSearch.isForprint())
+				return pdfServiceReposistory.getPrint(mainRequest, "store-asset-report-opening-balance",
+						materialReceiptSearch.getTenantId());
+			else
+				return PDFResponse.builder().responseInfo(ResponseInfo.builder().status("Success").build())
+						.printData(mainRequest).build();
+		}
+
+		return PDFResponse.builder()
+				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
 	}
 }

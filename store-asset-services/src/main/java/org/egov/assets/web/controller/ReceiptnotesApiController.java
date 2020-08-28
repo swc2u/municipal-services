@@ -123,5 +123,4 @@ public class ReceiptnotesApiController {
 		MaterialReceiptResponse materialReceiptResponse = receiptNoteService.updateStatus(materialReceipt, tenantId);
 		return new ResponseEntity<>(materialReceiptResponse, HttpStatus.OK);
 	}
-
 }
