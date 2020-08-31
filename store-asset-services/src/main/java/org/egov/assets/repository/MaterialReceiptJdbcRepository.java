@@ -46,18 +46,25 @@ import java.util.List;
 import java.util.Map;
 
 import org.egov.assets.common.JdbcRepository;
+import org.egov.assets.common.MdmsRepository;
 import org.egov.assets.common.Pagination;
+import org.egov.assets.model.Department;
 import org.egov.assets.model.MaterialBalanceRate;
 import org.egov.assets.model.MaterialReceipt;
 import org.egov.assets.model.MaterialReceiptSearch;
 import org.egov.assets.repository.entity.MaterialBalanceRateEntity;
 import org.egov.assets.repository.entity.MaterialReceiptEntity;
+import org.egov.common.contract.request.RequestInfo;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class MaterialReceiptJdbcRepository extends JdbcRepository {
@@ -66,6 +73,9 @@ public class MaterialReceiptJdbcRepository extends JdbcRepository {
 
 	@Autowired
 	NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+	@Autowired
+	private MdmsRepository mdmsRepository;
 
 	static {
 		init(MaterialReceiptEntity.class);
@@ -226,10 +236,10 @@ public class MaterialReceiptJdbcRepository extends JdbcRepository {
 		Map<String, Object> paramValues = new HashMap<>();
 
 		if (materialReceiptSearch.getMaterials() != null && !materialReceiptSearch.getMaterials().isEmpty()) {
-			searchQuery = searchQuery.replace(":materialcondition", "and material in (:material)");			
+			searchQuery = searchQuery.replace(":materialcondition", "and material in (:material)");
 			paramValues.put("material", materialReceiptSearch.getMaterials());
-		}else {
-			searchQuery = searchQuery.replace(":materialcondition", "");	
+		} else {
+			searchQuery = searchQuery.replace(":materialcondition", "");
 		}
 
 		if (materialReceiptSearch.getIssueingStore() != null) {
@@ -258,6 +268,70 @@ public class MaterialReceiptJdbcRepository extends JdbcRepository {
 		page.setTotalResults(materialBalanceRate.size());
 		page.setPagedData(materialBalanceRate);
 		return page;
+	}
+
+	public JSONArray getInventoryReport(MaterialReceiptSearch materialReceiptSearch) {
+		String searchQuery = "select tenantid,openmrn, openstore, opendepart, openmat, openuom, openqty, openrate, opentotalvalue, TO_CHAR(TO_TIMESTAMP(recptdate/1000), 'DD-MM-YYYY') recptdate, recptreceiptno, recptdepartment, recptqtypurchased, recptuom,\r\n"
+				+ " recptunitrate, recpttotalvalue, issuenum, issuestore, issuedepart, TO_CHAR(TO_TIMESTAMP(issuedate/1000), 'DD-MM-YYYY') issuedate, issueqty, issuerate, issueuom, issuetotalvalue, balanceqty,  \r\n"
+				+ " balanceuom, balancetotalvalue from ((select tenantid,opnBalance.mrnnumber openmrn, opnBalance.storecode openstore, opnBalance.department opendepart, opnBalance.material openmat,\r\n"
+				+ " opnBalance.uomno openuom,opnBalance.qtyopeningbalance openqty, opnBalance.unitrateopeningbalance openrate, opnBalance.valueopeningbalance opentotalvalue,\r\n"
+				+ " 0 as recptdate, '' as recptreceiptno, '' as recptdepartment, 0 as recptqtypurchased, '' as recptuom, 0 as recptunitrate, 0 as recpttotalvalue,\r\n"
+				+ " issues.issuenumber issuenum,issues.tostore issuestore, issues.department issuedepart,issues.issuedate issuedate, issues.quantity issueqty, opnBalance.unitrateopeningbalance issuerate,\r\n"
+				+ " issues.uom issueuom, opnBalance.unitrateopeningbalance*issues.quantity issuetotalvalue, (opnBalance.qtyopeningbalance::numeric(18,2) - SUM(COALESCE(issues.quantity,0)::numeric(18,2)) OVER (PARTITION BY opnBalance.mrnnumber ORDER BY issues.id, issues.issuedate)) balanceqty, opnBalance.uomno balanceuom, \r\n"
+				+ " ((opnBalance.qtyopeningbalance::numeric(18,2) - SUM(COALESCE(issues.quantity,0)::numeric(18,2)) OVER (PARTITION BY opnBalance.mrnnumber ORDER BY issues.id, issues.issuedate)) * opnBalance.unitrateopeningbalance::numeric(18,2))  balancetotalvalue\r\n"
+				+ "from (select materialreceipt.tenantid,rctdtl.id,materialreceipt.receiptdate, materialreceipt.receivingstore storecode, st.department,rctdtl.material,rctdtl.uomno, materialreceipt.mrnnumber,COALESCE(addinfo.quantity,acceptedqty)::numeric(18,2) qtyopeningbalance,unitRate::numeric(18,2) unitrateopeningbalance, (COALESCE(addinfo.quantity,acceptedqty)::numeric(18,2)*unitRate::numeric(18,2)) valueopeningbalance\r\n"
+				+ "from materialreceipt materialreceipt inner join materialreceiptdetail rctdtl on materialreceipt.mrnnumber = rctdtl.mrnnumber inner join\r\n"
+				+ "materialreceiptdetailaddnlinfo  addinfo on rctdtl.id= addinfo.receiptdetailid left join store st on materialreceipt.receivingstore=st.code\r\n"
+				+ "where materialreceipt.receipttype= 'OPENING BALANCE') as opnBalance left join (select iss.id, iss.issuenumber,iss.tostore,st.department,issuedetails.materialcode, issuedetails.uom, iss.issuedate,receiptdetailid, issuedetails.id issuedetailid,issuereceipt.status,issuereceipt.quantity::numeric(18,2) from materialissue iss inner join materialissuedetail issuedetails on iss.issuenumber=issuedetails.materialissuenumber inner join materialissuedfromreceipt issuereceipt \r\n"
+				+ "on issuedetails.id=issuereceipt.issuedetailid left join store st on iss.tostore=st.code) issues on issues.status=true and issues.receiptdetailid=opnBalance.id\r\n"
+				+ "order by opnBalance.mrnnumber, issues.id, issues.issuedate asc)\r\n" + "union all\r\n"
+				+ "(select tenantid,'' openmrn, opnBalance.storecode openstore, opnBalance.department opendepart, opnBalance.material openmat,\r\n"
+				+ " '' openuom,0 openqty, 0 openrate, 0 opentotalvalue,\r\n"
+				+ " opnBalance.receiptdate recptdate, opnBalance.mrnnumber recptreceiptno, opnBalance.department recptdepartment, opnBalance.qtyopeningbalance recptqtypurchased,\r\n"
+				+ " opnBalance.uomno recptuom, opnBalance.unitrateopeningbalance recptunitrate, (opnBalance.qtyopeningbalance::numeric(18,2)*opnBalance.unitrateopeningbalance::numeric(18,2)) recpttotalvalue,\r\n"
+				+ " issues.issuenumber issuenum,issues.tostore issuestore, issues.department issuedepart,issues.issuedate issuedate, \r\n"
+				+ " issues.quantity issueqty, opnBalance.unitrateopeningbalance issuerate, issues.uom issueuom, opnBalance.unitrateopeningbalance*issues.quantity issuetotalvalue,\r\n"
+				+ " (opnBalance.qtyopeningbalance::numeric(18,2) - SUM(COALESCE(issues.quantity,0)::numeric(18,2)) OVER (PARTITION BY opnBalance.mrnnumber ORDER BY issues.id, issues.issuedate)) balanceqty, opnBalance.uomno balanceuom, \r\n"
+				+ " ((opnBalance.qtyopeningbalance::numeric(18,2) - SUM(COALESCE(issues.quantity,0)::numeric(18,2)) OVER (PARTITION BY opnBalance.mrnnumber ORDER BY issues.id, issues.issuedate)) * opnBalance.unitrateopeningbalance::numeric(18,2))  balancetotalvalue\r\n"
+				+ "from (select materialreceipt.tenantid,rctdtl.id,materialreceipt.receiptdate, materialreceipt.receivingstore storecode, st.department,rctdtl.material,rctdtl.uomno, materialreceipt.mrnnumber,COALESCE(addinfo.quantity,acceptedqty)::numeric(18,2) qtyopeningbalance,unitRate::numeric(18,2) unitrateopeningbalance, (COALESCE(addinfo.quantity,acceptedqty)::numeric(18,2)*unitRate::numeric(18,2)) valueopeningbalance\r\n"
+				+ "from materialreceipt materialreceipt inner join materialreceiptdetail rctdtl on materialreceipt.mrnnumber = rctdtl.mrnnumber inner join\r\n"
+				+ "materialreceiptdetailaddnlinfo  addinfo on rctdtl.id= addinfo.receiptdetailid left join store st on materialreceipt.receivingstore=st.code\r\n"
+				+ "where materialreceipt.receipttype <> 'OPENING BALANCE') as opnBalance left join (select iss.id, iss.issuenumber,iss.tostore,st.department,issuedetails.materialcode, issuedetails.uom, iss.issuedate,receiptdetailid, issuedetails.id issuedetailid,issuereceipt.status,issuereceipt.quantity::numeric(18,2) from materialissue iss inner join materialissuedetail issuedetails on iss.issuenumber=issuedetails.materialissuenumber inner join materialissuedfromreceipt issuereceipt \r\n"
+				+ "on issuedetails.id=issuereceipt.issuedetailid left join store st on iss.tostore=st.code) issues on issues.status=true and issues.receiptdetailid=opnBalance.id order by opnBalance.mrnnumber, issues.id, issues.issuedate asc)) as MainTable\r\n"
+				+ "where MainTable.openstore=:storecode and MainTable.openmat in (:material) and MainTable.tenantid=:tenantid";
+
+		Map<String, Object> paramValues = new HashMap<>();
+		if (materialReceiptSearch.getReceivingStore() != null) {
+			paramValues.put("storecode", materialReceiptSearch.getReceivingStore());
+		}
+
+		if (materialReceiptSearch.getTenantId() != null) {
+			paramValues.put("tenantid", materialReceiptSearch.getTenantId());
+		}
+		if (materialReceiptSearch.getMaterials() != null && !materialReceiptSearch.getMaterials().isEmpty()) {
+			paramValues.put("material", materialReceiptSearch.getMaterials());
+		}
+
+		Map<String, Department> departmentMap = getDepartment(materialReceiptSearch.getTenantId());
+		InventoryRowMapper inventoryRowMapper = new InventoryRowMapper(departmentMap);
+		List<JSONArray> inventoryResponse = namedParameterJdbcTemplate.query(searchQuery, paramValues,
+				inventoryRowMapper);
+
+		return inventoryResponse.isEmpty() ? new JSONArray() : inventoryResponse.get(0);
+	}
+
+	private Map<String, Department> getDepartment(String tenantId) {
+		net.minidev.json.JSONArray responseJSONArray = mdmsRepository.getByCriteria(tenantId, "store-asset",
+				"Department", null, null, new RequestInfo());
+		Map<String, Department> departmentMap = new HashMap<>();
+		ObjectMapper mapper = new ObjectMapper();
+		if (responseJSONArray != null && !responseJSONArray.isEmpty()) {
+			for (int i = 0; i < responseJSONArray.size(); i++) {
+				Department department = mapper.convertValue(responseJSONArray.get(i), Department.class);
+				departmentMap.put(department.getCode(), department);
+			}
+		}
+		return departmentMap;
 	}
 
 }

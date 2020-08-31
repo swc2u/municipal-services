@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -38,6 +39,7 @@ import org.egov.assets.model.PurchaseOrderDetailSearch;
 import org.egov.assets.model.PurchaseOrderRequest;
 import org.egov.assets.model.PurchaseOrderResponse;
 import org.egov.assets.model.PurchaseOrderSearch;
+import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.StoreResponse;
 import org.egov.assets.model.SupplierGetRequest;
@@ -852,13 +854,59 @@ public class ReceiptNoteService extends DomainService {
 
 		try {
 			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
-					materialReceiptRequest.getWorkFlowDetails(), materialReceiptRequest.getWorkFlowDetails().getTenantId());
+					materialReceiptRequest.getWorkFlowDetails(),
+					materialReceiptRequest.getWorkFlowDetails().getTenantId());
 			kafkaQue.send(updateStatusTopic, updateStatusTopicKey, materialReceiptRequest);
 			MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
-			return materialReceiptResponse.responseInfo(null).materialReceipt(materialReceiptRequest.getMaterialReceipt());
+			return materialReceiptResponse.responseInfo(null)
+					.materialReceipt(materialReceiptRequest.getMaterialReceipt());
 		} catch (CustomBindException e) {
 			throw e;
 		}
 	}
 
+	public PDFResponse printInventoryReportPdf(MaterialReceiptSearch materialReceiptSearch, RequestInfo requestInfo) {
+		JSONArray jsonArray = materialReceiptService.getInventoryReport(materialReceiptSearch);
+		JSONArray arrayPrintData = new JSONArray();
+		if (!jsonArray.isEmpty()) {
+			JSONObject requestMain = new JSONObject();
+
+			StoreGetRequest storeGetRequest = new StoreGetRequest();
+			storeGetRequest.setCode(Arrays.asList(materialReceiptSearch.getReceivingStore()));
+			storeGetRequest.setTenantId(materialReceiptSearch.getTenantId());
+			StoreResponse store = storeService.search(storeGetRequest);
+
+			Material material = materialService.fetchMaterial(materialReceiptSearch.getTenantId(),
+					materialReceiptSearch.getMaterials().get(0), new RequestInfo());
+			requestMain.put("storeName", store.getStores().isEmpty() ? materialReceiptSearch.getReceivingStore()
+					: store.getStores().get(0).getName());
+			requestMain.put("storeDepartment",
+					store.getStores().isEmpty() ? "" : store.getStores().get(0).getDepartment().getName());
+			requestMain.put("materialName", material.getName());
+			requestMain.put("invetoryDetails", jsonArray);
+			arrayPrintData.add(requestMain);
+		}
+
+		if (!arrayPrintData.isEmpty() && materialReceiptSearch.isForprint()) {
+			JSONObject finalDta = new JSONObject();
+
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
+				finalDta.put("RequestInfo", reqInfo);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			finalDta.put("InventoryReport", arrayPrintData);
+
+			return pdfServiceReposistory.getPrint(finalDta, "store-asset-report-inventory-register",
+					materialReceiptSearch.getTenantId());
+		} else if (!arrayPrintData.isEmpty() && !materialReceiptSearch.isForprint()) {
+			return PDFResponse.builder().responseInfo(ResponseInfo.builder().status("Success").build())
+					.printData(arrayPrintData).build();
+		} else {
+			return PDFResponse.builder()
+					.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+		}
+	}
 }
