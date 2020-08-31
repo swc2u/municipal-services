@@ -726,7 +726,7 @@ public class NocRepository {
 					object.put("NOCApplicationDetail", details);
 					producer.push(updateNOCApplicationDetailsTopic, object);
 				}
-			} else if (dataPayLoad.get(CommonConstants.WITHDRAWAPPROVALAMOUNT) != null) {
+			} else if (dataPayLoad.get(CommonConstants.WITHDRAWAPPROVALAMOUNT) != null && dataPayLoad.get(CommonConstants.WITHDRAWAPPROVALTAXAMOUNT) != null) {
 				NOCApplicationDetail applicationDetailModel = jdbcTemplate.queryForObject(
 						QueryBuilder.SELECT_APPLICATION_DETAIL_QUERY, new Object[] { requestData.getApplicationId() },
 						BeanPropertyRowMapper.newInstance(NOCApplicationDetail.class));
@@ -735,8 +735,19 @@ public class NocRepository {
 					ObjectMapper objectMapper = new ObjectMapper();
 					JSONObject applicationDetailData = objectMapper
 							.readValue(applicationDetailModel.getApplicationDetail(), JSONObject.class);
+					BigDecimal amountFromPayload = new BigDecimal(dataPayLoad.get(CommonConstants.WITHDRAWAPPROVALAMOUNT).toString());
+					BigDecimal taxFromPayload = new BigDecimal(dataPayLoad.get(CommonConstants.WITHDRAWAPPROVALTAXAMOUNT).toString());
+					if(amountFromPayload.compareTo(apps.getAmount())>0)
+						throw new CustomException(CommonConstants.WITHDRAWAPPROVALAMOUNTERRORCODE, CommonConstants.WITHDRAWAPPROVALAMOUNTERROR);
+
+					if(taxFromPayload.compareTo(apps.getGstAmount())>0)
+						throw new CustomException(CommonConstants.WITHDRAWAPPROVALTAXAMOUNTERRORCODE, CommonConstants.WITHDRAWAPPROVALTAXAMOUNTERROR);
+
 					applicationDetailData.put(CommonConstants.WITHDRAWAPPROVALAMOUNT,
 							dataPayLoad.get(CommonConstants.WITHDRAWAPPROVALAMOUNT));
+					applicationDetailData.put(CommonConstants.WITHDRAWAPPROVALTAXAMOUNT,
+							dataPayLoad.get(CommonConstants.WITHDRAWAPPROVALTAXAMOUNT));
+
 					NOCApplicationDetail details = new NOCApplicationDetail();
 					details.setApplicationDetail(applicationDetailData.toJSONString());
 					details.setApplicationUuid(getAppIdUuid(requestData.getApplicationId()));
