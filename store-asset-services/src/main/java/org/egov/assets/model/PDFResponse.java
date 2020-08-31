@@ -45,6 +45,6 @@ public class PDFResponse {
 	private int totalcount;
 
 	@JsonProperty("printData")
-	private JSONArray printData;
+	private Object printData;
 
 }
