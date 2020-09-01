@@ -1293,6 +1293,11 @@
 					"mandatory": "false",
 					"validateRegularExp": "^[0-9. ]+$"
 				},
+				"withdrawapprovaltaxamount": {
+					"fieldName": "Amount",
+					"mandatory": "false",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1424,6 +1429,11 @@
 					"mandatory": "false",
 					"validateRegularExp": "^[0-9. ]+$"
 				},
+				"withdrawapprovaltaxamount": {
+					"fieldName": "Amount",
+					"mandatory": "false",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1437,6 +1447,11 @@
 			},
 			"REVIEWOFACFORWITHDRAW": {
 				"withdrawapprovalamount": {
+					"fieldName": "Amount",
+					"mandatory": "false",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
+				"withdrawapprovaltaxamount": {
 					"fieldName": "Amount",
 					"mandatory": "false",
 					"validateRegularExp": "^[0-9. ]+$"
@@ -1458,6 +1473,11 @@
 					"mandatory": "false",
 					"validateRegularExp": "^[0-9. ]+$"
 				},
+				"withdrawapprovaltaxamount": {
+					"fieldName": "Amount",
+					"mandatory": "false",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1471,6 +1491,11 @@
 			},
 			"REVIEWOFSECFORWITHDRAW": {
 				"withdrawapprovalamount": {
+					"fieldName": "Amount",
+					"mandatory": "false",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
+				"withdrawapprovaltaxamount": {
 					"fieldName": "Amount",
 					"mandatory": "false",
 					"validateRegularExp": "^[0-9. ]+$"
@@ -1554,6 +1579,11 @@
 					"mandatory": "false",
 					"validateRegularExp": "^[0-9. ]+$"
 				},
+				"withdrawapprovaltaxamount": {
+					"fieldName": "Amount",
+					"mandatory": "false",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1567,6 +1597,11 @@
 			},
 			"REVIEWOFACFORWITHDRAW": {
 				"withdrawapprovalamount": {
+					"fieldName": "Amount",
+					"mandatory": "false",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
+				"withdrawapprovaltaxamount": {
 					"fieldName": "Amount",
 					"mandatory": "false",
 					"validateRegularExp": "^[0-9. ]+$"
@@ -1588,6 +1623,11 @@
 					"mandatory": "false",
 					"validateRegularExp": "^[0-9. ]+$"
 				},
+				"withdrawapprovaltaxamount": {
+					"fieldName": "Amount",
+					"mandatory": "false",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1601,6 +1641,11 @@
 			},
 			"REVIEWOFSECFORWITHDRAW": {
 				"withdrawapprovalamount": {
+					"fieldName": "Amount",
+					"mandatory": "false",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
+				"withdrawapprovaltaxamount": {
 					"fieldName": "Amount",
 					"mandatory": "false",
 					"validateRegularExp": "^[0-9. ]+$"

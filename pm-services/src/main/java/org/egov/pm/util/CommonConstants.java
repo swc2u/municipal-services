@@ -50,8 +50,13 @@ public class CommonConstants {
 	public static final String EMAILAPPID="[:applicationId:]";
 	public static final String PERFORMANCEBANKGUARANTEECHARGESDB = "performancebankguaranteecharges";
 	public static final String WITHDRAWAPPROVALAMOUNT="withdrawapprovalamount";
+	public static final String WITHDRAWAPPROVALTAXAMOUNT="withdrawapprovaltaxamount";
 	public static final String CREATEDBYDB = "createdby";
 
+	public static final String WITHDRAWAPPROVALAMOUNTERRORCODE="WITHDRAW_AMOUNT_EXCEPTION";
+	public static final String WITHDRAWAPPROVALAMOUNTERROR="Withdraw amount should be less than actual amount";
+	public static final String WITHDRAWAPPROVALTAXAMOUNTERRORCODE="WITHDRAW_TAXAMOUNT_EXCEPTION";
+	public static final String WITHDRAWAPPROVALTAXAMOUNTERROR="Withdraw tax amount should be less than actual tax amount";
 
 
 
