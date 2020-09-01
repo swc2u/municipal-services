@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.assets.common.Constants;
@@ -59,6 +60,9 @@ import org.egov.assets.repository.entity.FifoEntity;
 import org.egov.assets.repository.entity.MaterialIssueEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.assets.wf.WorkflowIntegrator;
+import org.egov.assets.wf.model.Action;
+import org.egov.assets.wf.model.ProcessInstance;
+import org.egov.assets.wf.model.ProcessInstanceResponse;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -1030,6 +1034,7 @@ public class NonIndentMaterialIssueService extends DomainService {
 				&& materialIssueResponse.getMaterialIssues().size() == 1) {
 			JSONObject requestMain = new JSONObject();
 			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			DateTimeFormatter wfdateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 			ObjectMapper mapper = new ObjectMapper();
 			try {
 				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
@@ -1086,15 +1091,33 @@ public class NonIndentMaterialIssueService extends DomainService {
 				indent.put("materialDetails", indentDetails);
 
 				// Need to integrate Workflow
+				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo,
+						in.getIssueNumber(),in.getTenantId());
+				LOG.info(workflowData.toString());
 				JSONArray workflows = new JSONArray();
-				JSONObject jsonWork = new JSONObject();
-				jsonWork.put("reviewApprovalDate", "02-05-2020");
-				jsonWork.put("reviewerApproverName", "Aniket");
-				jsonWork.put("designation", "MD");
-				jsonWork.put("action", "Forwarded");
-				jsonWork.put("sendTo", "Prakash");
-				jsonWork.put("approvalStatus", "APPROVED");
-				workflows.add(jsonWork);
+				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
+					ProcessInstance processData = workflowData.getProcessInstances().get(j);
+					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
+					// Need to integrate Workflow
+					JSONObject jsonWork = new JSONObject();
+					jsonWork.put("date", wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())));
+					jsonWork.put("updatedBy", processData.getAssigner().getName());
+					jsonWork.put("comments", processData.getComment());
+					if (processData.getAssignee() == null) {
+						if (!processData.getState().getIsTerminateState()) {
+							ProcessInstance data = workflowData.getProcessInstances().get(j - 1);
+							Optional<Action> currentAssignee = processData.getState().getActions().stream()
+									.filter(processObject -> processObject.getAction().equals(data.getAction()))
+									.findAny();
+							jsonWork.put("currentAssignee", currentAssignee.get().getRoles().get(0));
+						} else
+							jsonWork.put("currentAssignee", "NA");
+					} else
+						jsonWork.put("currentAssignee", processData.getAssignee().getName());
+
+					jsonWork.put("status", processData.getState().getApplicationStatus());
+					workflows.add(jsonWork);
+				}
 				indent.put("workflowDetails", workflows);
 				indents.add(indent);
 
