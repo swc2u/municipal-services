@@ -28,12 +28,14 @@ import org.egov.hc.model.Source;
 import org.egov.hc.producer.HCConfiguration;
 import org.egov.hc.producer.HCProducer;
 import org.egov.hc.service.NotificationService;
-
+import org.egov.hc.service.ServiceRequestService;
 import org.egov.hc.utils.HCConstants;
 
 import org.egov.hc.utils.WorkFlowConfigs;
+import org.egov.hc.workflow.WorkflowIntegrator;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.context.annotation.Lazy;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -57,13 +59,16 @@ public class HCNotificationConsumer {
 	@Autowired
 	private NotificationService notificationService;
 	
+	@Autowired
+	private WorkflowIntegrator workflowIntegrator;
+	
 
 	@Autowired
 	private RestTemplate rest;
 
 	@KafkaListener(topics = { "${kafka.topics.save.service}", "${kafka.topics.update.service}" })
 
-	public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+	public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) throws JSONException {
 		ObjectMapper mapper = new ObjectMapper();
 		ServiceRequest serviceReqRequest = new ServiceRequest();
 		try {
@@ -79,8 +84,9 @@ public class HCNotificationConsumer {
 	 * Sends notifications on different topics for the consumer to pick.
 	 *
 	 * @param serviceReqRequest
+	 * @throws JSONException 
 	 */
-	public void process(ServiceRequest serviceReqRequest) {
+	public void process(ServiceRequest serviceReqRequest) throws JSONException {
 
 		// get all the messages from localization table
 		Map<String, String> messageMap = getLocalizationMessage(serviceReqRequest.getRequestInfo().getUserInfo().getTenantId(),
@@ -100,7 +106,9 @@ public class HCNotificationConsumer {
 					serviceReqRequest.getRequestInfo());
 			
 			if (serviceReqRequest.getActionInfo().get(0).getAction().equals(WorkFlowConfigs.ACTION_OPEN)) {
-				String role = HCConstants.EXECUTIVE_ENGINEER;
+				//String role = HCConstants.EXECUTIVE_ENGINEER;
+				
+				String role = workflowIntegrator.parseBussinessServiceData(workflowIntegrator.getbussinessServiceDatafromprocesinstanceEdit(serviceReqRequest),serviceReqRequest);
 
 				getRolewiseUserList(serviceReqRequest, role, messageMap);
 
@@ -760,7 +768,7 @@ public class HCNotificationConsumer {
 			}
 			if(text != null)
 			{
-			text = text.replace(HCConstants.SMS_NOTIFICATION_EMP_NAME_KEY, employeeName)
+			text = text.replace(HCConstants.SMS_NOTIFICATION_EMP_NAME_KEY, serviceReq.getOwnerName())
 					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_ID, serviceReq.getService_request_id())
 					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_DATE_KEY, genratedDate);
 			}
@@ -825,6 +833,25 @@ public class HCNotificationConsumer {
 			break;
 			
 		case WorkFlowConfigs.EDIT:
+
+			if (notifcationType.equals(HCConstants.SMS)) {
+				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_SMS_NOTIFICATION);
+			} else if (notifcationType.equals(HCConstants.EMAIL)) {
+
+				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_EMAIL_NOTIFICATION);
+			} else if (notifcationType.equals(HCConstants.PUSH)) {
+				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_PUSH_NOTIFICATION);
+			}
+			if(text != null)
+			{
+			text = text.replace(HCConstants.SMS_NOTIFICATION_EMP_NAME_KEY,  serviceReq.getOwnerName())
+					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_ID, serviceReq.getService_request_id_old())
+					.replace(HCConstants.NOTIFICATION_SERVICEREQUEST_ID_NEW, serviceReq.getService_request_id())
+					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_DATE_KEY, genratedDate);
+			}
+			break;
+			
+		case WorkFlowConfigs.ACTION_INITIATED:
 
 			if (notifcationType.equals(HCConstants.SMS)) {
 				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_SMS_NOTIFICATION);

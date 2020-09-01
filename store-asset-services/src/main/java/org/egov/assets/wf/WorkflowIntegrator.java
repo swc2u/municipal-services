@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.egov.assets.common.MdmsRepository;
+import org.egov.assets.model.Indent;
 import org.egov.assets.model.IndentRequest;
 import org.egov.assets.model.Material;
 import org.egov.assets.model.User;
 import org.egov.assets.model.WorkFlowDetails;
+import org.egov.assets.wf.model.ProcessInstanceResponse;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
-import org.egov.common.contract.request.User.UserBuilder;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,13 +71,16 @@ public class WorkflowIntegrator {
 	private MdmsRepository mdmsRepository;
 
 	private final String wfServiceTransitionUrl;
+	private final String wfServiceProcessSearchUrl;
 
 	@Autowired
 	public WorkflowIntegrator(RestTemplate rest, MdmsRepository mdmsRepository,
 			@Value("${egov.services.egov_workflow.hostname}") final String wfServiceHostname,
-			@Value("${egov.services.egov_workflow.transition}") final String wfServiceTransitionPath) {
+			@Value("${egov.services.egov_workflow.transition}") final String wfServiceTransitionPath,
+			@Value("${egov.services.egov_workflow.process.search}") final String wfServiceProcessSearchUrl) {
 		this.rest = rest;
 		this.wfServiceTransitionUrl = wfServiceHostname + wfServiceTransitionPath;
+		this.wfServiceProcessSearchUrl = wfServiceHostname + wfServiceProcessSearchUrl;
 		this.mdmsRepository = mdmsRepository;
 	}
 
@@ -181,4 +185,36 @@ public class WorkflowIntegrator {
 			// tlObj.setStatus(idStatusMap.get(tlObj.getApplicationNumber())));
 		}
 	}
+	public ProcessInstanceResponse getWorkflowDataByID(RequestInfo requestInfo, String businessId, String tenantId) {
+		StringBuilder builder = new StringBuilder();
+		String searchCriteria = "?businessIds=" + businessId + "&tenantId=" + tenantId + "&history=true";
+		builder.append(wfServiceProcessSearchUrl).append(searchCriteria);
+		JSONObject workFlowRequest = new JSONObject();
+		workFlowRequest.put(REQUESTINFOKEY, requestInfo);
+		ProcessInstanceResponse response = null;
+		try {
+			response = rest.postForObject(builder.toString(), workFlowRequest, ProcessInstanceResponse.class);
+		} catch (HttpClientErrorException e) {
+
+			/*
+			 * extracting message from client error exception
+			 */
+			DocumentContext responseContext = JsonPath.parse(e.getResponseBodyAsString());
+			List<Object> errros = null;
+			try {
+				errros = responseContext.read("$.Errors");
+			} catch (PathNotFoundException pnfe) {
+				log.error("EG_SA_WF_ERROR_KEY_NOT_FOUND",
+						" Unable to read the json path in error object : " + pnfe.getMessage());
+				throw new CustomException("EG_SA_WF_ERROR_KEY_NOT_FOUND",
+						" Unable to read the json path in error object : " + pnfe.getMessage());
+			}
+			throw new CustomException("EG_WF_ERROR", errros.toString());
+		} catch (Exception e) {
+			throw new CustomException("EG_WF_ERROR",
+					" Exception occured while integrating with workflow : " + e.getMessage());
+		}
+		return response;
+	}
+
 }
