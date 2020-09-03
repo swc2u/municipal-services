@@ -37,6 +37,7 @@ public class PurchaseOrderDetailEntity {
 	private BigDecimal receivedQuantity;
 	private BigDecimal unitPrice;
 	private String description;
+	private String indentNumber;
 
 	public PurchaseOrderDetail toDomain() {
 		PurchaseOrderDetail poDetails = new PurchaseOrderDetail();
@@ -55,6 +56,7 @@ public class PurchaseOrderDetailEntity {
 		poDetails.setPurchaseOrderNumber(purchaseOrder);
 		poDetails.setPurchaseOrderPurpose(purchaseOrderPurpose);
 		poDetails.setWorkDetailRemarks(workDetailRemarks);
+		poDetails.setIndentNumber(indentNumber);
 		return poDetails;
 	}
 

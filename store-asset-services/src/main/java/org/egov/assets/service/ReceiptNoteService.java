@@ -9,12 +9,14 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
@@ -38,6 +40,7 @@ import org.egov.assets.model.PurchaseOrderDetailSearch;
 import org.egov.assets.model.PurchaseOrderRequest;
 import org.egov.assets.model.PurchaseOrderResponse;
 import org.egov.assets.model.PurchaseOrderSearch;
+import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.StoreResponse;
 import org.egov.assets.model.SupplierGetRequest;
@@ -52,6 +55,9 @@ import org.egov.assets.repository.entity.PurchaseOrderDetailEntity;
 import org.egov.assets.repository.entity.PurchaseOrderEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.assets.wf.WorkflowIntegrator;
+import org.egov.assets.wf.model.Action;
+import org.egov.assets.wf.model.ProcessInstance;
+import org.egov.assets.wf.model.ProcessInstanceResponse;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -751,7 +757,7 @@ public class ReceiptNoteService extends DomainService {
 				&& materialReceiptResponse.getMaterialReceipt().size() == 1) {
 			JSONObject requestMain = new JSONObject();
 			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
+			DateTimeFormatter wfdateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 			ObjectMapper mapper = new ObjectMapper();
 			try {
 				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
@@ -824,17 +830,34 @@ public class ReceiptNoteService extends DomainService {
 
 				// Need to integrate Workflow
 
+				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo,
+						in.getMrnNumber(),in.getTenantId());
+				LOG.info(workflowData.toString());
 				JSONArray workflows = new JSONArray();
-				JSONObject jsonWork = new JSONObject();
-				jsonWork.put("reviewApprovalDate", "02-05-2020");
-				jsonWork.put("reviewerApproverName", "Aniket");
-				jsonWork.put("designation", "MD");
-				jsonWork.put("action", "Forwarded");
-				jsonWork.put("sendTo", "Prakash");
-				jsonWork.put("approvalStatus", "APPROVED");
-				workflows.add(jsonWork);
-				material.put("workflowDetails", workflows);
+				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
+					ProcessInstance processData = workflowData.getProcessInstances().get(j);
+					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
+					// Need to integrate Workflow
+					JSONObject jsonWork = new JSONObject();
+					jsonWork.put("date", wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())));
+					jsonWork.put("updatedBy", processData.getAssigner().getName());
+					jsonWork.put("comments", processData.getComment());
+					if (processData.getAssignee() == null) {
+						if (!processData.getState().getIsTerminateState()) {
+							ProcessInstance data = workflowData.getProcessInstances().get(j - 1);
+							Optional<Action> currentAssignee = processData.getState().getActions().stream()
+									.filter(processObject -> processObject.getAction().equals(data.getAction()))
+									.findAny();
+							jsonWork.put("currentAssignee", currentAssignee.get().getRoles().get(0));
+						} else
+							jsonWork.put("currentAssignee", "NA");
+					} else
+						jsonWork.put("currentAssignee", processData.getAssignee().getName());
 
+					jsonWork.put("status", processData.getState().getApplicationStatus());
+					workflows.add(jsonWork);
+				}
+				material.put("workflowDetails", workflows);
 				materials.add(material);
 				requestMain.put("MeterialReceiptNote", materials);
 			}
@@ -852,13 +875,59 @@ public class ReceiptNoteService extends DomainService {
 
 		try {
 			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
-					materialReceiptRequest.getWorkFlowDetails(), materialReceiptRequest.getWorkFlowDetails().getTenantId());
+					materialReceiptRequest.getWorkFlowDetails(),
+					materialReceiptRequest.getWorkFlowDetails().getTenantId());
 			kafkaQue.send(updateStatusTopic, updateStatusTopicKey, materialReceiptRequest);
 			MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
-			return materialReceiptResponse.responseInfo(null).materialReceipt(materialReceiptRequest.getMaterialReceipt());
+			return materialReceiptResponse.responseInfo(null)
+					.materialReceipt(materialReceiptRequest.getMaterialReceipt());
 		} catch (CustomBindException e) {
 			throw e;
 		}
 	}
 
+	public PDFResponse printInventoryReportPdf(MaterialReceiptSearch materialReceiptSearch, RequestInfo requestInfo) {
+		JSONArray jsonArray = materialReceiptService.getInventoryReport(materialReceiptSearch);
+		JSONArray arrayPrintData = new JSONArray();
+		if (!jsonArray.isEmpty()) {
+			JSONObject requestMain = new JSONObject();
+
+			StoreGetRequest storeGetRequest = new StoreGetRequest();
+			storeGetRequest.setCode(Arrays.asList(materialReceiptSearch.getReceivingStore()));
+			storeGetRequest.setTenantId(materialReceiptSearch.getTenantId());
+			StoreResponse store = storeService.search(storeGetRequest);
+
+			Material material = materialService.fetchMaterial(materialReceiptSearch.getTenantId(),
+					materialReceiptSearch.getMaterials().get(0), new RequestInfo());
+			requestMain.put("storeName", store.getStores().isEmpty() ? materialReceiptSearch.getReceivingStore()
+					: store.getStores().get(0).getName());
+			requestMain.put("storeDepartment",
+					store.getStores().isEmpty() ? "" : store.getStores().get(0).getDepartment().getName());
+			requestMain.put("materialName", material.getName());
+			requestMain.put("invetoryDetails", jsonArray);
+			arrayPrintData.add(requestMain);
+		}
+
+		if (!arrayPrintData.isEmpty() && materialReceiptSearch.isForprint()) {
+			JSONObject finalDta = new JSONObject();
+
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
+				finalDta.put("RequestInfo", reqInfo);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			finalDta.put("InventoryReport", arrayPrintData);
+
+			return pdfServiceReposistory.getPrint(finalDta, "store-asset-report-inventory-register",
+					materialReceiptSearch.getTenantId());
+		} else if (!arrayPrintData.isEmpty() && !materialReceiptSearch.isForprint()) {
+			return PDFResponse.builder().responseInfo(ResponseInfo.builder().status("Success").build())
+					.printData(arrayPrintData).build();
+		} else {
+			return PDFResponse.builder()
+					.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+		}
+	}
 }

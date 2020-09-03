@@ -6,9 +6,6 @@ import java.util.List;
 
 import org.egov.assets.common.DomainService;
 import org.egov.assets.common.Pagination;
-import org.egov.assets.common.exception.ErrorCode;
-import org.egov.assets.common.exception.InvalidDataException;
-import org.egov.assets.model.Material;
 import org.egov.assets.model.MaterialBalanceRate;
 import org.egov.assets.model.MaterialReceipt;
 import org.egov.assets.model.MaterialReceiptDetail;
@@ -23,6 +20,7 @@ import org.egov.assets.model.SupplierGetRequest;
 import org.egov.assets.model.SupplierResponse;
 import org.egov.assets.repository.MaterialReceiptJdbcRepository;
 import org.egov.assets.repository.StoreJdbcRepository;
+import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,6 +68,10 @@ public class MaterialReceiptService extends DomainService {
 			}
 		}
 		return materialReceiptPagination;
+	}
+
+	public JSONArray getInventoryReport(MaterialReceiptSearch materialReceiptSearch) {
+		return materialReceiptJdbcRepository.getInventoryReport(materialReceiptSearch);
 	}
 
 	private Supplier getSupplier(String code, String tenantId) {

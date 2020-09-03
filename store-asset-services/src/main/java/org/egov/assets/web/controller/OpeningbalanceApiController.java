@@ -13,6 +13,8 @@ import org.egov.assets.model.MaterialReceipt;
 import org.egov.assets.model.MaterialReceiptSearch;
 import org.egov.assets.model.OpeningBalanceRequest;
 import org.egov.assets.model.OpeningBalanceResponse;
+import org.egov.assets.model.PDFRequest;
+import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.StatusNums.StatusEnum;
 import org.egov.assets.service.OpeningBalanceService;
 import org.egov.common.contract.request.RequestInfo;
@@ -78,6 +80,20 @@ public class OpeningbalanceApiController {
 				.pageSize(pageSize).build();
 
 		return new ResponseEntity<>(openingBalanceService.search(receiptSearch), HttpStatus.OK);
+	}
+
+	@PostMapping(value = "/_report", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<PDFResponse> openingbalanceReportPdfPrintPost(@Valid @RequestBody PDFRequest pdfRequest,
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@RequestParam(value = "storecode", required = true) String storecode,
+			@RequestParam(value = "financialyear", required = true) String financialyear,
+			@RequestParam(value = "isprint", required = true) boolean forprint) {
+		MaterialReceiptSearch materialReceiptSearch = MaterialReceiptSearch.builder().tenantId(tenantId)
+				.receiptType(Arrays.asList("OPENING BALANCE")).forprint(forprint).receivingStore(storecode)
+				.forprint(forprint).financialYear(financialyear).build();
+		PDFResponse response = openingBalanceService.printOpeningBalanceReportPdf(materialReceiptSearch,
+				pdfRequest.getRequestInfo());
+		return new ResponseEntity(response, HttpStatus.OK);
 	}
 
 	private OpeningBalanceResponse buildOpenBalanceResponse(List<MaterialReceipt> material, RequestInfo requestInfo) {
