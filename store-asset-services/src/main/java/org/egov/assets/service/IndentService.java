@@ -319,6 +319,10 @@ public class IndentService extends DomainService {
 									uomMap.get((material.getBaseUom() != null ? material.getBaseUom().getCode() : "")));
 							detail.setMaterial(material);
 							indent.addIndentDetailsItem(detail);
+
+							detail.setUom(
+									uomMap.get((detail.getUom().getCode() != null ? detail.getUom().getCode() : "")));
+
 						}
 					}
 				}
@@ -626,7 +630,7 @@ public class IndentService extends DomainService {
 					indentDetail.put("materialCode", detail.getMaterial().getCode());
 					indentDetail.put("materialName", detail.getMaterial().getName());
 					indentDetail.put("materialDescription", detail.getMaterial().getDescription());
-					indentDetail.put("uomName", detail.getUom().getCode());
+					indentDetail.put("uomName", detail.getUom().getName());
 					indentDetail.put("indentPurpose", in.getIndentPurpose());
 					indentDetail.put("workDetailsRemark", detail.getRemarks());
 					indentDetail.put("requiredQuantity", detail.getIndentQuantity());
@@ -634,25 +638,22 @@ public class IndentService extends DomainService {
 				}
 				indent.put("materialDetails", indentDetails);
 
-				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo, in.getIndentNumber(),
-						in.getTenantId());
+				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo,
+						in.getIndentNumber(), in.getTenantId());
 				JSONArray workflows = new JSONArray();
 				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
 					ProcessInstance processData = workflowData.getProcessInstances().get(j);
 					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
 					// Need to integrate Workflow
 					JSONObject jsonWork = new JSONObject();
-					//fmt.format()
-					jsonWork.put("date",wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())) );
+					// fmt.format()
+					jsonWork.put("date", wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())));
 					jsonWork.put("updatedBy", processData.getAssigner().getName());
 					jsonWork.put("comments", processData.getComment());
 					if (processData.getAssignee() == null) {
 						if (!processData.getState().getIsTerminateState()) {
-							ProcessInstance data = workflowData.getProcessInstances().get(j - 1);
-							Optional<Action> currentAssignee = processData.getState().getActions().stream()
-									.filter(processObject -> processObject.getAction().equals(data.getAction()))
-									.findAny();
-							jsonWork.put("currentAssignee", currentAssignee.get().getRoles().get(0));
+							jsonWork.put("currentAssignee",
+									processData.getState().getActions().get(0).getRoles().get(0));
 						} else
 							jsonWork.put("currentAssignee", "NA");
 					} else

@@ -56,9 +56,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
-
-
 @Service
 public class MiscellaneousReceiptNoteService extends DomainService {
 
@@ -387,7 +384,7 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 					matsDetail.put("srNo", i++);
 					matsDetail.put("materialCode", detail.getMaterial().getCode());
 					matsDetail.put("materialName", detail.getMaterial().getName());
-					matsDetail.put("uomName", detail.getUom().getCode());
+					matsDetail.put("uomName", detail.getUom().getName());
 					matsDetail.put("quantityReceived", detail.getReceivedQty());
 					matsDetail.put("unitRate", detail.getUnitRate());
 					matsDetail.put("totalValue", detail.getReceivedQty().multiply(detail.getUnitRate()));
@@ -398,7 +395,7 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 				// Need to integrate Workflow
 
 				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo,
-						in.getMrnNumber(),in.getTenantId());
+						in.getMrnNumber(), in.getTenantId());
 				JSONArray workflows = new JSONArray();
 				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
 					ProcessInstance processData = workflowData.getProcessInstances().get(j);
@@ -410,11 +407,8 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 					jsonWork.put("comments", processData.getComment());
 					if (processData.getAssignee() == null) {
 						if (!processData.getState().getIsTerminateState()) {
-							ProcessInstance data = workflowData.getProcessInstances().get(j - 1);
-							Optional<Action> currentAssignee = processData.getState().getActions().stream()
-									.filter(processObject -> processObject.getAction().equals(data.getAction()))
-									.findAny();
-							jsonWork.put("currentAssignee", currentAssignee.get().getRoles().get(0));
+							jsonWork.put("currentAssignee",
+									processData.getState().getActions().get(0).getRoles().get(0));
 						} else
 							jsonWork.put("currentAssignee", "NA");
 					} else
@@ -441,10 +435,12 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 
 		try {
 			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
-					materialReceiptRequest.getWorkFlowDetails(), materialReceiptRequest.getWorkFlowDetails().getTenantId());
+					materialReceiptRequest.getWorkFlowDetails(),
+					materialReceiptRequest.getWorkFlowDetails().getTenantId());
 			kafkaQue.send(updatestatusTopic, updatestatusTopicKey, materialReceiptRequest);
 			MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
-			return materialReceiptResponse.responseInfo(null).materialReceipt(materialReceiptRequest.getMaterialReceipt());
+			return materialReceiptResponse.responseInfo(null)
+					.materialReceipt(materialReceiptRequest.getMaterialReceipt());
 		} catch (CustomBindException e) {
 			throw e;
 		}

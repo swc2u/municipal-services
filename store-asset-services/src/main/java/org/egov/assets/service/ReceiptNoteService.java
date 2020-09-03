@@ -16,12 +16,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
 import org.egov.assets.common.MdmsRepository;
 import org.egov.assets.common.Pagination;
+import org.egov.assets.common.SupplierRepository;
 import org.egov.assets.common.exception.CustomBindException;
 import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
@@ -37,14 +37,11 @@ import org.egov.assets.model.MaterialReceiptSearch;
 import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.PurchaseOrderDetail;
 import org.egov.assets.model.PurchaseOrderDetailSearch;
-import org.egov.assets.model.PurchaseOrderRequest;
-import org.egov.assets.model.PurchaseOrderResponse;
 import org.egov.assets.model.PurchaseOrderSearch;
-import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.StoreResponse;
+import org.egov.assets.model.Supplier;
 import org.egov.assets.model.SupplierGetRequest;
-import org.egov.assets.model.SupplierResponse;
 import org.egov.assets.model.Uom;
 import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.PDFServiceReposistory;
@@ -55,7 +52,6 @@ import org.egov.assets.repository.entity.PurchaseOrderDetailEntity;
 import org.egov.assets.repository.entity.PurchaseOrderEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.assets.wf.WorkflowIntegrator;
-import org.egov.assets.wf.model.Action;
 import org.egov.assets.wf.model.ProcessInstance;
 import org.egov.assets.wf.model.ProcessInstanceResponse;
 import org.egov.common.contract.request.RequestInfo;
@@ -130,7 +126,7 @@ public class ReceiptNoteService extends DomainService {
 	private StoreService storeService;
 
 	@Autowired
-	private SupplierService supplierService;
+	private SupplierRepository supplierRepository;
 
 	@Autowired
 	private PurchaseOrderDetailJdbcRepository purchaseOrderDetailJdbcRepository;
@@ -496,11 +492,8 @@ public class ReceiptNoteService extends DomainService {
 	}
 
 	private void validateSupplier(MaterialReceipt materialReceipt, String tenantId, InvalidDataException errors) {
-		SupplierGetRequest supplierGetRequest = SupplierGetRequest.builder()
-				.code(Collections.singletonList(materialReceipt.getSupplier().getCode())).tenantId(tenantId)
-				.active(true).build();
-		SupplierResponse suppliers = supplierService.search(supplierGetRequest);
-		if (suppliers.getSuppliers().size() == 0) {
+		Supplier suppliers = supplierRepository.getByCode(materialReceipt.getSupplier().getCode());
+		if (suppliers == null) {
 			errors.addDataError(ErrorCode.INVALID_REF_VALUE.getCode(), "supplier",
 					materialReceipt.getSupplier().getCode());
 
@@ -810,7 +803,7 @@ public class ReceiptNoteService extends DomainService {
 					matsDetail.put("srNo", i++);
 					matsDetail.put("materialName", detail.getMaterial().getName());
 					matsDetail.put("poNumber", detail.getPurchaseOrderDetail().getPurchaseOrderNumber());
-					matsDetail.put("uomName", detail.getUom().getCode());
+					matsDetail.put("uomName", detail.getUom().getName());
 					matsDetail.put("acceptedQty", detail.getAcceptedQty());
 					matsDetail.put("orderedQty", detail.getPurchaseOrderDetail().getOrderQuantity());
 					matsDetail.put("receivedQty", detail.getReceivedQty());
@@ -831,7 +824,7 @@ public class ReceiptNoteService extends DomainService {
 				// Need to integrate Workflow
 
 				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo,
-						in.getMrnNumber(),in.getTenantId());
+						in.getMrnNumber(), in.getTenantId());
 				LOG.info(workflowData.toString());
 				JSONArray workflows = new JSONArray();
 				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
@@ -844,11 +837,8 @@ public class ReceiptNoteService extends DomainService {
 					jsonWork.put("comments", processData.getComment());
 					if (processData.getAssignee() == null) {
 						if (!processData.getState().getIsTerminateState()) {
-							ProcessInstance data = workflowData.getProcessInstances().get(j - 1);
-							Optional<Action> currentAssignee = processData.getState().getActions().stream()
-									.filter(processObject -> processObject.getAction().equals(data.getAction()))
-									.findAny();
-							jsonWork.put("currentAssignee", currentAssignee.get().getRoles().get(0));
+							jsonWork.put("currentAssignee",
+									processData.getState().getActions().get(0).getRoles().get(0));
 						} else
 							jsonWork.put("currentAssignee", "NA");
 					} else

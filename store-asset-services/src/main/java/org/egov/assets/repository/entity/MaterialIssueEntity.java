@@ -41,6 +41,8 @@ public class MaterialIssueEntity {
 
 	private String issueNumber;
 
+	private String createdByName;
+
 	private Long issueDate;
 
 	private String materialIssueStatus;
@@ -62,7 +64,7 @@ public class MaterialIssueEntity {
 	private String issuePurpose;
 
 	private String supplier;
-	
+
 	private Boolean scrapCreated;
 
 	private Long stateId;
@@ -127,6 +129,7 @@ public class MaterialIssueEntity {
 		materialIssue.setId(id);
 		materialIssue.setTenantId(tenantId);
 		materialIssue.setIssueType(IssueTypeEnum.valueOf(issueType));
+		materialIssue.setCreatedByName(createdByName);
 		Store issueStore = new Store();
 		issueStore.setCode(fromStore);
 		Store indentStore = new Store();
