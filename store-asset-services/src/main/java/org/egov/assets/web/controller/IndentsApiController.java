@@ -61,8 +61,8 @@ public class IndentsApiController {
 
 		IndentSearch is = new IndentSearch().builder().tenantId(tenantId).ids(ids).indentDate(indentDate)
 				.indentStore(indentStore).indentNumber(indentNumber).indentPurpose(indentPurpose)
-				.inventoryType(inventoryType).issueStore(issueStore).indentType(indentType).searchPurpose(searchPurpose)
-				.build();
+				.indentStatus(indentStatus).inventoryType(inventoryType).issueStore(issueStore).indentType(indentType)
+				.searchPurpose(searchPurpose).build();
 		IndentResponse response = indentService.search(is, requestInfo);
 		return new ResponseEntity(response, HttpStatus.OK);
 	}

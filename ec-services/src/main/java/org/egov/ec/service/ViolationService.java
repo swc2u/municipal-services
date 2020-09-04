@@ -199,7 +199,7 @@ public class ViolationService {
 					.replace("<EnchroachmentType>", violationMaster.getEncroachmentType())
 					.replace("<Date and Time>",
 							violationMaster.getViolationDate() + " " + violationMaster.getViolationTime())
-					.replace("<Link>", config.getLoginUrl())
+					.replace("<Link>", (config.getLoginUrl()+"?mobileno="+violationMaster.getContactNumber()+"&ecno="+violationMaster.getChallanId()))
 					.replace("<br>","\r\n");
 			violationMaster.getNotificationTemplate().setBody(strOutput);
 			violationMaster.getNotificationTemplate().setMessage(strOutput);

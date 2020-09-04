@@ -33,7 +33,7 @@ public class EcConstants {
 
 	public static final String INVALID_TENANT_ID_MDMS_MSG = "No data found for this tenentID";
 
-	public static final String INVALID_FINE_DATA = "Fine Data does not exist";
+	public static final String INVALID_FINE_DATA = "Fine data does not exist";
 
 	public static final String FAILED_IDGEN_CHALLANID = "ChallanID Generation Failed";
 

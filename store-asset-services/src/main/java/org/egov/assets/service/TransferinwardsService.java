@@ -447,7 +447,7 @@ public class TransferinwardsService extends DomainService {
 				indent.put("inwardStatus", in.getMrnStatus());
 
 				indent.put("remark", in.getDescription());
-				// indent.put("createdBy", in.get);
+				indent.put("createdBy", in.getReceivedBy());
 				indent.put("designation", in.getDesignation());
 
 				JSONArray indentDetails = new JSONArray();
@@ -459,7 +459,7 @@ public class TransferinwardsService extends DomainService {
 					indentDetail.put("materialCode", detail.getMaterial().getCode());
 					indentDetail.put("materialName", detail.getMaterial().getName());
 					indentDetail.put("materialDescription", detail.getMaterial().getDescription());
-					indentDetail.put("uomName", detail.getUom().getCode());
+					indentDetail.put("uomName", detail.getUom().getName());
 					indentDetail.put("receivedQuantity", detail.getReceivedQty());
 
 					if (materialIssueDetail != null) {
@@ -484,9 +484,8 @@ public class TransferinwardsService extends DomainService {
 
 				// Need to integrate Workflow
 
-				
 				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo,
-						in.getMrnNumber(),in.getTenantId());
+						in.getMrnNumber(), in.getTenantId());
 				JSONArray workflows = new JSONArray();
 				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
 					ProcessInstance processData = workflowData.getProcessInstances().get(j);
@@ -498,11 +497,8 @@ public class TransferinwardsService extends DomainService {
 					jsonWork.put("comments", processData.getComment());
 					if (processData.getAssignee() == null) {
 						if (!processData.getState().getIsTerminateState()) {
-							ProcessInstance data = workflowData.getProcessInstances().get(j - 1);
-							Optional<Action> currentAssignee = processData.getState().getActions().stream()
-									.filter(processObject -> processObject.getAction().equals(data.getAction()))
-									.findAny();
-							jsonWork.put("currentAssignee", currentAssignee.get().getRoles().get(0));
+							jsonWork.put("currentAssignee",
+									processData.getState().getActions().get(0).getRoles().get(0));
 						} else
 							jsonWork.put("currentAssignee", "NA");
 					} else

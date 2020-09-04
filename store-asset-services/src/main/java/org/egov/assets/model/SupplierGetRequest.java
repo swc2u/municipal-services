@@ -13,17 +13,17 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SupplierGetRequest  {
+public class SupplierGetRequest {
 	private List<String> id;
 
-	private List<String> code;
+	private String code;
 
 	private String name;
 
 	private String type;
 
 	private String status;
-	
+
 	private Boolean active;
 
 	private Long inActiveDate;
@@ -43,11 +43,11 @@ public class SupplierGetRequest  {
 	private String cstNo;
 
 	private String vatNo;
-	
+
 	private String bankCode;
-	
+
 	private String bankBranch;
-	
+
 	private String gstNo;
 
 	private String contactPerson;

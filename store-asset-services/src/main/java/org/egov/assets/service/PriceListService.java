@@ -13,6 +13,7 @@ import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
 import org.egov.assets.common.MdmsRepository;
 import org.egov.assets.common.Pagination;
+import org.egov.assets.common.SupplierRepository;
 import org.egov.assets.common.exception.CustomBindException;
 import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
@@ -30,7 +31,6 @@ import org.egov.assets.repository.PriceListDetailJdbcRepository;
 import org.egov.assets.repository.PriceListJdbcRepository;
 import org.egov.assets.repository.PriceListRepository;
 import org.egov.assets.repository.PurchaseOrderJdbcRepository;
-import org.egov.assets.repository.SupplierJdbcRepository;
 import org.egov.assets.repository.entity.PriceListEntity;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
@@ -76,7 +76,8 @@ public class PriceListService extends DomainService {
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 	@Autowired
-	SupplierJdbcRepository supplierJdbcRepository;
+	SupplierRepository supplierRepository;
+
 	@Autowired
 	private MaterialService materialService;
 	@Autowired
@@ -244,8 +245,9 @@ public class PriceListService extends DomainService {
 			PriceListRequest priceListRequest) {
 		InvalidDataException errors = new InvalidDataException();
 		try {
-			String rateType = null;;
-			
+			String rateType = null;
+			;
+
 			switch (method) {
 			case Constants.ACTION_CREATE: {
 				if (priceLists == null) {
@@ -302,7 +304,7 @@ public class PriceListService extends DomainService {
 			Long currentMilllis = System.currentTimeMillis();
 
 			for (PriceList pl : priceLists) {
-				
+
 				rateType = pl.getRateType().toString();
 
 				if (!Arrays.stream(PriceList.RateTypeEnum.values())
@@ -423,8 +425,8 @@ public class PriceListService extends DomainService {
 
 			}
 			// TODO: CHECK IN CASE OF UPDATE..
-//			(PriceList.RateTypeEnum.fromValue(pl.getRateType().toString()))
-			
+			// (PriceList.RateTypeEnum.fromValue(pl.getRateType().toString()))
+
 			if (priceListJdbcRepository.isDuplicateContract(priceLists, method)) {
 				throw new CustomException("inv.0011",
 						"A ratecontract already exists in the system for the given material in the specified time duration. Please select alternate duration for the contract.");
@@ -440,10 +442,8 @@ public class PriceListService extends DomainService {
 	}
 
 	private boolean isValidSupplier(String tenantId, String supplierCode) {
-		SupplierGetRequest supplierGetRequest = SupplierGetRequest.builder()
-				.code(Collections.singletonList(supplierCode)).tenantId(tenantId).active(true).build();
-		Pagination<Supplier> suppliers = supplierJdbcRepository.search(supplierGetRequest);
-		if (suppliers.getPagedData().size() > 0)
+		Supplier suppliers = supplierRepository.getByCode(supplierCode);
+		if (suppliers != null)
 			return true;
 		return false;
 	}
