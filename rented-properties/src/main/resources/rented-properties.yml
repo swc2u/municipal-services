@@ -294,7 +294,7 @@ serviceMaps:
 
       - jsonPath: $.Properties.*.payments.*.auditDetails.lastModifiedTime
 
-      - query: INSERT INTO cs_pt_account(id, property_id, remainingAmount, remaining_since, created_by, modified_by, created_date, modified_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)ON CONFLICT (id) DO UPDATE SET remainingAmount=?, remaining_since=?, modified_by=?, modified_date=?;
+    - query: INSERT INTO cs_pt_account(id, property_id, remainingAmount, remaining_since, created_by, modified_by, created_date, modified_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)ON CONFLICT (id) DO UPDATE SET remainingAmount=?, remaining_since=?, modified_by=?, modified_date=?;
       basePath: $.Properties.*.rentAccount
       jsonMaps:
       - jsonPath: $.Properties.*.rentAccount.id
@@ -314,6 +314,8 @@ serviceMaps:
       - jsonPath: $.Properties.*.rentAccount.auditDetails.lastModifiedTime
 
       - jsonPath: $.Properties.*.rentAccount.remainingAmount
+
+      - jsonPath: $.Properties.*.rentAccount.remainingSince
 
       - jsonPath: $.Properties.*.rentAccount.auditDetails.lastModifiedBy
 
@@ -665,6 +667,8 @@ serviceMaps:
       - jsonPath: $.Properties.*.rentAccount.auditDetails.lastModifiedTime
 
       - jsonPath: $.Properties.*.rentAccount.remainingAmount
+
+      - jsonPath: $.Properties.*.rentAccount.remainingSince
 
       - jsonPath: $.Properties.*.rentAccount.auditDetails.lastModifiedBy
 
