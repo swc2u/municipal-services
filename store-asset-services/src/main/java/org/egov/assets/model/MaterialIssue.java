@@ -128,6 +128,9 @@ public class MaterialIssue {
 	@JsonProperty("totalIssueValue")
 	private BigDecimal totalIssueValue = null;
 
+	@JsonProperty("totalDeductionValue")
+	private BigDecimal totalDeductionValue = null;
+
 	@JsonProperty("fileStoreId")
 	private String fileStoreId = null;
 
@@ -239,6 +242,14 @@ public class MaterialIssue {
 	public MaterialIssue issueType(IssueTypeEnum issueType) {
 		this.issueType = issueType;
 		return this;
+	}
+
+	public BigDecimal getTotalDeductionValue() {
+		return totalDeductionValue;
+	}
+
+	public void setTotalDeductionValue(BigDecimal totalDeductionValue) {
+		this.totalDeductionValue = totalDeductionValue;
 	}
 
 	/**

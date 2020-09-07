@@ -16,12 +16,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
 import org.egov.assets.common.MdmsRepository;
 import org.egov.assets.common.Pagination;
+import org.egov.assets.common.SupplierRepository;
 import org.egov.assets.common.exception.CustomBindException;
 import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
@@ -58,11 +58,9 @@ import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.PriceListJdbcRepository;
 import org.egov.assets.repository.PurchaseOrderJdbcRepository;
 import org.egov.assets.repository.StoreJdbcRepository;
-import org.egov.assets.repository.SupplierJdbcRepository;
 import org.egov.assets.repository.entity.IndentEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.assets.wf.WorkflowIntegrator;
-import org.egov.assets.wf.model.Action;
 import org.egov.assets.wf.model.ProcessInstance;
 import org.egov.assets.wf.model.ProcessInstanceResponse;
 import org.egov.common.contract.request.RequestInfo;
@@ -119,7 +117,7 @@ public class PurchaseOrderService extends DomainService {
 	private UomService uomService;
 
 	@Autowired
-	SupplierJdbcRepository supplierJdbcRepository;
+	SupplierRepository supplierRepository;
 
 	@Value("${inv.purchaseorders.save.topic}")
 	private String saveTopic;
@@ -1198,20 +1196,16 @@ public class PurchaseOrderService extends DomainService {
 	}
 
 	private boolean isValidSupplier(String tenantId, String supplierCode) {
-		SupplierGetRequest supplierGetRequest = SupplierGetRequest.builder()
-				.code(Collections.singletonList(supplierCode)).tenantId(tenantId).active(true).build();
-		Pagination<Supplier> suppliers = supplierJdbcRepository.search(supplierGetRequest);
-		if (!suppliers.getPagedData().isEmpty())
+		Supplier suppliers = supplierRepository.getByCode(supplierCode);
+		if (suppliers != null)
 			return true;
 		return false;
 	}
 
 	private Supplier getSupplier(String tenantId, String supplierCode) {
-		SupplierGetRequest supplierGetRequest = SupplierGetRequest.builder()
-				.code(Collections.singletonList(supplierCode)).tenantId(tenantId).active(true).build();
-		Pagination<Supplier> suppliers = supplierJdbcRepository.search(supplierGetRequest);
-		if (!suppliers.getPagedData().isEmpty())
-			return suppliers.getPagedData().get(0);
+		Supplier suppliers = supplierRepository.getByCode(supplierCode);
+		if (suppliers != null)
+			return suppliers;
 		return null;
 	}
 
@@ -1320,14 +1314,17 @@ public class PurchaseOrderService extends DomainService {
 					poDets.put("srNo", i++);
 					poDets.put("materialCode", poDetails.getMaterial().getCode());
 					poDets.put("materialName", poDetails.getMaterial().getName());
-					poDets.put("uomName", poDetails.getUom().getCode());
+					poDets.put("uomName", poDetails.getUom().getName());
 					poDets.put("indentNumber", poDetails.getIndentNumber());
-					poDets.put("indentQuantity", poDetails.getIndentQuantity());
 					poDets.put("orderQuantity", poDetails.getOrderQuantity());
 					poDets.put("poPurpose", poDetails.getPurchaseOrderPurpose());
 					poDets.put("unitRate", poDetails.getUnitPrice());
 					poDets.put("totalValue", poDetails.getOrderQuantity().multiply(poDetails.getUnitPrice()));
 					poDets.put("workDetailsRemark", poDetails.getWorkDetailRemarks());
+
+					for (PurchaseIndentDetail indentDetails : poDetails.getPurchaseIndentDetails()) {
+						poDets.put("indentQuantity", indentDetails.getIndentDetail().getIndentQuantity());
+					}
 
 					purchaseOrder.put("rateContractNumber", poDetails.getPriceList().getRateContractNumber());
 					if (poDetails.getPriceList().getRateContractDate() != null) {
@@ -1357,11 +1354,8 @@ public class PurchaseOrderService extends DomainService {
 					jsonWork.put("comments", processData.getComment());
 					if (processData.getAssignee() == null) {
 						if (!processData.getState().getIsTerminateState()) {
-							ProcessInstance data = workflowData.getProcessInstances().get(j - 1);
-							Optional<Action> currentAssignee = processData.getState().getActions().stream()
-									.filter(processObject -> processObject.getAction().equals(data.getAction()))
-									.findAny();
-							jsonWork.put("currentAssignee", currentAssignee.get().getRoles().get(0));
+							jsonWork.put("currentAssignee",
+									processData.getState().getActions().get(0).getRoles().get(0));
 						} else
 							jsonWork.put("currentAssignee", "NA");
 					} else
