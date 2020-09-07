@@ -1,6 +1,7 @@
 package org.egov.cpt.util;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -36,6 +37,8 @@ public class NotificationUtil {
 	private ServiceRequestRepository serviceRequestRepository;
 
 	private Producer producer;
+
+	private static DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
 	@Autowired
 	public NotificationUtil(PropertyConfiguration config, ServiceRequestRepository serviceRequestRepository,
@@ -329,7 +332,7 @@ public class NotificationUtil {
 	private String getRecoveryNoticeMsg(NoticeGeneration notice, Owner ownerDtl, String message) {
 		message = message.replace("<1>", ownerDtl.getOwnerDetails().getName());
 		message = message.replace("<2>", notice.getMemoNumber());
-		message = message.replace("<3>", notice.getAmount().toString());
+		message = message.replace("<3>", decimalFormat.format(notice.getAmount()).toString());
 
 		return message;
 	}
