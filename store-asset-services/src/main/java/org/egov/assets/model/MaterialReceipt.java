@@ -33,6 +33,9 @@ public class MaterialReceipt {
 	@JsonProperty("issueNumber")
 	private String issueNumber = null;
 
+	@JsonProperty("externalPoNumber")
+	private String externalPoNumber = null;
+
 	@JsonProperty("receiptDate")
 	private Long receiptDate = null;
 
@@ -53,8 +56,10 @@ public class MaterialReceipt {
 
 		INWARD_RECEIPT("INWARD RECEIPT"),
 
+		NON_PURCHASE_RECEIPT("NON PURCHASE RECEIPT"),
 		OPENING_BALANCE("OPENING BALANCE");
 
+		
 		private String value;
 
 		ReceiptTypeEnum(String value) {
@@ -80,7 +85,6 @@ public class MaterialReceipt {
 
 	@JsonProperty("receiptType")
 	private ReceiptTypeEnum receiptType = null;
-
 	/**
 	 * Applicable if receipt type is MISCELLANEOUS RECEIPT
 	 */
@@ -161,6 +165,7 @@ public class MaterialReceipt {
 				"REVIEWOFJC"), REVIEWOFMOH("REVIEWOFMOH"),
 
 		CANCELED("CANCELED"),
+		REJECTED("REJECTED"),
 
 		RECEIPTED("RECEIPTED");
 
@@ -898,6 +903,14 @@ public class MaterialReceipt {
 		sb.append("    auditDetails: ").append(toIndentedString(auditDetails)).append("\n");
 		sb.append("}");
 		return sb.toString();
+	}
+
+	public String getExternalPoNumber() {
+		return externalPoNumber;
+	}
+
+	public void setExternalPoNumber(String externalPoNumber) {
+		this.externalPoNumber = externalPoNumber;
 	}
 
 	/**

@@ -151,6 +151,7 @@ public class MaterialIssueService extends DomainService {
 					materialIssueRequest.getMaterialIssues().size());
 			int i = 0;
 			for (MaterialIssue materialIssue : materialIssueRequest.getMaterialIssues()) {
+				materialIssue.setToStore(getStore(materialIssue.getToStore().getCode(), materialIssue.getTenantId()));
 				String seqNo = sequenceNos.get(i);
 				materialIssue.setId(seqNo);
 				setMaterialIssueValues(materialIssue, seqNo, Constants.ACTION_CREATE, type);
@@ -176,6 +177,13 @@ public class MaterialIssueService extends DomainService {
 					}
 				}
 				materialIssue.setTotalIssueValue(totalIssueValue);
+				BigDecimal deductionPercentage = materialIssue.getToStore().getDepartment().getDeductionPercentage();
+				if (deductionPercentage != null && deductionPercentage.compareTo(BigDecimal.ZERO) > 0)
+					materialIssue.setTotalDeductionValue(
+							deductionPercentage.divide(new BigDecimal(100)).multiply(totalIssueValue));
+				else
+					materialIssue.setTotalDeductionValue(BigDecimal.ZERO);
+
 				WorkFlowDetails workFlowDetails = materialIssueRequest.getWorkFlowDetails();
 				workFlowDetails.setBusinessId(materialIssue.getIssueNumber());
 				workflowIntegrator.callWorkFlow(materialIssueRequest.getRequestInfo(), workFlowDetails,
@@ -707,6 +715,8 @@ public class MaterialIssueService extends DomainService {
 		List<MaterialIssue> materialIssues = materialIssueRequest.getMaterialIssues();
 		int i = 0;
 		for (MaterialIssue materialIssue : materialIssues) {
+			materialIssue.setToStore(getStore(materialIssue.getToStore().getCode(), materialIssue.getTenantId()));
+
 			if (StringUtils.isEmpty(materialIssue.getTenantId()))
 				materialIssue.setTenantId(tenantId);
 			// Search old issue object.
@@ -769,6 +779,14 @@ public class MaterialIssueService extends DomainService {
 			materialIssueDetailsJdbcRepository.markDeleted(materialIssueDetailsIds, tenantId, "materialissuedetail",
 					"materialissuenumber", materialIssue.getIssueNumber());
 			materialIssue.setTotalIssueValue(totalIssueValue);
+
+			BigDecimal deductionPercentage = materialIssue.getToStore().getDepartment().getDeductionPercentage();
+			if (deductionPercentage != null && deductionPercentage.compareTo(BigDecimal.ZERO) > 0)
+				materialIssue.setTotalDeductionValue(
+						deductionPercentage.divide(new BigDecimal(100)).multiply(totalIssueValue));
+			else
+				materialIssue.setTotalDeductionValue(BigDecimal.ZERO);
+
 			i++;
 		}
 		kafkaTemplate.send(updateTopic, updateKey, materialIssueRequest);
@@ -1245,25 +1263,24 @@ public class MaterialIssueService extends DomainService {
 
 			if (indentIssueRequest.getWorkFlowDetails().getAction()
 					.equals(MaterialIssueStatusEnum.REJECTED.toString())) {
-				for (MaterialIssue issue : indentIssueRequest.getMaterialIssues()) {
-					MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(issue.getTenantId(),
-							null, null, null, issue.getIssueNumber(), null, null, null, null, null, null, null, null,
-							null, null, null);
-					MaterialIssueResponse issueResponse = search(searchContract, issue.getIssueType().toString());
-					for (MaterialIssue materialIssues : issueResponse.getMaterialIssues()) {
-						for (MaterialIssueDetail issueDetail : materialIssues.getMaterialIssueDetails()) {
-							issueDetail.rejectedIssuedQuantity(issueDetail.getQuantityIssued());
-							issueDetail.setQuantityIssued(BigDecimal.ZERO);
-							issueDetail.setUserQuantityIssued(BigDecimal.ZERO);
+				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(
+						indentIssueRequest.getWorkFlowDetails().getTenantId(), null, null, null,
+						indentIssueRequest.getWorkFlowDetails().getBusinessId(), null, null, null, null, null, null,
+						null, null, null, null, null);
+				MaterialIssueResponse issueResponse = search(searchContract, IssueTypeEnum.INDENTISSUE.toString());
+				for (MaterialIssue materialIssues : issueResponse.getMaterialIssues()) {
+					for (MaterialIssueDetail issueDetail : materialIssues.getMaterialIssueDetails()) {
+						issueDetail.rejectedIssuedQuantity(issueDetail.getQuantityIssued());
+						issueDetail.setQuantityIssued(BigDecimal.ZERO);
+						issueDetail.setUserQuantityIssued(BigDecimal.ZERO);
 
-							for (MaterialIssuedFromReceipt fromReceipt : issueDetail.getMaterialIssuedFromReceipts()) {
-								fromReceipt.setRejectedIssuedQuantity(fromReceipt.getQuantity());
-								fromReceipt.setQuantity(BigDecimal.ZERO);
-							}
+						for (MaterialIssuedFromReceipt fromReceipt : issueDetail.getMaterialIssuedFromReceipts()) {
+							fromReceipt.setRejectedIssuedQuantity(fromReceipt.getQuantity());
+							fromReceipt.setQuantity(BigDecimal.ZERO);
 						}
-						rejectedMaterialService.minusRejectedMaterial(materialIssues.getMaterialIssueDetails(),
-								issue.getTenantId());
 					}
+					rejectedMaterialService.minusRejectedMaterial(materialIssues.getMaterialIssueDetails(),
+							indentIssueRequest.getWorkFlowDetails().getTenantId());
 				}
 			}
 

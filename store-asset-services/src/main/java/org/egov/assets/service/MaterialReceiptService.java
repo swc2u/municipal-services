@@ -20,6 +20,7 @@ import org.egov.assets.model.PurchaseOrderDetail;
 import org.egov.assets.model.PurchaseOrderDetailSearch;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
+import org.egov.assets.model.StoreResponse;
 import org.egov.assets.model.Supplier;
 import org.egov.assets.model.SupplierGetRequest;
 import org.egov.assets.model.SupplierResponse;
@@ -29,6 +30,7 @@ import org.egov.assets.repository.StoreJdbcRepository;
 import org.egov.common.contract.request.RequestInfo;
 import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +58,12 @@ public class MaterialReceiptService extends DomainService {
 
 	@Autowired
 	private SupplierRepository supplierRepository;
+
+	@Autowired
+	private StoreService storeService;
+
+	@Autowired
+	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 	public Pagination<MaterialReceipt> search(MaterialReceiptSearch materialReceiptSearch) {
 		Pagination<MaterialReceipt> materialReceiptPagination = materialReceiptJdbcRepository
@@ -91,11 +99,11 @@ public class MaterialReceiptService extends DomainService {
 	}
 
 	private Store getStore(String tenantId, String code) {
-		StoreGetRequest storeEntity = StoreGetRequest.builder().code(Collections.singletonList(code)).tenantId(tenantId)
-				.active(true).build();
-		Pagination<Store> store = storeJdbcRepository.search(storeEntity);
-		if (!store.getPagedData().isEmpty()) {
-			return store.getPagedData().get(0);
+		StoreGetRequest storeGetRequest = StoreGetRequest.builder().code(Collections.singletonList(code))
+				.tenantId(tenantId).active(true).build();
+		StoreResponse search = storeService.search(storeGetRequest);
+		if (!search.getStores().isEmpty()) {
+			return search.getStores().get(0);
 		}
 		return null;
 	}
@@ -166,5 +174,16 @@ public class MaterialReceiptService extends DomainService {
 
 		}
 		return uomMap;
+	}
+
+	public void updatePOdetailIdAgainstMaterials(List<MaterialReceiptDetail> materialReceiptDetails, String tenantId) {
+		for (MaterialReceiptDetail detail : materialReceiptDetails) {
+			Map<String, Object> paramValuesqueryMat = new HashMap<>();
+			String queryMat = "update materialreceiptdetail set podetailid =:podetailid where id = :id and tenantid = :tenantId";
+			paramValuesqueryMat.put("podetailid", detail.getPurchaseOrderDetail().getId());
+			paramValuesqueryMat.put("id", detail.getId());
+			paramValuesqueryMat.put("tenantId", tenantId);
+			namedParameterJdbcTemplate.update(queryMat, paramValuesqueryMat);
+		}
 	}
 }
