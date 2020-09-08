@@ -191,7 +191,7 @@ public class PurchaseOrderService extends DomainService {
 
 			List<PurchaseOrder> purchaseOrders = purchaseOrderRequest.getPurchaseOrders();
 			InvalidDataException errors = new InvalidDataException();
-		//	validate(purchaseOrders, Constants.ACTION_CREATE, tenantId);
+			validate(purchaseOrders, Constants.ACTION_CREATE, tenantId);
 
 			List<String> sequenceNos = purchaseOrderRepository.getSequence(PurchaseOrder.class.getSimpleName(),
 					purchaseOrders.size());
