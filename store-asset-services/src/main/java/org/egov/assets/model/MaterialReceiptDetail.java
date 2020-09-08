@@ -31,6 +31,9 @@ public class MaterialReceiptDetail {
 	@JsonProperty("orderNumber")
 	private BigDecimal orderNumber = null;
 
+	@JsonProperty("orderQuantity")
+	private BigDecimal orderQuantity = null;
+
 	@JsonProperty("uom")
 	private Uom uom = null;
 
@@ -95,6 +98,14 @@ public class MaterialReceiptDetail {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public BigDecimal getOrderQuantity() {
+		return orderQuantity;
+	}
+
+	public void setOrderQuantity(BigDecimal orderQuantity) {
+		this.orderQuantity = orderQuantity;
 	}
 
 	public MaterialReceiptDetail tenantId(String tenantId) {

@@ -1,4 +1,4 @@
-package org.egov.hc.model;
+package org.egov.assets.wf.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,16 +7,11 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.egov.assets.model.Document;
 import org.egov.common.contract.request.User;
-import org.egov.hc.contract.Action;
-import org.egov.hc.contract.AuditDetails;
-import org.egov.hc.workflow.Document;
-import org.json.simple.JSONObject;
 import org.springframework.validation.annotation.Validated;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -74,9 +69,6 @@ public class ProcessInstance   {
 
         @JsonProperty("state")
         private State state = null;
-        
-        @JsonProperty("status")
-        private String status = null;
 
         @JsonProperty("comment")
         private String comment = null;
@@ -91,10 +83,6 @@ public class ProcessInstance   {
         @JsonProperty("assignee")
         private User assignee = null;
 
-        @JsonProperty("nextActions")
-        @Valid
-        private List<Action> nextActions = null;
-
         @JsonProperty("stateSla")
         private Long stateSla = null;
 
@@ -108,31 +96,8 @@ public class ProcessInstance   {
         @JsonProperty("entity")
         private Object entity = null;
 
-        @JsonProperty("auditDetails")
-        private AuditDetails auditDetails = null;
-        
-        @JsonProperty("additionalDetails")
-        @JsonInclude(Include.NON_NULL)
-        private JSONObject additionalDetails = null;
+        private AuditDetails auditDetails;
 
-
-        public ProcessInstance addDocumentsItem(Document documentsItem) {
-            if (this.documents == null) {
-            this.documents = new ArrayList<>();
-            }
-            if(!this.documents.contains(documentsItem))
-                this.documents.add(documentsItem);
-
-        return this;
-        }
-
-        public ProcessInstance addNextActionsItem(Action nextActionsItem) {
-            if (this.nextActions == null) {
-            this.nextActions = new ArrayList<>();
-            }
-        this.nextActions.add(nextActionsItem);
-        return this;
-        }
 
 }
 

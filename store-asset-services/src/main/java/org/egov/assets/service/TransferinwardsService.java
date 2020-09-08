@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
@@ -45,6 +46,9 @@ import org.egov.assets.repository.MaterialReceiptDetailAddInfoJdbcRepository;
 import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.TransferInwardRepository;
 import org.egov.assets.wf.WorkflowIntegrator;
+import org.egov.assets.wf.model.Action;
+import org.egov.assets.wf.model.ProcessInstance;
+import org.egov.assets.wf.model.ProcessInstanceResponse;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -391,6 +395,7 @@ public class TransferinwardsService extends DomainService {
 				&& transferInwardResponse.getTransferInwards().size() == 1) {
 			JSONObject requestMain = new JSONObject();
 			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			DateTimeFormatter wfdateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 			ObjectMapper mapper = new ObjectMapper();
 			try {
 				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
@@ -442,7 +447,7 @@ public class TransferinwardsService extends DomainService {
 				indent.put("inwardStatus", in.getMrnStatus());
 
 				indent.put("remark", in.getDescription());
-				// indent.put("createdBy", in.get);
+				indent.put("createdBy", in.getReceivedBy());
 				indent.put("designation", in.getDesignation());
 
 				JSONArray indentDetails = new JSONArray();
@@ -454,7 +459,7 @@ public class TransferinwardsService extends DomainService {
 					indentDetail.put("materialCode", detail.getMaterial().getCode());
 					indentDetail.put("materialName", detail.getMaterial().getName());
 					indentDetail.put("materialDescription", detail.getMaterial().getDescription());
-					indentDetail.put("uomName", detail.getUom().getCode());
+					indentDetail.put("uomName", detail.getUom().getName());
 					indentDetail.put("receivedQuantity", detail.getReceivedQty());
 
 					if (materialIssueDetail != null) {
@@ -479,15 +484,29 @@ public class TransferinwardsService extends DomainService {
 
 				// Need to integrate Workflow
 
+				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo,
+						in.getMrnNumber(), in.getTenantId());
 				JSONArray workflows = new JSONArray();
-				JSONObject jsonWork = new JSONObject();
-				jsonWork.put("reviewApprovalDate", "02-05-2020");
-				jsonWork.put("reviewerApproverName", "Aniket");
-				jsonWork.put("designation", "MD");
-				jsonWork.put("action", "Forwarded");
-				jsonWork.put("sendTo", "Prakash");
-				jsonWork.put("approvalStatus", "APPROVED");
-				workflows.add(jsonWork);
+				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
+					ProcessInstance processData = workflowData.getProcessInstances().get(j);
+					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
+					// Need to integrate Workflow
+					JSONObject jsonWork = new JSONObject();
+					jsonWork.put("date", wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())));
+					jsonWork.put("updatedBy", processData.getAssigner().getName());
+					jsonWork.put("comments", processData.getComment());
+					if (processData.getAssignee() == null) {
+						if (!processData.getState().getIsTerminateState()) {
+							jsonWork.put("currentAssignee",
+									processData.getState().getActions().get(0).getRoles().get(0));
+						} else
+							jsonWork.put("currentAssignee", "NA");
+					} else
+						jsonWork.put("currentAssignee", processData.getAssignee().getName());
+
+					jsonWork.put("status", processData.getState().getApplicationStatus());
+					workflows.add(jsonWork);
+				}
 				indent.put("workflowDetails", workflows);
 				indents.add(indent);
 				requestMain.put("IndentInwardTransfer", indents);

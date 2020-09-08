@@ -11,6 +11,7 @@ import java.util.Map;
 import org.egov.assets.common.Constants;
 import org.egov.assets.common.JdbcRepository;
 import org.egov.assets.common.Pagination;
+import org.egov.assets.common.SupplierRepository;
 import org.egov.assets.model.PriceList;
 import org.egov.assets.model.PriceList.RateTypeEnum;
 import org.egov.assets.model.PriceListDetails;
@@ -75,7 +76,7 @@ public class PriceListJdbcRepository extends JdbcRepository {
 	PriceListDetailJdbcRepository priceListDetailJdbcRepository;
 
 	@Autowired
-	SupplierJdbcRepository supplierJdbcRepository;
+	SupplierRepository supplierRepository;
 
 	public PriceListJdbcRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
 		this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -195,12 +196,12 @@ public class PriceListJdbcRepository extends JdbcRepository {
 			pdlsr.setPriceList(priceListEntity.getId());
 			pdlsr.setDeleted(false);
 			pdlsr.setActive(true);
-			sgr.setCode(Arrays.asList(supCode));
+			sgr.setCode(supCode);
 			pdlsr.setTenantId(priceListEntity.getTenantId());
 			if (priceListSearchRequest.getMaterialCode() != null)
 				pdlsr.setMaterial(priceListSearchRequest.getMaterialCode());
 			pl.setPriceListDetails(priceListDetailJdbcRepository.search(pdlsr).getPagedData());
-			pl.setSupplier(supplierJdbcRepository.search(sgr).getPagedData().get(0));
+			pl.setSupplier(supplierRepository.getByCode(supCode));
 			priceListList.add(pl);
 		}
 
@@ -447,15 +448,13 @@ public class PriceListJdbcRepository extends JdbcRepository {
 			sgr = new SupplierGetRequest();
 			pdlsr.setPriceList(id);
 			pdlsr.setDeleted(false);
-			sgr.setCode(Arrays.asList(supCode));
+			sgr.setCode(supCode);
 			if (priceListSearchRequest.getMaterialCode() != null) {
 				pdlsr.setMaterial(priceListSearchRequest.getMaterialCode());
 			}
 			pdlsr.setTenantId(priceListEntity.getTenantId());
 			pl.setPriceListDetails(priceListDetailJdbcRepository.search(pdlsr).getPagedData());
-			pl.setSupplier(supplierJdbcRepository.search(sgr).getPagedData().size() > 0
-					? supplierJdbcRepository.search(sgr).getPagedData().get(0)
-					: null);
+			pl.setSupplier(supplierRepository.getByCode(supCode));
 			priceListList.add(pl);
 		}
 

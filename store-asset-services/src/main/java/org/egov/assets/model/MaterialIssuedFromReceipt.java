@@ -34,6 +34,9 @@ public class MaterialIssuedFromReceipt {
 	@JsonProperty("quantity")
 	private BigDecimal quantity = null;
 
+	@JsonProperty("rejectedIssuedQuantity")
+	private BigDecimal rejectedIssuedQuantity = null;
+
 	@JsonProperty("status")
 	private Boolean status = true;
 
@@ -61,6 +64,19 @@ public class MaterialIssuedFromReceipt {
 	public MaterialIssuedFromReceipt tenantId(String tenantId) {
 		this.tenantId = tenantId;
 		return this;
+	}
+
+	public MaterialIssuedFromReceipt rejectedIssuedQuantity(BigDecimal rejectedIssuedQuantity) {
+		this.rejectedIssuedQuantity = rejectedIssuedQuantity;
+		return this;
+	}
+
+	public BigDecimal getRejectedIssuedQuantity() {
+		return rejectedIssuedQuantity;
+	}
+
+	public void setRejectedIssuedQuantity(BigDecimal rejectedIssuedQuantity) {
+		this.rejectedIssuedQuantity = rejectedIssuedQuantity;
 	}
 
 	/**

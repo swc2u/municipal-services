@@ -1,15 +1,11 @@
 package org.egov.assets.model;
 
-import java.util.Objects;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * This object holds the Supplier information.
@@ -25,44 +21,44 @@ public class Supplier {
 	/**
 	 * type of the Supplier
 	 */
-	public enum TypeEnum {
-		INDIVIDUAL("INDIVIDUAL"),
+	// public enum TypeEnum {
+	// INDIVIDUAL("INDIVIDUAL"),
+	//
+	// FIRM("FIRM"),
+	//
+	// COMPANY("COMPANY"),
+	//
+	// REGISTEREDSOCIETY("REGISTEREDSOCIETY"),
+	//
+	// GOVERNMENTDEPARTMENT("GOVERNMENTDEPARTMENT"),
+	//
+	// OTHERS("OTHERS");
+	//
+	// private String value;
+	//
+	// TypeEnum(String value) {
+	// this.value = value;
+	// }
+	//
+	// @Override
+	// @JsonValue
+	// public String toString() {
+	// return String.valueOf(value);
+	// }
+	//
+	// @JsonCreator
+	// public static TypeEnum fromValue(String text) {
+	// for (TypeEnum b : TypeEnum.values()) {
+	// if (String.valueOf(b.value).equals(text)) {
+	// return b;
+	// }
+	// }
+	// return null;
+	// }
+	// }
 
-		FIRM("FIRM"),
-
-		COMPANY("COMPANY"),
-
-		REGISTEREDSOCIETY("REGISTEREDSOCIETY"),
-
-		GOVERNMENTDEPARTMENT("GOVERNMENTDEPARTMENT"),
-
-		OTHERS("OTHERS");
-
-		private String value;
-
-		TypeEnum(String value) {
-			this.value = value;
-		}
-
-		@Override
-		@JsonValue
-		public String toString() {
-			return String.valueOf(value);
-		}
-
-		@JsonCreator
-		public static TypeEnum fromValue(String text) {
-			for (TypeEnum b : TypeEnum.values()) {
-				if (String.valueOf(b.value).equals(text)) {
-					return b;
-				}
-			}
-			return null;
-		}
-	}
-
-	@JsonProperty("type")
-	private TypeEnum type = null;
+	@JsonProperty("narration")
+	private String narration = null;
 
 	@JsonProperty("code")
 	private String code = null;
@@ -70,79 +66,97 @@ public class Supplier {
 	@JsonProperty("name")
 	private String name = null;
 
-	@JsonProperty("address")
-	private String address = null;
+	@JsonProperty("correspondenceAddress")
+	private String correspondenceAddress = null;
+
+	@JsonProperty("paymentAddress")
+	private String paymentAddress = null;
 
 	/**
 	 * status of the Supplier
 	 */
-	public enum StatusEnum {
-		ACTIVE("ACTIVE"),
-
-		SUSPENDED("SUSPENDED"),
-
-		BARRED("BARRED"),
-
-		INACTIVE("INACTIVE");
-
-		private String value;
-
-		StatusEnum(String value) {
-			this.value = value;
-		}
-
-		@Override
-		@JsonValue
-		public String toString() {
-			return String.valueOf(value);
-		}
-
-		@JsonCreator
-		public static StatusEnum fromValue(String text) {
-			for (StatusEnum b : StatusEnum.values()) {
-				if (String.valueOf(b.value).equals(text)) {
-					return b;
-				}
-			}
-			return null;
-		}
-	}
+	// public enum StatusEnum {
+	// ACTIVE("ACTIVE"),
+	//
+	// SUSPENDED("SUSPENDED"),
+	//
+	// BARRED("BARRED"),
+	//
+	// INACTIVE("INACTIVE");
+	//
+	// private String value;
+	//
+	// StatusEnum(String value) {
+	// this.value = value;
+	// }
+	//
+	// @Override
+	// @JsonValue
+	// public String toString() {
+	// return String.valueOf(value);
+	// }
+	//
+	// @JsonCreator
+	// public static StatusEnum fromValue(String text) {
+	// for (StatusEnum b : StatusEnum.values()) {
+	// if (String.valueOf(b.value).equals(text)) {
+	// return b;
+	// }
+	// }
+	// return null;
+	// }
+	// }
 
 	@JsonProperty("status")
-	private StatusEnum status = null;
+	private Object status = null;
 
-	@JsonProperty("inActiveDate")
-	private Long inActiveDate = null;
+	@JsonProperty("bankAccount")
+	private String bankAccount = null;
 
-	@JsonProperty("active")
-	private Boolean active;
+//	@JsonProperty("bankaccount")
+//	private String bankaccount = null;
 
-	@JsonProperty("contactNo")
-	private String contactNo = null;
+	@JsonProperty("registrationNumber")
+	private String registrationNumber;
 
-	@JsonProperty("faxNo")
-	private String faxNo = null;
+	@JsonProperty("mobileNumber")
+	private String mobileNumber = null;
 
-	@JsonProperty("website")
-	private String website = null;
+	@JsonProperty("epfNumber")
+	private String epfNumber = null;
+
+	@JsonProperty("esiNumber")
+	private String esiNumber = null;
+
+	@JsonProperty("gstRegisteredState")
+	private String gstRegisteredState = null;
+
+	@JsonProperty("entityId")
+	private String entityId = null;
+
+	@JsonProperty("modeofpay")
+	private String modeofpay = null;
 
 	@JsonProperty("email")
 	private String email = null;
 
-	@JsonProperty("description")
-	private String description = null;
+	@JsonProperty("entityDescription")
+	private String entityDescription = null;
 
-	@JsonProperty("panNo")
-	private String panNo = null;
+	@JsonProperty("panNumber")
+	private String panNumber = null;
 
-	@JsonProperty("tinNo")
-	private String tinNo = null;
+	@JsonProperty("tinNumber")
+	private String tinNumber = null;
 
-	@JsonProperty("cstNo")
-	private String cstNo = null;
+	@JsonProperty("ifscCode")
+	private String ifscCode = null;
 
-	@JsonProperty("vatNo")
-	private String vatNo = null;
+//	@JsonProperty("ifsccode")
+//	private String ifsccode = null;
+
+	@JsonProperty("panno")
+	private String panno = null;
 
 	@JsonProperty("gstNo")
 	private String gstNo = null;
@@ -156,8 +170,8 @@ public class Supplier {
 	@JsonProperty("bankCode")
 	private String bankCode = null;
 
-	@JsonProperty("bankName")
-	private String bankName = null;
+	@JsonProperty("bankname")
+	private String bankname = null;
 
 	@JsonProperty("bankBranch")
 	private String bankBranch = null;
@@ -165,8 +179,14 @@ public class Supplier {
 	@JsonProperty("acctNo")
 	private String acctNo = null;
 
-	@JsonProperty("ifsc")
-	private String ifsc = null;
+	@JsonProperty("tinno")
+	private String tinno = null;
+
+	@JsonProperty("bank")
+	private Object bank = null;
+
+	@JsonProperty("egwStatus")
+	private Object egwStatus = null;
 
 	@JsonProperty("micr")
 	private String micr = null;
@@ -184,7 +204,6 @@ public class Supplier {
 	 * 
 	 * @return id
 	 **/
-	
 
 	public String getId() {
 		return id;
@@ -192,21 +211,6 @@ public class Supplier {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public Supplier active(Boolean active) {
-		this.active = active;
-		return this;
-	}
-
-	
-
-	public Boolean getActive() {
-		return active;
-	}
-
-	public void setActive(Boolean active) {
-		this.active = active;
 	}
 
 	public Supplier tenantId(String tenantId) {
@@ -219,7 +223,7 @@ public class Supplier {
 	 * 
 	 * @return tenantId
 	 **/
-	
+
 	@NotNull
 	@Size(min = 2, max = 128)
 	public String getTenantId() {
@@ -228,27 +232,6 @@ public class Supplier {
 
 	public void setTenantId(String tenantId) {
 		this.tenantId = tenantId;
-	}
-
-	public Supplier type(TypeEnum type) {
-		this.type = type;
-		return this;
-	}
-
-	/**
-	 * type of the Supplier
-	 * 
-	 * @return type
-	 **/
-	
-	@NotNull
-
-	public TypeEnum getType() {
-		return type;
-	}
-
-	public void setType(TypeEnum type) {
-		this.type = type;
 	}
 
 	public Supplier code(String code) {
@@ -261,7 +244,7 @@ public class Supplier {
 	 * 
 	 * @return code
 	 **/
-	
+
 	@NotNull
 
 	@Pattern(regexp = "^[a-zA-Z0-9]*$")
@@ -284,7 +267,7 @@ public class Supplier {
 	 * 
 	 * @return name
 	 **/
-	
+
 	@NotNull
 
 	@Pattern(regexp = "^[a-zA-Z ]*$")
@@ -297,145 +280,11 @@ public class Supplier {
 		this.name = name;
 	}
 
-	public Supplier address(String address) {
-		this.address = address;
-		return this;
-	}
-
-	/**
-	 * address of the Supplier
-	 * 
-	 * @return address
-	 **/
-	
-	@NotNull
-
-	@Size(max = 1000)
-	@Pattern(regexp = "^[#.0-9a-zA-Z, -]*$")
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public Supplier status(StatusEnum status) {
-		this.status = status;
-		return this;
-	}
-
-	/**
-	 * status of the Supplier
-	 * 
-	 * @return status
-	 **/
-	
-
-	public StatusEnum getStatus() {
-		return status;
-	}
-
-	public void setStatus(StatusEnum status) {
-		this.status = status;
-	}
-
-	public Supplier inActiveDate(Long inActiveDate) {
-		this.inActiveDate = inActiveDate;
-		return this;
-	}
-
-	/**
-	 * inactive date of the Supplier
-	 * 
-	 * @return inActiveDate
-	 **/
-	
-
-	public Long getInActiveDate() {
-		return inActiveDate;
-	}
-
-	public void setInActiveDate(Long inActiveDate) {
-		this.inActiveDate = inActiveDate;
-	}
-
-	public Supplier contactNo(String contactNo) {
-		this.contactNo = contactNo;
-		return this;
-	}
-
-	/**
-	 * contact no of the Supplier
-	 * 
-	 * @return contactNo
-	 **/
-	
-	@NotNull
-
-	@Pattern(regexp = "^[0-9]*$")
-	@Size(max = 10)
-	public String getContactNo() {
-		return contactNo;
-	}
-
-	public void setContactNo(String contactNo) {
-		this.contactNo = contactNo;
-	}
-
-	public Supplier faxNo(String faxNo) {
-		this.faxNo = faxNo;
-		return this;
-	}
-
-	/**
-	 * fax number of Supplier
-	 * 
-	 * @return faxNo
-	 **/
-	
-	@Size(max = 15)
-	@Pattern(regexp = "^[0-9]*$")
-	public String getFaxNo() {
-		return faxNo;
-	}
-
-	public void setFaxNo(String faxNo) {
-		this.faxNo = faxNo;
-	}
-
-	public Supplier website(String website) {
-		this.website = website;
-		return this;
-	}
-
-	/**
-	 * website of the Supplier
-	 * 
-	 * @return website
-	 **/
-	
-	@Size(max = 500)
-	@Pattern(regexp = "^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$")
-	public String getWebsite() {
-		return website;
-	}
-
-	public void setWebsite(String website) {
-		this.website = website;
-	}
-
-	public Supplier email(String email) {
-		this.email = email;
-		return this;
-	}
-
 	/**
 	 * email of the Supplier
 	 * 
 	 * @return email
 	 **/
-	
 
 	@Pattern(regexp = "^$|([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$")
 	@Size(max = 100)
@@ -447,123 +296,14 @@ public class Supplier {
 		this.email = email;
 	}
 
-	public Supplier description(String description) {
-		this.description = description;
-		return this;
-	}
-
-	/**
-	 * description of the Supplier
-	 * 
-	 * @return description
-	 **/
-		@Pattern(regexp = "^[,.a-zA-Z 0-9]*$")
-	@Size(max = 1000)
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Supplier panNo(String panNo) {
-		this.panNo = panNo;
-		return this;
-	}
-
-	/**
-	 * pan number of supplier
-	 * 
-	 * @return panNo
-	 **/
-	
-    @Pattern(regexp ="[A-Z]{5}[0-9]{4}[A-Z]{1}")
-	@Size(max = 10,min = 10)
-	public String getPanNo() {
-		return panNo;
-	}
-
-	public void setPanNo(String panNo) {
-		this.panNo = panNo;
-	}
-
-	public Supplier tinNo(String tinNo) {
-		this.tinNo = tinNo;
-		return this;
-	}
-
-	/**
-	 * tin number of supplier
-	 * 
-	 * @return tinNo
-	 **/
-		@Size(max = 11, min = 11)
-	@Pattern(regexp = "[0-9]{2}[A-Za-z0-9-!@#$%&*.?=]{9}")
-	public String getTinNo() {
-		return tinNo;
-	}
-
-	public void setTinNo(String tinNo) {
-		this.tinNo = tinNo;
-	}
-
-	public Supplier cstNo(String cstNo) {
-		this.cstNo = cstNo;
-		return this;
-	}
-
-	/**
-	 * cst number of supplier
-	 * 
-	 * @return cstNo
-	 **/
-	
-	@Size(max = 11, min = 11)
-	@Pattern(regexp = "[0-9]{2}[A-Za-z0-9-!@#$%&*.?=]{8}[C]{1}")
-
-	public String getCstNo() {
-		return cstNo;
-	}
-
-	public void setCstNo(String cstNo) {
-		this.cstNo = cstNo;
-	}
-
-	public Supplier vatNo(String vatNo) {
-		this.vatNo = vatNo;
-		return this;
-	}
-
-	/**
-	 * vat number of supplier
-	 * 
-	 * @return vatNo
-	 **/
-	
-	@Size(max = 11, min = 11)
-	@Pattern(regexp = "[0-9]{2}[A-Za-z0-9-!@#$%&*.?=]{8}[V]{1}")
-	public String getVatNo() {
-		return vatNo;
-	}
-
-	public void setVatNo(String vatNo) {
-		this.vatNo = vatNo;
-	}
-
-	public Supplier gstNo(String gstNo) {
-		this.gstNo = gstNo;
-		return this;
-	}
-
 	/**
 	 * gst number of supplier
 	 * 
 	 * @return gstNo
 	 **/
-	
-	@Size(min = 15,max = 15)
-	@Pattern(regexp ="[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[0-9A-Za-z]{1}[Z]{1}[0-9]{1}")
+
+	@Size(min = 15, max = 15)
+	@Pattern(regexp = "[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[0-9A-Za-z]{1}[Z]{1}[0-9]{1}")
 	public String getGstNo() {
 		return gstNo;
 	}
@@ -582,7 +322,7 @@ public class Supplier {
 	 * 
 	 * @return contactPerson
 	 **/
-		@Pattern(regexp = "^[a-zA-Z ]*$")
+	@Pattern(regexp = "^[a-zA-Z ]*$")
 	@Size(max = 50)
 	public String getContactPerson() {
 		return contactPerson;
@@ -602,7 +342,7 @@ public class Supplier {
 	 * 
 	 * @return contactPersonNo
 	 **/
-	
+
 	@Pattern(regexp = "^[0-9]*$")
 	@Size(max = 10)
 	public String getContactPersonNo() {
@@ -623,7 +363,7 @@ public class Supplier {
 	 * 
 	 * @return bankCode
 	 **/
-	
+
 	@NotNull
 	@Size(max = 50)
 	public String getBankCode() {
@@ -634,38 +374,12 @@ public class Supplier {
 		this.bankCode = bankCode;
 	}
 
-	public Supplier bankName(String bankName) {
-		this.bankName = bankName;
-		return this;
-	}
-
-	/**
-	 * name of the bank
-	 * 
-	 * @return bankName
-	 **/
-	
-	@Size(max = 100)
-	@Pattern(regexp = "^[a-zA-Z ]*$")
-	public String getBankName() {
-		return bankName;
-	}
-
-	public void setBankName(String bankName) {
-		this.bankName = bankName;
-	}
-
-	public Supplier bankBranch(String bankBranch) {
-		this.bankBranch = bankBranch;
-		return this;
-	}
-
 	/**
 	 * name of the bank branch
 	 * 
 	 * @return bankBranch
 	 **/
-	
+
 	@Size(max = 100)
 	public String getBankBranch() {
 		return bankBranch;
@@ -685,7 +399,7 @@ public class Supplier {
 	 * 
 	 * @return acctNo
 	 **/
-	
+
 	@NotNull
 	@Size(max = 16)
 	@Pattern(regexp = "^[0-9]*$")
@@ -695,28 +409,6 @@ public class Supplier {
 
 	public void setAcctNo(String acctNo) {
 		this.acctNo = acctNo;
-	}
-
-	public Supplier ifsc(String ifsc) {
-		this.ifsc = ifsc;
-		return this;
-	}
-
-	/**
-	 * ifsc of the bank
-	 * 
-	 * @return ifsc
-	 **/
-	
-	@NotNull
-	@Size(max = 10)
-	@Pattern(regexp = "^[a-zA-Z0-9]*$")
-	public String getIfsc() {
-		return ifsc;
-	}
-
-	public void setIfsc(String ifsc) {
-		this.ifsc = ifsc;
 	}
 
 	public Supplier micr(String micr) {
@@ -729,7 +421,7 @@ public class Supplier {
 	 * 
 	 * @return micr
 	 **/
-	
+
 	@Size(max = 10)
 	@Pattern(regexp = "^[a-zA-Z0-9]*$")
 	public String getMicr() {
@@ -750,7 +442,6 @@ public class Supplier {
 	 * 
 	 * @return auditDetails
 	 **/
-	
 
 	@Valid
 
@@ -760,102 +451,6 @@ public class Supplier {
 
 	public void setAuditDetails(AuditDetails auditDetails) {
 		this.auditDetails = auditDetails;
-	}
-
-	@Override
-	public boolean equals(java.lang.Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		Supplier supplier = (Supplier) o;
-		return Objects.equals(this.id, supplier.id)
-				&& Objects.equals(this.tenantId, supplier.tenantId)
-				&& Objects.equals(this.type, supplier.type)
-				&& Objects.equals(this.code, supplier.code)
-				&& Objects.equals(this.name, supplier.name)
-				&& Objects.equals(this.address, supplier.address)
-				&& Objects.equals(this.status, supplier.status)
-				&& Objects.equals(this.inActiveDate, supplier.inActiveDate)
-				&& Objects.equals(this.contactNo, supplier.contactNo)
-				&& Objects.equals(this.faxNo, supplier.faxNo)
-				&& Objects.equals(this.website, supplier.website)
-				&& Objects.equals(this.email, supplier.email)
-				&& Objects.equals(this.description, supplier.description)
-				&& Objects.equals(this.panNo, supplier.panNo)
-				&& Objects.equals(this.tinNo, supplier.tinNo)
-				&& Objects.equals(this.cstNo, supplier.cstNo)
-				&& Objects.equals(this.vatNo, supplier.vatNo)
-				&& Objects.equals(this.gstNo, supplier.gstNo)
-				&& Objects.equals(this.contactPerson, supplier.contactPerson)
-				&& Objects.equals(this.contactPersonNo,
-						supplier.contactPersonNo)
-				&& Objects.equals(this.bankCode, supplier.bankCode)
-				&& Objects.equals(this.bankName, supplier.bankName)
-				&& Objects.equals(this.bankBranch, supplier.bankBranch)
-				&& Objects.equals(this.acctNo, supplier.acctNo)
-				&& Objects.equals(this.ifsc, supplier.ifsc)
-				&& Objects.equals(this.micr, supplier.micr)
-				&& Objects.equals(this.auditDetails, supplier.auditDetails);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, tenantId, type, code, name, address, status,
-				inActiveDate, contactNo, faxNo, website, email, description,
-				panNo, tinNo, cstNo, vatNo, gstNo, contactPerson,
-				contactPersonNo, bankCode, bankName, bankBranch, acctNo, ifsc,
-				micr, auditDetails);
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("class Supplier {\n");
-
-		sb.append("    id: ").append(toIndentedString(id)).append("\n");
-		sb.append("    tenantId: ").append(toIndentedString(tenantId))
-				.append("\n");
-		sb.append("    type: ").append(toIndentedString(type)).append("\n");
-		sb.append("    code: ").append(toIndentedString(code)).append("\n");
-		sb.append("    name: ").append(toIndentedString(name)).append("\n");
-		sb.append("    address: ").append(toIndentedString(address))
-				.append("\n");
-		sb.append("    status: ").append(toIndentedString(status)).append("\n");
-		sb.append("    inActiveDate: ").append(toIndentedString(inActiveDate))
-				.append("\n");
-		sb.append("    contactNo: ").append(toIndentedString(contactNo))
-				.append("\n");
-		sb.append("    faxNo: ").append(toIndentedString(faxNo)).append("\n");
-		sb.append("    website: ").append(toIndentedString(website))
-				.append("\n");
-		sb.append("    email: ").append(toIndentedString(email)).append("\n");
-		sb.append("    description: ").append(toIndentedString(description))
-				.append("\n");
-		sb.append("    panNo: ").append(toIndentedString(panNo)).append("\n");
-		sb.append("    tinNo: ").append(toIndentedString(tinNo)).append("\n");
-		sb.append("    cstNo: ").append(toIndentedString(cstNo)).append("\n");
-		sb.append("    vatNo: ").append(toIndentedString(vatNo)).append("\n");
-		sb.append("    gstNo: ").append(toIndentedString(gstNo)).append("\n");
-		sb.append("    contactPerson: ").append(toIndentedString(contactPerson))
-				.append("\n");
-		sb.append("    contactPersonNo: ")
-				.append(toIndentedString(contactPersonNo)).append("\n");
-		sb.append("    bankCode: ").append(toIndentedString(bankCode))
-				.append("\n");
-		sb.append("    bankName: ").append(toIndentedString(bankName))
-				.append("\n");
-		sb.append("    bankBranch: ").append(toIndentedString(bankBranch))
-				.append("\n");
-		sb.append("    acctNo: ").append(toIndentedString(acctNo)).append("\n");
-		sb.append("    ifsc: ").append(toIndentedString(ifsc)).append("\n");
-		sb.append("    micr: ").append(toIndentedString(micr)).append("\n");
-		sb.append("    auditDetails: ").append(toIndentedString(auditDetails))
-				.append("\n");
-		sb.append("}");
-		return sb.toString();
 	}
 
 	/**
@@ -868,4 +463,189 @@ public class Supplier {
 		}
 		return o.toString().replace("\n", "\n    ");
 	}
+
+	public String getNarration() {
+		return narration;
+	}
+
+	public void setNarration(String narration) {
+		this.narration = narration;
+	}
+
+	public String getCorrespondenceAddress() {
+		return correspondenceAddress;
+	}
+
+	public void setCorrespondenceAddress(String correspondenceAddress) {
+		this.correspondenceAddress = correspondenceAddress;
+	}
+
+	public String getPaymentAddress() {
+		return paymentAddress;
+	}
+
+	public void setPaymentAddress(String paymentAddress) {
+		this.paymentAddress = paymentAddress;
+	}
+
+	public Object getStatus() {
+		return status;
+	}
+
+	public void setStatus(Object status) {
+		this.status = status;
+	}
+
+	public String getBankAccount() {
+		return bankAccount;
+	}
+
+	public void setBankAccount(String bankAccount) {
+		this.bankAccount = bankAccount;
+	}
+
+//	public String getBankaccount() {
+//		return bankaccount;
+//	}
+//
+//	public void setBankaccount(String bankaccount) {
+//		this.bankaccount = bankaccount;
+//	}
+
+	public String getRegistrationNumber() {
+		return registrationNumber;
+	}
+
+	public void setRegistrationNumber(String registrationNumber) {
+		this.registrationNumber = registrationNumber;
+	}
+
+	public String getMobileNumber() {
+		return mobileNumber;
+	}
+
+	public void setMobileNumber(String mobileNumber) {
+		this.mobileNumber = mobileNumber;
+	}
+
+	public String getEpfNumber() {
+		return epfNumber;
+	}
+
+	public void setEpfNumber(String epfNumber) {
+		this.epfNumber = epfNumber;
+	}
+
+	public String getEsiNumber() {
+		return esiNumber;
+	}
+
+	public void setEsiNumber(String esiNumber) {
+		this.esiNumber = esiNumber;
+	}
+
+	public String getGstRegisteredState() {
+		return gstRegisteredState;
+	}
+
+	public void setGstRegisteredState(String gstRegisteredState) {
+		this.gstRegisteredState = gstRegisteredState;
+	}
+
+	public String getEntityId() {
+		return entityId;
+	}
+
+	public void setEntityId(String entityId) {
+		this.entityId = entityId;
+	}
+
+	public String getModeofpay() {
+		return modeofpay;
+	}
+
+	public void setModeofpay(String modeofpay) {
+		this.modeofpay = modeofpay;
+	}
+
+	public String getEntityDescription() {
+		return entityDescription;
+	}
+
+	public void setEntityDescription(String entityDescription) {
+		this.entityDescription = entityDescription;
+	}
+
+	public String getPanNumber() {
+		return panNumber;
+	}
+
+	public void setPanNumber(String panNumber) {
+		this.panNumber = panNumber;
+	}
+
+	public String getTinNumber() {
+		return tinNumber;
+	}
+
+	public void setTinNumber(String tinNumber) {
+		this.tinNumber = tinNumber;
+	}
+
+	public String getIfscCode() {
+		return ifscCode;
+	}
+
+	public void setIfscCode(String ifscCode) {
+		this.ifscCode = ifscCode;
+	}
+
+//	public String getIfsccode() {
+//		return ifsccode;
+//	}
+//
+//	public void setIfsccode(String ifsccode) {
+//		this.ifsccode = ifsccode;
+//	}
+
+	public String getPanno() {
+		return panno;
+	}
+
+	public void setPanno(String panno) {
+		this.panno = panno;
+	}
+
+	public String getBankname() {
+		return bankname;
+	}
+
+	public void setBankname(String bankname) {
+		this.bankname = bankname;
+	}
+
+	public String getTinno() {
+		return tinno;
+	}
+
+	public void setTinno(String tinno) {
+		this.tinno = tinno;
+	}
+
+	public Object getBank() {
+		return bank;
+	}
+
+	public void setBank(Object bank) {
+		this.bank = bank;
+	}
+
+	public Object getEgwStatus() {
+		return egwStatus;
+	}
+
+	public void setEgwStatus(Object egwStatus) {
+		this.egwStatus = egwStatus;
+	}
+
 }

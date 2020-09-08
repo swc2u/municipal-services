@@ -72,6 +72,7 @@ import org.egov.tracer.model.CustomException;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
@@ -80,10 +81,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-
 import lombok.extern.slf4j.Slf4j;
 
 @org.springframework.stereotype.Service
@@ -153,15 +151,19 @@ public class ServiceRequestService {
 		String service_request_id = generateServiceRequestId(request);
 		log.info("Generate service request id :"+service_request_id);
 		enrichserviceRequestForcreate(request, service_request_id);
-
+		
+		String role = wfIntegrator.parseBussinessServiceData(wfIntegrator.getbussinessServiceDatafromprocesinstanceEdit(request),request);
 		// call workflow service if it's enable else uses internal workflow process
+	
+		
 		boolean flag = false;
 		if (hcConfiguration.getIsExternalWorkFlowEnabled()) {
-			flag = wfIntegrator.callWorkFlow(request, service_request_id);
+			flag = wfIntegrator.callWorkFlow(request, service_request_id,role,null);
 		}
 		if(flag)
 		{
-			String role = HCConstants.ROLE;
+			//String bussinessServiceData = getbussinessServiceDatafromprocesinstanceEdit(request);
+			
 			String status = HCConstants.INITIATED_STATUS;
 			String history_service_request_id = null;
 			String service_request_id_new_gen = null;
@@ -454,6 +456,9 @@ public class ServiceRequestService {
 		auditDetail.setCreatedBy(requestInfo.getUserInfo().getRoles().get(0).getName());
 		request.setAuditDetails(auditDetail);
 		
+		String jsonRole = "";
+		String employeeUuid = null;
+		
 		for (int servReqCount = 0; servReqCount < serviceReqs.size(); servReqCount++) {
 
 			String service_request_id = request.getServices().get(servReqCount).getService_request_id();
@@ -471,7 +476,7 @@ public class ServiceRequestService {
 						|| request.getServices().get(servReqCount).getAction().equals(HCConstants.VERIFY_AND_FORWARD_TO_SDO)
 						|| request.getServices().get(servReqCount).getAction().equals(HCConstants.FORWARD_FOR_INSPECTION))
 				{
-				 getroles = parseBussinessServiceData(bussinessServiceData,request);
+				 getroles = wfIntegrator.parseBussinessServiceData(bussinessServiceData,request);
 				
 				 request.getServices().get(servReqCount).setRole(getroles);
 				}
@@ -480,6 +485,10 @@ public class ServiceRequestService {
 					getroles = parseInspectedBussinessServiceData(bussinessServiceData,request);
 					 request.getServices().get(servReqCount).setRole(getroles);
 				}
+				
+				
+				roleList.add(getroles);
+				jsonRole = getroles;
 
 				log.info("Selected role depend upon the action");
 
@@ -488,15 +497,24 @@ public class ServiceRequestService {
 
 					String role = request.getServices().get(servReqCount).getRoleList().get(0);
 					assigneeList = serviceRepository.getRoleDetails(request, role);
+					jsonRole = role;
 				}
 
 			} else {
 
-				assigneeList = request.getServices().get(servReqCount).getAssignee();
+				//assigneeList = request.getServices().get(servReqCount).getAssignee();
+				
+				String list = request.getServices().get(servReqCount).getAssignee().get(0).toString();
+				
+				String roleSplit [] =  list.split("#");
+				employeeUuid = roleSplit[1];
+				
+				List<String> assigneeListSplited = new ArrayList<>();
+				assigneeListSplited.add(roleSplit[0]);
+				assigneeList = assigneeListSplited;
+				
 			}
 
-			
-	
 			RequestData requestData = new RequestData();
 			requestData.setService_request_id(service_request_id);
 			requestData.setRequestInfo(request.getRequestInfo());
@@ -526,7 +544,7 @@ public class ServiceRequestService {
 			
 
 			if (hcConfiguration.getIsExternalWorkFlowEnabled()) {
-				flag = wfIntegrator.callWorkFlow(request, service_request_id);
+				flag = wfIntegrator.callWorkFlow(request, service_request_id,jsonRole,employeeUuid);
 			}
 			
 			if(flag)
@@ -580,6 +598,9 @@ public class ServiceRequestService {
 				updateRequest.setService_request_status(HCConstants.INSPECTED_STATUS);
 
 			updateRequest.setServiceMedia(documentDetailsJson.toJSONString());
+			updateRequest.setLastModifiedBy(auditDetails.getLastModifiedBy());
+			updateRequest.setLastModifiedTime(auditDetails.getLastModifiedTime());
+			request.getServices().get(0).setLastModifiedTime(auditDetails.getLastModifiedTime());
 
 			if (request.getServices().get(servReqCount).getIsRoleSpecific().equals(true))
 				updateRequest.setCurrent_assignee(request.getServices().get(servReqCount).getRole());
@@ -604,13 +625,15 @@ public class ServiceRequestService {
 			{
 				User user = new User();
 				
+				String tenantIdSplited = getTenantid(serviceRequest.getTenantId());
+				
 				ArrayList list = new ArrayList<>();
 				list.add(serviceRequest.getCreatedBy());
 				JSONArray array = new JSONArray();
 				JSONObject obj = new JSONObject();
 				obj.put("RequestInfo", request.getRequestInfo());
 				obj.put("id", list);
-				obj.put("tenantId", serviceRequest.getTenantId());
+				obj.put("tenantId", tenantIdSplited);
 				
 				String response = null;
 				try {
@@ -670,11 +693,15 @@ public class ServiceRequestService {
 					ActionInfo newActionInfo = ActionInfo.builder().uuid(UUID.randomUUID().toString())
 							.businessKey(serviceReqs.get(servReqCount).getBusinessService())
 							.action(action)
-							.assignee(serviceRequest.getCreatedBy()).by(by).when(auditDetails.getCreatedTime())
+							.assignee(serviceRequest.getCreatedBy())
+							.by(by)
+							.when(auditDetails.getCreatedTime())
 							.tenantId(serviceReqs.get(servReqCount).getTenantId())
 							.status(action).build();
 					actionInfos.add(newActionInfo);
 				}
+				
+				
 
 				infowraperforupdate = RequestInfoWrapper.builder().actionInfo(actionInfos).requestInfo(requestInfo)
 						.requestBody(updateRequest).services(request.getServices()).build();
@@ -719,6 +746,8 @@ public class ServiceRequestService {
 
 				}
 				}
+				
+				updateRequest.setLastModifiedTime(auditDetails.getLastModifiedTime());
 
 				infowraperforupdate = RequestInfoWrapper.builder().actionInfo(actionInfos).requestInfo(requestInfo)
 						.requestBody(updateRequest).services(request.getServices()).build();
@@ -739,7 +768,6 @@ public class ServiceRequestService {
 
 	private String parseInspectedBussinessServiceData(String bussinessServiceData, ServiceRequest request) throws JSONException {
 		String newactions = null;
-		String newState = null;
 
 		String roles = null;
 		Boolean found = false;
@@ -810,107 +838,6 @@ public class ServiceRequestService {
 		return roles ;
 	}
 
-
-	private String parseBussinessServiceData(String bussinessServiceData, ServiceRequest request) throws JSONException {
-	
-		String newactions = null;
-		String newState = null;
-		
-		String roles = null;
-		Boolean found = false;
-		
-		for (int businessCnt = 0; businessCnt <= bussinessServiceData.length(); businessCnt++) 
-		{
-			org.json.JSONObject bussinessServiceDetails = new org.json.JSONObject(
-					bussinessServiceData.toString());
-
-			org.json.JSONArray businessServicesObj = bussinessServiceDetails.getJSONArray("BusinessServices");
-			
-			for (int businessServiceCnt = 0; businessServiceCnt <= businessServicesObj.length(); businessServiceCnt++) 
-			{
-			
-				org.json.JSONObject businessServicesSingleObj = new org.json.JSONObject(
-						businessServicesObj.get(businessServiceCnt).toString());
-				
-				org.json.JSONArray stateObj = businessServicesSingleObj.getJSONArray("states");
-				
-				for (int stateCnt = 0; stateCnt <= stateObj.length(); stateCnt++) 
-				{
-					org.json.JSONObject stateSingleObj = new org.json.JSONObject(
-							stateObj.get(stateCnt).toString());
-					
-					org.json.JSONArray actionsObj = stateSingleObj.getJSONArray("actions");
-					
-					for (int actionCnt = 0; actionCnt < actionsObj.length(); actionCnt++) 
-					{
-						org.json.JSONObject actionsSingleObj = new org.json.JSONObject(
-								actionsObj.get(actionCnt).toString());
-						
-						
-						newactions = actionsSingleObj.getString("action");
-						newState = actionsSingleObj.getString("nextState");
-
-						if(newactions.equals(request.getServices().get(0).getAction()))
-						{
-							for (int stateCnt1 = 0; stateCnt1 <= stateObj.length(); stateCnt1++) 
-							{
-								
-								org.json.JSONObject stateSingleObj1 = new org.json.JSONObject(
-										stateObj.get(stateCnt1).toString());
-								
-								String uuid = stateSingleObj1.getString("uuid");
-								
-								if(newState.equals(uuid))
-								{
-								
-									org.json.JSONArray actionsObj1 = stateSingleObj1.getJSONArray("actions");
-									
-									for (int actionCnt1 = 0; actionCnt1 <= actionsObj1.length(); actionCnt1++) 
-									{
-										org.json.JSONObject actionsSingleObj1 = new org.json.JSONObject(
-												actionsObj1.get(actionCnt1).toString());
-										
-										org.json.JSONArray roleObj = actionsSingleObj1.getJSONArray("roles");
-										
-										
-										for (int roleCnt = 0; roleCnt < roleObj.length(); roleCnt++) 
-										{
-											String role = roleObj.getString(roleCnt);
-											
-											if(null != roles)
-												{
-												roles = roles +","+role;
-												
-												}
-											else 
-												{	
-												roles = role;
-												}
-												found = true;
-												log.info("businessServicesObj" + actionsObj);
-												
-										 }
-										break;
-										///if(found) break;
-									}
-									if(found) break;
-								}
-								if(found) break;
-							}
-							if(found) break; 
-						}
-						
-						if(found) break;
-					}	
-					if(found) break;
-				}	
-				if(found) break;
-			}
-			if(found) break;	
-		}
-		return roles ;
-		
-	}
 
 	/**
 	 * returns ServiceResponse fetched from database/built based on the given
@@ -1121,15 +1048,30 @@ public class ServiceRequestService {
 
 			serviceRequestStatus = stateObject.getString("applicationStatus");
 			sla = ProcessInstancesDetails.getLong("businesssServiceSla");
+		
+			org.json.JSONObject ProcessInstancesDetailsNew = new org.json.JSONObject(
+						ProcessInstances.get(0).toString());
+				
+			String serviceType = ProcessInstancesDetailsNew.getString("businessService");
+		
+			
 			if (serviceRequestStatus.equalsIgnoreCase(HCConstants.REJECTED) || serviceRequestStatus.equalsIgnoreCase(HCConstants.COMPLETED_STATUS))
 				days = 0;
 			else
 				if(sla > 0)
-					days = (int) ((sla / (1000 * 60 * 60 * 24)) % 7);
+				{
+					
+					double doubleDays =  (double)sla/(double)(1000 * 60 * 60 * 24); //(sla / (1000 * 60 * 60 * 24)); 		
+					days = (int)Math.ceil(doubleDays); 
+					
+				}
+			
 				else
+					
 				{
 					sla = -sla;
-					days = (int) ((sla / (1000 * 60 * 60 * 24)));
+					double doubleDays =  (double)sla/(double)(1000 * 60 * 60 * 24); //(sla / (1000 * 60 * 60 * 24)); 		
+					days = (int)Math.ceil(doubleDays); 
 					days = -days;
 				}
 
@@ -1257,7 +1199,8 @@ public class ServiceRequestService {
 					
 			responseBody = updateServiceRequest(serviceRequest, service_request_id, requestHeader, roleStatusIdSplit[0], roleStatusIdSplit[1],
 					roleStatusIdSplit[2],servicetype);
-			updateServiceRequestStatusEdit(serviceRequest, service_request_id, serviceRequestServiceType);
+			
+			updateServiceRequestStatusEdit(serviceRequest, service_request_id, serviceRequestServiceType,roleStatusIdSplit[0]);
 
 		} else {
 			
@@ -1288,7 +1231,7 @@ public class ServiceRequestService {
 	}
 
 	private void updateServiceRequestStatusEdit(ServiceRequest serviceRequest, String service_request_id,
-			String serviceRequestServiceType) throws JSONException {
+			String serviceRequestServiceType, String role) throws JSONException {
 		
 		serviceRequest.getRequestInfo().setAction(HCConstants.EDIT);
 		String comment = HCConstants.EDITED;
@@ -1298,12 +1241,59 @@ public class ServiceRequestService {
 		serviceRequest.getServices().get(0).setAction(HCConstants.EDIT);
 
 		log.info("Update processinstance data : "+serviceRequest);
-		
+		String userUuid=null;
+		try 
+        { 
+            // checking valid integer using parseInt() method 
+            Integer.parseInt(role); 
+            
+            userUuid=getEmployeeUuid(serviceRequest,role);
+            System.out.println(role + " is a valid integer number"); 
+        }  
+        catch (NumberFormatException e)  
+        { 
+            System.out.println(role + " is not a valid integer number"); 
+        } 
+
 		if (hcConfiguration.getIsExternalWorkFlowEnabled()) {
-			wfIntegrator.callWorkFlow(serviceRequest, service_request_id);
+			wfIntegrator.callWorkFlow(serviceRequest, service_request_id,role,userUuid);
 		}
 
 	}
+
+	private String getEmployeeUuid(ServiceRequest request ,String role ) throws JSONException {
+		
+		//role ="194";
+		String uuid = null;
+		ArrayList list = new ArrayList<>();
+		list.add(role);
+		JSONArray array = new JSONArray();
+		JSONObject obj = new JSONObject();
+		obj.put("RequestInfo", request.getRequestInfo());
+		obj.put("id", list);
+		obj.put("tenantId", request.getServices().get(0).getTenantId());
+		
+		String response = null;
+		try {
+			response = rest.postForObject(hcConfiguration.getUserBasePath().concat(hcConfiguration.getUserSearchEndPoint()), obj, String.class);
+		} catch (HttpClientErrorException e) {
+		}
+		
+			org.json.JSONObject userDetails = new org.json.JSONObject(
+					response.toString());
+			org.json.JSONArray responseObj = userDetails.getJSONArray("user");
+			
+		for (int userCnt = 0; userCnt < responseObj.length(); userCnt++) 
+		{
+			org.json.JSONObject userinfo = new org.json.JSONObject(
+					responseObj.get(userCnt).toString());
+			
+			uuid = userinfo.getString("uuid");
+			
+		}
+		return uuid;
+	}
+
 
 	private void updateProcesinstancedata(ServiceRequest serviceRequest, String service_request_id,
 			String service_request_id_new, String serviceRequestServiceType) throws JSONException {
@@ -1383,13 +1373,15 @@ public class ServiceRequestService {
 		requestinfo.setDid(serviceRequest.getRequestInfo().getDid());
 		requestinfo.setMsgId(serviceRequest.getRequestInfo().getMsgId());
 		
+		String tenantIdSplited = getTenantid(serviceRequest.getServices().get(0).getTenantId());
+		
 		ArrayList list = new ArrayList<>();
 		list.add(serviceRequest.getAuditDetails().getCreatedBy());
 		JSONArray array = new JSONArray();
 		JSONObject obj = new JSONObject();
 		obj.put("RequestInfo", serviceRequest.getRequestInfo());
 		obj.put("id", list);
-		obj.put("tenantId", serviceRequest.getServices().get(0).getTenantId());
+		obj.put("tenantId", tenantIdSplited);
 		
 		String response = null;
 		try {
@@ -1441,6 +1433,26 @@ public class ServiceRequestService {
 		
 	}
 
+	private String getTenantid(String tenantId) {
+		
+		String id = tenantId.replace(".", "#");
+		
+		 String  tenantIdSplit[] = null;
+		 String tenantid = null;
+		 
+		 if(tenantId != null) 
+		    {
+			 tenantIdSplit = id.split("#");
+			}
+		 
+		 if(tenantIdSplit != null) {	
+			 tenantid= tenantIdSplit[0];
+			}
+		
+		return tenantid;
+	}
+
+
 	private void updateServiceRequestStatus(ServiceRequest serviceRequest, String serviceRequestId,
 			String serviceRequestTypeOld) throws JSONException {
 
@@ -1450,11 +1462,12 @@ public class ServiceRequestService {
 		serviceRequest.getServices().get(0).setServiceType(serviceRequestTypeOld);
 		serviceRequest.getServices().get(0).setComment(comment);
 		serviceRequest.getServices().get(0).setAction(HCConstants.REJECT);
+		
 
 		log.info("Update processinstance data : "+serviceRequest);
 		
 		if (hcConfiguration.getIsExternalWorkFlowEnabled()) {
-			wfIntegrator.callWorkFlow(serviceRequest, serviceRequestId);
+			wfIntegrator.callWorkFlow(serviceRequest, serviceRequestId,null,null);
 		}
 
 	}
@@ -1526,8 +1539,14 @@ public class ServiceRequestService {
 	private String updateStatus(ServiceRequest serviceRequest, String service_request_id_new,
 			String service_request_id) {
 
+		final AuditDetails auditDetail = hCUtils.getAuditDetail(String.valueOf(serviceRequest.getRequestInfo().getUserInfo().getId()),
+				false);
+		
 		String action = serviceRequest.getServices().get(0).getAction();
 		ServiceRequestData updateRequest = new ServiceRequestData();
+		
+		updateRequest.setLastModifiedTime(auditDetail.getLastModifiedTime() - 10000);
+		
 		updateRequest.setService_request_status(HCConstants.REJECTED_STATUS);
 		updateRequest.setService_request_id(service_request_id);
 		updateRequest.setComment(HCConstants.COMMENT);
@@ -1552,11 +1571,12 @@ public class ServiceRequestService {
 			String procesinstanceData = getProcesinstanceDataFromprocesinstance(service_request_id,serviceRequestGetData);
 			String bussinessServiceData = getbussinessServiceDatafromprocesinstanceEdit(serviceRequestGetData);
 			String bussinessServiceDataOld = getbussinessServiceDataOldServiceType(serviceRequestGetData,serviceRequestServiceType);
-			
+		
+			log.info("get data from procesinstance :" + procesinstanceData );
 			serviceRequestGetData = procesinstanceBulkData(procesinstanceData,bussinessServiceData,serviceRequestGetData,service_request_id,service_request_id_new,bussinessServiceDataOld);
 	
 		} catch (HttpClientErrorException e) {
-			System.out.print("Handled exception");
+			log.info("Handled exception");
 		}
 
 		serviceRequestGetData.getRequestInfo().setUserInfo(employeeData);
@@ -1573,7 +1593,7 @@ public class ServiceRequestService {
 			
 			 bussinessServiceData = rest.postForObject(
 					hcConfiguration.getWfHost().concat(hcConfiguration.getWfBusinessServiceSearchPath()).concat("?").concat(
-							"tenantId=" + serviceRequestGetData.getServices().get(0).getTenantId() + "&businessServices=" + serviceRequestServiceType.toUpperCase()
+							"tenantId=" + serviceRequestGetData.getServices().get(0).getCity() + "&businessServices=" + serviceRequestServiceType.toUpperCase()
 							),
 					serviceRequestGetData, String.class);
 			
@@ -1582,14 +1602,14 @@ public class ServiceRequestService {
 	}
 
 
-	private String getbussinessServiceDatafromprocesinstanceEdit(ServiceRequest serviceRequestGetData) {
+	public String getbussinessServiceDatafromprocesinstanceEdit(ServiceRequest serviceRequestGetData) {
 		
 		String bussinessServiceData = null;
 		{
 			
 			 bussinessServiceData = rest.postForObject(
 					hcConfiguration.getWfHost().concat(hcConfiguration.getWfBusinessServiceSearchPath()).concat("?").concat(
-							"tenantId=" + serviceRequestGetData.getServices().get(0).getTenantId() + "&businessServices=" + serviceRequestGetData.getServices().get(0).getServiceType().toUpperCase()
+							"tenantId=" + serviceRequestGetData.getServices().get(0).getCity() + "&businessServices=" + serviceRequestGetData.getServices().get(0).getServiceType().toUpperCase()
 							),
 					serviceRequestGetData, String.class);
 			
@@ -1610,8 +1630,6 @@ public class ServiceRequestService {
 		
 		try { 
 			
-			log.info("get data from procesinstance :" + procesinstanceData );
-			log.info("bussinessService Data :" + bussinessServiceData );
 			org.json.JSONObject obj = new org.json.JSONObject(procesinstanceData);
 			org.json.JSONArray ProcessInstances = obj.getJSONArray("ProcessInstances");
 
@@ -1620,19 +1638,44 @@ public class ServiceRequestService {
 
 			for (int i = ProcessInstances.length() - 1; i >= 0; i--) 
 			{
-				
-				System.out.println(ProcessInstances.get(i).toString());
+			
 				org.json.JSONObject ProcessInstancesDetails = new org.json.JSONObject(
 						ProcessInstances.get(i).toString());
 
 				org.json.JSONObject wfAssigner = ProcessInstancesDetails.getJSONObject("assigner");
-
+			
 				User wfUser = new User();
 				wfUser = getUserdata(wfAssigner);
 				
 				List<Document> wfAddDocument = new ArrayList<>();
 				wfAddDocument = getDocument(ProcessInstancesDetails);
 				
+				org.json.simple.JSONObject jsonObject = null;
+				
+				if (!ProcessInstancesDetails.isNull("additionalDetails"))
+				{
+				
+					org.json.JSONObject additionalDetails = ProcessInstancesDetails.getJSONObject("additionalDetails");
+	
+					
+					  JSONParser parser=new JSONParser(); 
+	
+					Object obj1 = parser.parse(additionalDetails.toString());
+			        jsonObject=(org.json.simple.JSONObject)obj1;
+				}
+		
+		        User asigneeUser = new User();
+		        if (!ProcessInstancesDetails.isNull("assignee"))
+		        {		    
+		        
+		        	org.json.JSONObject wfAssignee = ProcessInstancesDetails.getJSONObject("assignee");
+		        	
+		        	String assignee = wfAssignee.getString("uuid") ;  
+		        	
+		        	if(assignee !=null  )
+		        		asigneeUser.setUuid(assignee);
+		        }
+		
 				ServiceRequestData request = new ServiceRequestData();
 				request = getProcessData(ProcessInstancesDetails);
 
@@ -1650,7 +1693,7 @@ public class ServiceRequestService {
 				
 				List<ProcessInstance> processInstances = new ArrayList<>();
 				ProcessInstance process = new ProcessInstance();
-				process = setProcessInstanceData(wfUser,nextStateAndSla,wfAddDocument,request,serviceRequestGetData,businessService,service_request_id_new);
+				process = setProcessInstanceData(wfUser,nextStateAndSla,wfAddDocument,request,serviceRequestGetData,businessService,service_request_id_new,bussinessServiceDataOld,jsonObject,asigneeUser);
 				
 				processInstances.add(process);
 				ProcessInstanceList.addAll(processInstances);
@@ -1662,6 +1705,8 @@ public class ServiceRequestService {
 			serviceRequestGetData = setActionInfo(serviceRequestGetData,serviceRequestData);
 	
 		} catch (Exception ex) {
+			
+			System.out.println("  DATA PARSING EXCEPTION " + ex);
 
 		}
 		return serviceRequestGetData;
@@ -1779,13 +1824,15 @@ public class ServiceRequestService {
 
 	private ProcessInstance setProcessInstanceData(User wfUser, String nextStateAndSla, List<Document> wfAddDocument,
 			ServiceRequestData request, ServiceRequest serviceRequestGetData, String businessService,
-			String service_request_id_new) {
+			String service_request_id_new,String bussinessServiceDataOld, JSONObject jsonObject, User asigneeUser) throws JSONException {
 		
 		
 		String  nextStateAndSlaSplit[] = null;
 		if(nextStateAndSla != null) {
 			nextStateAndSlaSplit = nextStateAndSla.split("#");
 			}
+		
+		long getSla = getCalculatedSla(request.getBusinessservicesla(),serviceRequestGetData,bussinessServiceDataOld);
 		
 		long sla = Long.parseLong(nextStateAndSlaSplit[1]);
 		ProcessInstance process = new ProcessInstance();
@@ -1798,7 +1845,8 @@ public class ServiceRequestService {
 		String proccessId = UUID.randomUUID().toString();
 		  
 		 // state.setTenantId(tenentId);
-		  
+		final AuditDetails auditDetail = hCUtils.getAuditDetail(String.valueOf(serviceRequestGetData.getRequestInfo().getUserInfo().getId()),
+				false);
 		List<Document> wfDocument = new ArrayList<>();
 		  
 		 for(Document wf: wfAddDocument)
@@ -1806,6 +1854,8 @@ public class ServiceRequestService {
 			 String documentId = UUID.randomUUID().toString();
 			 wf.setId(documentId);
 			 wfDocument.add(wf);
+			 wfDocument.get(0).setActive(true);
+			 wfDocument.get(0).setAuditDetails(auditDetail);
 		 }
 		  
 
@@ -1818,14 +1868,84 @@ public class ServiceRequestService {
 			process.setState(state);
 			process.setComment(request.getComment());
 			process.setAssigner(user);
-			process.setBusinesssServiceSla(request.getBusinessservicesla());
+			process.setBusinesssServiceSla(getSla);
 			process.setStateSla(sla);
 			process.setDocuments(wfDocument);
 			process.setAuditDetails(request.getAuditDetails());
+			process.setAssignee(asigneeUser);
+		
+			process.setAdditionalDetails(jsonObject);
 
 
 		return process;
 	}
+
+	private long getCalculatedSla(long sla, ServiceRequest serviceRequestGetData, String bussinessServiceDataOld) throws JSONException {
+		
+		long timeInMiliSecondNewServiceType = 0;
+		long timeInMiliSecondOldServiceType = 0;
+		long finalSla = 0;
+		
+		String bussinessServiceData = getAllbussinessService(serviceRequestGetData);
+		
+		org.json.JSONObject bussinessServiceDetails = new org.json.JSONObject(
+					bussinessServiceData.toString());
+		org.json.JSONArray businessServicesObj = bussinessServiceDetails.getJSONArray("BusinessServices");
+			
+		org.json.JSONObject businessServicesSingleObj = new org.json.JSONObject(
+						businessServicesObj.get(0).toString());
+		timeInMiliSecondNewServiceType = businessServicesSingleObj.getLong("businessServiceSla");
+		
+		
+		org.json.JSONObject bussinessServiceDetailsOld = new org.json.JSONObject(
+				bussinessServiceDataOld.toString());
+		org.json.JSONArray businessServicesObjOld = bussinessServiceDetailsOld.getJSONArray("BusinessServices");
+		
+		org.json.JSONObject businessServicesSingleObjOld = new org.json.JSONObject(
+					businessServicesObjOld.get(0).toString());
+		timeInMiliSecondOldServiceType = businessServicesSingleObjOld.getLong("businessServiceSla");
+			
+		// sla = total sla - old sla
+		
+		if (sla > 0)
+		{
+			if(timeInMiliSecondOldServiceType > timeInMiliSecondNewServiceType)
+				finalSla = timeInMiliSecondNewServiceType -(timeInMiliSecondOldServiceType - sla) ;
+			else
+				finalSla = timeInMiliSecondNewServiceType -(timeInMiliSecondOldServiceType - sla) ;
+		}
+		else 
+			
+		{
+			if(timeInMiliSecondOldServiceType > timeInMiliSecondNewServiceType)
+			{
+				long oldsla = timeInMiliSecondOldServiceType -(sla) ;
+				finalSla = timeInMiliSecondNewServiceType -(oldsla);
+			}
+			else
+				finalSla = timeInMiliSecondNewServiceType -(timeInMiliSecondOldServiceType - (sla));
+		}
+		
+		return finalSla;
+	}
+
+
+	private String getAllbussinessService(ServiceRequest serviceRequestGetData) {
+		
+			
+			String bussinessServiceData = null;
+			{
+				
+				 bussinessServiceData = rest.postForObject(
+						hcConfiguration.getWfHost().concat(hcConfiguration.getWfBusinessServiceSearchPath()).concat("?").concat(
+								"tenantId=" + serviceRequestGetData.getServices().get(0).getTenantId() + "&businessServices=" + serviceRequestGetData.getServices().get(0).getServiceType().toUpperCase()
+								),
+						serviceRequestGetData, String.class);
+				
+			}
+			return bussinessServiceData;
+	}
+
 
 	private String getNextState(String bussinessServiceData, ServiceRequestData request) throws JSONException {
 		
@@ -1915,19 +2035,17 @@ public class ServiceRequestService {
 		details.setCreatedTime(auditDetails.getLong("createdTime"));
 		details.setLastModifiedTime(auditDetails.getLong("lastModifiedTime"));
 		data.setAuditDetails(details);
+		
+		
 
 		long businesssServiceSla = processInstancesDetails.getLong("businesssServiceSla");
 		
-		//long businesssServiceSlaGet = 604800000;
-		//long lastModifiedTime = auditDetails.getLong("lastModifiedTime");
-				
-		//Long timeSinceLastAction = System.currentTimeMillis() - lastModifiedTime;
-		//long businesssServiceSla = (604800000 - timeSinceLastAction);
 		data.setBusinessservicesla(businesssServiceSla);
 		
-		org.json.JSONObject stateDetails = processInstancesDetails.getJSONObject("state"); //no try to use current state and check it works or not
+		org.json.JSONObject stateDetails = processInstancesDetails.getJSONObject("state"); 
 		
-	
+		
+		
 		String state = stateDetails.getString("state");
 		data.setState(state);
 		
@@ -2072,7 +2190,7 @@ public class ServiceRequestService {
 		{	
 		
    //old date - current date		
-		  long dateDifference = (currentDateepoch - serviceRequestDateEpoc); 
+		  long dateDifference = (serviceRequestDateEpoc - currentDateepoch); 
 			  
 		  log.info("Date difference  :  "+ dateDifference);
 
@@ -2088,14 +2206,16 @@ public class ServiceRequestService {
 		 businessSla= Long.parseLong(processInstanceSplit[1]);
 		}
 		 
-
+		String processInstanceData = getProcessInstanceData(request,serviceRequestId,tenantId);
+		
+		String serviceRequestType = getServiceRequestType(processInstanceData);
 	//check days greter or less than
 
-		if( businessSla > dateDifference )
+		if( businessSla >= 0 )
 		{
 			//geting role details
 			
-			int days = getDays(businessSla);
+			int days = getDays(businessSla,serviceRequestType);
 			
 			log.info("REMINDER days remaining is : "+ days );
 			
@@ -2104,9 +2224,9 @@ public class ServiceRequestService {
 			
 		}
 		
-		else  if(businessSla <= dateDifference ) {
+		else  if(businessSla < 0 ) {
 			
-			int days = getDays(businessSla);
+			int days = getDays(businessSla,serviceRequestType);
 			
 			log.info("OVERDAYS are : "+ days );
 			
@@ -2127,16 +2247,52 @@ public class ServiceRequestService {
 		return null;
 	}
 	
-	private int getDays(long businessSla) {
+	private String getServiceRequestType(String processInstanceData) throws JSONException {
+		
+		org.json.JSONObject obj = new org.json.JSONObject(processInstanceData);
+		org.json.JSONArray ProcessInstances = obj.getJSONArray("ProcessInstances");
+
+			org.json.JSONObject ProcessInstancesDetails = new org.json.JSONObject(
+					ProcessInstances.get(ProcessInstances.length() - 1).toString());
+			
+			String serviceType = ProcessInstancesDetails.getString("businessService");
+			System.out.println(ProcessInstancesDetails);
+			
+
+		return serviceType;
+	}
+
+
+	private String getProcessInstanceData(ServiceRequestData request,String service_request_id,String tenantId) {
+		String procesinstanceData = null;
+		String payloadData="{\"RequestInfo\": {\"userInfo\": {\"roles\": [{ \"code\": \"EE\",\"name\": \"EE\",\"tenantId\": \"ch.chandigarh\"}]}}}";
+   try {
+		 procesinstanceData = sendPostRequest(hcConfiguration.getWfHost().concat(hcConfiguration.getWfProcessSearch()).concat("?").concat("businessIds="+service_request_id+"&history="+HCConstants.TRUE+"&tenantId="+tenantId), payloadData);
+
+         }
+    catch (Exception e) {
+	     
+                }
+
+		return procesinstanceData;
+		
+	}
+
+
+	private int getDays(long businessSla,String serviceRequestType) {
 		
 		int days = 0;
 		
 		if(businessSla > 0)
-			days = (int) ((businessSla / (1000 * 60 * 60 * 24)) % 7);
+		{
+			    double doubleDays =  (double)businessSla/(double)(1000 * 60 * 60 * 24); 		
+		        days = (int)Math.ceil(doubleDays); 
+		}
 		else
 		{
 			businessSla = -businessSla;
-			days = (int) ((businessSla / (1000 * 60 * 60 * 24)));
+			double doubleDays =  (double)businessSla/(double)(1000 * 60 * 60 * 24); 		
+		    days = (int)Math.ceil(doubleDays); 
 			days = -days;
 		}
 		
@@ -2191,7 +2347,7 @@ public class ServiceRequestService {
 		        sla = ProcessInstancesDetails.getLong("businesssServiceSla");
 		        
 		        processIntanceData = tenantId+"#"+sla;
-		        System.out.println(processIntanceData);
+		        //System.out.println(processIntanceData);
 		        
 	         }
 	    catch (Exception e) {

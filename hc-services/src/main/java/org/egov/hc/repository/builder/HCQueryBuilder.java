@@ -12,13 +12,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class HCQueryBuilder {
+	
+	@Autowired
+	private HCConfiguration hcConfiguration;
 
 	@Autowired
 	public HCQueryBuilder(HCConfiguration config) {
 		
 	}
 
-	private static final String QUERY = "select service_request_id,service_type,owner_name,service_request_status,current_assignee,to_char(to_timestamp(cast(createdtime/1000 as bigint))::date ,'DD/MM/YYYY')as createdtime from eg_hc_service_request hc ";
+	private static final String QUERY = "select service_request_id,service_type,owner_name,service_request_status,tenant_id,current_assignee,to_char(to_timestamp(cast(createdtime/1000 as bigint))::date ,'DD/MM/YYYY')as createdtime,lastmodifiedtime from eg_hc_service_request hc ";
 
 	public static final String SELECT_SERVICE_DETAIL_FOR_CITIZEN = "SELECT service_request_uuid, owner_name, tenant_id, location, latitude, longitude, locality, street_name, landmark, contact_number, email_id, tree_count, service_request_document, service_request_status, service_request_id, service_type, description,current_assignee, createdby, to_char(to_timestamp(cast(createdtime/1000 as bigint))::date,'DD/MM/YYYY') as createdtimes,servicerequest_lang ,lastmodifiedby,to_char(to_timestamp(cast(lastmodifiedtime/1000 as bigint))::date,'DD/MM/YYYY') as lastmodifiedtime from eg_hc_service_request WHERE service_request_id =? and createdby = ?";
 	
@@ -28,13 +31,13 @@ public class HCQueryBuilder {
 			"from eg_hc_service_request WHERE \r\n" + 
 			" service_request_status != '"+HCConstants.REJECTED_STATUS+"' AND\r\n" + 
 			" service_request_status != '"+HCConstants.COMPLETED_STATUS+"' AND \r\n" +
-			" service_request_status != '"+HCConstants.APPROVED_STATUS+"' AND \r\n" +
-			" service_request_status != '"+HCConstants.INITIATED_STATUS+"' AND \r\n" +
 			"current_assignee != ''";
-
+		
+	
 	private final String paginationWrapper = "SELECT * FROM "
-			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY service_request_id DESC) offset_ FROM " + "({})"
-			+ " result) result_offset ";
+			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY lastmodifiedtime DESC) offset_ FROM " + "({})"
+			+ " result) result_offset "
+			+ "WHERE offset_ > ? AND offset_ <= ?";
 
 	public String getHCSearchQuery(RequestData criteria, List<Object> preparedStmtList) {
 
@@ -171,8 +174,26 @@ public class HCQueryBuilder {
 
 	private String addPaginationWrapper(String query, List<Object> preparedStmtList, RequestData criteria) {
 	
-		String finalQuery = paginationWrapper.replace("{}", query);
-		return finalQuery;
+//		String finalQuery = paginationWrapper.replace("{}", query);
+//		return finalQuery;
+		
+		 int limit = hcConfiguration.getDefaultLimit();
+	        int offset = hcConfiguration.getDefaultOffset();
+	        String finalQuery = paginationWrapper.replace("{}",query);
+
+	        if(criteria.getLimit()!=null && criteria.getLimit()<=hcConfiguration.getMaxSearchLimit())
+	            limit = criteria.getLimit();
+
+	        if(criteria.getLimit()!=null && criteria.getLimit()>hcConfiguration.getMaxSearchLimit())
+	            limit = hcConfiguration.getMaxSearchLimit();
+
+	        if(criteria.getOffset()!=null)
+	            offset = criteria.getOffset();
+
+	        preparedStmtList.add(offset);
+	        preparedStmtList.add(limit+offset);
+
+	       return finalQuery;
 	}
 
 	private static void addClauseIfRequired(List<Object> values, StringBuilder queryString) {

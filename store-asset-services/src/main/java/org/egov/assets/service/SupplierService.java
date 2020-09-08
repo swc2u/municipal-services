@@ -39,27 +39,21 @@
  */
 package org.egov.assets.service;
 
-import org.egov.assets.common.Constants;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.egov.assets.common.DomainService;
-import org.egov.assets.common.Pagination;
-import org.egov.assets.common.exception.CustomBindException;
-import org.egov.assets.common.exception.ErrorCode;
-import org.egov.assets.common.exception.InvalidDataException;
-import org.egov.assets.model.*;
+import org.egov.assets.common.SupplierRepository;
+import org.egov.assets.model.Supplier;
+import org.egov.assets.model.SupplierGetRequest;
+import org.egov.assets.model.SupplierResponse;
 import org.egov.assets.repository.MaterialIssueJdbcRepository;
 import org.egov.assets.repository.MaterialReceiptJdbcRepository;
 import org.egov.assets.repository.PurchaseOrderJdbcRepository;
-import org.egov.assets.repository.SupplierJdbcRepository;
-import org.egov.assets.repository.entity.SupplierEntity;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.springframework.util.StringUtils.isEmpty;
 
 @Service
 public class SupplierService extends DomainService {
@@ -67,8 +61,11 @@ public class SupplierService extends DomainService {
 	@Autowired
 	private LogAwareKafkaTemplate<String, Object> kafkaTemplate;
 
+	// @Autowired
+	// private SupplierJdbcRepository supplierJdbcRepository;
+
 	@Autowired
-	private SupplierJdbcRepository supplierJdbcRepository;
+	private SupplierRepository supplierRepository;
 
 	@Value("${inv.supplier.save.topic}")
 	private String createTopic;
@@ -94,185 +91,221 @@ public class SupplierService extends DomainService {
 	@Autowired
 	private MaterialIssueJdbcRepository materialIssueJdbcRepository;
 
-	public SupplierResponse create(SupplierRequest supplierRequest, String tenantId) {
-		try {
-			SupplierRequest fetchRelated = fetchRelated(supplierRequest, tenantId);
-			validate(fetchRelated.getSuppliers(), Constants.ACTION_CREATE, tenantId);
-			List<String> sequenceNos = supplierJdbcRepository.getSequence(Supplier.class.getSimpleName(),
-					supplierRequest.getSuppliers().size());
-			int i = 0;
-			for (Supplier supplier : supplierRequest.getSuppliers()) {
-				if (isEmpty(supplier.getTenantId())) {
-					supplier.setTenantId(tenantId);
-				}
-				supplier.setId(sequenceNos.get(i));
-				supplier.setStatus(Supplier.StatusEnum.ACTIVE);
-				supplier.setCode(supplier.getCode().toUpperCase());
-				i++;
-				supplier.setAuditDetails(mapAuditDetails(supplierRequest.getRequestInfo()));
-			}
-			kafkaTemplate.send(createTopic, createKey, supplierRequest);
-			SupplierResponse response = new SupplierResponse();
-			response.setSuppliers(supplierRequest.getSuppliers());
-			response.setResponseInfo(getResponseInfo(supplierRequest.getRequestInfo()));
-			return response;
-		} catch (CustomBindException e) {
-			throw e;
-		}
-	}
+	// public SupplierResponse create(SupplierRequest supplierRequest, String
+	// tenantId) {
+	// try {
+	// SupplierRequest fetchRelated = fetchRelated(supplierRequest, tenantId);
+	// validate(fetchRelated.getSuppliers(), Constants.ACTION_CREATE, tenantId);
+	// List<String> sequenceNos =
+	// supplierJdbcRepository.getSequence(Supplier.class.getSimpleName(),
+	// supplierRequest.getSuppliers().size());
+	// int i = 0;
+	// for (Supplier supplier : supplierRequest.getSuppliers()) {
+	// if (isEmpty(supplier.getTenantId())) {
+	// supplier.setTenantId(tenantId);
+	// }
+	// supplier.setId(sequenceNos.get(i));
+	// supplier.setStatus(Supplier.StatusEnum.ACTIVE);
+	// supplier.setCode(supplier.getCode().toUpperCase());
+	// i++;
+	// supplier.setAuditDetails(mapAuditDetails(supplierRequest.getRequestInfo()));
+	// }
+	// kafkaTemplate.send(createTopic, createKey, supplierRequest);
+	// SupplierResponse response = new SupplierResponse();
+	// response.setSuppliers(supplierRequest.getSuppliers());
+	// response.setResponseInfo(getResponseInfo(supplierRequest.getRequestInfo()));
+	// return response;
+	// } catch (CustomBindException e) {
+	// throw e;
+	// }
+	// }
 
-	public SupplierResponse update(SupplierRequest supplierRequest, String tenantId) {
+	// public SupplierResponse update(SupplierRequest supplierRequest, String
+	// tenantId) {
+	//
+	// try {
+	// SupplierRequest fetchRelated = fetchRelated(supplierRequest, tenantId);
+	// validate(fetchRelated.getSuppliers(), Constants.ACTION_UPDATE, tenantId);
+	//
+	// List<Supplier> supplierList = new ArrayList<>();
+	// for (Supplier supplier : supplierRequest.getSuppliers()) {
+	//
+	// boolean supplierUsed = checkSupplierUsedInTransaction(supplier.getCode(),
+	// supplier.getTenantId());
+	//
+	// if (supplierUsed) {
+	// Boolean active = supplier.getActive();
+	//
+	// SupplierEntity supplierEntity = new SupplierEntity();
+	// supplierEntity.setId(supplier.getId());
+	// supplierEntity.setTenantId(tenantId);
+	// SupplierEntity supplierResult = (SupplierEntity)
+	// supplierJdbcRepository.findById(supplierEntity,
+	// SupplierEntity.class.getSimpleName());
+	//
+	// supplier = supplierResult.toDomain();
+	// supplier.setActive(active);
+	// supplierList.add(supplier);
+	// } else {
+	// if (isEmpty(supplier.getTenantId())) {
+	// supplier.setTenantId(tenantId);
+	// }
+	// supplier.setCode(supplier.getCode().toUpperCase());
+	// if (!supplier.getActive()) {
+	// supplier.setStatus(Supplier.StatusEnum.INACTIVE);
+	// }
+	// supplier.setAuditDetails(mapAuditDetailsForUpdate(supplierRequest.getRequestInfo()));
+	// supplierList.add(supplier);
+	// }
+	// }
+	// supplierRequest.setSuppliers(supplierList);
+	// kafkaTemplate.send(updateTopic, updateKey, supplierRequest);
+	// SupplierResponse response = new SupplierResponse();
+	// response.setSuppliers(supplierRequest.getSuppliers());
+	// response.setResponseInfo(getResponseInfo(supplierRequest.getRequestInfo()));
+	// return response;
+	// } catch (CustomBindException e) {
+	// throw e;
+	// }
+	//
+	// }
 
-		try {
-			SupplierRequest fetchRelated = fetchRelated(supplierRequest, tenantId);
-			validate(fetchRelated.getSuppliers(), Constants.ACTION_UPDATE, tenantId);
-
-			List<Supplier> supplierList = new ArrayList<>();
-			for (Supplier supplier : supplierRequest.getSuppliers()) {
-
-				boolean supplierUsed = checkSupplierUsedInTransaction(supplier.getCode(), supplier.getTenantId());
-
-				if (supplierUsed) {
-					Boolean active = supplier.getActive();
-
-					SupplierEntity supplierEntity = new SupplierEntity();
-					supplierEntity.setId(supplier.getId());
-					supplierEntity.setTenantId(tenantId);
-					SupplierEntity supplierResult = (SupplierEntity) supplierJdbcRepository.findById(supplierEntity,
-							SupplierEntity.class.getSimpleName());
-
-					supplier = supplierResult.toDomain();
-					supplier.setActive(active);
-					supplierList.add(supplier);
-				} else {
-					if (isEmpty(supplier.getTenantId())) {
-						supplier.setTenantId(tenantId);
-					}
-					supplier.setCode(supplier.getCode().toUpperCase());
-					if (!supplier.getActive()) {
-						supplier.setStatus(Supplier.StatusEnum.INACTIVE);
-					}
-					supplier.setAuditDetails(mapAuditDetailsForUpdate(supplierRequest.getRequestInfo()));
-					supplierList.add(supplier);
-				}
-			}
-			supplierRequest.setSuppliers(supplierList);
-			kafkaTemplate.send(updateTopic, updateKey, supplierRequest);
-			SupplierResponse response = new SupplierResponse();
-			response.setSuppliers(supplierRequest.getSuppliers());
-			response.setResponseInfo(getResponseInfo(supplierRequest.getRequestInfo()));
-			return response;
-		} catch (CustomBindException e) {
-			throw e;
-		}
-
-	}
-
-	private void validate(List<Supplier> suppliers, String method, String tenantId) {
-		InvalidDataException errors = new InvalidDataException();
-
-		try {
-			switch (method) {
-
-			case Constants.ACTION_CREATE:
-				if (suppliers == null) {
-					throw new InvalidDataException("suppliers", ErrorCode.NOT_NULL.getCode(), null);
-				}
-				for (Supplier supplier : suppliers) {
-					if (isEmpty(supplier.getTenantId())) {
-						supplier.setTenantId(tenantId);
-					}
-					if (!supplierJdbcRepository.uniqueCheck("code", new SupplierEntity().toEntity(supplier))) {
-						errors.addDataError(ErrorCode.CODE_ALREADY_EXISTS.getCode(), "Supplier", supplier.getCode());
-
-					}
-				}
-				break;
-			case Constants.ACTION_UPDATE:
-				if (suppliers == null) {
-					throw new InvalidDataException("suppliers", ErrorCode.NOT_NULL.getCode(), null);
-				}
-				for (Supplier supplier : suppliers) {
-					if (isEmpty(supplier.getTenantId())) {
-						supplier.setTenantId(tenantId);
-					}
-					if (supplier.getId() == null) {
-						throw new InvalidDataException("id", ErrorCode.MANDATORY_VALUE_MISSING.getCode(),
-								supplier.getId());
-					}
-					if (!supplierJdbcRepository.uniqueCheck("code", new SupplierEntity().toEntity(supplier))) {
-						errors.addDataError(ErrorCode.CODE_ALREADY_EXISTS.getCode(), "Supplier", supplier.getCode());
-
-					}
-				}
-			}
-		} catch (IllegalArgumentException e) {
-
-		}
-		if (errors.getValidationErrors().size() > 0)
-			throw errors;
-	}
+	// private void validate(List<Supplier> suppliers, String method, String
+	// tenantId) {
+	// InvalidDataException errors = new InvalidDataException();
+	//
+	// try {
+	// switch (method) {
+	//
+	// case Constants.ACTION_CREATE:
+	// if (suppliers == null) {
+	// throw new InvalidDataException("suppliers", ErrorCode.NOT_NULL.getCode(),
+	// null);
+	// }
+	// for (Supplier supplier : suppliers) {
+	// if (isEmpty(supplier.getTenantId())) {
+	// supplier.setTenantId(tenantId);
+	// }
+	// if (!supplierJdbcRepository.uniqueCheck("code", new
+	// SupplierEntity().toEntity(supplier))) {
+	// errors.addDataError(ErrorCode.CODE_ALREADY_EXISTS.getCode(), "Supplier",
+	// supplier.getCode());
+	//
+	// }
+	// }
+	// break;
+	// case Constants.ACTION_UPDATE:
+	// if (suppliers == null) {
+	// throw new InvalidDataException("suppliers", ErrorCode.NOT_NULL.getCode(),
+	// null);
+	// }
+	// for (Supplier supplier : suppliers) {
+	// if (isEmpty(supplier.getTenantId())) {
+	// supplier.setTenantId(tenantId);
+	// }
+	// if (supplier.getId() == null) {
+	// throw new InvalidDataException("id",
+	// ErrorCode.MANDATORY_VALUE_MISSING.getCode(),
+	// supplier.getId());
+	// }
+	// if (!supplierJdbcRepository.uniqueCheck("code", new
+	// SupplierEntity().toEntity(supplier))) {
+	// errors.addDataError(ErrorCode.CODE_ALREADY_EXISTS.getCode(), "Supplier",
+	// supplier.getCode());
+	//
+	// }
+	// }
+	// }
+	// } catch (IllegalArgumentException e) {
+	//
+	// }
+	// if (errors.getValidationErrors().size() > 0)
+	// throw errors;
+	// }
 
 	public SupplierResponse search(SupplierGetRequest supplierGetRequest) {
 		SupplierResponse supplierResponse = new SupplierResponse();
-		Pagination<Supplier> search = supplierJdbcRepository.search(supplierGetRequest);
+		List<Supplier> search = supplierRepository.getAll();
+
+		if (supplierGetRequest.getCode() != null && !supplierGetRequest.getCode().isEmpty()
+				&& supplierGetRequest.getName() != null && !supplierGetRequest.getName().isEmpty()) {
+			search = search.stream()
+					.filter(res -> res.getCode().equalsIgnoreCase(supplierGetRequest.getCode())
+							&& res.getName().toUpperCase().contains(supplierGetRequest.getName().toUpperCase()))
+					.collect(Collectors.toList());
+		} else if (supplierGetRequest.getCode() != null && !supplierGetRequest.getCode().isEmpty()
+				&& supplierGetRequest.getName() == null) {
+			search = search.stream().filter(res -> res.getCode().equalsIgnoreCase(supplierGetRequest.getCode()))
+					.collect(Collectors.toList());
+		} else if (supplierGetRequest.getName() != null && !supplierGetRequest.getName().isEmpty()
+				&& supplierGetRequest.getCode() == null) {
+			search = search.stream()
+					.filter(res -> res.getName().toUpperCase().contains(supplierGetRequest.getName().toUpperCase()))
+					.collect(Collectors.toList());
+		}
 		supplierResponse.setResponseInfo(null);
-		supplierResponse.setSuppliers(search.getPagedData());
+		supplierResponse.setSuppliers(search);
 		return supplierResponse;
 	}
 
-	private SupplierRequest fetchRelated(SupplierRequest supplierRequest, String tenantId) {
-
-		List<Supplier> suppliers = supplierRequest.getSuppliers();
-
-		for (Supplier supplier : suppliers) {
-			if (supplier.getCode() != null)
-				supplier.setCode(supplier.getCode().toUpperCase());
-
-			BankContract bankContract = new BankContract();
-			bankContract.setCode(supplier.getBankCode());
-			bankContract.setTenantId(!isEmpty(supplier.getTenantId()) ? supplier.getTenantId() : tenantId);
-			BankContract bank = bankContractRepository.findByCode(bankContract, supplierRequest.getRequestInfo());
-			supplier.setBankCode(bank.getCode());
-		}
-
-		return supplierRequest;
-	}
-
-	public boolean checkSupplierUsedInTransaction(String code, String tenantId) {
-
-		PurchaseOrderSearch purchaseOrderSearch = new PurchaseOrderSearch();
-		purchaseOrderSearch.setSupplier(code);
-		purchaseOrderSearch.setTenantId(tenantId);
-
-		Pagination<PurchaseOrder> purchaseOrders = purchaseOrderJdbcRepository.search(purchaseOrderSearch);
-
-		if (purchaseOrders.getPagedData().size() > 0) {
-			return true;
-		}
-
-		MaterialReceiptSearch receiptSearch = new MaterialReceiptSearch();
-		receiptSearch.setSupplierCode(code);
-		receiptSearch.setTenantId(tenantId);
-
-		Pagination<MaterialReceipt> receivingStoreMaterialReceipts = materialReceiptJdbcRepository
-				.search(receiptSearch);
-
-		if (receivingStoreMaterialReceipts.getPagedData().size() > 0) {
-			return true;
-		}
-
-		MaterialIssueSearchContract issueSearch = new MaterialIssueSearchContract();
-		issueSearch.setSupplier(code);
-		issueSearch.setTenantId(tenantId);
-
-		Pagination<MaterialIssue> issues = materialIssueJdbcRepository.search(issueSearch, null);
-
-		if (issues.getPagedData().size() > 0) {
-			return true;
-		}
-
-		return false;
-	}
+	// private SupplierRequest fetchRelated(SupplierRequest supplierRequest, String
+	// tenantId) {
+	//
+	// List<Supplier> suppliers = supplierRequest.getSuppliers();
+	//
+	// for (Supplier supplier : suppliers) {
+	// if (supplier.getCode() != null)
+	// supplier.setCode(supplier.getCode().toUpperCase());
+	//
+	// BankContract bankContract = new BankContract();
+	// bankContract.setCode(supplier.getBankCode());
+	// bankContract.setTenantId(!isEmpty(supplier.getTenantId()) ?
+	// supplier.getTenantId() : tenantId);
+	// BankContract bank = bankContractRepository.findByCode(bankContract,
+	// supplierRequest.getRequestInfo());
+	// supplier.setBankCode(bank.getCode());
+	// }
+	//
+	// return supplierRequest;
+	// }
+	//
+	// public boolean checkSupplierUsedInTransaction(String code, String tenantId) {
+	//
+	// PurchaseOrderSearch purchaseOrderSearch = new PurchaseOrderSearch();
+	// purchaseOrderSearch.setSupplier(code);
+	// purchaseOrderSearch.setTenantId(tenantId);
+	//
+	// Pagination<PurchaseOrder> purchaseOrders =
+	// purchaseOrderJdbcRepository.search(purchaseOrderSearch);
+	//
+	// if (purchaseOrders.getPagedData().size() > 0) {
+	// return true;
+	// }
+	//
+	// MaterialReceiptSearch receiptSearch = new MaterialReceiptSearch();
+	// receiptSearch.setSupplierCode(code);
+	// receiptSearch.setTenantId(tenantId);
+	//
+	// Pagination<MaterialReceipt> receivingStoreMaterialReceipts =
+	// materialReceiptJdbcRepository
+	// .search(receiptSearch);
+	//
+	// if (receivingStoreMaterialReceipts.getPagedData().size() > 0) {
+	// return true;
+	// }
+	//
+	// MaterialIssueSearchContract issueSearch = new MaterialIssueSearchContract();
+	// issueSearch.setSupplier(code);
+	// issueSearch.setTenantId(tenantId);
+	//
+	// Pagination<MaterialIssue> issues =
+	// materialIssueJdbcRepository.search(issueSearch, null);
+	//
+	// if (issues.getPagedData().size() > 0) {
+	// return true;
+	// }
+	//
+	// return false;
+	// }
 
 }

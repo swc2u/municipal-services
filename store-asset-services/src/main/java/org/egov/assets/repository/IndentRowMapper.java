@@ -26,6 +26,7 @@ public class IndentRowMapper implements RowMapper<Indent> {
 				.inventoryType(InventoryTypeEnum.fromValue(rs.getString("inventoryType")))
 				.indentPurpose(IndentPurposeEnum.fromValue(rs.getString("indentPurpose")))
 				.indentStatus(IndentStatusEnum.fromValue(rs.getString("indentStatus")))
+				.indentCreatedBy(rs.getString("indentCreatedBy"))
 				.issueStore(new Store().name(rs.getString("issueStore.name")).code(rs.getString("issueStore.code")))
 				.totalIndentValue(rs.getBigDecimal("totalIndentValue"))
 				.auditDetails(new AuditDetails().createdBy(rs.getString("createdBy"))

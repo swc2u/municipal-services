@@ -186,4 +186,5 @@ public class HCConfiguration {
 		@Value("${egov.user.search.endpoint}")
 		private String egovUserSearchEndpoint;
 
+
 }

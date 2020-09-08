@@ -22,12 +22,19 @@ public class HCConstants {
 	
 	public static final String MODULENAMEVALUE = "HORTICULTURE";
 	
+	
+	//serviceTypes
+	
+	public static final String ServiceType1 = "PRUNING OF TREES GIRTH LESS THAN OR EQUAL TO 90 CMS";
+	public static final String ServiceType2 = "PRUNING OF TREES GIRTH GREATER THAN 90 CMS";
+	public static final String ServiceType3 = "REMOVAL OF OVERGROWN/GREEN TREES";
+	public static final String ServiceType4 = "REMOVAL OF DEAD/DANGEROUS/DRY TREES";
+	
 	//Roll
 	
 	public static final String ROLE = "EE";
 	public static final String EXECUTIVE_ENGINEER = "EE";
-	public static final String JUNIER_ENGINEERE = "JE";
-	public static final String SDO = "SDO";
+	
 	
 	// Actions
 	public static final String EDITED = "EDITED";
@@ -174,7 +181,6 @@ public class HCConstants {
 	
 	public static final String HC_EMPLOYEE_REMAINDER_EMAIL_SUBJECT="HC_EMPLOYEE_REMAINDER_EMAIL_SUBJECT";
 	public static final String HC_EMPLOYEE_OVERDAYS_EMAIL_SUBJECT="HC_EMPLOYEE_OVERDAYS_EMAIL_SUBJECT";
-	
 	
 	
 	//approve, request for clarification
