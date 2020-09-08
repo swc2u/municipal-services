@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.egov.common.contract.request.User;
 import org.egov.hc.contract.ServiceRequest;
 import org.egov.hc.model.ServiceRequestData;
 import org.egov.hc.producer.HCConfiguration;
@@ -46,7 +47,7 @@ public class WorkflowIntegrator {
 
 	private static final String DOCUMENTSKEY = "documents";
 
-	private static final String ASSIGNEEKEY = "assignes";
+	private static final String ASSIGNEEKEY = "assignee";
 
 	private static final String MODULENAMEVALUE = "HORTICULTURE";
 
@@ -59,6 +60,8 @@ public class WorkflowIntegrator {
 	private static final String BUSINESSIDJOSNKEY = "$.businessId";
 
 	private static final String STATUSJSONKEY = "$.state.applicationStatus";
+	
+	private static final String ADITIONALDETAILSKEY = "additionalDetails";
 
 	@Autowired
 	private RestTemplate rest;
@@ -85,7 +88,7 @@ public class WorkflowIntegrator {
 	 * @param ServiceRequest
 	 * @throws JSONException 
 	 */
-	public  boolean callWorkFlow(ServiceRequest request, String service_request_id) throws JSONException {
+	public  boolean callWorkFlow(ServiceRequest request, String service_request_id,String role, String employeeUuid) throws JSONException {
 		boolean status = false;
 		
 		if(!request.getServices().isEmpty())
@@ -157,7 +160,7 @@ public class WorkflowIntegrator {
 						}
 				}
 				
-				obj.put("businesssServiceSla", servicerequestdata.getBusinessservicesla());
+				//obj.put("businesssServiceSla", servicerequestdata.getBusinessservicesla());
 
 				obj.put(DOCUMENTSKEY, wfDocument);
 				obj.put(BUSINESSIDKEY, service_request_id);
@@ -171,7 +174,22 @@ public class WorkflowIntegrator {
 				obj.put(ACTIONKEY, servicerequestdata.getAction());		
 				obj.put(COMMENTKEY, servicerequestdata.getComment());
 
-				obj.put(ASSIGNEEKEY, servicerequestdata.getAssignee());
+				User user = new User();
+				if(null != employeeUuid)
+				{	
+					user.setUuid(employeeUuid);
+					obj.put(ASSIGNEEKEY, user);
+				}
+				else
+				{
+			
+				JSONObject roleJson = new JSONObject();
+
+				roleJson.put("role", role);
+
+				obj.put(ADITIONALDETAILSKEY, roleJson);
+
+				}
 				array.add(obj);
 			
 		}

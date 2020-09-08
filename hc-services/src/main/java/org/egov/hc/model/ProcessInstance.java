@@ -11,9 +11,12 @@ import org.egov.common.contract.request.User;
 import org.egov.hc.contract.Action;
 import org.egov.hc.contract.AuditDetails;
 import org.egov.hc.workflow.Document;
+import org.json.simple.JSONObject;
 import org.springframework.validation.annotation.Validated;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -107,6 +110,10 @@ public class ProcessInstance   {
 
         @JsonProperty("auditDetails")
         private AuditDetails auditDetails = null;
+        
+        @JsonProperty("additionalDetails")
+        @JsonInclude(Include.NON_NULL)
+        private JSONObject additionalDetails = null;
 
 
         public ProcessInstance addDocumentsItem(Document documentsItem) {
