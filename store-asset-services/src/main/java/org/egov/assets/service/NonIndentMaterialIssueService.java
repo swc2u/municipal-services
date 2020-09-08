@@ -1133,8 +1133,9 @@ public class NonIndentMaterialIssueService extends DomainService {
 	public MaterialIssueResponse updateStatus(MaterialIssueRequest indentIssueRequest) {
 
 		try {
-			workflowIntegrator.callWorkFlow(indentIssueRequest.getRequestInfo(),
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(indentIssueRequest.getRequestInfo(),
 					indentIssueRequest.getWorkFlowDetails(), indentIssueRequest.getWorkFlowDetails().getTenantId());
+			indentIssueRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updateStatusTopic, updateStatusKey, indentIssueRequest);
 			MaterialIssueResponse response = new MaterialIssueResponse();
 			response.setMaterialIssues(indentIssueRequest.getMaterialIssues());
