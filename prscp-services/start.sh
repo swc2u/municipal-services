@@ -9,4 +9,3 @@ if [ x"${JAVA_ENABLE_DEBUG}" != x ] && [ "${JAVA_ENABLE_DEBUG}" != "false" ]; th
 fi
 
 java ${java_debug_args} ${JAVA_OPTS} ${JAVA_ARGS}  -jar /opt/egov/prscp-services-0.0.1-SNAPSHOT.jar
-

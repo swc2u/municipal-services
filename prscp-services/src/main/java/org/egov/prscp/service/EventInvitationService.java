@@ -23,6 +23,8 @@ import org.egov.prscp.repository.EventInvetationRepository;
 import org.egov.prscp.util.CommonConstants;
 import org.egov.prscp.util.DeviceSource;
 import org.egov.prscp.util.FileStoreUtils;
+import org.egov.prscp.util.PrScpUtil;
+import org.egov.prscp.web.models.CommitteeDetail;
 import org.egov.prscp.web.models.EventDetail;
 import org.egov.prscp.web.models.Files;
 import org.egov.prscp.web.models.Guests;
@@ -33,13 +35,18 @@ import org.egov.prscp.web.models.RequestInfoWrapper;
 import org.egov.prscp.web.models.ResponseInfoWrapper;
 import org.egov.prscp.web.models.Template;
 import org.egov.tracer.model.CustomException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,14 +61,17 @@ public class EventInvitationService {
 	private DeviceSource deviceSource;
 
 	private FileStoreUtils fileStoreUtils;
+	
+	private PrScpUtil prScpUtil;
 
 	@Autowired
 	public EventInvitationService(EventInvetationRepository repository, ObjectMapper objectMapper,
-			FileStoreUtils fileStoreUtils, DeviceSource deviceSource) {
+			FileStoreUtils fileStoreUtils, DeviceSource deviceSource,PrScpUtil prScpUtil) {
 		this.objectMapper = objectMapper;
 		this.repository = repository;
 		this.fileStoreUtils = fileStoreUtils;
 		this.deviceSource = deviceSource;
+		this.prScpUtil =prScpUtil;
 	}
 	/**
 	 * Upload external user for event
@@ -201,34 +211,50 @@ public class EventInvitationService {
 		try {
 
 			Template template = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), Template.class);
-			String notificationTemplateUuid = this.validateTemplate(template, requestInfoWrapper);
 
-			InviteGuest inviteGuest = InviteGuest.builder().eventDetailUuid(template.getEventDetailUuid())
-					.tenantId(template.getTenantId()).sentFlag(true)
-					.createdBy(requestInfoWrapper.getAuditDetails().getCreatedBy())
-					.createdTime(requestInfoWrapper.getAuditDetails().getCreatedTime())
-					.lastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy())
-					.lastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime())
-					.notificationTemplateUuid(notificationTemplateUuid).build();
-
-			repository.updateTemplateOfEvent(inviteGuest);
-			EventDetail eventDetail = EventDetail.builder().notificationTemplateUuid(notificationTemplateUuid)
-					.tenantId(template.getTenantId()).isActive(true).moduleCode(template.getModuleCode())
-					.eventDetailUuid(template.getEventDetailUuid())
-					.createdTime(requestInfoWrapper.getAuditDetails().getCreatedTime()).build();
-
-			repository.updateEventNotification(eventDetail);
-
-			NotificationReceiver notificationReceiver = NotificationReceiver.builder()
-					.receiverType(CommonConstants.RECIEVER_TYPE_EVENT).receiverUuid(template.getEventDetailUuid())
-					.tenantId(template.getTenantId()).moduleCode(template.getModuleCode())
-					.senderUuid(requestInfoWrapper.getAuditDetails().getCreatedBy()).build();
-			repository.sendInvitation(notificationReceiver);
-
-			return new ResponseEntity(
-					ResponseInfoWrapper.builder()
-							.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build()).build(),
-					HttpStatus.OK);
+			
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(template, Template.class);
+			
+			String responseValidate = "";
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.SENDENVITEENVITATION);
+			
+			if (responseValidate.equals("")) 
+			{
+		
+				String notificationTemplateUuid = this.validateTemplate(template, requestInfoWrapper);
+	
+				InviteGuest inviteGuest = InviteGuest.builder().eventDetailUuid(template.getEventDetailUuid())
+						.tenantId(template.getTenantId()).sentFlag(true)
+						.createdBy(requestInfoWrapper.getAuditDetails().getCreatedBy())
+						.createdTime(requestInfoWrapper.getAuditDetails().getCreatedTime())
+						.lastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy())
+						.lastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime())
+						.notificationTemplateUuid(notificationTemplateUuid).build();
+	
+				repository.updateTemplateOfEvent(inviteGuest);
+				EventDetail eventDetail = EventDetail.builder().notificationTemplateUuid(notificationTemplateUuid)
+						.tenantId(template.getTenantId()).isActive(true).moduleCode(template.getModuleCode())
+						.eventDetailUuid(template.getEventDetailUuid())
+						.createdTime(requestInfoWrapper.getAuditDetails().getCreatedTime()).build();
+	
+				repository.updateEventNotification(eventDetail);
+	
+				NotificationReceiver notificationReceiver = NotificationReceiver.builder()
+						.receiverType(CommonConstants.RECIEVER_TYPE_EVENT).receiverUuid(template.getEventDetailUuid())
+						.tenantId(template.getTenantId()).moduleCode(template.getModuleCode())
+						.senderUuid(requestInfoWrapper.getAuditDetails().getCreatedBy()).build();
+				repository.sendInvitation(notificationReceiver);
+	
+				return new ResponseEntity(
+						ResponseInfoWrapper.builder()
+								.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build()).build(),
+						HttpStatus.OK);
+			}
+			else
+			{
+				throw new CustomException(CommonConstants.INVITATION_EXCEPTION_CODE, responseValidate);
+			}
 
 		} catch (Exception exception) {
 			throw new CustomException(CommonConstants.INVITATION_EXCEPTION_CODE, exception.getMessage());
@@ -274,31 +300,46 @@ public class EventInvitationService {
 	public ResponseEntity<ResponseInfoWrapper> addGuest(RequestInfoWrapper requestInfoWrapper, String requestHeader) {
 		try {
 			Guests guests = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), Guests.class);
-			String sourceUuid = deviceSource.saveDeviceDetails(requestHeader, CommonConstants.DEVICE_GUEST,
-					guests.getTenantId(), guests.getModuleCode(), requestInfoWrapper.getAuditDetails());
-
-			List<InviteGuest> inviteGuest = guests.getInviteGuest();
-			inviteGuest.stream().forEach(element -> {
-				String uuid = UUID.randomUUID().toString();
-				element.setEventGuestUuid(uuid);
-				element.setEventDetailUuid(guests.getEventDetailUuid());
-				element.setTenantId(guests.getTenantId());
-				element.setModuleCode(guests.getModuleCode());
-				element.setActive(true);
-				element.setSentFlag(false);
-				element.setCreatedBy(requestInfoWrapper.getAuditDetails().getCreatedBy());
-				element.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
-				element.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
-				element.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
-				element.setSourceUuid(sourceUuid);
-			});
-
-			List<InviteGuest> inviteGuestFinal = repository.saveGuest(inviteGuest, guests.getTenantId(),
-					guests.getEventDetailUuid(), requestInfoWrapper.getAuditDetails().getCreatedBy(),
-					guests.getModuleCode());
-			return new ResponseEntity(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(inviteGuestFinal).build(), HttpStatus.CREATED);
+			
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(guests, Guests.class);
+			
+			String responseValidate = "";
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.ADDENVITEGUEST);
+			List<InviteGuest> inviteGuestFinal=new ArrayList<>();
+			if (responseValidate.equals("")) 
+			{
+			
+				String sourceUuid = deviceSource.saveDeviceDetails(requestHeader, CommonConstants.DEVICE_GUEST,
+						guests.getTenantId(), guests.getModuleCode(), requestInfoWrapper.getAuditDetails());
+	
+				List<InviteGuest> inviteGuest = guests.getInviteGuest();
+				inviteGuest.stream().forEach(element -> {
+					String uuid = UUID.randomUUID().toString();
+					element.setEventGuestUuid(uuid);
+					element.setEventDetailUuid(guests.getEventDetailUuid());
+					element.setTenantId(guests.getTenantId());
+					element.setModuleCode(guests.getModuleCode());
+					element.setActive(true);
+					element.setSentFlag(false);
+					element.setCreatedBy(requestInfoWrapper.getAuditDetails().getCreatedBy());
+					element.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
+					element.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
+					element.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
+					element.setSourceUuid(sourceUuid);
+				});
+	
+				inviteGuestFinal = repository.saveGuest(inviteGuest, guests.getTenantId(),
+						guests.getEventDetailUuid(), requestInfoWrapper.getAuditDetails().getCreatedBy(),
+						guests.getModuleCode());
+				return new ResponseEntity(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+						.responseBody(inviteGuestFinal).build(), HttpStatus.CREATED);
+			}
+			else
+			{
+				throw new CustomException(CommonConstants.INVITATION_EXCEPTION_CODE, responseValidate);
+			}
 		} catch (Exception exception) {
 			throw new CustomException(CommonConstants.INVITATION_EXCEPTION_CODE, exception.getMessage());
 		}
@@ -312,22 +353,35 @@ public class EventInvitationService {
 	public ResponseEntity<ResponseInfoWrapper> deleteGuest(RequestInfoWrapper requestInfoWrapper) {
 		try {
 			Guests guests = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), Guests.class);
-			List<InviteGuest> inviteGuest = guests.getInviteGuest();
-			inviteGuest.stream().forEach(element -> {
-				element.setEventDetailUuid(guests.getEventDetailUuid());
-				element.setTenantId(guests.getTenantId());
-				element.setModuleCode(guests.getModuleCode());
-				element.setActive(false);
-				element.setCreatedBy(requestInfoWrapper.getAuditDetails().getCreatedBy());
-				element.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
-				element.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getCreatedBy());
-				element.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
-			});
-
-			repository.deleteGuest(inviteGuest);
-			return new ResponseEntity(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build()).responseBody(guests)
-					.build(), HttpStatus.OK);
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(guests, Guests.class);
+			
+			String responseValidate = "";
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.REMOVEENVITEGUEST);
+			if (responseValidate.equals("")) 
+			{
+			
+				List<InviteGuest> inviteGuest = guests.getInviteGuest();
+				inviteGuest.stream().forEach(element -> {
+					element.setEventDetailUuid(guests.getEventDetailUuid());
+					element.setTenantId(guests.getTenantId());
+					element.setModuleCode(guests.getModuleCode());
+					element.setActive(false);
+					element.setCreatedBy(requestInfoWrapper.getAuditDetails().getCreatedBy());
+					element.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
+					element.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getCreatedBy());
+					element.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
+				});
+	
+				repository.deleteGuest(inviteGuest);
+				return new ResponseEntity(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build()).responseBody(guests)
+						.build(), HttpStatus.OK);
+			}
+			else
+			{
+				throw new CustomException(CommonConstants.INVITATION_EXCEPTION_CODE, responseValidate);
+			}
 		} catch (Exception exception) {
 			throw new CustomException(CommonConstants.INVITATION_EXCEPTION_CODE, exception.getMessage());
 		}
@@ -341,13 +395,28 @@ public class EventInvitationService {
 	public ResponseEntity<ResponseInfoWrapper> getGuest(RequestInfoWrapper requestInfoWrapper) {
 		try {
 			InviteGuest inviteGuest = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), InviteGuest.class);
-			List<InviteGuest> inviteGuests = repository.getGuest(inviteGuest);
-			return new ResponseEntity(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(inviteGuests).build(), HttpStatus.OK);
+			String responseValidate = "";
+			
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(inviteGuest, InviteGuest.class);
+			
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.GETENVITEGUEST);
+			List<InviteGuest> inviteGuests=new ArrayList<>();
+			if (responseValidate.equals("")) 
+			{
+				inviteGuests = repository.getGuest(inviteGuest);
+				return new ResponseEntity(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+						.responseBody(inviteGuests).build(), HttpStatus.OK);
+			}
+			else
+			{
+				throw new CustomException(CommonConstants.INVITATION_EXCEPTION_CODE, responseValidate);
+			}
 		} catch (Exception exception) {
 			throw new CustomException(CommonConstants.INVITATION_EXCEPTION_CODE, exception.getMessage());
 		}
 	}
-
+	
+	
 }

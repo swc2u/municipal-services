@@ -7,21 +7,30 @@ import java.util.List;
 import java.util.UUID;
 
 import org.egov.common.contract.response.ResponseInfo;
+
 import org.egov.prscp.config.PrScpConfiguration;
 import org.egov.prscp.producer.Producer;
 import org.egov.prscp.repository.EventCommitteeMasterRepository;
 import org.egov.prscp.util.CommonConstants;
+import org.egov.prscp.util.PrScpUtil;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.egov.prscp.web.models.CommitteeDetail;
 import org.egov.prscp.web.models.CommitteeMember;
 import org.egov.prscp.web.models.RequestInfoWrapper;
 import org.egov.prscp.web.models.ResponseInfoWrapper;
 import org.egov.tracer.model.CustomException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @Service
 public class EventCommitteeMasterService {
@@ -33,14 +42,18 @@ public class EventCommitteeMasterService {
 	private ObjectMapper objectMapper;
 
 	private Producer producer;
+	
+	private PrScpUtil prScpUtil;
+
 
 	@Autowired
 	public EventCommitteeMasterService(EventCommitteeMasterRepository repository, PrScpConfiguration config,
-			ObjectMapper objectMapper, Producer producer) {
+			ObjectMapper objectMapper, Producer producer, PrScpUtil prScpUtil) {
 		this.repository = repository;
 		this.config = config;
 		this.objectMapper = objectMapper;
 		this.producer = producer;
+		this.prScpUtil = prScpUtil;
 	}
 
 	/**
@@ -49,19 +62,39 @@ public class EventCommitteeMasterService {
 	 * @return list of Events
 	 */
 	public ResponseEntity<ResponseInfoWrapper> getCommittee(RequestInfoWrapper requestInfoWrapper) {
+		
 		try {
 			CommitteeDetail committeeDetail = objectMapper.convertValue(requestInfoWrapper.getRequestBody(),
 					CommitteeDetail.class);
+			
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(committeeDetail, CommitteeDetail.class);
+			
+			String responseValidate = "";
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.COMMITTEEMASTERGET);
+			List<CommitteeDetail> data=new ArrayList<>();
+			if (responseValidate.equals("")) 
+			   {
+				 data = repository.getCommittee(committeeDetail);
 
-			List<CommitteeDetail> data = repository.getCommittee(committeeDetail);
-
-			return new ResponseEntity<>(ResponseInfoWrapper.builder()
+				return new ResponseEntity<>(ResponseInfoWrapper.builder()
 					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build()).responseBody(data)
 					.build(), HttpStatus.OK);
-
+			    }
+			else
+			    {
+				
+				throw new CustomException(CommonConstants.COMMITTEE_MASTER_EXCEPTION_CODE, responseValidate);
+			    }
+		
 		} catch (Exception e) {
+			
+			
 			throw new CustomException(CommonConstants.COMMITTEE_MASTER_EXCEPTION_CODE, e.getMessage());
 		}
+		
+
+		
 	}
 
 	
@@ -73,14 +106,24 @@ public class EventCommitteeMasterService {
 	 */
 	public ResponseEntity<ResponseInfoWrapper> createCommittee(RequestInfoWrapper requestInfoWrapper) {
 
+		String responseValidate = "";
 		try {
-
+			
 			CommitteeDetail committeeDetail = objectMapper.convertValue(requestInfoWrapper.getRequestBody(),
 					CommitteeDetail.class);
-			List<CommitteeDetail> existingData = repository.getCommitteeByName(committeeDetail);
-			if (existingData != null && !existingData.isEmpty()) {
+			
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(committeeDetail, CommitteeDetail.class);
+			
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.COMMITTEEMASTERCREATE);
+			List<CommitteeDetail> listCommittee = new ArrayList<>();
+			if(responseValidate.equals("")) 
+			{
 
-				return new ResponseEntity<>(
+				List<CommitteeDetail> existingData = repository.getCommitteeByName(committeeDetail);
+				if (existingData != null && !existingData.isEmpty()) {
+
+					return new ResponseEntity<>(
 						ResponseInfoWrapper.builder()
 								.responseInfo(ResponseInfo.builder().status(CommonConstants.FAIL)
 										.msgId(CommonConstants.COMMIITEE_IS_EXISTS).build())
@@ -120,14 +163,22 @@ public class EventCommitteeMasterService {
 				}
 
 				committee.setCommitteeMember(listCommitteeMember);
-				List<CommitteeDetail> listCommittee = Arrays.asList(committee);
+				listCommittee = Arrays.asList(committee);
 				RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().requestBody(listCommittee).build();
 				producer.push(config.getCreateCommitteeTopic(), infoWrapper);
 
 				return new ResponseEntity<>(ResponseInfoWrapper.builder()
 						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
 						.responseBody(listCommittee).build(), HttpStatus.CREATED);
+				}
 			}
+		else
+			{
+			
+			throw new CustomException(CommonConstants.COMMITTEE_MASTER_EXCEPTION_CODE, responseValidate);
+
+		}
+					
 
 		} catch (Exception e) {
 			throw new CustomException(CommonConstants.COMMITTEE_MASTER_EXCEPTION_CODE, e.getMessage());
@@ -145,49 +196,65 @@ public class EventCommitteeMasterService {
 		try {
 			CommitteeDetail committeeDetail = objectMapper.convertValue(requestInfoWrapper.getRequestBody(),
 					CommitteeDetail.class);
-			List<CommitteeDetail> existingData = repository.getCommitteeByName(committeeDetail);
-			if (existingData != null && !existingData.isEmpty()) {
+			
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(committeeDetail, CommitteeDetail.class);
+			
+			String responseValidate = "";
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.COMMITTEEMASTERUPDATE);
+			List<CommitteeDetail> listCommittee = new ArrayList<>();
+			if (responseValidate.equals("")) 
+			{
+				List<CommitteeDetail> existingData = repository.getCommitteeByName(committeeDetail);
+				if (existingData != null && !existingData.isEmpty()) {
 				CommitteeDetail exsting = existingData.get(0);
 				if (!exsting.getCommitteeUuid().equals(committeeDetail.getCommitteeUuid()))
 					throw new CustomException(CommonConstants.COMMITTEE_MASTER_EXCEPTION_CODE,
 							CommonConstants.COMMIITEE_IS_EXISTS);
-			}
+				}
 
-			CommitteeDetail committeeCriteria = CommitteeDetail.builder()
+				CommitteeDetail committeeCriteria = CommitteeDetail.builder()
 					.committeeUuid(committeeDetail.getCommitteeUuid()).tenantId(committeeDetail.getTenantId())
 					.moduleCode(committeeDetail.getModuleCode()).build();
-			List<CommitteeDetail> existingCommittee = repository.getCommittee(committeeCriteria);
+				List<CommitteeDetail> existingCommittee = repository.getCommittee(committeeCriteria);
 
-			committeeDetail.setActive(true);
-			committeeDetail.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
-			committeeDetail.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
-			committeeDetail.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
-			
-			List<CommitteeMember> listCommitteeMember = new ArrayList<>();
-			for (CommitteeMember member : committeeDetail.getCommitteeMember()) {
-				String memberUuid = UUID.randomUUID().toString();
-				member.setCommitteeMemberUuid(memberUuid);
-				member.setCommitteeUuid(committeeDetail.getCommitteeUuid());
-				member.setActive(true);
-				member.setTenantId(committeeDetail.getTenantId());
-				member.setModuleCode(committeeDetail.getModuleCode());
-				member.setCreatedBy(requestInfoWrapper.getAuditDetails().getCreatedBy());
-				member.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
-				member.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
-				member.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
-				listCommitteeMember.add(member);
+				committeeDetail.setActive(true);
+				committeeDetail.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
+				committeeDetail.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
+				committeeDetail.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
+				
+				List<CommitteeMember> listCommitteeMember = new ArrayList<>();
+				for (CommitteeMember member : committeeDetail.getCommitteeMember()) {
+					String memberUuid = UUID.randomUUID().toString();
+					member.setCommitteeMemberUuid(memberUuid);
+					member.setCommitteeUuid(committeeDetail.getCommitteeUuid());
+					member.setActive(true);
+					member.setTenantId(committeeDetail.getTenantId());
+					member.setModuleCode(committeeDetail.getModuleCode());
+					member.setCreatedBy(requestInfoWrapper.getAuditDetails().getCreatedBy());
+					member.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
+					member.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
+					member.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
+					listCommitteeMember.add(member);
+				}
+				committeeDetail.setCommitteeMember(listCommitteeMember);
+				listCommittee = Arrays.asList(committeeDetail);
+				RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().requestBody(listCommittee).build();
+				producer.push(config.getUpdateCommitteeTopic(), infoWrapper);
+	
+				return new ResponseEntity<>(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+						.responseBody(listCommittee).build(), HttpStatus.OK);
 			}
-			committeeDetail.setCommitteeMember(listCommitteeMember);
-			List<CommitteeDetail> listCommittee = Arrays.asList(committeeDetail);
-			RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().requestBody(listCommittee).build();
-			producer.push(config.getUpdateCommitteeTopic(), infoWrapper);
-
-			return new ResponseEntity<>(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(listCommittee).build(), HttpStatus.OK);
+			else
+			{
+				throw new CustomException(CommonConstants.COMMITTEE_MASTER_EXCEPTION_CODE,responseValidate);
+			}
 
 		} catch (Exception e) {
 			throw new CustomException(CommonConstants.COMMITTEE_MASTER_EXCEPTION_CODE, e.getMessage());
 		}
 	}
+	
+	
 }
