@@ -1279,7 +1279,7 @@ public class MaterialIssueService extends DomainService {
 			response.setMaterialIssues(indentIssueRequest.getMaterialIssues());
 			response.setResponseInfo(getResponseInfo(indentIssueRequest.getRequestInfo()));
 
-			if (indentIssueRequest.getWorkFlowDetails().getAction()
+			if (indentIssueRequest.getWorkFlowDetails().getStatus()
 					.equals(MaterialIssueStatusEnum.REJECTED.toString())) {
 				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(
 						indentIssueRequest.getWorkFlowDetails().getTenantId(), null, null, null,

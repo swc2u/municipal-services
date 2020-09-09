@@ -1140,7 +1140,7 @@ public class NonIndentMaterialIssueService extends DomainService {
 			MaterialIssueResponse response = new MaterialIssueResponse();
 			response.setMaterialIssues(indentIssueRequest.getMaterialIssues());
 			response.setResponseInfo(getResponseInfo(indentIssueRequest.getRequestInfo()));
-			if (indentIssueRequest.getWorkFlowDetails().getAction()
+			if (indentIssueRequest.getWorkFlowDetails().getStatus()
 					.equals(MaterialIssueStatusEnum.REJECTED.toString())) {
 				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(
 						indentIssueRequest.getWorkFlowDetails().getTenantId(), null, null, null,
