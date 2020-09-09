@@ -6,11 +6,15 @@ import java.util.List;
 import org.egov.prscp.config.PrScpConfiguration;
 import org.egov.prscp.producer.Producer;
 import org.egov.prscp.repository.EventCommitteeMasterRepository;
+import org.egov.prscp.util.CommonConstants;
+import org.egov.prscp.util.PrScpUtil;
 import org.egov.prscp.web.models.AuditDetails;
 import org.egov.prscp.web.models.CommitteeDetail;
 import org.egov.prscp.web.models.CommitteeMember;
+import org.egov.prscp.web.models.Library;
 import org.egov.prscp.web.models.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
+import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventCommitteeMasterServiceTest {
@@ -37,12 +42,14 @@ public class EventCommitteeMasterServiceTest {
 
 	@Mock
 	private PrScpConfiguration config;
+	@Mock
+	private PrScpUtil prScpUtil;
 
 	@InjectMocks
 	private EventCommitteeMasterService service;
 
 	@Test
-	public void testCreateCommittee() {
+	public void testCreateCommittee() throws ParseException {
 
 		List<CommitteeMember> list = new ArrayList<>();
 
@@ -62,13 +69,16 @@ public class EventCommitteeMasterServiceTest {
 
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), CommitteeDetail.class))
 				.thenReturn(committeeDetail);
-
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(committeeDetail, CommitteeDetail.class);
+		String librarys = "";
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.COMMITTEEMASTERCREATE)).thenReturn(librarys);
 		Assert.assertEquals(HttpStatus.CREATED, service.createCommittee(infoWrapper).getStatusCode());
 
 	}
 
 	@Test
-	public void testTwoCreateCommittee() {
+	public void testTwoCreateCommittee() throws ParseException {
 
 		List<CommitteeMember> list = new ArrayList<>();
 
@@ -89,7 +99,10 @@ public class EventCommitteeMasterServiceTest {
 		listCommitteeDetail.add(committeeDetail);
 
 		Mockito.when(repository.getCommittee(Matchers.anyObject())).thenReturn(listCommitteeDetail);
-
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(committeeDetail, CommitteeDetail.class);
+		String librarys = "";
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.COMMITTEEMASTERCREATE)).thenReturn("");
 		Assert.assertEquals(HttpStatus.CREATED, service.createCommittee(infoWrapper).getStatusCode());
 
 	}
@@ -101,7 +114,7 @@ public class EventCommitteeMasterServiceTest {
 	}
 
 	@Test
-	public void testOneUpdateCommittee() {
+	public void testOneUpdateCommittee() throws ParseException {
 
 		List<CommitteeMember> list = new ArrayList<>();
 
@@ -132,7 +145,10 @@ public class EventCommitteeMasterServiceTest {
 		Mockito.when(repository.getCommittee(Matchers.anyObject())).thenReturn(listCommitteeDetail);
 
 		// Mockito.when(repository.getCommittee(Matchers.anyObject())).thenReturn(listCommitteeDetail);
-
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(committeeDetail, CommitteeDetail.class);
+		String librarys = "";
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.COMMITTEEMASTERUPDATE)).thenReturn(librarys);
 		Assert.assertEquals(HttpStatus.OK, service.updateCommittee(infoWrapper).getStatusCode());
 	}
 
@@ -143,7 +159,7 @@ public class EventCommitteeMasterServiceTest {
 	}
 
 	@Test
-	public void testTwoUpdateCommittee() {
+	public void testTwoUpdateCommittee() throws ParseException {
 		List<CommitteeMember> listCommitteeMember = new ArrayList<>();
 		CommitteeMember member = CommitteeMember.builder().departmentName("IT").departmentUuid("aksnd2dn29d")
 				.userUuid("15a5sf4f5f").build();
@@ -165,12 +181,15 @@ public class EventCommitteeMasterServiceTest {
 				.requestBody(committeeDetail).build();
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), CommitteeDetail.class))
 				.thenReturn(committeeDetail);
-
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(committeeDetail, CommitteeDetail.class);
+		String librarys = "";
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.COMMITTEEMASTERUPDATE)).thenReturn(librarys);
 		Assert.assertEquals(HttpStatus.OK, service.updateCommittee(infoWrapper).getStatusCode());
 	}
 
 	@Test
-	public void testGetCommittee() {
+	public void testGetCommittee() throws ParseException {
 
 		CommitteeDetail committeeDetail = CommitteeDetail.builder()
 				.committeeUuid("ee9c4698-3e55-4bd2-a4a2-352b48c0bdb0").build();
@@ -180,6 +199,10 @@ public class EventCommitteeMasterServiceTest {
 				.thenReturn(committeeDetail);
 
 		Mockito.when(repository.getCommittee(committeeDetail)).thenReturn(new ArrayList<CommitteeDetail>());
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(committeeDetail, CommitteeDetail.class);
+		String librarys = "";
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.COMMITTEEMASTERGET)).thenReturn(librarys);
 		Assert.assertEquals(HttpStatus.OK, service.getCommittee(infoWrapper).getStatusCode());
 	}
 }

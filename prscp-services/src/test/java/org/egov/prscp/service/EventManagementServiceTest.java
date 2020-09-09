@@ -6,15 +6,19 @@ import java.util.List;
 import org.egov.prscp.config.PrScpConfiguration;
 import org.egov.prscp.producer.Producer;
 import org.egov.prscp.repository.EventManegementRepository;
+import org.egov.prscp.util.CommonConstants;
 import org.egov.prscp.util.DeviceSource;
 import org.egov.prscp.util.IdGenRepository;
+import org.egov.prscp.util.PrScpUtil;
 import org.egov.prscp.web.models.AuditDetails;
+import org.egov.prscp.web.models.CommitteeDetail;
 import org.egov.prscp.web.models.EventDetail;
 import org.egov.prscp.web.models.RequestInfoWrapper;
 import org.egov.prscp.web.models.Idgen.IdGenerationResponse;
 import org.egov.prscp.web.models.Idgen.IdResponse;
 import org.egov.tracer.model.CustomException;
 import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EventManagementServiceTest {
@@ -34,6 +39,8 @@ public class EventManagementServiceTest {
 	private ObjectMapper objectMapper;
 	@Mock
 	private DeviceSource deviceSource;
+	@Mock
+	private PrScpUtil prScpUtil;
 
 	@Mock
 	private Producer producer;
@@ -50,7 +57,7 @@ public class EventManagementServiceTest {
 	private EventManagementService service;
 
 	@Test
-	public void testcreateEvent() {
+	public void testcreateEvent() throws ParseException {
 		JSONArray eventImage = new JSONArray();
 		eventImage.add("sample");
 		EventDetail eventDetail = EventDetail.builder().moduleCode("Test").startDate("01/04/2020").startTime("11:11")
@@ -70,7 +77,10 @@ public class EventManagementServiceTest {
 		IdGenerationResponse id = IdGenerationResponse.builder().idResponses(idResponses).build();
 		Mockito.when(idgenrepository.getId(Matchers.anyObject(), Matchers.anyString(), Matchers.anyString(),
 				Matchers.anyString(), Matchers.anyInt())).thenReturn(id);
-
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(eventDetail, EventDetail.class);
+	
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.EVENTCREATE)).thenReturn("");
 		Assert.assertEquals(HttpStatus.CREATED, service.createEvent(infoWrapper, "").getStatusCode());
 
 	}
@@ -82,7 +92,7 @@ public class EventManagementServiceTest {
 	}
 
 	@Test
-	public void testupdateEvent() {
+	public void testupdateEvent() throws ParseException {
 
 		EventDetail detail = EventDetail.builder().status("PUBLISHED").build();
 		List<EventDetail> list = new ArrayList<>();
@@ -101,7 +111,10 @@ public class EventManagementServiceTest {
 				.requestBody(eventDetail).build();
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), EventDetail.class))
 				.thenReturn(eventDetail);
-
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(eventDetail, EventDetail.class);
+	
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.EVENTUPDATE)).thenReturn("");
 		Assert.assertEquals(HttpStatus.OK, service.updateEvent(infoWrapper).getStatusCode());
 	}
 
@@ -112,7 +125,7 @@ public class EventManagementServiceTest {
 	}
 
 	@Test
-	public void testupdateStatus() {
+	public void testupdateStatus() throws ParseException {
 		EventDetail detail = EventDetail.builder().status("PUBLISHED").build();
 		List<EventDetail> list = new ArrayList<>();
 		list.add(detail);
@@ -130,7 +143,10 @@ public class EventManagementServiceTest {
 				.requestBody(eventDetail).build();
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), EventDetail.class))
 				.thenReturn(eventDetail);
-
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(eventDetail, EventDetail.class);
+	
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.EVENTUPDATE)).thenReturn("");
 		Assert.assertEquals(HttpStatus.OK, service.updateEventStatus(infoWrapper).getStatusCode());
 	}
 
@@ -141,7 +157,7 @@ public class EventManagementServiceTest {
 	}
 
 	@Test
-	public void testgetEvent() {
+	public void testgetEvent() throws ParseException {
 
 		EventDetail eventDetail = EventDetail.builder().eventDetailUuid("aasdjiasdu8ahs89asdy8a9h").moduleCode("Test")
 				.build();
@@ -150,7 +166,10 @@ public class EventManagementServiceTest {
 				.thenReturn(eventDetail);
 
 		Mockito.when(repository.getEvent(eventDetail)).thenReturn(new ArrayList<EventDetail>());
-
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(eventDetail, EventDetail.class);
+	
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.EVENTGET)).thenReturn("");
 		Assert.assertEquals(HttpStatus.OK, service.getEvent(infoWrapper).getStatusCode());
 	}
 }
