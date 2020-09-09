@@ -111,8 +111,9 @@ public class WorkflowIntegrator {
 	 * and sets the resultant status from wf-response back to trade-license object
 	 *
 	 * @param tradeLicenseRequest
+	 * @return 
 	 */
-	public void callWorkFlow(RequestInfo requestInfo,WorkFlowDetails workFlowDetails,String tenantId) {
+	public WorkFlowDetails callWorkFlow(RequestInfo requestInfo,WorkFlowDetails workFlowDetails,String tenantId) {
 
 		JSONArray array = new JSONArray();
 		JSONObject obj = new JSONObject();
@@ -178,12 +179,11 @@ public class WorkflowIntegrator {
 				DocumentContext instanceContext = JsonPath.parse(object);
 				idStatusMap.put(instanceContext.read(BUSINESSIDJOSNKEY), instanceContext.read(STATUSJSONKEY));
 			});
-
-			// // setting the status back to TL object from wf response
-			// tradeLicenseRequest.getLicenses()
-			// .forEach(tlObj ->
-			// tlObj.setStatus(idStatusMap.get(tlObj.getApplicationNumber())));
+			System.out.println(idStatusMap);
+			workFlowDetails.setStatus(idStatusMap.get(workFlowDetails.getBusinessId()));
 		}
+		
+		return workFlowDetails;
 	}
 	public ProcessInstanceResponse getWorkflowDataByID(RequestInfo requestInfo, String businessId, String tenantId) {
 		StringBuilder builder = new StringBuilder();
