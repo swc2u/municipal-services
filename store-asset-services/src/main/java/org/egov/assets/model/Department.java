@@ -131,6 +131,12 @@ public class Department {
 	public void setDeptCategory(String deptCategory) {
 		this.deptCategory = deptCategory;
 	}
+	
+	public Department deptCategory(String deptCategory) {
+		this.deptCategory = deptCategory;
+		return this;
+	}
+
 
 	public Department active(Boolean active) {
 		this.active = active;
