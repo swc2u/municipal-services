@@ -39,6 +39,9 @@ public class WaterConnection extends Connection {
 
 	@JsonProperty("noOfTaps")
 	private Integer noOfTaps = null;
+	
+	@JsonProperty("waterApplicationType")
+	private String waterApplicationType = null;
 
 
 	public WaterConnection waterSource(String waterSource) {
@@ -222,5 +225,13 @@ public class WaterConnection extends Connection {
 			return "null";
 		}
 		return o.toString().replace("\n", "\n    ");
+	}
+
+	public String getWaterApplicationType() {
+		return waterApplicationType;
+	}
+
+	public void setWaterApplicationType(String waterApplicationType) {
+		this.waterApplicationType = waterApplicationType;
 	}
 }

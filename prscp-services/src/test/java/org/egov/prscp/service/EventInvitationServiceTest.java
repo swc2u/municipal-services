@@ -5,17 +5,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.egov.prscp.repository.EventInvetationRepository;
+import org.egov.prscp.util.CommonConstants;
 import org.egov.prscp.util.DeviceSource;
 import org.egov.prscp.util.FileStoreUtils;
+import org.egov.prscp.util.PrScpUtil;
 import org.egov.prscp.web.models.AuditDetails;
+import org.egov.prscp.web.models.EventDetail;
 import org.egov.prscp.web.models.Files;
 import org.egov.prscp.web.models.Guests;
 import org.egov.prscp.web.models.InviteGuest;
+import org.egov.prscp.web.models.Library;
 import org.egov.prscp.web.models.NotificationTemplate;
 import org.egov.prscp.web.models.RequestInfoWrapper;
 import org.egov.prscp.web.models.Template;
 import org.egov.tracer.model.CustomException;
 import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -26,6 +31,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 import junit.framework.Assert;
 
@@ -37,6 +43,9 @@ public class EventInvitationServiceTest {
 
 	@Mock
 	private EventInvetationRepository repository;
+	
+	@Mock
+	private PrScpUtil prScpUtil;
 
 	@Mock
 	private DeviceSource deviceSource;
@@ -94,7 +103,7 @@ public class EventInvitationServiceTest {
 	}
 
 	@Test
-	public void testSendInvitations() {
+	public void testSendInvitations() throws ParseException {
 		JSONArray emailContent = new JSONArray();
 		JSONArray documentAttachment = new JSONArray();
 
@@ -114,12 +123,18 @@ public class EventInvitationServiceTest {
 		RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().auditDetails(auditDetails).requestBody(template)
 				.build();
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), Template.class)).thenReturn(template);
-
+		
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(template, Template.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.SENDENVITEENVITATION)).thenReturn("");
+		
+		
 		Assert.assertEquals(HttpStatus.OK, service.sendInvitations(infoWrapper).getStatusCode());
 	}
 
 	@Test
-	public void testSendInvitations_1() {
+	public void testSendInvitations_1() throws ParseException {
 		JSONArray emailContent = new JSONArray();
 		JSONArray documentAttachment = new JSONArray();
 
@@ -127,6 +142,7 @@ public class EventInvitationServiceTest {
 				.documentAttachment(documentAttachment).smsContent("sms").eventDetailUuid("asb87qwdb287")
 				.templateMappedUuid("asb87qwdb287").templateType("CREATE_EVENT").build();
 
+		
 		Mockito.when(repository.getTemplate(Matchers.any(Template.class))).thenReturn(null);
 
 		AuditDetails auditDetails = AuditDetails.builder().createdBy("1").createdTime(1546515646L).lastModifiedBy("1")
@@ -134,7 +150,12 @@ public class EventInvitationServiceTest {
 		RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().auditDetails(auditDetails).requestBody(template)
 				.build();
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), Template.class)).thenReturn(template);
-
+		
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(template, Template.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.SENDENVITEENVITATION)).thenReturn("");
+		
 		Assert.assertEquals(HttpStatus.OK, service.sendInvitations(infoWrapper).getStatusCode());
 	}
 
@@ -156,7 +177,7 @@ public class EventInvitationServiceTest {
 	}
 
 	@Test
-	public void testAddGuest() {
+	public void testAddGuest() throws ParseException {
 		List<InviteGuest> inviteGuest = new ArrayList<>();
 		InviteGuest guest = InviteGuest.builder().departmentName("depst").departmentUuid("asjdbasd8sdasd2")
 				.eventGuestType("EXTRANEL").guestEmail("guestEmail@gmail.com").guestMobile("258941894")
@@ -178,7 +199,13 @@ public class EventInvitationServiceTest {
 
 		Mockito.when(repository.saveGuest(Matchers.anyObject(), Matchers.anyString(), Matchers.anyString(),
 				Matchers.anyString(), Matchers.anyString())).thenReturn(inviteGuest);
-
+		
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(guests, Guests.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.ADDENVITEGUEST)).thenReturn("");
+		
+		
 		Assert.assertEquals(HttpStatus.CREATED, service.addGuest(infoWrapper, "").getStatusCode());
 	}
 
@@ -189,7 +216,7 @@ public class EventInvitationServiceTest {
 	}
 
 	@Test
-	public void testDeleteGuest() {
+	public void testDeleteGuest() throws ParseException {
 		List<InviteGuest> inviteGuest = new ArrayList<>();
 		InviteGuest guest = InviteGuest.builder().departmentName("depst").departmentUuid("asjdbasd8sdasd2")
 				.eventDetailUuid("asda2d22").eventGuestType("EXTRANEL").guestEmail("guestEmail@gmail.com")
@@ -205,6 +232,11 @@ public class EventInvitationServiceTest {
 				.build();
 
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), Guests.class)).thenReturn(guests);
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(guests, Guests.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.REMOVEENVITEGUEST)).thenReturn("");
+	
 		Assert.assertEquals(HttpStatus.OK, service.deleteGuest(infoWrapper).getStatusCode());
 	}
 
@@ -215,16 +247,23 @@ public class EventInvitationServiceTest {
 	}
 
 	@Test
-	public void testGetGuest() {
+	public void testGetGuest() throws ParseException {
 		AuditDetails auditDetails = AuditDetails.builder().createdBy("1").createdTime(1546515646L).lastModifiedBy("1")
 				.lastModifiedTime(15645455L).build();
 		InviteGuest guests = new InviteGuest();
+		
 		List<InviteGuest> list = new ArrayList<>();
 		list.add(guests);
 		Mockito.when(repository.getGuest(Matchers.any())).thenReturn(list);
 		RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().auditDetails(auditDetails).requestBody(guests)
 				.build();
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), InviteGuest.class)).thenReturn(guests);
+		
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(guests, InviteGuest.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.GETENVITEGUEST)).thenReturn("");
+		
 		Assert.assertEquals(HttpStatus.OK, service.getGuest(infoWrapper).getStatusCode());
 	}
 

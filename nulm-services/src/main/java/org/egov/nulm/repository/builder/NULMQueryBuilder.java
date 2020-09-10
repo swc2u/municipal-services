@@ -132,7 +132,7 @@ public class NULMQueryBuilder {
 
 	 public static final String GET_SUSV_QUERY="SELECT SA.application_uuid, SA.application_id, SA.nulm_application_id, SA.application_status,SA.name_of_applicant, SA.gender, SA.age, SA.adhar_no, SA.mother_name, SA.father_or_husband_name,\n" + 
 	 		"SA.permanent_address, SA.present_address, SA.mobile_no, SA.is_disability,SA.category, SA.qualification, SA.blood_group, SA.category_of_vending, SA.proposed_location_of_vending,\n" + 
-	 		"SA.proposed_time_of_vending, SA.goverment_scheme, SA.name_of_nominee,SA.tenant_id, SA.remark,  SA.is_active, SA.created_by,\n" + 
+	 		"SA.proposed_time_of_vending, SA.goverment_scheme, SA.name_of_nominee,SA.tenant_id, SA.remark,SA.is_undertaking,SA.date,SA.place,  SA.is_active, SA.created_by,\n" + 
 	 		"SA.created_time, SA.last_modified_by, SA.last_modified_time,ND.document,NF.familymembers\n" + 
 	 		"FROM public.nulm_susv_application_detail SA  left join (SELECT count(application_uuid) docs, application_uuid,max(tenant_id) tenant_id, array_to_json(array_agg(json_build_object('documentType',document_type,'filestoreId',filestore_id,'documnetUuid',document_uuid,'isActive',is_active, \n" + 
 	 		"'tenantId',tenant_id,'applicationUuid',application_uuid) ))as document FROM nulm_susv_application_document GROUP BY application_uuid) ND on SA.application_uuid=ND.application_uuid and SA.tenant_id=ND.tenant_id \n" + 

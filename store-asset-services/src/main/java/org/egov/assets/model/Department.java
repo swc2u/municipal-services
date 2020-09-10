@@ -35,6 +35,9 @@ public class Department {
 
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
+	
+	@JsonProperty("deptCategory")
+	private String deptCategory = null;
 
 	public Department id(String id) {
 		this.id = id;
@@ -119,6 +122,14 @@ public class Department {
 
 	public void setDeductionPercentage(BigDecimal deductionPercentage) {
 		this.deductionPercentage = deductionPercentage;
+	}
+	
+	public String getDeptCategory() {
+		return deptCategory;
+	}
+
+	public void setDeptCategory(String deptCategory) {
+		this.deptCategory = deptCategory;
 	}
 
 	public Department active(Boolean active) {
