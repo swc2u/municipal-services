@@ -224,7 +224,7 @@ public class MaterialReceiptJdbcRepository extends JdbcRepository {
 	}
 
 	public Pagination<MaterialBalanceRate> searchBalanceRate(MaterialReceiptSearch materialReceiptSearch) {
-		String searchQuery = "select * from (select materialreceipt.tenantid as tenantId, materialreceipt.id as receiptId,rctdtl.id as receiptDetailId,rctdtl.mrnnumber as mrnNumber,receivingstore as issueStoreCode, material as materialCode, uomno as uomCode,\n"
+		String searchQuery = "select * from (select materialreceipt.tenantid as tenantId, materialreceipt.id as receiptId,rctdtl.id as receiptDetailId,rctdtl.mrnnumber as mrnNumber,receivingstore as issueStoreCode, material as materialCode, uomno as uomCode,materialreceipt.receiptdate as receiptDate,\n"
 				+ "(COALESCE(addinfo.quantity,acceptedqty) - COALESCE (case when addinfo.id is not null then (select sum(issuereceipt.quantity) from materialissuedfromreceipt\n"
 				+ "issuereceipt where addinfo.id=issuereceipt.receiptdetailaddnlinfoid and issuereceipt.receiptdetailid=rctdtl.id and issuereceipt.status=true)\n"
 				+ "else (select sum(issuereceipt.quantity) from materialissuedfromreceipt issuereceipt where issuereceipt.receiptdetailid=rctdtl.id and issuereceipt.status=true) end,0)) as balance , unitRate \n"
