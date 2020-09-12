@@ -1003,7 +1003,8 @@ public class HCNotificationConsumer {
                      	EmailRequest emailRequests = prepareEmailRequest(service, actionInfo, serviceReqRequest.getRequestInfo(),messageMap,action,serviceRequestDate,days);
                      	log.info(" Sending mail : "+ emailRequests);
                      	hCProducer.push(hcConfiguration.getEmailNotifTopic(), emailRequests);
-                         
+                   
+
                      }
 //                     
 //
