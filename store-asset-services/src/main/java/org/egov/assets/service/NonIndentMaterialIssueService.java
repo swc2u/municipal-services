@@ -1133,34 +1133,35 @@ public class NonIndentMaterialIssueService extends DomainService {
 	public MaterialIssueResponse updateStatus(MaterialIssueRequest indentIssueRequest) {
 
 		try {
-			workflowIntegrator.callWorkFlow(indentIssueRequest.getRequestInfo(),
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(indentIssueRequest.getRequestInfo(),
 					indentIssueRequest.getWorkFlowDetails(), indentIssueRequest.getWorkFlowDetails().getTenantId());
+			indentIssueRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updateStatusTopic, updateStatusKey, indentIssueRequest);
 			MaterialIssueResponse response = new MaterialIssueResponse();
 			response.setMaterialIssues(indentIssueRequest.getMaterialIssues());
 			response.setResponseInfo(getResponseInfo(indentIssueRequest.getRequestInfo()));
-			if (indentIssueRequest.getWorkFlowDetails().getAction()
+			if (indentIssueRequest.getWorkFlowDetails().getStatus()
 					.equals(MaterialIssueStatusEnum.REJECTED.toString())) {
-				for (MaterialIssue issue : indentIssueRequest.getMaterialIssues()) {
-					MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(issue.getTenantId(),
-							null, null, null, issue.getIssueNumber(), null, null, null, null, null, null, null, null,
-							null, null, null);
-					MaterialIssueResponse issueResponse = search(searchContract);
-					for (MaterialIssue materialIssues : issueResponse.getMaterialIssues()) {
-						for (MaterialIssueDetail issueDetail : materialIssues.getMaterialIssueDetails()) {
-							issueDetail.rejectedIssuedQuantity(issueDetail.getQuantityIssued());
-							issueDetail.setQuantityIssued(BigDecimal.ZERO);
-							issueDetail.setUserQuantityIssued(BigDecimal.ZERO);
+				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(
+						indentIssueRequest.getWorkFlowDetails().getTenantId(), null, null, null,
+						indentIssueRequest.getWorkFlowDetails().getBusinessId(), null, null, null, null, null, null,
+						null, null, null, null, null);
+				MaterialIssueResponse issueResponse = search(searchContract);
+				for (MaterialIssue materialIssues : issueResponse.getMaterialIssues()) {
+					for (MaterialIssueDetail issueDetail : materialIssues.getMaterialIssueDetails()) {
+						issueDetail.rejectedIssuedQuantity(issueDetail.getQuantityIssued());
+						issueDetail.setQuantityIssued(BigDecimal.ZERO);
+						issueDetail.setUserQuantityIssued(BigDecimal.ZERO);
 
-							for (MaterialIssuedFromReceipt fromReceipt : issueDetail.getMaterialIssuedFromReceipts()) {
-								fromReceipt.setRejectedIssuedQuantity(fromReceipt.getQuantity());
-								fromReceipt.setQuantity(BigDecimal.ZERO);
-							}
+						for (MaterialIssuedFromReceipt fromReceipt : issueDetail.getMaterialIssuedFromReceipts()) {
+							fromReceipt.setRejectedIssuedQuantity(fromReceipt.getQuantity());
+							fromReceipt.setQuantity(BigDecimal.ZERO);
 						}
-						rejectedMaterialService.minusRejectedMaterial(materialIssues.getMaterialIssueDetails(),
-								issue.getTenantId());
 					}
+					rejectedMaterialService.minusRejectedMaterial(materialIssues.getMaterialIssueDetails(),
+							indentIssueRequest.getWorkFlowDetails().getTenantId());
 				}
+
 			}
 			return response;
 		} catch (CustomBindException e) {

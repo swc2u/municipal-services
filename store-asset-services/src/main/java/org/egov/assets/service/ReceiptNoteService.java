@@ -29,19 +29,25 @@ import org.egov.assets.model.Material;
 import org.egov.assets.model.MaterialBalanceRate;
 import org.egov.assets.model.MaterialBalanceRateResponse;
 import org.egov.assets.model.MaterialReceipt;
+import org.egov.assets.model.MaterialReceipt.MrnStatusEnum;
+import org.egov.assets.model.MaterialReceipt.ReceiptTypeEnum;
 import org.egov.assets.model.MaterialReceiptDetail;
 import org.egov.assets.model.MaterialReceiptDetailAddnlinfo;
 import org.egov.assets.model.MaterialReceiptRequest;
 import org.egov.assets.model.MaterialReceiptResponse;
 import org.egov.assets.model.MaterialReceiptSearch;
 import org.egov.assets.model.PDFResponse;
+import org.egov.assets.model.PriceList.RateTypeEnum;
+import org.egov.assets.model.PurchaseOrder;
+import org.egov.assets.model.PurchaseOrder.PurchaseTypeEnum;
+import org.egov.assets.model.PurchaseOrder.StatusEnum;
 import org.egov.assets.model.PurchaseOrderDetail;
 import org.egov.assets.model.PurchaseOrderDetailSearch;
 import org.egov.assets.model.PurchaseOrderSearch;
+import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.StoreResponse;
 import org.egov.assets.model.Supplier;
-import org.egov.assets.model.SupplierGetRequest;
 import org.egov.assets.model.Uom;
 import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.PDFServiceReposistory;
@@ -79,6 +85,15 @@ public class ReceiptNoteService extends DomainService {
 
 	@Autowired
 	private PDFServiceReposistory pdfServiceReposistory;
+
+	@Autowired
+	private PurchaseOrderJdbcRepository purchaseOrderRepository;
+
+	@Value("${inv.purchaseorders.nonindent.save.topic}")
+	private String saveNonIndentTopic;
+
+	@Value("${inv.purchaseorders.nonindent.save.key}")
+	private String saveNonIndentKey;
 
 	@Value("${inv.materialreceiptnote.save.topic}")
 	private String createTopic;
@@ -171,7 +186,8 @@ public class ReceiptNoteService extends DomainService {
 						getAuditDetails(materialReceiptRequest.getRequestInfo(), Constants.ACTION_CREATE));
 			});
 
-			backUpdatePo(tenantId, materialReceipt);
+				backUpdatePo(tenantId, materialReceipt);
+
 			WorkFlowDetails workFlowDetails = materialReceiptRequest.getWorkFlowDetails();
 			workFlowDetails.setBusinessId(materialReceipt.getMrnNumber());
 			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(), workFlowDetails, tenantId);
@@ -243,14 +259,14 @@ public class ReceiptNoteService extends DomainService {
 							"purchaseorderdetail", hashMap, null);
 
 					receiptNoteRepository.updateColumn(new PurchaseOrderEntity(), "purchaseorder", new HashMap<>(),
-							"status = (case when status = 'RECEIPTED' then 'APPROVED' ELSE status end)"
+							"status = (case when status = 'RECEIPTED' then 'Approved' ELSE status end)"
 									+ " where purchaseordernumber = (select purchaseorder from purchaseorderdetail where id = '"
 									+ materialReceiptDetail.getPurchaseOrderDetail().getId() + "') and tenantid = '"
 									+ tenantId + "'");
 				}
 			}
 
-			backUpdatePo(tenantId, materialReceipt);
+				backUpdatePo(tenantId, materialReceipt);
 		});
 
 		logAwareKafkaTemplate.send(updateTopic, updateTopicKey, materialReceiptRequest);
@@ -282,7 +298,7 @@ public class ReceiptNoteService extends DomainService {
 				purchaseOrderSearch.setTenantId(tenantId);
 				if (purchaseOrderService.checkAllItemsSuppliedForPo(purchaseOrderSearch))
 					receiptNoteRepository.updateColumn(new PurchaseOrderEntity(), "purchaseorder", new HashMap<>(),
-							"status = (case when status = 'RECEIPTED' then 'APPROVED' ELSE status end)"
+							"status = (case when status = 'RECEIPTED' then 'Approved' ELSE status end)"
 									+ " where purchaseordernumber = ('" + purchaseOrderSearch.getPurchaseOrderNumber()
 									+ "') and tenantid = '" + tenantId + "'");
 			}
@@ -864,11 +880,29 @@ public class ReceiptNoteService extends DomainService {
 	public MaterialReceiptResponse updateStatus(MaterialReceiptRequest materialReceiptRequest, String tenantId) {
 
 		try {
-			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
 					materialReceiptRequest.getWorkFlowDetails(),
 					materialReceiptRequest.getWorkFlowDetails().getTenantId());
+			materialReceiptRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updateStatusTopic, updateStatusTopicKey, materialReceiptRequest);
 			MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
+
+			if (materialReceiptRequest.getWorkFlowDetails().getStatus().equals(MrnStatusEnum.APPROVED.toString())) {
+				MaterialReceiptSearch materialReceiptSearch = new MaterialReceiptSearch();
+				materialReceiptSearch
+						.setMrnNumber(Arrays.asList(materialReceiptRequest.getWorkFlowDetails().getBusinessId()));
+				materialReceiptSearch.setTenantId(materialReceiptRequest.getWorkFlowDetails().getTenantId());
+				MaterialReceiptResponse receiptResponse = search(materialReceiptSearch);
+				for (MaterialReceipt materialReceipt : receiptResponse.getMaterialReceipt()) {
+						// generate PO
+					if (materialReceipt.getReceiptType() != null && materialReceipt.getReceiptType().toString()
+							.equals(ReceiptTypeEnum.NON_PURCHASE_RECEIPT.toString())) {
+						CreateNonPurchaseOrder(materialReceipt);
+					}
+					
+				}
+			}
+
 			return materialReceiptResponse.responseInfo(null)
 					.materialReceipt(materialReceiptRequest.getMaterialReceipt());
 		} catch (CustomBindException e) {
@@ -918,6 +952,63 @@ public class ReceiptNoteService extends DomainService {
 		} else {
 			return PDFResponse.builder()
 					.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+		}
+	}
+
+	private void CreateNonPurchaseOrder(MaterialReceipt materialReceipt) {
+		PurchaseOrder purchaseOrder = new PurchaseOrder();
+		List<String> sequenceNos = purchaseOrderRepository.getSequence(PurchaseOrder.class.getSimpleName(), 1);
+		if (!sequenceNos.isEmpty()) {
+			purchaseOrder.setId(sequenceNos.get(0));
+			purchaseOrder.setPurchaseOrderNumber(materialReceipt.getExternalPoNumber());
+			purchaseOrder.setPurchaseOrderDate(Instant.EPOCH.getEpochSecond());
+			purchaseOrder.setDesignation(materialReceipt.getDesignation());
+			purchaseOrder.setTenantId(materialReceipt.getTenantId());
+			purchaseOrder.setStore(Store.builder().code(materialReceipt.getReceivingStore().getCode()).build());
+			purchaseOrder.setPurchaseType(PurchaseTypeEnum.NON_INDENT);
+			purchaseOrder.setRateType(org.egov.assets.model.PurchaseOrder.RateTypeEnum.GEM);
+			Supplier supplier = new Supplier();
+			supplier.setCode(materialReceipt.getSupplier().getCode());
+			purchaseOrder.setSupplier(supplier);
+			purchaseOrder.setPoCreatedBy(materialReceipt.getReceivedBy());
+			purchaseOrder.setStatus(StatusEnum.APPROVED);
+			purchaseOrder.setRemarks(materialReceipt.getDescription());
+			purchaseOrder.setAuditDetails(materialReceipt.getAuditDetails());
+
+			List<PurchaseOrderDetail> purchaseOrderDetails = new ArrayList<>();
+			List<String> detailSequenceNos = purchaseOrderRepository
+					.getSequence(PurchaseOrderDetail.class.getSimpleName(), materialReceipt.getReceiptDetails().size());
+			int i = 0;
+			BigDecimal totalAmount = BigDecimal.ZERO;
+			for (MaterialReceiptDetail detailReceipt : materialReceipt.getReceiptDetails()) {
+				PurchaseOrderDetail purchaseOrderDetail = new PurchaseOrderDetail();
+				purchaseOrderDetail.setId(detailSequenceNos.get(i));
+				purchaseOrderDetail.setMaterial(detailReceipt.getMaterial());
+				purchaseOrderDetail.setTenantId(materialReceipt.getTenantId());
+				purchaseOrderDetail.setUom(detailReceipt.getUom());
+				purchaseOrderDetail.setOrderQuantity(detailReceipt.getOrderQuantity());
+				purchaseOrderDetail.setUserQuantity(detailReceipt.getOrderQuantity());
+				purchaseOrderDetail.setUnitPrice(detailReceipt.getUnitRate());
+				purchaseOrderDetail.setReceivedQuantity(detailReceipt.getReceivedQty());
+
+				PurchaseOrderDetail detail = new PurchaseOrderDetail();
+				detail.setId(detailSequenceNos.get(i));
+				detailReceipt.setPurchaseOrderDetail(detail);
+
+				purchaseOrderDetails.add(purchaseOrderDetail);
+
+				totalAmount = totalAmount.add(detailReceipt.getOrderQuantity().multiply(detailReceipt.getUnitRate()));
+				i++;
+			}
+
+			purchaseOrder.setTotalAmount(totalAmount);
+			purchaseOrder.setPurchaseOrderDetails(purchaseOrderDetails);
+
+			// 1. Add into PO
+			// 2. Update PO Id against materials
+			kafkaQue.send(saveNonIndentTopic, saveNonIndentKey, purchaseOrder);
+			materialReceiptService.updatePOdetailIdAgainstMaterials(materialReceipt.getReceiptDetails(),
+					materialReceipt.getTenantId());
 		}
 	}
 }

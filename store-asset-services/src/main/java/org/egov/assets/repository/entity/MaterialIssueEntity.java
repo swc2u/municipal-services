@@ -51,6 +51,8 @@ public class MaterialIssueEntity {
 
 	private Double totalIssueValue;
 
+	private Double totalDeductionValue;
+
 	private String fileStoreId;
 
 	private String designation;
@@ -144,9 +146,10 @@ public class MaterialIssueEntity {
 		materialIssue.setToStore(indentStore);
 		materialIssue.setIssueNumber(issueNumber);
 		materialIssue.setIssueDate(issueDate);
-		materialIssue.setMaterialIssueStatus(MaterialIssueStatusEnum.valueOf(materialIssueStatus));
+		materialIssue.setMaterialIssueStatus(MaterialIssueStatusEnum.fromValue(materialIssueStatus));
 		materialIssue.setDescription(description);
 		materialIssue.setTotalIssueValue(BigDecimal.valueOf(totalIssueValue));
+		materialIssue.setTotalDeductionValue(BigDecimal.valueOf(totalDeductionValue != null ? totalDeductionValue : 0));
 		materialIssue.setFileStoreId(fileStoreId);
 		materialIssue.setDesignation(designation);
 		materialIssue.setIssuedToEmployee(issuedToEmployee);

@@ -16,19 +16,26 @@ import org.egov.prscp.util.CommonConstants;
 import org.egov.prscp.util.DeviceSource;
 import org.egov.prscp.util.ErrorConstants;
 import org.egov.prscp.util.IdGenRepository;
+import org.egov.prscp.util.PrScpUtil;
 import org.egov.prscp.web.models.EventDetail;
+import org.egov.prscp.web.models.Library;
 import org.egov.prscp.web.models.NotificationReceiver;
 import org.egov.prscp.web.models.RequestInfoWrapper;
 import org.egov.prscp.web.models.ResponseInfoWrapper;
 import org.egov.prscp.web.models.Idgen.IdGenerationResponse;
 import org.egov.tracer.model.CustomException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @Service
 public class EventManagementService {
@@ -38,15 +45,19 @@ public class EventManagementService {
 	private IdGenRepository idgenrepository;
 	private ObjectMapper objectMapper;
 	private DeviceSource deviceSource;
+	
+	private PrScpUtil prScpUtil;
+
 
 	@Autowired
 	public EventManagementService(EventManegementRepository repository, ObjectMapper objectMapper,
-			IdGenRepository idgenrepository, PrScpConfiguration config, DeviceSource deviceSource) {
+			IdGenRepository idgenrepository, PrScpConfiguration config, DeviceSource deviceSource,PrScpUtil prScpUtil) {
 		this.objectMapper = objectMapper;
 		this.repository = repository;
 		this.config = config;
 		this.idgenrepository = idgenrepository;
 		this.deviceSource = deviceSource;
+		this.prScpUtil = prScpUtil;
 	}
 	/**
 	 * Get event for the given criteria
@@ -54,15 +65,32 @@ public class EventManagementService {
 	 * @return list of Events
 	 */
 	public ResponseEntity<ResponseInfoWrapper> getEvent(RequestInfoWrapper requestInfo) {
+		String responseValidate = "";
 		try {
 			EventDetail eventDetail = objectMapper.convertValue(requestInfo.getRequestBody(), EventDetail.class);
-			List<EventDetail> resultData = repository.getEvent(eventDetail);
-			return new ResponseEntity<>(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(resultData).build(), HttpStatus.OK);
+			
+			
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(eventDetail, EventDetail.class);
+			
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.EVENTGET);
+			if (responseValidate.equals("")) 
+			{
+				List<EventDetail> resultData = repository.getEvent(eventDetail);
+				return new ResponseEntity<>(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+						.responseBody(resultData).build(), HttpStatus.OK);
+			}
+			else
+			{
+				throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE,
+						responseValidate);
+			}
 		} catch (Exception e) {
-			throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE,
-					CommonConstants.EVENT_EXCEPTION_MESSAGE_GET);
+			
+			
+			throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE, e.getMessage());
+					//CommonConstants.EVENT_EXCEPTION_MESSAGE_GET);
 		}
 	}
 
@@ -79,36 +107,50 @@ public class EventManagementService {
 
 			EventDetail eventDetail = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), EventDetail.class);
 			
-			String sourceUuid = deviceSource.saveDeviceDetails(requestHeader, CommonConstants.DEVICE_EVENT,
-					eventDetail.getTenantId(), eventDetail.getModuleCode(), requestInfoWrapper.getAuditDetails());
-			eventDetail.setSourceUuid(sourceUuid);
-			validateEvent(eventDetail);
-			repository.checkEventExist(eventDetail);
-			eventDetail.setEventDetailUuid(UUID.randomUUID().toString());
-			eventDetail.setCreatedBy(requestInfoWrapper.getAuditDetails().getCreatedBy());
-			eventDetail.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
-			eventDetail.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
-			eventDetail.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
-			eventDetail.setActive(true);
-			//idgen service call to genrate event id
-			IdGenerationResponse id = idgenrepository.getId(requestInfoWrapper.getRequestInfo(),
-					eventDetail.getTenantId(), config.getApplicationNumberIdgenName(),
-					config.getApplicationNumberIdgenFormat(), 1);
-			if (id.getIdResponses() != null && id.getIdResponses().get(0) != null)
-				eventDetail.setEventId(id.getIdResponses().get(0).getId());
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(eventDetail, EventDetail.class);
+			
+			String responseValidate = "";
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.EVENTCREATE);
+			if (responseValidate.equals("")) 
+			{
+			
+				String sourceUuid = deviceSource.saveDeviceDetails(requestHeader, CommonConstants.DEVICE_EVENT,
+						eventDetail.getTenantId(), eventDetail.getModuleCode(), requestInfoWrapper.getAuditDetails());
+				eventDetail.setSourceUuid(sourceUuid);
+				validateEvent(eventDetail);
+				repository.checkEventExist(eventDetail);
+				eventDetail.setEventDetailUuid(UUID.randomUUID().toString());
+				eventDetail.setCreatedBy(requestInfoWrapper.getAuditDetails().getCreatedBy());
+				eventDetail.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
+				eventDetail.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
+				eventDetail.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
+				eventDetail.setActive(true);
+				//idgen service call to genrate event id
+				IdGenerationResponse id = idgenrepository.getId(requestInfoWrapper.getRequestInfo(),
+						eventDetail.getTenantId(), config.getApplicationNumberIdgenName(),
+						config.getApplicationNumberIdgenFormat(), 1);
+				if (id.getIdResponses() != null && id.getIdResponses().get(0) != null)
+					eventDetail.setEventId(id.getIdResponses().get(0).getId());
+				else
+					throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR.toString(), CommonConstants.ID_GENERATION);
+	
+				eventDetail.setStartDate(eventDetail.getStartDate());
+				eventDetail.setEndDate(eventDetail.getEndDate());
+				eventDetail.setStartTime((LocalTime.parse(eventDetail.getStartTime())).toString());
+				eventDetail.setEndTime((LocalTime.parse(eventDetail.getEndTime())).toString());
+				eventDetail.setEventString(eventDetail.getEventImage().toJSONString());
+	
+				repository.createEvent(eventDetail); 
+				return new ResponseEntity<>(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+						.responseBody(eventDetail).build(), HttpStatus.CREATED);
+			}
 			else
-				throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR.toString(), CommonConstants.ID_GENERATION);
-
-			eventDetail.setStartDate(eventDetail.getStartDate());
-			eventDetail.setEndDate(eventDetail.getEndDate());
-			eventDetail.setStartTime((LocalTime.parse(eventDetail.getStartTime())).toString());
-			eventDetail.setEndTime((LocalTime.parse(eventDetail.getEndTime())).toString());
-			eventDetail.setEventString(eventDetail.getEventImage().toJSONString());
-
-			repository.createEvent(eventDetail); 
-			return new ResponseEntity<>(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(eventDetail).build(), HttpStatus.CREATED);
+			{
+				throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE,
+						responseValidate);
+			}
 
 		} catch (Exception e) {
 			throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE,
@@ -124,36 +166,51 @@ public class EventManagementService {
 
 	public ResponseEntity<ResponseInfoWrapper> updateEvent(RequestInfoWrapper requestInfoWrapper) {
 
+		String responseValidate = "";
 		try {
 
 			EventDetail eventDetail = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), EventDetail.class);
-			chekcStatus(eventDetail);
-			validateEvent(eventDetail);
-			eventDetail.setActive(true);
-			eventDetail.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
-			eventDetail.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
-			eventDetail.setStartDate(eventDetail.getStartDate());
-			eventDetail.setEndDate(eventDetail.getEndDate());
-			eventDetail.setStartTime((LocalTime.parse(eventDetail.getStartTime())).toString());
-			eventDetail.setEndTime((LocalTime.parse(eventDetail.getEndTime())).toString());
-			eventDetail.setEventString(eventDetail.getEventImage().toJSONString());
-			eventDetail.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
 			
-			repository.updateEvent(eventDetail);
-			NotificationReceiver notificationReceiver = NotificationReceiver.builder()
-					.receiverType(CommonConstants.RECIEVER_TYPE_EVENTUPDATE)
-					.receiverUuid(eventDetail.getEventDetailUuid()).tenantId(eventDetail.getTenantId())
-					.moduleCode(eventDetail.getModuleCode())
-					.senderUuid(requestInfoWrapper.getAuditDetails().getCreatedBy()).build();
-
-			repository.sendEventUpdateNotification(notificationReceiver);
-			return new ResponseEntity<>(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(eventDetail).build(), HttpStatus.OK);
+			
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(eventDetail, EventDetail.class);
+			
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.EVENTUPDATE);
+			if (!responseValidate.equals("")) 
+			{
+				throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE,
+						responseValidate);
+			}
+				chekcStatus(eventDetail);
+				validateEvent(eventDetail);
+				eventDetail.setActive(true);
+				eventDetail.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
+				eventDetail.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
+				eventDetail.setStartDate(eventDetail.getStartDate());
+				eventDetail.setEndDate(eventDetail.getEndDate());
+				eventDetail.setStartTime((LocalTime.parse(eventDetail.getStartTime())).toString());
+				eventDetail.setEndTime((LocalTime.parse(eventDetail.getEndTime())).toString());
+				eventDetail.setEventString(eventDetail.getEventImage().toJSONString());
+				eventDetail.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
+				
+				repository.updateEvent(eventDetail);
+				NotificationReceiver notificationReceiver = NotificationReceiver.builder()
+						.receiverType(CommonConstants.RECIEVER_TYPE_EVENTUPDATE)
+						.receiverUuid(eventDetail.getEventDetailUuid()).tenantId(eventDetail.getTenantId())
+						.moduleCode(eventDetail.getModuleCode())
+						.senderUuid(requestInfoWrapper.getAuditDetails().getCreatedBy()).build();
+	
+				repository.sendEventUpdateNotification(notificationReceiver);
+				return new ResponseEntity<>(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+						.responseBody(eventDetail).build(), HttpStatus.OK);
+			
 
 		} catch (Exception e) {
-			throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE,
-					CommonConstants.EVENT_EXCEPTION_MESSAGE_UPDATE);
+			
+				throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE,e.getMessage());
+					//CommonConstants.EVENT_EXCEPTION_MESSAGE_UPDATE);
+			
 		}
 	}
 
@@ -167,26 +224,40 @@ public class EventManagementService {
 		try {
 
 			EventDetail eventDetail = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), EventDetail.class);
-			chekcStatus(eventDetail);
-
-			eventDetail.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
-			eventDetail.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
-			eventDetail.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
 			
-			List<EventDetail> listCommittee = Arrays.asList(eventDetail);
-			RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().requestBody(listCommittee).build();
-			repository.updateEventStatus(infoWrapper);
-
-			NotificationReceiver notificationReceiver = NotificationReceiver.builder().receiverType("CANCELEVENT")
-					.receiverUuid(eventDetail.getEventDetailUuid()).tenantId(eventDetail.getTenantId())
-					.moduleCode(eventDetail.getModuleCode())
-					.senderUuid(requestInfoWrapper.getAuditDetails().getCreatedBy()).build();
-
-			repository.sendEventUpdateNotification(notificationReceiver);
-
-			return new ResponseEntity<>(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(eventDetail).build(), HttpStatus.OK);
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(eventDetail, EventDetail.class);
+			
+			String responseValidate = "";
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.EVENTUPDATE);
+			if (responseValidate.equals("")) 
+			{
+				chekcStatus(eventDetail);
+	
+				eventDetail.setLastModifiedBy(requestInfoWrapper.getAuditDetails().getLastModifiedBy());
+				eventDetail.setLastModifiedTime(requestInfoWrapper.getAuditDetails().getLastModifiedTime());
+				eventDetail.setCreatedTime(requestInfoWrapper.getAuditDetails().getCreatedTime());
+				
+				List<EventDetail> listCommittee = Arrays.asList(eventDetail);
+				RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().requestBody(listCommittee).build();
+				repository.updateEventStatus(infoWrapper);
+	
+				NotificationReceiver notificationReceiver = NotificationReceiver.builder().receiverType("CANCELEVENT")
+						.receiverUuid(eventDetail.getEventDetailUuid()).tenantId(eventDetail.getTenantId())
+						.moduleCode(eventDetail.getModuleCode())
+						.senderUuid(requestInfoWrapper.getAuditDetails().getCreatedBy()).build();
+	
+				repository.sendEventUpdateNotification(notificationReceiver);
+	
+				return new ResponseEntity<>(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+						.responseBody(eventDetail).build(), HttpStatus.OK);
+			}
+			else
+			{
+				throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE,
+						responseValidate);
+			}
 
 		} catch (Exception e) {
 			throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE, e.getMessage());
@@ -245,4 +316,5 @@ public class EventManagementService {
 			throw new CustomException(CommonConstants.EVENT_EXCEPTION_CODE, CommonConstants.INVALID_EVENT);
 		}
 	}
+	
 }

@@ -525,9 +525,10 @@ public class TransferinwardsService extends DomainService {
 	public TransferInwardResponse updateStatus(TransferInwardRequest transferInwardRequest) {
 
 		try {
-			workflowIntegrator.callWorkFlow(transferInwardRequest.getRequestInfo(),
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(transferInwardRequest.getRequestInfo(),
 					transferInwardRequest.getWorkFlowDetails(),
 					transferInwardRequest.getWorkFlowDetails().getTenantId());
+			transferInwardRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updateStatusTopic, updateStatusTopicKey, transferInwardRequest);
 			TransferInwardResponse response = new TransferInwardResponse();
 			response.setResponseInfo(null);

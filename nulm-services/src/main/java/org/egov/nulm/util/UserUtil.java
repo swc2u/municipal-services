@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 
 import java.io.IOException;
 import java.util.Collections;
+
 import org.egov.common.contract.request.Role;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.nulm.common.CommonConstants;
@@ -60,7 +61,7 @@ public class UserUtil {
 			user.setUserName(organization.getMobileNo());
 			user.setMobileNumber(organization.getMobileNo());
 			user.setTenantId(tenantId.split("\\.")[0]);
-			user.setPermanentCity(tenantId);
+			user.setPermanentCity(tenantId.split("\\.")[0]);
 			user.setName(organization.getRepresentativeName());
 			user.setCorrespondenceAddress(organization.getAddress());
 			user.setEmailId(organization.getEmailId());

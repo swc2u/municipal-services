@@ -1,15 +1,11 @@
 package org.egov.assets.model;
 
-import java.util.Objects;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * This object holds the Supplier information.
@@ -117,8 +113,8 @@ public class Supplier {
 	@JsonProperty("bankAccount")
 	private String bankAccount = null;
 
-	@JsonProperty("bankaccount")
-	private String bankaccount = null;
+//	@JsonProperty("bankaccount")
+//	private String bankaccount = null;
 
 	@JsonProperty("registrationNumber")
 	private String registrationNumber;
@@ -156,8 +152,8 @@ public class Supplier {
 	@JsonProperty("ifscCode")
 	private String ifscCode = null;
 
-	@JsonProperty("ifsccode")
-	private String ifsccode = null;
+//	@JsonProperty("ifsccode")
+//	private String ifsccode = null;
 
 	@JsonProperty("panno")
 	private String panno = null;
@@ -508,13 +504,13 @@ public class Supplier {
 		this.bankAccount = bankAccount;
 	}
 
-	public String getBankaccount() {
-		return bankaccount;
-	}
-
-	public void setBankaccount(String bankaccount) {
-		this.bankaccount = bankaccount;
-	}
+//	public String getBankaccount() {
+//		return bankaccount;
+//	}
+//
+//	public void setBankaccount(String bankaccount) {
+//		this.bankaccount = bankaccount;
+//	}
 
 	public String getRegistrationNumber() {
 		return registrationNumber;
@@ -604,13 +600,13 @@ public class Supplier {
 		this.ifscCode = ifscCode;
 	}
 
-	public String getIfsccode() {
-		return ifsccode;
-	}
-
-	public void setIfsccode(String ifsccode) {
-		this.ifsccode = ifsccode;
-	}
+//	public String getIfsccode() {
+//		return ifsccode;
+//	}
+//
+//	public void setIfsccode(String ifsccode) {
+//		this.ifsccode = ifsccode;
+//	}
 
 	public String getPanno() {
 		return panno;

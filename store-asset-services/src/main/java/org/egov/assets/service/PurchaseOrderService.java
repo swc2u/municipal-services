@@ -1383,8 +1383,9 @@ public class PurchaseOrderService extends DomainService {
 	public PurchaseOrderResponse updateStatus(PurchaseOrderRequest purchaseOrderRequest, String tenantId) {
 
 		try {
-			workflowIntegrator.callWorkFlow(purchaseOrderRequest.getRequestInfo(),
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(purchaseOrderRequest.getRequestInfo(),
 					purchaseOrderRequest.getWorkFlowDetails(), purchaseOrderRequest.getWorkFlowDetails().getTenantId());
+			purchaseOrderRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updatestatusTopic, updatestatusKey, purchaseOrderRequest);
 			PurchaseOrderResponse response = new PurchaseOrderResponse();
 			response.setPurchaseOrders(purchaseOrderRequest.getPurchaseOrders());

@@ -82,15 +82,15 @@ public class MaterialIssue {
 	public enum MaterialIssueStatusEnum {
 		CREATED("CREATED"),
 
-		REVIEWOFSDO("REVIEWOFSDO"), REVIEWOFEE("REVIEWOFEE"), REVIEWOFSE("REVIEWOFSE"), REVIEWOFCE(
-				"REVIEWOFCE"), SENDTOCREATOR("SENDTOCREATOR"), COMMISSIONERAPPROVAL("COMMISSIONERAPPROVAL"), APPROVED(
-						"APPROVED"), REASSIGNTOJE(
-								"REASSIGNTOJE"), REVIEWOFCAO("REVIEWOFCAO"), REVIEWOFACMC("REVIEWOFACMC"),
+		REVIEWOFSDO("Review Of SDO"), REVIEWOFEE("Review Of EE"), REVIEWOFSE("Review Of SE"), REVIEWOFCE(
+				"Review Of CE"), SENDTOCREATOR("Send To Creator"), COMMISSIONERAPPROVAL("Commissioner Approval"), APPROVED(
+						"Approved"), REASSIGNTOJE(
+								"REASSIGNTOJE"), REVIEWOFCAO("Review Of CAO"), REVIEWOFACMC("Review Of ACMC"),
 
-		REVIEWOFSO("REVIEWOFSO"), REVIEWOFSA("REVIEWOFSA"), REVIEWOFSP("REVIEWOFSP"), REVIEWOFJC(
-				"REVIEWOFJC"), REVIEWOFMOH("REVIEWOFMOH"),
+		REVIEWOFSO("Review Of SO"), REVIEWOFSA("Review Of SA"), REVIEWOFSP("Review Of SP"), REVIEWOFJC(
+				"Review Of JC"), REVIEWOFMOH("Review Of MOH"),
 
-		REJECTED("REJECTED"),
+		REJECTED("Rejected"),
 
 		CANCELED("CANCELED"),
 
@@ -127,6 +127,9 @@ public class MaterialIssue {
 
 	@JsonProperty("totalIssueValue")
 	private BigDecimal totalIssueValue = null;
+
+	@JsonProperty("totalDeductionValue")
+	private BigDecimal totalDeductionValue = null;
 
 	@JsonProperty("fileStoreId")
 	private String fileStoreId = null;
@@ -239,6 +242,14 @@ public class MaterialIssue {
 	public MaterialIssue issueType(IssueTypeEnum issueType) {
 		this.issueType = issueType;
 		return this;
+	}
+
+	public BigDecimal getTotalDeductionValue() {
+		return totalDeductionValue;
+	}
+
+	public void setTotalDeductionValue(BigDecimal totalDeductionValue) {
+		this.totalDeductionValue = totalDeductionValue;
 	}
 
 	/**

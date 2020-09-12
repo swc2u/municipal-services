@@ -33,6 +33,9 @@ public class MaterialReceipt {
 	@JsonProperty("issueNumber")
 	private String issueNumber = null;
 
+	@JsonProperty("externalPoNumber")
+	private String externalPoNumber = null;
+
 	@JsonProperty("receiptDate")
 	private Long receiptDate = null;
 
@@ -53,8 +56,10 @@ public class MaterialReceipt {
 
 		INWARD_RECEIPT("INWARD RECEIPT"),
 
+		NON_PURCHASE_RECEIPT("NON PURCHASE RECEIPT"),
 		OPENING_BALANCE("OPENING BALANCE");
 
+		
 		private String value;
 
 		ReceiptTypeEnum(String value) {
@@ -80,7 +85,6 @@ public class MaterialReceipt {
 
 	@JsonProperty("receiptType")
 	private ReceiptTypeEnum receiptType = null;
-
 	/**
 	 * Applicable if receipt type is MISCELLANEOUS RECEIPT
 	 */
@@ -152,14 +156,15 @@ public class MaterialReceipt {
 	public enum MrnStatusEnum {
 		CREATED("CREATED"),
 
-		REVIEWOFSDO("REVIEWOFSDO"), REVIEWOFEE("REVIEWOFEE"), REVIEWOFSE("REVIEWOFSE"), REVIEWOFCE(
-				"REVIEWOFCE"), SENDTOCREATOR("SENDTOCREATOR"), COMMISSIONERAPPROVAL("COMMISSIONERAPPROVAL"), APPROVED(
-						"APPROVED"), REASSIGNTOJE(
-								"REASSIGNTOJE"), REVIEWOFCAO("REVIEWOFCAO"), REVIEWOFACMC("REVIEWOFACMC"),
+		REVIEWOFSDO("Review Of SDO"), REVIEWOFEE("Review Of EE"), REVIEWOFSE("Review Of SE"), REVIEWOFCE(
+				"Review Of CE"), SENDTOCREATOR("Send To Creator"), COMMISSIONERAPPROVAL("Commissioner Approval"), APPROVED(
+						"Approved"), REASSIGNTOJE(
+								"REASSIGNTOJE"), REVIEWOFCAO("Review Of CAO"), REVIEWOFACMC("Review Of ACMC"),
 
-		REVIEWOFSO("REVIEWOFSO"), REVIEWOFSA("REVIEWOFSA"), REVIEWOFSP("REVIEWOFSP"), REVIEWOFJC(
-				"REVIEWOFJC"), REVIEWOFMOH("REVIEWOFMOH"),
+		REVIEWOFSO("Review Of SO"), REVIEWOFSA("Review Of SA"), REVIEWOFSP("Review Of SP"), REVIEWOFJC(
+				"Review Of JC"), REVIEWOFMOH("Review Of MOH"),
 
+		REJECTED("Rejected"),
 		CANCELED("CANCELED"),
 
 		RECEIPTED("RECEIPTED");
@@ -898,6 +903,14 @@ public class MaterialReceipt {
 		sb.append("    auditDetails: ").append(toIndentedString(auditDetails)).append("\n");
 		sb.append("}");
 		return sb.toString();
+	}
+
+	public String getExternalPoNumber() {
+		return externalPoNumber;
+	}
+
+	public void setExternalPoNumber(String externalPoNumber) {
+		this.externalPoNumber = externalPoNumber;
 	}
 
 	/**
