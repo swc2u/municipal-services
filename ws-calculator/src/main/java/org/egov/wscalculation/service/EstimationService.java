@@ -426,7 +426,8 @@ public class EstimationService {
 			if (property.getUsageCategory().equalsIgnoreCase(WSCalculationConstant.WS_COMMERCIAL) && slabs.getCode().equalsIgnoreCase("GENERAL_BOOTHS")
 					&& property.getLandArea() > slabs.getFrom() && property.getLandArea() < slabs.getTo()) {
 				multiplier = slabs.getCharge();
-			} else if (property.getLandArea() > slabs.getFrom() && property.getLandArea() < slabs.getTo()) {
+			} else if (property.getLandArea() > slabs.getFrom() && property.getLandArea() < slabs.getTo()
+					&& (!property.getUsageCategory().equalsIgnoreCase(WSCalculationConstant.WS_COMMERCIAL))) {
 				multiplier = slabs.getCharge();
 			}
 
