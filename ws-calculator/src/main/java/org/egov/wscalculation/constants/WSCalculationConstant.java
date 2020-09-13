@@ -313,6 +313,6 @@ public class WSCalculationConstant {
 
 	public static final String WS_COMMERCIAL = "COMMERCIAL";
 
-	
+	public static final String	WS_SECURITY_CHARGE_STATUS = "PENDING_FOR_SECURITY_DEPOSIT";
 	
 }
