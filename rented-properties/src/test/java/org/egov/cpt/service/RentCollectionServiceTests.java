@@ -339,7 +339,7 @@ public class RentCollectionServiceTests {
         RentAccount rentAccount = getAccount(40.03);
         RentSummary rentSummary = this.rentCollectionService.calculateRentSummaryAt(demands, rentAccount,
                 RentCollectionServiceTests.DEFAULT_INTEREST_RATE, getEpochFromDateString(JUN_1_2000));
-        assertEquals(40.03, rentSummary.getBalanceAmount(), 0.0001);
+        assertEquals(0D, rentSummary.getBalanceAmount(), 0.0001);
     }
 
     private long getEpochFromDateString(String date) throws ParseException {

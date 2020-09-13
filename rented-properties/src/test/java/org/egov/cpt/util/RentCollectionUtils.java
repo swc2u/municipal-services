@@ -109,10 +109,10 @@ public class RentCollectionUtils {
 		}
 	}
 
-	private static final double ERROR_RANGE = 5.0D;
+	private static final double ERROR_RANGE = 6.0D;
 
 	private void assertInRange(String message, Double expected, Double actual) {
-		if (expected - actual >= 0.000001) {
+		if (!diffInRange(expected, actual, 0.000001)) {
 			System.out.println(String.format("%s, error range %.10f", message, expected - actual));
 		}
 		assertEquals(message, expected, actual, ERROR_RANGE);
