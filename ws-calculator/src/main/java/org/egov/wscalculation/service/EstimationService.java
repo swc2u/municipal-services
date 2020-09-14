@@ -646,8 +646,9 @@ public class EstimationService {
 				return BigDecimal.ZERO;
 			JSONObject master = mapper.convertValue(filteredMasters.get(0), JSONObject.class);
 			charge = new BigDecimal(master.getAsNumber(WSCalculationConstant.UNIT_COST_CONST).toString());
-			charge = charge.add(charge.multiply(gst_tax.divide(WSCalculationConstant.HUNDRED)));
+			charge = charge.multiply(new BigDecimal (roadCuttingArea));
 			charge = charge.add(charge.multiply(supervision_tax.divide(WSCalculationConstant.HUNDRED)));
+			charge = charge.add(charge.multiply(gst_tax.divide(WSCalculationConstant.HUNDRED)));
 
 		}
 		return charge;
