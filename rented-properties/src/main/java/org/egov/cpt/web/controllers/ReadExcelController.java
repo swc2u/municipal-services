@@ -12,6 +12,7 @@ import org.egov.cpt.models.RequestInfoWrapper;
 import org.egov.cpt.service.ReadExcelNewFormatService;
 import org.egov.cpt.service.ReadExcelService;
 import org.egov.cpt.util.FileStoreUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,9 +32,9 @@ public class ReadExcelController {
 	private ReadExcelService readExcelService;
 	private FileStoreUtils fileStoreUtils;
 	private ReadExcelNewFormatService readExcelNewFormatService;
-
+	
+	@Autowired
 	public ReadExcelController(ReadExcelService readExcelService, FileStoreUtils fileStoreUtils,ReadExcelNewFormatService readExcelNewFormatService) {
-		super();
 		this.readExcelService = readExcelService;
 		this.fileStoreUtils = fileStoreUtils;
 		this.readExcelNewFormatService = readExcelNewFormatService;
