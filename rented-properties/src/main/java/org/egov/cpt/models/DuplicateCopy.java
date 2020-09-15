@@ -56,6 +56,12 @@ public class DuplicateCopy {
 
 	@JsonProperty("allotmentNumber")
 	private String allotmentNumber;
+	
+	@JsonProperty("allotmentStartDate")
+	private String allotmentStartDate;
+	
+	@JsonProperty("allotmentEndDate")
+	private String allotmentEndDate;
 
 	@JsonProperty("assignee")
 	@Builder.Default
