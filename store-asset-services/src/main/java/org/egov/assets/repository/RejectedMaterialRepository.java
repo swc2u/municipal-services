@@ -26,7 +26,7 @@ public class RejectedMaterialRepository extends DomainService {
 
 		for (MaterialIssueDetail detail : issueDetail) {
 			Map<String, Object> paramValuesqueryMat = new HashMap<>();
-			String queryMat = "update materialissuedetail set rejectedissuedquantity =:rejectedissuedquantity, quantityissued =:quantityissued userquantityissued =:userquantityissued where id = :id and tenantid = :tenantId";
+			String queryMat = "update materialissuedetail set rejectedissuedquantity =:rejectedissuedquantity, quantityissued =:quantityissued, userquantityissued =:userquantityissued where id = :id and tenantid = :tenantId";
 			paramValuesqueryMat.put("rejectedissuedquantity", detail.getRejectedIssuedQuantity());
 			paramValuesqueryMat.put("quantityissued", detail.getQuantityIssued());
 			paramValuesqueryMat.put("userquantityissued", detail.getUserQuantityIssued());

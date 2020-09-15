@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.egov.prscp.repository.GeneratePressNotesRepository;
+import org.egov.prscp.util.CommonConstants;
 import org.egov.prscp.util.DeviceSource;
+import org.egov.prscp.util.PrScpUtil;
 import org.egov.prscp.web.models.AuditDetails;
+import org.egov.prscp.web.models.PressMaster;
 import org.egov.prscp.web.models.PressNote;
 import org.egov.prscp.web.models.PublicationList;
 import org.egov.prscp.web.models.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
 import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PressNoteServiceTest {
@@ -35,9 +40,10 @@ public class PressNoteServiceTest {
 	private DeviceSource deviceSource;
 	@InjectMocks
 	private GeneratePressNotesService eventPressNoteManagement;
-
+	@Mock
+	private PrScpUtil prScpUtil;
 	@Test
-	public void testUploadPressNote() {
+	public void testUploadPressNote() throws ParseException {
 
 		JSONArray emailContent = new JSONArray();
 		emailContent.add("ggs");
@@ -58,6 +64,11 @@ public class PressNoteServiceTest {
 
 		Mockito.when(deviceSource.saveDeviceDetails(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
 				Matchers.anyString(), Matchers.any(AuditDetails.class))).thenReturn("asdasdwdsd");
+		
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(pressNote, PressNote.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.PRESSNOTESCREATE)).thenReturn("");
 		Assert.assertEquals(HttpStatus.CREATED,
 				eventPressNoteManagement.createPressNote(infoWrapper, "").getStatusCode());
 	}
@@ -70,7 +81,7 @@ public class PressNoteServiceTest {
 	}
 
 	@Test
-	public void testDeletePressNote() {
+	public void testDeletePressNote() throws ParseException {
 		PublicationList publicationList = new PublicationList();
 		List<PublicationList> list = new ArrayList<>();
 		list.add(publicationList);
@@ -84,19 +95,29 @@ public class PressNoteServiceTest {
 				.build();
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), PressNote.class)).thenReturn(pressNote);
 		Mockito.when(repository.checkpressNote(Matchers.any(PressNote.class))).thenReturn(1);
-
+		
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(pressNote, PressNote.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.PRESSNOTEUPDATE)).thenReturn("");
+	
 		Assert.assertEquals(HttpStatus.OK, eventPressNoteManagement.updatePressNote(infoWrapper).getStatusCode());
 	}
 
 	@Test
-	public void testGetPressNote() {
+	public void testGetPressNote() throws ParseException {
 
 		PressNote pressNote = PressNote.builder().pressNoteUuid("aasdjiasdu8ahs89asdy8a9h").moduleCode("Test").build();
 		RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().requestBody(pressNote).build();
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), PressNote.class)).thenReturn(pressNote);
 
 		Mockito.when(repository.getPressNote(pressNote)).thenReturn(new ArrayList<PressNote>());
-
+		
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(pressNote, PressNote.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.PRESSNOTEGET)).thenReturn("");
+	
 		Assert.assertEquals(HttpStatus.OK, eventPressNoteManagement.getPressNote(infoWrapper).getStatusCode());
 	}
 

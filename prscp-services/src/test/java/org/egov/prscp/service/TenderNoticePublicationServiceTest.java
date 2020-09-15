@@ -6,10 +6,14 @@ import java.util.List;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.prscp.config.PrScpConfiguration;
 import org.egov.prscp.repository.TenderNoticePublicationRepository;
+import org.egov.prscp.util.CommonConstants;
 import org.egov.prscp.util.DeviceSource;
 import org.egov.prscp.util.IDGenUtil;
 import org.egov.prscp.util.IdGenRepository;
+import org.egov.prscp.util.PrScpUtil;
 import org.egov.prscp.web.models.AuditDetails;
+import org.egov.prscp.web.models.PressMaster;
+import org.egov.prscp.web.models.PressNote;
 import org.egov.prscp.web.models.RequestInfoWrapper;
 import org.egov.prscp.web.models.Template;
 import org.egov.prscp.web.models.TenderNotice;
@@ -17,6 +21,7 @@ import org.egov.prscp.web.models.Idgen.IdGenerationResponse;
 import org.egov.prscp.web.models.Idgen.IdResponse;
 import org.egov.tracer.model.CustomException;
 import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +33,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TenderNoticePublicationServiceTest {
@@ -46,7 +52,8 @@ public class TenderNoticePublicationServiceTest {
 	private IdGenRepository idgenrepository;
 	@Mock
 	private PrScpConfiguration config;
-
+	@Mock
+	private PrScpUtil prScpUtil;
 	@Test
 	public void testCreateTender() throws Exception {
 
@@ -77,7 +84,13 @@ public class TenderNoticePublicationServiceTest {
 		ResponseInfo workflowResponse = ResponseInfo.builder().status("successful").build();
 
 		Mockito.when(idgen.createWorkflowRequest(Matchers.anyObject())).thenReturn(workflowResponse);
-
+		
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(tender, TenderNotice.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.TENDERNOTICECREATE)).thenReturn("");
+		
+		
 		Assert.assertEquals(HttpStatus.CREATED,
 				tenderNoticePublicationService.createTender(infoWrapper, "User-Agent-Values").getStatusCode());
 
@@ -91,7 +104,7 @@ public class TenderNoticePublicationServiceTest {
 	}
 
 	@Test
-	public void testGetTender() {
+	public void testGetTender() throws ParseException {
 
 		TenderNotice tender = TenderNotice.builder().tenderNoticeUuid("abe3a709-50fb-4c61-b3f5-e4d4eaaaf3fd")
 				.moduleCode("PR").tenantId("ch.chandigarh").build();
@@ -100,7 +113,10 @@ public class TenderNoticePublicationServiceTest {
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), TenderNotice.class)).thenReturn(tender);
 
 		Mockito.when(repository.getTender(tender)).thenReturn(new ArrayList<TenderNotice>());
-
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(tender, TenderNotice.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.TENDERNOTICEGET)).thenReturn("");
 		Assert.assertEquals(HttpStatus.OK, tenderNoticePublicationService.getTender(infoWrapper).getStatusCode());
 	}
 
@@ -120,7 +136,10 @@ public class TenderNoticePublicationServiceTest {
 				.build();
 
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), TenderNotice.class)).thenReturn(tender);
-
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(tender, TenderNotice.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.TENDERNOTICEUPDATE)).thenReturn("");
 		Assert.assertEquals(HttpStatus.OK, tenderNoticePublicationService.updateTender(infoWrapper).getStatusCode());
 
 	}
@@ -158,6 +177,12 @@ public class TenderNoticePublicationServiceTest {
 		Mockito.when(repository.getTenderDetails(Matchers.any(TenderNotice.class))).thenReturn(existingPress);
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), TenderNotice.class)).thenReturn(tender);
 		Mockito.when(objectMapper.convertValue(infoWrapper.getRequestBody(), Template.class)).thenReturn(template);
+		Gson gson = new Gson();
+		String payloadData = gson.toJson(tender, TenderNotice.class);
+		String templatePayloadData = gson.toJson(template, Template.class);
+		
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.TENDERNOTICEPUBLISH)).thenReturn("");
+		Mockito.when(prScpUtil.validateJsonAddUpdateData(templatePayloadData,CommonConstants.TENDERNOTICETEMPLATE)).thenReturn("");
 		Assert.assertEquals(HttpStatus.OK, tenderNoticePublicationService.publish(infoWrapper).getStatusCode());
 
 	}

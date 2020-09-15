@@ -683,8 +683,9 @@ public class IndentService extends DomainService {
 	public IndentResponse updateStatus(IndentRequest indentRequest) {
 
 		try {
-			workflowIntegrator.callWorkFlow(indentRequest.getRequestInfo(), indentRequest.getWorkFlowDetails(),
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(indentRequest.getRequestInfo(), indentRequest.getWorkFlowDetails(),
 					indentRequest.getWorkFlowDetails().getTenantId());
+			indentRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updatestatusTopic, updatestatusKey, indentRequest);
 			IndentResponse response = new IndentResponse();
 			response.setIndents(indentRequest.getIndents());

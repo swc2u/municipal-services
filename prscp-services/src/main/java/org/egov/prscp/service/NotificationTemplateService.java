@@ -16,10 +16,12 @@ import org.egov.prscp.repository.NotificationTemplateRepository;
 import org.egov.prscp.repository.TenderNoticePublicationRepository;
 import org.egov.prscp.util.CommonConstants;
 import org.egov.prscp.util.MDMSService;
+import org.egov.prscp.util.PrScpUtil;
 import org.egov.prscp.web.models.EmailContent;
 import org.egov.prscp.web.models.EventDetail;
 import org.egov.prscp.web.models.GuestsResend;
 import org.egov.prscp.web.models.NotificationTemplate;
+import org.egov.prscp.web.models.PressNote;
 import org.egov.prscp.web.models.RequestInfoWrapper;
 import org.egov.prscp.web.models.ResponseInfoWrapper;
 import org.egov.prscp.web.models.Template;
@@ -27,12 +29,16 @@ import org.egov.prscp.web.models.TenderNotice;
 import org.egov.tracer.model.CustomException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 @Service
 public class NotificationTemplateService {
@@ -48,19 +54,25 @@ public class NotificationTemplateService {
 	private EventManegementRepository eventManegementRepository;
 
 	private GeneratePressNotesRepository generatePressNotesRepository;
+	
+	private PrScpUtil prScpUtil;
+	
 
 	@Autowired
 	public NotificationTemplateService(ObjectMapper objectMapper, MDMSService mDMSService,
 			NotificationTemplateRepository notificationTemplateRepository,
 			EventManegementRepository eventManegementRepository,
 			TenderNoticePublicationRepository tenderNoticePublicationRepository,
-			GeneratePressNotesRepository generatePressNotesRepository) {
+			GeneratePressNotesRepository generatePressNotesRepository,
+			PrScpUtil prScpUtil
+			) {
 		this.objectMapper = objectMapper;
 		this.notificationTemplateRepository = notificationTemplateRepository;
 		this.tenderNoticePublicationRepository = tenderNoticePublicationRepository;
 		this.mDMSService = mDMSService;
 		this.eventManegementRepository = eventManegementRepository;
 		this.generatePressNotesRepository = generatePressNotesRepository;
+		this.prScpUtil = prScpUtil;
 	}
 	
 	/**
@@ -72,26 +84,41 @@ public class NotificationTemplateService {
 		try {
 
 			Template template = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), Template.class);
-			NotificationTemplate notificationTemplate = notificationTemplateRepository.getTemplate(template);
-			if (notificationTemplate == null) {
-				notificationTemplate = mDMSService.getTemplate(requestInfoWrapper.getRequestInfo(), template);
-			}
+			String responseValidate = "";
+			
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(template, Template.class);
+			
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.GETEVENTTEMPLATE);
 
-			if (template != null && notificationTemplate != null
-					&& template.getModuleName().equals(CommonConstants.MODULE_NAME_EVENT)) {
-				getEventTemplate(notificationTemplate, template);
-			} else if (template != null && notificationTemplate != null
-					&& template.getModuleName().equals(CommonConstants.MODULE_NAME_PRESSNOTE)) {
-				getPressNoteTemplate(notificationTemplate, template);
-			} else if (template != null && notificationTemplate != null
-					&& template.getModuleName().equals(CommonConstants.MODULE_NAME_TENDER)) {
-				getTenderTemplate(notificationTemplate, template);
-			} else {
-				throw new CustomException(CommonConstants.TEMPLATE_EXCEPTION_CODE, CommonConstants.MODULE_NAME_INVALID);
+			NotificationTemplate notificationTemplate=new NotificationTemplate();
+			if (responseValidate.equals("")) 
+			{
+				notificationTemplate = notificationTemplateRepository.getTemplate(template);
+				if (notificationTemplate == null) {
+					notificationTemplate = mDMSService.getTemplate(requestInfoWrapper.getRequestInfo(), template);
+				}
+	
+				if (template != null && notificationTemplate != null
+						&& template.getModuleName().equals(CommonConstants.MODULE_NAME_EVENT)) {
+					getEventTemplate(notificationTemplate, template);
+				} else if (template != null && notificationTemplate != null
+						&& template.getModuleName().equals(CommonConstants.MODULE_NAME_PRESSNOTE)) {
+					getPressNoteTemplate(notificationTemplate, template);
+				} else if (template != null && notificationTemplate != null
+						&& template.getModuleName().equals(CommonConstants.MODULE_NAME_TENDER)) {
+					getTenderTemplate(notificationTemplate, template);
+				} else {
+					throw new CustomException(CommonConstants.TEMPLATE_EXCEPTION_CODE, CommonConstants.MODULE_NAME_INVALID);
+				}
+				return new ResponseEntity(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+						.responseBody(notificationTemplate).build(), HttpStatus.OK);
 			}
-			return new ResponseEntity(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(notificationTemplate).build(), HttpStatus.OK);
+			else
+			{
+				throw new CustomException(CommonConstants.TEMPLATE_EXCEPTION_CODE, responseValidate);
+			}
 		} catch (Exception e) {
 			throw new CustomException(CommonConstants.TEMPLATE_EXCEPTION_CODE, e.getMessage());
 		}
@@ -245,24 +272,37 @@ public class NotificationTemplateService {
 		try {
 			GuestsResend guestsResend = objectMapper.convertValue(requestInfoWrapper.getRequestBody(),
 					GuestsResend.class);
-
-			if (guestsResend != null && guestsResend.getModuleName().equals(CommonConstants.MODULE_NAME_EVENT)) {
-				guestsResend = notificationTemplateRepository.resendEvent(guestsResend,
-						requestInfoWrapper.getAuditDetails());
-			} else if (guestsResend != null
-					&& guestsResend.getModuleName().equals(CommonConstants.MODULE_NAME_PRESSNOTE)) {
-				guestsResend = notificationTemplateRepository.resendPressNote(guestsResend,
-						requestInfoWrapper.getAuditDetails());
-			} else if (guestsResend != null
-					&& guestsResend.getModuleName().equals(CommonConstants.MODULE_NAME_TENDER)) {
-				guestsResend = notificationTemplateRepository.resendTender(guestsResend,
-						requestInfoWrapper.getAuditDetails());
-			} else {
-				throw new CustomException(CommonConstants.TEMPLATE_EXCEPTION_CODE, CommonConstants.MODULE_NAME_INVALID);
+			String responseValidate = "";
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(guestsResend, GuestsResend.class);
+			
+			responseValidate = prScpUtil.validateJsonAddUpdateData(payloadData,CommonConstants.RESENDNOTIFICATION);
+			if (responseValidate.equals("")) 
+			{
+			
+				if (guestsResend != null && guestsResend.getModuleName().equals(CommonConstants.MODULE_NAME_EVENT)) {
+					guestsResend = notificationTemplateRepository.resendEvent(guestsResend,
+							requestInfoWrapper.getAuditDetails());
+				} else if (guestsResend != null
+						&& guestsResend.getModuleName().equals(CommonConstants.MODULE_NAME_PRESSNOTE)) {
+					guestsResend = notificationTemplateRepository.resendPressNote(guestsResend,
+							requestInfoWrapper.getAuditDetails());
+				} else if (guestsResend != null
+						&& guestsResend.getModuleName().equals(CommonConstants.MODULE_NAME_TENDER)) {
+					guestsResend = notificationTemplateRepository.resendTender(guestsResend,
+							requestInfoWrapper.getAuditDetails());
+				} else {
+					throw new CustomException(CommonConstants.TEMPLATE_EXCEPTION_CODE, CommonConstants.MODULE_NAME_INVALID);
+				}
+				return new ResponseEntity(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+						.responseBody(guestsResend).build(), HttpStatus.OK);
 			}
-			return new ResponseEntity(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(guestsResend).build(), HttpStatus.OK);
+			else
+			{
+				throw new CustomException(CommonConstants.TEMPLATE_EXCEPTION_CODE, responseValidate);
+			}
+			
 		} catch (Exception e) {
 			throw new CustomException(CommonConstants.TEMPLATE_EXCEPTION_CODE, e.getMessage());
 		}

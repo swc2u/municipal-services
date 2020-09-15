@@ -434,9 +434,10 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 	public MaterialReceiptResponse updateStatus(MaterialReceiptRequest materialReceiptRequest, String tenantId) {
 
 		try {
-			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
 					materialReceiptRequest.getWorkFlowDetails(),
 					materialReceiptRequest.getWorkFlowDetails().getTenantId());
+			materialReceiptRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updatestatusTopic, updatestatusTopicKey, materialReceiptRequest);
 			MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
 			return materialReceiptResponse.responseInfo(null)

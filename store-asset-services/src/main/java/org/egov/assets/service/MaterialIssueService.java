@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.assets.common.Constants;
@@ -52,7 +53,6 @@ import org.egov.assets.repository.MaterialIssueDetailJdbcRepository;
 import org.egov.assets.repository.MaterialIssueJdbcRepository;
 import org.egov.assets.repository.MaterialIssuedFromReceiptJdbcRepository;
 import org.egov.assets.repository.PDFServiceReposistory;
-import org.egov.assets.repository.RejectedMaterialRepository;
 import org.egov.assets.repository.entity.FifoEntity;
 import org.egov.assets.repository.entity.IndentDetailEntity;
 import org.egov.assets.repository.entity.IndentEntity;
@@ -60,11 +60,13 @@ import org.egov.assets.repository.entity.MaterialIssueDetailEntity;
 import org.egov.assets.repository.entity.MaterialIssueEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.assets.wf.WorkflowIntegrator;
+import org.egov.assets.wf.model.Action;
+import org.egov.assets.wf.model.ProcessInstance;
+import org.egov.assets.wf.model.ProcessInstanceResponse;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
 import org.egov.tracer.model.CustomException;
-import org.elasticsearch.search.DocValueFormat.Decimal;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
@@ -73,8 +75,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.egov.assets.wf.model.ProcessInstance;
-import org.egov.assets.wf.model.ProcessInstanceResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -1138,7 +1138,7 @@ public class MaterialIssueService extends DomainService {
 				&& materialIssueResponse.getMaterialIssues().size() == 1) {
 			JSONObject requestMain = new JSONObject();
 			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-				DateTimeFormatter wfdateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			DateTimeFormatter wfdateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 			ObjectMapper mapper = new ObjectMapper();
 			try {
 				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
@@ -1221,7 +1221,6 @@ public class MaterialIssueService extends DomainService {
 				indent.put("materialDetails", indentDetails);
 
 				// Need to integrate Workflow
-
 				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo, in.getIssueNumber(),
 						in.getTenantId());
 				LOG.info(workflowData.toString());
@@ -1272,14 +1271,15 @@ public class MaterialIssueService extends DomainService {
 	public MaterialIssueResponse updateStatus(MaterialIssueRequest indentIssueRequest) {
 
 		try {
-			workflowIntegrator.callWorkFlow(indentIssueRequest.getRequestInfo(),
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(indentIssueRequest.getRequestInfo(),
 					indentIssueRequest.getWorkFlowDetails(), indentIssueRequest.getWorkFlowDetails().getTenantId());
+			indentIssueRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updatestatusTopic, updatestatusKey, indentIssueRequest);
 			MaterialIssueResponse response = new MaterialIssueResponse();
 			response.setMaterialIssues(indentIssueRequest.getMaterialIssues());
 			response.setResponseInfo(getResponseInfo(indentIssueRequest.getRequestInfo()));
 
-			if (indentIssueRequest.getWorkFlowDetails().getAction()
+			if (indentIssueRequest.getWorkFlowDetails().getStatus()
 					.equals(MaterialIssueStatusEnum.REJECTED.toString())) {
 				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(
 						indentIssueRequest.getWorkFlowDetails().getTenantId(), null, null, null,
