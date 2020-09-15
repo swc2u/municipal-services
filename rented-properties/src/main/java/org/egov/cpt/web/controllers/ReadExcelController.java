@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.apache.commons.lang.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,7 +48,7 @@ public class ReadExcelController {
 		RentDemandResponse data = new RentDemandResponse();
 		try {
 			String filePath = fileStoreUtils.fetchFileStoreUrl(searchCriteria);
-			if (!"".equals(filePath)) {
+			if (StringUtils.isNotBlank(filePath)) {
 				if("0".equalsIgnoreCase(searchCriteria.getFileFormat())) {
 					data = readExcelService.getDatafromExcel(new UrlResource(filePath).getInputStream(), 0);
 				}else if("1".equalsIgnoreCase(searchCriteria.getFileFormat())) {
