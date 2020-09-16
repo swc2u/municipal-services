@@ -30,7 +30,15 @@ config:
         image-name: "hc-services"
         dockerfile: "build/maven/Dockerfile"
       - work-dir: "hc-services/src/main/resources/db"
-        image-name: "hc-services-db"    
+        image-name: "hc-services-db"   
+        
+  - name: "builds/municipal-services/ec-services"
+    build:
+      - work-dir: "ec-services"
+        image-name: "ec-services"
+        dockerfile: "build/maven/Dockerfile"
+      - work-dir: "ec-services/src/main/resources/db"
+        image-name: "ec-services-db"         
         
   - name: "builds/municipal-services/pm-services"
     build:

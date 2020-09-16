@@ -22,6 +22,22 @@ public class MaterialReceiptRequest {
 	@JsonProperty("materialReceipt")
 	private List<MaterialReceipt> materialReceipt = new ArrayList<MaterialReceipt>();
 
+	@JsonProperty("workFlowDetails")
+	private WorkFlowDetails workFlowDetails;
+
+	public MaterialReceiptRequest workFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+		return this;
+	}
+
+	public WorkFlowDetails getWorkFlowDetails() {
+		return workFlowDetails;
+	}
+
+	public void setWorkFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+	}
+
 	public MaterialReceiptRequest requestInfo(RequestInfo requestInfo) {
 		this.requestInfo = requestInfo;
 		return this;

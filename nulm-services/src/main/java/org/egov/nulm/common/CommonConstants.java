@@ -20,7 +20,7 @@ public class CommonConstants {
 	public static final String  INVALID_SUH_LOG_REQUEST="INVALID_SUH_LOG_REQUEST";
 	public static final String  INVALID_SUH_LOG_REQUEST_MESSAGE="you can not delete record ";
 	public static final String  INVALID_SUH_LOG_UUID_REQUEST_MESSAGE="please provide valid log UUid";
-	
+	public static final String WORKFLOW_MESSAGE = "Failed to Create Tender or Invalid User Action";
 	public static final String INVALID_ORGANIZATION_REQUEST="INVALID_ORGANIZATION_REQUEST";
 	public static final String INVALID_ORGANIZATION_REQUEST_MOBILE_MESSAGE="Mobile No already Exists";
 	public static final String INVALID_ORGANIZATION_REQUEST_ORG_NAME_MESSAGE="Organization Name already Exists";
@@ -51,6 +51,10 @@ public class CommonConstants {
 	
 	public static final String INVALID_SHG_UUID="INVALID_SHG_UUID";
 	public static final String  INVALID_SHG_UUID_MESSAGE="provide valid SHG id";
+	public static final String INVALID_MEMBER_UUID="INVALID_SHD_MEMBER_APPLICATION_UUID";
+	public static final String  INVALID_MEMBER_UUID_MESSAGE="provide valid SHG memeber application id";
+	public static final String TRANSACTION_EXCEPTION_CODE="TRANSACTION_EXCEPTION";
+	
 	public static final String ACTION_CREATE="CREATE";
 	public static final String ACTION_UPDATE="UPDATE";
 	public static final String SUCCESS = "Success";

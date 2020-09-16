@@ -96,7 +96,6 @@ public class ScrapService extends DomainService {
 
 	public List<Scrap> create(ScrapRequest scrapReq, String tenantId) {
 		try {
-
 			fetchRelated(scrapReq, tenantId);
 			List<Scrap> scrap = scrapReq.getScraps();
 			validate(scrapReq.getScraps(), Constants.ACTION_CREATE, tenantId, scrapReq.getRequestInfo());
@@ -143,12 +142,12 @@ public class ScrapService extends DomainService {
 						scrapDetails.setId(scrapJdbcRepository.getSequence("seq_scrapDetail"));
 					}
 					scrapDetails.setUpdatedScrapedQty(scrapDetails.getScrapQuantity());
-//					List<ScrapDetail> scrapDetail = getScrapDetails(scrapDetails.getScrapNumber(),
-//							scrapData.getTenantId());
-//					if (!scrapDetail.isEmpty() && scrapDetail.size() == 1) {
-//						scrapDetails.setScrapQuantity(
-//								scrapDetails.getScrapQuantity().subtract(scrapDetail.get(0).getScrapQuantity()));
-//					}
+					List<ScrapDetail> scrapDetail = getScrapDetails(scrapDetails.getScrapNumber(),
+							scrapData.getTenantId());
+					if (!scrapDetail.isEmpty() && scrapDetail.size() == 1) {
+						scrapDetails.setScrapQuantity(
+								scrapDetails.getScrapQuantity().subtract(scrapDetail.get(0).getScrapQuantity()));
+					}
 					scrapDetails.setAuditDetails(getAuditDetails(scrapReq.getRequestInfo(), Constants.ACTION_UPDATE));
 
 					if (StringUtils.isEmpty(scrapDetails.getTenantId())) {
@@ -167,7 +166,6 @@ public class ScrapService extends DomainService {
 	}
 
 	public ScrapResponse search(ScrapSearch scrapSearch) {
-		
 		Pagination<Scrap> scrapPagination = scrapJdbcRepository.search(scrapSearch);
 		if (!scrapPagination.getPagedData().isEmpty()) {
 			for (Scrap scrap : scrapPagination.getPagedData()) {
@@ -232,10 +230,8 @@ public class ScrapService extends DomainService {
 						errors.addDataError(ErrorCode.UNIT_PRICE_GT_ZERO.getCode());
 
 					}
-
 					BigDecimal remainQuantity = scrapDetail.getQuantity()
 							.subtract(scrapDetail.getIssueDetail().getScrapedQuantity());
-
 					if ((scrapDetail.getScrapQuantity().compareTo(remainQuantity)) == 1) {
 						errors.addDataError(ErrorCode.QTY1_LE_QTY2.getCode(),
 								"Scrap Quantity  " + scrapDetail.getScrapQuantity(),
@@ -280,83 +276,60 @@ public class ScrapService extends DomainService {
 		return seq + "-" + numberGenerator.getNextNumber(seq, 5);
 	}
 
-	// private void fetchRelated(ScrapRequest request, String tenantId) {
-	// InvalidDataException errors = new InvalidDataException();
-	// List<ScrapDetail> scrapDetailList = new ArrayList<>();
-	// for (Scrap scrap : request.getScraps()) {
-	// for (ScrapDetail scrapDetails : scrap.getScrapDetails()) {
-	// MaterialIssueSearchContract searchContract =
-	// MaterialIssueSearchContract.builder()
-	// .id(Arrays.asList(scrapDetails.getIssueDetail().getId()))
-	// .issuePurpose(MaterialIssue.IssuePurposeEnum.WRITEOFFORSCRAP.toString())
-	// .materialIssueStatus(MaterialIssueStatusEnum.APPROVED.toString()).scrapCreated(false)
-	// .tenantId(tenantId).build();
-	//
-	// MaterialIssueResponse response =
-	// nonIndentMaterialIssueService.search(searchContract);
-	// if (response.getMaterialIssues().size() <= 0) {
-	// errors.addDataError(ErrorCode.NO_DATA_FOUND.getCode(), "Scrap Process");
-	// }
-	// for (MaterialIssue issue : response.getMaterialIssues()) {
-	// for (MaterialIssueDetail issueDetail : issue.getMaterialIssueDetails()) {
-	// ScrapDetail scrapDetail = new ScrapDetail();
-	// MaterialIssueDetail matIssueDetail = new MaterialIssueDetail();
-	// matIssueDetail.setId(issueDetail.getId());
-	// matIssueDetail.setScrapedQuantity(issueDetail.getScrapedQuantity());
-	// if (issue == null)
-	// errors.addDataError(ErrorCode.NO_DATA_FOUND.getCode(), "Scrap Process",
-	// null);
-	//
-	// else
-	// scrapDetail.setId(scrapDetails.getId());
-	// scrapDetail.setIssueDetail(matIssueDetail);
-	// scrapDetail.setTenantId(tenantId);
-	// scrapDetail.setUom(issueDetail.getUom());
-	// scrapDetail.setMaterial(issueDetail.getMaterial());
-	// scrapDetail.setExistingValue(issueDetail.getValue());
-	// scrapDetail.setQuantity(issueDetail.getQuantityIssued());
-	//
-	// if (scrapDetails.getUserQuantity() != null) {
-	// setConvertedScrapQuantity(tenantId, scrapDetails, issueDetail,
-	// request.getRequestInfo());
-	// }
-	//
-	// if (scrapDetails.getScrapValue() != null) {
-	// setConvertedScrapRate(tenantId, scrapDetails, issueDetail,
-	// request.getRequestInfo());
-	// }
-	// scrapDetail.setScrapQuantity(scrapDetails.getScrapQuantity());
-	// scrapDetail.setUserQuantity(scrapDetails.getUserQuantity());
-	// scrapDetail.setScrapReason(scrapDetail.getScrapReason());
-	// scrapDetail.setScrapValue(scrapDetails.getScrapValue());
-	// scrapDetail.setScrapReason(scrapDetails.getScrapReason());
-	// scrapDetailList.add(scrapDetail);
-	//
-	// }
-	// }
-	// scrap.setScrapDetails(scrapDetailList);
-	// }
-	// }
-	// if (errors.getValidationErrors().size() > 0)
-	// throw errors;
-	// }
-
 	private void fetchRelated(ScrapRequest request, String tenantId) {
 		InvalidDataException errors = new InvalidDataException();
 		List<ScrapDetail> scrapDetailList = new ArrayList<>();
 		for (Scrap scrap : request.getScraps()) {
 			for (ScrapDetail scrapDetails : scrap.getScrapDetails()) {
-				if (scrapDetails.getUserQuantity() != null) {
-					setConvertedScrapQuantity(tenantId, scrapDetails, request.getRequestInfo());
-				}
+				MaterialIssueSearchContract searchContract = MaterialIssueSearchContract.builder()
+						.id(Arrays.asList(scrapDetails.getIssueDetail().getId()))
+						.issuePurpose(MaterialIssue.IssuePurposeEnum.WRITEOFFORSCRAP.toString())
+						.materialIssueStatus(MaterialIssueStatusEnum.APPROVED.toString()).scrapCreated(false)
+						.tenantId(tenantId).build();
 
-				if (scrapDetails.getScrapValue() != null) {
-					setConvertedScrapRate(tenantId, scrapDetails, request.getRequestInfo());
+				MaterialIssueResponse response = nonIndentMaterialIssueService.search(searchContract);
+				if (response.getMaterialIssues().size() <= 0) {
+					errors.addDataError(ErrorCode.NO_DATA_FOUND.getCode(), "Scrap Process");
 				}
-				scrapDetailList.add(scrapDetails);
+				for (MaterialIssue issue : response.getMaterialIssues()) {
+					for (MaterialIssueDetail issueDetail : issue.getMaterialIssueDetails()) {
+						ScrapDetail scrapDetail = new ScrapDetail();
+						MaterialIssueDetail matIssueDetail = new MaterialIssueDetail();
+						matIssueDetail.setId(issueDetail.getId());
+						matIssueDetail.setScrapedQuantity(issueDetail.getScrapedQuantity());
+						if (issue == null)
+							errors.addDataError(ErrorCode.NO_DATA_FOUND.getCode(), "Scrap Process", null);
+
+						else
+							scrapDetail.setId(scrapDetails.getId());
+						scrapDetail.setIssueDetail(matIssueDetail);
+						scrapDetail.setTenantId(tenantId);
+						scrapDetail.setUom(issueDetail.getUom());
+						scrapDetail.setMaterial(issueDetail.getMaterial());
+						scrapDetail.setExistingValue(issueDetail.getValue());
+						scrapDetail.setQuantity(issueDetail.getQuantityIssued());
+
+						if (scrapDetails.getUserQuantity() != null) {
+							setConvertedScrapQuantity(tenantId, scrapDetails, issueDetail, request.getRequestInfo());
+						}
+
+						if (scrapDetails.getScrapValue() != null) {
+							setConvertedScrapRate(tenantId, scrapDetails, issueDetail, request.getRequestInfo());
+						}
+						scrapDetail.setScrapQuantity(scrapDetails.getScrapQuantity());
+						scrapDetail.setUserQuantity(scrapDetails.getUserQuantity());
+						scrapDetail.setScrapReason(scrapDetail.getScrapReason());
+						scrapDetail.setScrapValue(scrapDetails.getScrapValue());
+						scrapDetail.setScrapReason(scrapDetails.getScrapReason());
+						scrapDetailList.add(scrapDetail);
+
+					}
+				}
 				scrap.setScrapDetails(scrapDetailList);
 			}
 		}
+		if (errors.getValidationErrors().size() > 0)
+			throw errors;
 	}
 
 	private List<ScrapDetail> getScrapDetails(String scrapNumber, String tenantId) {
@@ -433,10 +406,11 @@ public class ScrapService extends DomainService {
 		return uomMap;
 	}
 
-	private void setConvertedScrapRate(String tenantId, ScrapDetail detail, RequestInfo requestInfo) {
-		Uom uom = (Uom) mdmsRepository.fetchObject(tenantId, "common-masters", "UOM", "code", detail.getUom().getCode(),
-				Uom.class, requestInfo);
-		detail.setUom(uom);
+	private void setConvertedScrapRate(String tenantId, ScrapDetail detail, MaterialIssueDetail issueDetail,
+			RequestInfo requestInfo) {
+		Uom uom = (Uom) mdmsRepository.fetchObject(tenantId, "common-masters", "UOM", "code",
+				issueDetail.getUom().getCode(), Uom.class, requestInfo);
+		issueDetail.setUom(uom);
 
 		if (null != detail.getScrapValue() && null != uom.getConversionFactor()) {
 			BigDecimal convertedRate = getSaveConvertedRate(detail.getScrapValue(), uom.getConversionFactor());
@@ -445,26 +419,26 @@ public class ScrapService extends DomainService {
 
 	}
 
-	private void setConvertedScrapQuantity(String tenantId, ScrapDetail detail, RequestInfo requestInfo) {
+	private void setConvertedScrapQuantity(String tenantId, ScrapDetail detail, MaterialIssueDetail issueDetail,
+			RequestInfo requestInfo) {
 		InvalidDataException errors = new InvalidDataException();
-		Uom uom = (Uom) mdmsRepository.fetchObject(tenantId, "common-masters", "UOM", "code", detail.getUom().getCode(),
-				Uom.class, requestInfo);
-		detail.setUom(uom);
+		Uom uom = (Uom) mdmsRepository.fetchObject(tenantId, "common-masters", "UOM", "code",
+				issueDetail.getUom().getCode(), Uom.class, requestInfo);
+		issueDetail.setUom(uom);
 
 		if (null != detail.getUserQuantity() && null != uom.getConversionFactor()) {
 			BigDecimal convertedUserQuantity = getSaveConvertedQuantity(detail.getUserQuantity(),
 					uom.getConversionFactor());
 			detail.setScrapQuantity(convertedUserQuantity);
-			// int res = convertedUserQuantity.compareTo(detail.getQuantityIssued());
-			// if (res == 1) {
-			// errors.addDataError(ErrorCode.QTY1_LE_QTY2.getCode(), "Scrap Quantity ",
-			// "Issued Quantity ", null);
-			//
-			// }
+			int res = convertedUserQuantity.compareTo(issueDetail.getQuantityIssued());
+			if (res == 1) {
+				errors.addDataError(ErrorCode.QTY1_LE_QTY2.getCode(), "Scrap Quantity ", "Issued Quantity ", null);
+
+			}
 		}
 
-		// if (errors.getValidationErrors().size() > 0)
-		// throw errors;
+		if (errors.getValidationErrors().size() > 0)
+			throw errors;
 
 	}
 

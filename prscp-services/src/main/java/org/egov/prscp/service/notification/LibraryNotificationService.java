@@ -124,16 +124,31 @@ public class LibraryNotificationService {
 							builderSms.append(smsTemplate);
 
 							// Email
-							EmailRequest emailRequest = EmailRequest.builder().email(user.getEmailId())
-									.subject(emailSubject).body(builderEmail.toString()).isHTML(true).build();
-							producer.push(config.getNotificationEmailTopic(), emailRequest);
-
+							
+							if (config.getIsEmailNotificationEnabled()) 
+							 {
+							
+								if (config.getIsLibraryUploadSendEmailNotificationEnabled()) 
+								{
+									EmailRequest emailRequest = EmailRequest.builder().email(user.getEmailId())
+											.subject(emailSubject).body(builderEmail.toString()).isHTML(true).build();
+									producer.push(config.getNotificationEmailTopic(), emailRequest);
+								}
+							 }
+							
 							// SMS
-							if (notificationTemplate.getSmsContent() != null) {
-								SMSRequest smsRequest = SMSRequest.builder().mobileNumber(user.getMobileNumber())
-										.message(builderSms.toString()).build();
-								producer.push(config.getNotificationSmsTopic(), smsRequest);
-							}
+							
+							if (config.getIsSMSNotificationEnabled()) 
+							 {
+								
+								if (config.getIsLibraryUploadSendSmsNotificationEnabled()) 
+								{
+									if (notificationTemplate.getSmsContent() != null) {
+										SMSRequest smsRequest = SMSRequest.builder().mobileNumber(user.getMobileNumber())
+												.message(builderSms.toString()).build();
+										producer.push(config.getNotificationSmsTopic(), smsRequest);
+									}
+							}   }
 
 						}
 						log.info("Success : Sent Notification sendLibraryUploadNotificaiton(): " + library.toString());

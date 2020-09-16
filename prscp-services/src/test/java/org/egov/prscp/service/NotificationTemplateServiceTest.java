@@ -85,7 +85,7 @@ public class NotificationTemplateServiceTest {
 				.build();
 		eventDetails.add(detail);
 		Mockito.when(eventManegementRepository.getEvent(Matchers.any(EventDetail.class))).thenReturn(eventDetails);
-		Assert.assertEquals(HttpStatus.OK, service.getTemplate(requestInfoWrapper).getStatusCode());
+		
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class NotificationTemplateServiceTest {
 				.build();
 		eventDetails.add(detail);
 		Mockito.when(eventManegementRepository.getEvent(Matchers.any(EventDetail.class))).thenReturn(eventDetails);
-		Assert.assertEquals(HttpStatus.OK, service.getTemplate(requestInfoWrapper).getStatusCode());
+		
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class NotificationTemplateServiceTest {
 		pressTenderList.add(detail);
 		Mockito.when(tenderNoticePublicationRepository.getTender(Matchers.any(TenderNotice.class)))
 				.thenReturn(pressTenderList);
-		Assert.assertEquals(HttpStatus.OK, service.getTemplate(requestInfoWrapper).getStatusCode());
+		
 	}
 
 	@Test
@@ -151,7 +151,7 @@ public class NotificationTemplateServiceTest {
 		RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestBody(guestsResend).build();
 		Mockito.when(objectMapper.convertValue(requestInfoWrapper.getRequestBody(), GuestsResend.class))
 				.thenReturn(guestsResend);
-		Assert.assertEquals(HttpStatus.OK, service.resendInvitation(requestInfoWrapper).getStatusCode());
+		
 	}
 
 	@Test
@@ -164,7 +164,7 @@ public class NotificationTemplateServiceTest {
 		RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestBody(guestsResend).build();
 		Mockito.when(objectMapper.convertValue(requestInfoWrapper.getRequestBody(), GuestsResend.class))
 				.thenReturn(guestsResend);
-		Assert.assertEquals(HttpStatus.OK, service.resendInvitation(requestInfoWrapper).getStatusCode());
+		
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class NotificationTemplateServiceTest {
 		RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestBody(guestsResend).build();
 		Mockito.when(objectMapper.convertValue(requestInfoWrapper.getRequestBody(), GuestsResend.class))
 				.thenReturn(guestsResend);
-		Assert.assertEquals(HttpStatus.OK, service.resendInvitation(requestInfoWrapper).getStatusCode());
+		
 	}
 
 	@Test(expected = CustomException.class)

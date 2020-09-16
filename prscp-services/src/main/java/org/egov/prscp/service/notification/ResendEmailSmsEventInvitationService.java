@@ -190,17 +190,32 @@ public class ResendEmailSmsEventInvitationService {
 							builderSms.append(smsTemplate);
 
 							// Email
-							EmailRequest emailRequest = EmailRequest.builder().email(guest.getReceiverEmail())
-									.subject(emailSubject).body(builderEmail.toString()).isHTML(true)
-									.attachments(listOfAttachments).build();
-							producer.push(config.getNotificationEmailTopic(), emailRequest);
-
+							
+							if (config.getIsEmailNotificationEnabled()) 
+							 {
+							
+								if (config.getIsEventResendEmailNotificationEnabled()) 
+								{
+									EmailRequest emailRequest = EmailRequest.builder().email(guest.getReceiverEmail())
+											.subject(emailSubject).body(builderEmail.toString()).isHTML(true)
+											.attachments(listOfAttachments).build();
+									producer.push(config.getNotificationEmailTopic(), emailRequest);
+								}
+							 }
+							
 							// SMS
-							if (notificationTemplate.getSmsContent() != null) {
-								SMSRequest smsRequest = SMSRequest.builder().mobileNumber(guest.getReceiverMobile())
-										.message(builderSms.toString()).build();
-								producer.push(config.getNotificationSmsTopic(), smsRequest);
-							}
+							
+							if (config.getIsSMSNotificationEnabled()) 
+							 {
+								if (config.getIsEventResendSmsNotificationEnabled()) 
+								{
+									if (notificationTemplate.getSmsContent() != null) {
+										SMSRequest smsRequest = SMSRequest.builder().mobileNumber(guest.getReceiverMobile())
+												.message(builderSms.toString()).build();
+										producer.push(config.getNotificationSmsTopic(), smsRequest);
+									}
+								}
+							 }
 						}
 						insertResendHistory(contactDetails);
 						log.info("Success : Sent Notification sendEventInvitation(): "
@@ -281,17 +296,31 @@ public class ResendEmailSmsEventInvitationService {
 								builderSms.append(smsTemplate);
 
 								// Email
-								EmailRequest emailRequest = EmailRequest.builder().email(press.getReceiverEmail())
-										.subject(emailSubject).body(builderEmail.toString()).isHTML(true)
-										.attachments(listOfAttachments).build();
-								producer.push(config.getNotificationEmailTopic(), emailRequest);
-
-								// SMS
-								if (notificationTemplate.getSmsContent() != null) {
-									SMSRequest smsRequest = SMSRequest.builder().mobileNumber(press.getReceiverMobile())
-											.message(builderSms.toString()).build();
-									producer.push(config.getNotificationSmsTopic(), smsRequest);
-								}
+								
+								if (config.getIsEmailNotificationEnabled()) 
+								 {
+									if (config.getIsPressnoteResendEmailNotificationEnabled()) 
+									{
+										EmailRequest emailRequest = EmailRequest.builder().email(press.getReceiverEmail())
+												.subject(emailSubject).body(builderEmail.toString()).isHTML(true)
+												.attachments(listOfAttachments).build();
+										producer.push(config.getNotificationEmailTopic(), emailRequest);
+									}
+								 }
+								
+									// SMS
+								
+								if (config.getIsSMSNotificationEnabled()) 
+								 {
+									if (config.getIsPressnoteResendSmsNotificationEnabled()) 
+									{
+										if (notificationTemplate.getSmsContent() != null) {
+											SMSRequest smsRequest = SMSRequest.builder().mobileNumber(press.getReceiverMobile())
+													.message(builderSms.toString()).build();
+											producer.push(config.getNotificationSmsTopic(), smsRequest);
+										}
+									}
+								 }
 							}
 							insertResendHistory(contactDetails);
 							log.info("Success : Sent Notification sendPressNoteNotification(): "
@@ -382,17 +411,31 @@ public class ResendEmailSmsEventInvitationService {
 								builderSms.append(smsTemplate);
 
 								// Email
-								EmailRequest emailRequest = EmailRequest.builder().email(press.getReceiverEmail())
-										.subject(emailSubject).body(builderEmail.toString()).isHTML(true)
-										.attachments(listOfAttachments).build();
-								producer.push(config.getNotificationEmailTopic(), emailRequest);
-
+								
+								if (config.getIsEmailNotificationEnabled()) 
+								 {
+									if (config.getIsTenderResendEmailNotificationEnabled()) 
+									{
+										EmailRequest emailRequest = EmailRequest.builder().email(press.getReceiverEmail())
+												.subject(emailSubject).body(builderEmail.toString()).isHTML(true)
+												.attachments(listOfAttachments).build();
+										producer.push(config.getNotificationEmailTopic(), emailRequest);
+									}
+								 }
+								
 								// SMS
-								if (notificationTemplate.getSmsContent() != null) {
-									SMSRequest smsRequest = SMSRequest.builder().mobileNumber(press.getReceiverMobile())
-											.message(builderSms.toString()).build();
-									producer.push(config.getNotificationSmsTopic(), smsRequest);
+								
+								if (config.getIsSMSNotificationEnabled()) 
+								 {
+									if (config.getIsTenderResendSmsNotificationEnabled()) 
+									{
+										if (notificationTemplate.getSmsContent() != null) {
+											SMSRequest smsRequest = SMSRequest.builder().mobileNumber(press.getReceiverMobile())
+													.message(builderSms.toString()).build();
+											producer.push(config.getNotificationSmsTopic(), smsRequest);
+									}
 								}
+							 }
 							}
 							insertResendHistory(contactDetails);
 							log.info("Success : Sent Notification sendTenderNoticeNotification(): "

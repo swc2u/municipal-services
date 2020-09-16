@@ -24,6 +24,24 @@ public class IndentRequest {
 	@JsonProperty("indents")
 	private List<Indent> indents = new ArrayList<Indent>();
 
+	@JsonProperty("workFlowDetails")
+	private WorkFlowDetails workFlowDetails;
+
+	public IndentRequest workFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+		return this;
+	}
+
+	public WorkFlowDetails getWorkFlowDetails() {
+		return workFlowDetails;
+	}
+
+	public void setWorkFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+	}
+
+
+	
 	public IndentRequest requestInfo(RequestInfo requestInfo) {
 		this.requestInfo = requestInfo;
 		return this;

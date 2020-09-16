@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.assets.common.Constants;
@@ -27,9 +28,7 @@ import org.egov.assets.model.Department;
 import org.egov.assets.model.Fifo;
 import org.egov.assets.model.FifoRequest;
 import org.egov.assets.model.FifoResponse;
-import org.egov.assets.model.Indent;
 import org.egov.assets.model.Indent.IndentStatusEnum;
-import org.egov.assets.model.Indent.IndentTypeEnum;
 import org.egov.assets.model.IndentDetail;
 import org.egov.assets.model.IndentResponse;
 import org.egov.assets.model.IndentSearch;
@@ -48,6 +47,7 @@ import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.Uom;
+import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.IndentDetailJdbcRepository;
 import org.egov.assets.repository.MaterialIssueDetailJdbcRepository;
 import org.egov.assets.repository.MaterialIssueJdbcRepository;
@@ -59,6 +59,10 @@ import org.egov.assets.repository.entity.IndentEntity;
 import org.egov.assets.repository.entity.MaterialIssueDetailEntity;
 import org.egov.assets.repository.entity.MaterialIssueEntity;
 import org.egov.assets.util.InventoryUtilities;
+import org.egov.assets.wf.WorkflowIntegrator;
+import org.egov.assets.wf.model.Action;
+import org.egov.assets.wf.model.ProcessInstance;
+import org.egov.assets.wf.model.ProcessInstanceResponse;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -70,6 +74,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -85,6 +90,9 @@ public class MaterialIssueService extends DomainService {
 
 	@Autowired
 	private IndentService indentService;
+
+	@Autowired
+	private RejectedMaterialService rejectedMaterialService;
 
 	@Autowired
 	private MdmsRepository mdmsRepository;
@@ -125,6 +133,15 @@ public class MaterialIssueService extends DomainService {
 	@Value("${inv.issues.update.key}")
 	private String updateKey;
 
+	@Value("${inv.issues.updatestatus.topic}")
+	private String updatestatusTopic;
+
+	@Value("${inv.issues.updatestatus.key}")
+	private String updatestatusKey;
+
+	@Autowired
+	WorkflowIntegrator workflowIntegrator;
+
 	@Autowired
 	private LogAwareKafkaTemplate<String, Object> kafkaTemplate;
 
@@ -136,6 +153,7 @@ public class MaterialIssueService extends DomainService {
 					materialIssueRequest.getMaterialIssues().size());
 			int i = 0;
 			for (MaterialIssue materialIssue : materialIssueRequest.getMaterialIssues()) {
+				materialIssue.setToStore(getStore(materialIssue.getToStore().getCode(), materialIssue.getTenantId()));
 				String seqNo = sequenceNos.get(i);
 				materialIssue.setId(seqNo);
 				setMaterialIssueValues(materialIssue, seqNo, Constants.ACTION_CREATE, type);
@@ -161,6 +179,18 @@ public class MaterialIssueService extends DomainService {
 					}
 				}
 				materialIssue.setTotalIssueValue(totalIssueValue);
+				BigDecimal deductionPercentage = materialIssue.getToStore().getDepartment().getDeductionPercentage();
+				if (deductionPercentage != null && deductionPercentage.compareTo(BigDecimal.ZERO) > 0)
+					materialIssue.setTotalDeductionValue(
+							deductionPercentage.divide(new BigDecimal(100)).multiply(totalIssueValue));
+				else
+					materialIssue.setTotalDeductionValue(BigDecimal.ZERO);
+
+				WorkFlowDetails workFlowDetails = materialIssueRequest.getWorkFlowDetails();
+				workFlowDetails.setBusinessId(materialIssue.getIssueNumber());
+				workflowIntegrator.callWorkFlow(materialIssueRequest.getRequestInfo(), workFlowDetails,
+						materialIssue.getTenantId());
+
 			}
 			kafkaTemplate.send(createTopic, createKey, materialIssueRequest);
 			MaterialIssueResponse response = new MaterialIssueResponse();
@@ -687,6 +717,8 @@ public class MaterialIssueService extends DomainService {
 		List<MaterialIssue> materialIssues = materialIssueRequest.getMaterialIssues();
 		int i = 0;
 		for (MaterialIssue materialIssue : materialIssues) {
+			materialIssue.setToStore(getStore(materialIssue.getToStore().getCode(), materialIssue.getTenantId()));
+
 			if (StringUtils.isEmpty(materialIssue.getTenantId()))
 				materialIssue.setTenantId(tenantId);
 			// Search old issue object.
@@ -749,6 +781,14 @@ public class MaterialIssueService extends DomainService {
 			materialIssueDetailsJdbcRepository.markDeleted(materialIssueDetailsIds, tenantId, "materialissuedetail",
 					"materialissuenumber", materialIssue.getIssueNumber());
 			materialIssue.setTotalIssueValue(totalIssueValue);
+
+			BigDecimal deductionPercentage = materialIssue.getToStore().getDepartment().getDeductionPercentage();
+			if (deductionPercentage != null && deductionPercentage.compareTo(BigDecimal.ZERO) > 0)
+				materialIssue.setTotalDeductionValue(
+						deductionPercentage.divide(new BigDecimal(100)).multiply(totalIssueValue));
+			else
+				materialIssue.setTotalDeductionValue(BigDecimal.ZERO);
+
 			i++;
 		}
 		kafkaTemplate.send(updateTopic, updateKey, materialIssueRequest);
@@ -1098,6 +1138,7 @@ public class MaterialIssueService extends DomainService {
 				&& materialIssueResponse.getMaterialIssues().size() == 1) {
 			JSONObject requestMain = new JSONObject();
 			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			DateTimeFormatter wfdateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 			ObjectMapper mapper = new ObjectMapper();
 			try {
 				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
@@ -1125,7 +1166,6 @@ public class MaterialIssueService extends DomainService {
 				} else {
 					indent.put("issueDate", in.getIssueDate());
 				}
-
 				indent.put("issuingStoreName", in.getFromStore().getName());
 				indent.put("issuingStoreDept", in.getFromStore().getDepartment().getName());
 
@@ -1181,19 +1221,32 @@ public class MaterialIssueService extends DomainService {
 				indent.put("materialDetails", indentDetails);
 
 				// Need to integrate Workflow
-
+				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo, in.getIssueNumber(),
+						in.getTenantId());
+				LOG.info(workflowData.toString());
 				JSONArray workflows = new JSONArray();
-				JSONObject jsonWork = new JSONObject();
-				jsonWork.put("reviewApprovalDate", "02-05-2020");
-				jsonWork.put("reviewerApproverName", "Aniket");
-				jsonWork.put("designation", "MD");
-				jsonWork.put("action", "Forwarded");
-				jsonWork.put("sendTo", "Prakash");
-				jsonWork.put("approvalStatus", "APPROVED");
-				workflows.add(jsonWork);
+				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
+					ProcessInstance processData = workflowData.getProcessInstances().get(j);
+					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
+					// Need to integrate Workflow
+					JSONObject jsonWork = new JSONObject();
+					jsonWork.put("date",wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())) );
+					jsonWork.put("updatedBy", processData.getAssigner().getName());
+					jsonWork.put("comments", processData.getComment());
+					if (processData.getAssignee() == null) {
+						if (!processData.getState().getIsTerminateState()) {
+							jsonWork.put("currentAssignee",
+									processData.getState().getActions().get(0).getRoles().get(0));
+						} else
+							jsonWork.put("currentAssignee", "NA");
+					} else
+						jsonWork.put("currentAssignee", processData.getAssignee().getName());
+
+					jsonWork.put("status", processData.getState().getApplicationStatus());
+					workflows.add(jsonWork);
+				}
 				indent.put("workflowDetails", workflows);
 				indents.add(indent);
-
 				if (type.equals(IssueTypeEnum.MATERIALOUTWARD.toString())) {
 					requestMain.put("IndentOutwardTransfer", indents);
 				} else if (type.equals(IssueTypeEnum.INDENTISSUE.toString())) {
@@ -1208,10 +1261,51 @@ public class MaterialIssueService extends DomainService {
 				return pdfServiceReposistory.getPrint(requestMain, "store-asset-indent-issue-note",
 						searchContract.getTenantId());
 			}
-
 		}
 		return PDFResponse.builder()
 				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
 
 	}
+
+	@Transactional
+	public MaterialIssueResponse updateStatus(MaterialIssueRequest indentIssueRequest) {
+
+		try {
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(indentIssueRequest.getRequestInfo(),
+					indentIssueRequest.getWorkFlowDetails(), indentIssueRequest.getWorkFlowDetails().getTenantId());
+			indentIssueRequest.setWorkFlowDetails(workFlowDetails);
+			kafkaQue.send(updatestatusTopic, updatestatusKey, indentIssueRequest);
+			MaterialIssueResponse response = new MaterialIssueResponse();
+			response.setMaterialIssues(indentIssueRequest.getMaterialIssues());
+			response.setResponseInfo(getResponseInfo(indentIssueRequest.getRequestInfo()));
+
+			if (indentIssueRequest.getWorkFlowDetails().getStatus()
+					.equals(MaterialIssueStatusEnum.REJECTED.toString())) {
+				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(
+						indentIssueRequest.getWorkFlowDetails().getTenantId(), null, null, null,
+						indentIssueRequest.getWorkFlowDetails().getBusinessId(), null, null, null, null, null, null,
+						null, null, null, null, null);
+				MaterialIssueResponse issueResponse = search(searchContract, IssueTypeEnum.INDENTISSUE.toString());
+				for (MaterialIssue materialIssues : issueResponse.getMaterialIssues()) {
+					for (MaterialIssueDetail issueDetail : materialIssues.getMaterialIssueDetails()) {
+						issueDetail.rejectedIssuedQuantity(issueDetail.getQuantityIssued());
+						issueDetail.setQuantityIssued(BigDecimal.ZERO);
+						issueDetail.setUserQuantityIssued(BigDecimal.ZERO);
+
+						for (MaterialIssuedFromReceipt fromReceipt : issueDetail.getMaterialIssuedFromReceipts()) {
+							fromReceipt.setRejectedIssuedQuantity(fromReceipt.getQuantity());
+							fromReceipt.setQuantity(BigDecimal.ZERO);
+						}
+					}
+					rejectedMaterialService.minusRejectedMaterial(materialIssues.getMaterialIssueDetails(),
+							indentIssueRequest.getWorkFlowDetails().getTenantId());
+				}
+			}
+
+			return response;
+		} catch (CustomBindException e) {
+			throw e;
+		}
+	}
+
 }

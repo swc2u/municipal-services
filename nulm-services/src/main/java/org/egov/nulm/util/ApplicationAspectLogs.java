@@ -53,6 +53,45 @@ public class ApplicationAspectLogs {
 	}
 
 
+	// Service
+		@Before("execution(* org.egov.nulm.service.*.*(..))")
+		public void beforeService(JoinPoint joinPoint) {
+			long startTime = System.currentTimeMillis();
+			log.info("nulm-services logs :: beforeService = Method::{}, Execution Time::{}", joinPoint.getSignature(),
+					startTime);
+			log.debug("nulm-services logs :: beforeService = Method::{}, Execution Time::{}", joinPoint.getSignature(),
+					startTime);
+		}
+
+		@After("execution(* org.egov.nulm.service.*.*(..))")
+		public void afterService(JoinPoint joinPoint) {
+			long startTime = System.currentTimeMillis();
+			log.info("nulm-services logs :: afterService = Method::{}, Execution Time::{}", joinPoint.getSignature(),
+					startTime);
+			log.debug("nulm-services logs :: afterService = Method::{}, Execution Time::{}", joinPoint.getSignature(),
+					startTime);
+		}
+
+		@AfterReturning(value = "execution(* org.egov.nulm.service.*.*(..))", returning = "result")
+		public void afterReturningService(JoinPoint joinPoint, Object result) {
+			long startTime = System.currentTimeMillis();
+			log.info("nulm-services logs :: afterReturningService = Method::{}, Execution Time::{}, Results::{}",
+					joinPoint.getSignature(), startTime, result);
+			log.debug("nulm-services logs :: afterReturningService = Method::{}, Execution Time::{}, Results::{}",
+					joinPoint.getSignature(), startTime, result);
+		}
+
+		@AfterThrowing(value = "execution(* org.egov.nulm.service.*.*(..))", throwing = "exception")
+		public void afterThrowingService(JoinPoint joinPoint, Throwable exception) {
+			long startTime = System.currentTimeMillis();
+			log.info("nulm-services logs :: afterThrowingService = Method::{}, Execution Time::{}, Exception::{}",
+					joinPoint.getSignature(), startTime, exception.getMessage());
+			log.debug("nulm-services logs :: afterThrowingService = Method::{}, Execution Time::{}, Exception::{}",
+					joinPoint.getSignature(), startTime, exception.getMessage());
+
+			log.error("nulm-services logs :: afterThrowingService = Method::{}, Execution Time::{}, Exception::{}",
+					joinPoint.getSignature(), startTime, exception.getMessage());
+		}
 
 	// Repository
 	@Before("execution(* org.egov.nulm.repository.*.*(..))")

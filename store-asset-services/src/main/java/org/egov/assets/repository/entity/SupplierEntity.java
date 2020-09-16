@@ -1,4 +1,4 @@
-package org.egov.assets.repository.entity;
+/*package org.egov.assets.repository.entity;
 
 import org.egov.assets.model.AuditDetails;
 import org.egov.assets.model.Supplier;
@@ -173,3 +173,4 @@ public class SupplierEntity {
 	}
 
 }
+*/

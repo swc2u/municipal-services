@@ -86,5 +86,46 @@ public class CommonConstants {
 	public static final String NOTIFICATION_EVENT_SEND_UPDATE_EXCEPTION_CODE = "NOTIFICATION_EVENT_SEND_UPDATE_EXCEPTION";
 
 	public static final String NOTIFICATION_EMAIL_ATTACHMENTS_EXCEPTION_CODE = "NOTIFICATION_EMAIL_ATTACHMENTS_EXCEPTION";
-
+	
+	
+	public static final String EVENTCREATE = "EVENTCREATE";
+	public static final String EVENTUPDATE = "EVENTUPDATE";
+	public static final String EVENTGET = "EVENTGET";
+	public static final String EVENTPUBLISH = "EVENTPUBLISH";
+	public static final String GETEVENTTEMPLATE = "GETEVENTTEMPLATE";
+	public static final String GETPRASSNOTETEMPLATE = "GETPRASSNOTETEMPLATE";
+	public static final String GETTENDERTEMPLATE = "GETTENDERTEMPLATE";
+	public static final String RESENDNOTIFICATION = "RESENDNOTIFICATION";
+	public static final String ADDENVITEGUEST = "ADDENVITEGUEST";
+	public static final String REMOVEENVITEGUEST = "REMOVEENVITEGUEST";
+	public static final String GETENVITEGUEST = "GETENVITEGUEST";
+	public static final String UPLOADEXTERNALENVITEGUESTLIST = "UPLOADEXTERNALENVITEGUESTLIST";
+	public static final String SENDENVITEENVITATION = "SENDENVITEENVITATION";
+	public static final String LIBRARYUPLOAD = "LIBRARYUPLOAD";
+	public static final String LIBRARYGET = "LIBRARYGET";
+	public static final String LIBRARYDELETE = "LIBRARYDELETE";
+	public static final String COMMITTEEMASTERCREATE = "COMMITTEEMASTERCREATE";
+	public static final String COMMITTEEMASTERUPDATE = "COMMITTEEMASTERUPDATE";
+	public static final String COMMITTEEMASTERGET = "COMMITTEEMASTERGET";
+	public static final String PRESSMASTERCREATE = "PRESSMASTERCREATE";
+	public static final String PRESSMASTERUPDATE = "PRESSMASTERUPDATE";
+	public static final String PRESSMASTERGET = "PRESSMASTERGET";
+	public static final String PRESSMASTERDELETE = "PRESSMASTERDELETE";
+	public static final String PRESSNOTESCREATE = "PRESSNOTESCREATE";
+	public static final String PRESSNOTEUPDATE = "PRESSNOTEUPDATE";
+	public static final String PRESSNOTEGET = "PRESSNOTEGET";
+	public static final String TENDERNOTICECREATE = "TENDERNOTICECREATE";
+	public static final String TENDERNOTICEUPDATE = "TENDERNOTICEUPDATE";
+	public static final String TENDERNOTICEGET = "TENDERNOTICEGET";
+	public static final String TENDERNOTICEPUBLISH = "TENDERNOTICEPUBLISH";
+	public static final String TENDERNOTICETEMPLATE = "TENDERNOTICETEMPLATE";
+	
+	public static final String SCRIPTTAGXSS = "(.*?)<(\\s*?)script(\\s*?)(.*?)>(.*?)<(\\s*?)/(\\s*?)script(\\s*?)>(.*?)";
+	public static final String SRC1TAGXSS = "(.*?)src[\\r\\n]*=[\\r\\n]*\\\'(.*?)\\\'(.*?)";
+	public static final String SRC2TAGXSS = "(.*?)src[\\r\\n]*=[\\r\\n]*\\\"(.*?)\\\"(.*?)";
+	public static final String SCRIPTENDTAGXSS = "(.*?)</script(\\s*?)>(.*?)";
+	public static final String SCRIPTSTARTTAGXSS = "(.*?)<(\\s*?)script(\\s*?)>(.*?)";
+	public static final String JSTAGXSS = "(.*?)javascript:(.*?)";
+	public static final String VBTAGXSS = "(.*?)vbscript:(.*?)";
+	public static final String ONLOADTAGXSS = "(.*?)onload(.*?)=(.*?)";
 }

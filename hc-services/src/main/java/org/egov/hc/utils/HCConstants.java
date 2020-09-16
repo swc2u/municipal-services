@@ -22,12 +22,19 @@ public class HCConstants {
 	
 	public static final String MODULENAMEVALUE = "HORTICULTURE";
 	
+	
+	//serviceTypes
+	
+	public static final String ServiceType1 = "PRUNING OF TREES GIRTH LESS THAN OR EQUAL TO 90 CMS";
+	public static final String ServiceType2 = "PRUNING OF TREES GIRTH GREATER THAN 90 CMS";
+	public static final String ServiceType3 = "REMOVAL OF OVERGROWN/GREEN TREES";
+	public static final String ServiceType4 = "REMOVAL OF DEAD/DANGEROUS/DRY TREES";
+	
 	//Roll
 	
 	public static final String ROLE = "EE";
 	public static final String EXECUTIVE_ENGINEER = "EE";
-	public static final String JUNIER_ENGINEERE = "JE";
-	public static final String SDO = "SDO";
+	
 	
 	// Actions
 	public static final String EDITED = "EDITED";
@@ -74,6 +81,7 @@ public class HCConstants {
 	// Massage
 	
 	public static final String SUCCESS = "success";
+	public static final String FAIL = "fail";
 	public static final String MEDIA = "media";
 
 	
@@ -176,7 +184,6 @@ public class HCConstants {
 	public static final String HC_EMPLOYEE_OVERDAYS_EMAIL_SUBJECT="HC_EMPLOYEE_OVERDAYS_EMAIL_SUBJECT";
 	
 	
-	
 	//approve, request for clarification
 	
 	public static final String SMS_NOTIFICATION_STATUS_KEY = "<status>";
@@ -213,5 +220,27 @@ public class HCConstants {
 	public static final String ROLE_NAME_DGRO = "Department Grievance Routing Officer";
 	public static final String ROLE_NAME_CSR = "Customer Support Representative";
 	public static final String SUBJECT = "SERVICE REQUEST FORM";
+	
+	public static final String GET_REQUEST_EXCEPTION_CODE = "GET_REQUEST_EXCEPTION_CODE";
+	public static final String CREATE_REQUEST_EXCEPTION_CODE = "CREATE_REQUEST_EXCEPTION_CODE";
+	public static final String UPDATE_REQUEST_EXCEPTION_CODE = "UPDATE_REQUEST_EXCEPTION_CODE";
+	public static final String GETDETAIL_REQUEST_EXCEPTION_CODE = "GETDETAIL_REQUEST_EXCEPTION_CODE";
+	
+	
+	public static final String SERVICEREQUESTCREATE = "SERVICEREQUESTCREATE";
+	public static final String SERVICEREQUESTUPDATE = "SERVICEREQUESTUPDATE";
+	public static final String SERVICEREQUESTGET = "SERVICEREQUESTGET";
+	public static final String SERVICEREQUESTGETDETAIL = "SERVICEREQUESTGETDETAIL";
+	
+	
+	
+	public static final String SCRIPTTAGXSS = "(.*?)<(\\s*?)script(\\s*?)(.*?)>(.*?)<(\\s*?)/(\\s*?)script(\\s*?)>(.*?)";
+	public static final String SRC1TAGXSS = "(.*?)src[\\r\\n]*=[\\r\\n]*\\\'(.*?)\\\'(.*?)";
+	public static final String SRC2TAGXSS = "(.*?)src[\\r\\n]*=[\\r\\n]*\\\"(.*?)\\\"(.*?)";
+	public static final String SCRIPTENDTAGXSS = "(.*?)</script(\\s*?)>(.*?)";
+	public static final String SCRIPTSTARTTAGXSS = "(.*?)<(\\s*?)script(\\s*?)>(.*?)";
+	public static final String JSTAGXSS = "(.*?)javascript:(.*?)";
+	public static final String VBTAGXSS = "(.*?)vbscript:(.*?)";
+	public static final String ONLOADTAGXSS = "(.*?)onload(.*?)=(.*?)";
 		
 }

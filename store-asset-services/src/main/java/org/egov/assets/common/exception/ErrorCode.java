@@ -233,7 +233,7 @@ public enum ErrorCode {
             "{0} should be active", "{0} should be active"),
     INVALID_INDENT_VALUE("invalid.indent.value",
             "the field {0} is not valid for creating PO",
-            "The  value  {1} for the field {0} is not valid for creating PO. Please select another one."),
+            "The  value  {1} for the field {0} is not valid for creating PO. May some material already consumed. Please select another one."),
     INVALID_PURCHASETYPE_VALUE("invalid.purchasetype.value",
             "the field {0} is not valid for creating PO",
             "The  value  {1} for the field {0} is not valid for creating PO. Please select another one."),

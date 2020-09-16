@@ -1,5 +1,10 @@
 package org.egov.hc.consumer;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,12 +33,14 @@ import org.egov.hc.model.Source;
 import org.egov.hc.producer.HCConfiguration;
 import org.egov.hc.producer.HCProducer;
 import org.egov.hc.service.NotificationService;
-
+import org.egov.hc.service.ServiceRequestService;
 import org.egov.hc.utils.HCConstants;
 
 import org.egov.hc.utils.WorkFlowConfigs;
+import org.egov.hc.workflow.WorkflowIntegrator;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.context.annotation.Lazy;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -47,6 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 @org.springframework.stereotype.Service
 @Slf4j
 public class HCNotificationConsumer {
+	
 
 	@Autowired
 	private HCProducer hCProducer;
@@ -57,13 +65,16 @@ public class HCNotificationConsumer {
 	@Autowired
 	private NotificationService notificationService;
 	
+	@Autowired
+	private WorkflowIntegrator workflowIntegrator;
+	
 
 	@Autowired
 	private RestTemplate rest;
 
 	@KafkaListener(topics = { "${kafka.topics.save.service}", "${kafka.topics.update.service}" })
 
-	public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+	public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) throws JSONException {
 		ObjectMapper mapper = new ObjectMapper();
 		ServiceRequest serviceReqRequest = new ServiceRequest();
 		try {
@@ -79,8 +90,9 @@ public class HCNotificationConsumer {
 	 * Sends notifications on different topics for the consumer to pick.
 	 *
 	 * @param serviceReqRequest
+	 * @throws JSONException 
 	 */
-	public void process(ServiceRequest serviceReqRequest) {
+	public void process(ServiceRequest serviceReqRequest) throws JSONException {
 
 		// get all the messages from localization table
 		Map<String, String> messageMap = getLocalizationMessage(serviceReqRequest.getRequestInfo().getUserInfo().getTenantId(),
@@ -90,6 +102,7 @@ public class HCNotificationConsumer {
 		if (!CollectionUtils.isEmpty(serviceReqRequest.getActionInfo())) {
 
 			sendNotification(serviceReqRequest, messageMap, null);
+			
 
 			// check citizen raised a request, then get Executive engg role user list from
 			
@@ -100,7 +113,9 @@ public class HCNotificationConsumer {
 					serviceReqRequest.getRequestInfo());
 			
 			if (serviceReqRequest.getActionInfo().get(0).getAction().equals(WorkFlowConfigs.ACTION_OPEN)) {
-				String role = HCConstants.EXECUTIVE_ENGINEER;
+				//String role = HCConstants.EXECUTIVE_ENGINEER;
+				
+				String role = workflowIntegrator.parseBussinessServiceData(workflowIntegrator.getbussinessServiceDatafromprocesinstanceEdit(serviceReqRequest),serviceReqRequest);
 
 				getRolewiseUserList(serviceReqRequest, role, messageMap);
 
@@ -214,12 +229,19 @@ public class HCNotificationConsumer {
 
 	}
 
-	public void sendNotification(ServiceRequest serviceReqRequest, Map<String, String> messageMap,
+	public void sendNotification(ServiceRequest serviceReqRequest, Map<String, String> messageMap, 
 			String service_request_id_new) {
 
 		for (ActionInfo actionInfo : serviceReqRequest.getActionInfo()) {
 			if (null != actionInfo && (!StringUtils.isEmpty(actionInfo.getStatus()))) {
 				ServiceRequestData service = serviceReqRequest.getServices().get(0);
+				
+				//call to mdms and get servicetype
+				
+				String mdmsServiceTypeName = getMdmsServiceTypeName(service);
+				
+				service.setServiceType(mdmsServiceTypeName); 
+				 
 				if (isNotificationEnabled(actionInfo.getStatus())) {
 					if (hcConfiguration.getIsSMSNotificationEnabled()) {
 						SMSRequest smsRequest = prepareSMSRequest(service, actionInfo,
@@ -261,6 +283,43 @@ public class HCNotificationConsumer {
 			}
 		}
 
+	}
+
+	private String getMdmsServiceTypeName(ServiceRequestData service) {
+		
+		String servicetype = null;
+		try
+		{
+			String payloadData ="{\"MdmsCriteria\": {\"tenantId\": \"ch\",\"moduleDetails\": [{\"moduleName\": \"eg-horticulture\",\"masterDetails\": [{\"name\":\"ServiceType\"}]}]}}" ;
+
+			String mdmsData = sendPostRequest(
+					hcConfiguration.getMdmsHost().concat(hcConfiguration.getMdmsEndpoint()).concat("?").concat("&tenantId=" + service.getTenantId()),
+					payloadData);
+
+			org.json.JSONObject mdmsDataobj = new org.json.JSONObject(mdmsData);
+			org.json.JSONObject MdmsResObj = mdmsDataobj.getJSONObject("MdmsRes");
+			org.json.JSONObject eghorticultureObj = MdmsResObj.getJSONObject("eg-horticulture");
+		
+			org.json.JSONArray mdmsServiceTypes = eghorticultureObj.getJSONArray("ServiceType");
+			
+			for(int cnt =0 ; cnt <= mdmsServiceTypes.length() ; cnt ++)
+			{
+				org.json.JSONObject mdmsServiceTypesObj = new org.json.JSONObject(
+						mdmsServiceTypes.get(cnt).toString());
+				
+				String servicecode = mdmsServiceTypesObj.getString("code");
+				
+				if(servicecode.equals(service.getServiceType()))
+				{
+					servicetype = mdmsServiceTypesObj.getString("name");
+					break;
+				}
+			}
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
+		return servicetype;
 	}
 
 	/**
@@ -760,7 +819,7 @@ public class HCNotificationConsumer {
 			}
 			if(text != null)
 			{
-			text = text.replace(HCConstants.SMS_NOTIFICATION_EMP_NAME_KEY, employeeName)
+			text = text.replace(HCConstants.SMS_NOTIFICATION_EMP_NAME_KEY, serviceReq.getOwnerName())
 					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_ID, serviceReq.getService_request_id())
 					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_DATE_KEY, genratedDate);
 			}
@@ -825,6 +884,25 @@ public class HCNotificationConsumer {
 			break;
 			
 		case WorkFlowConfigs.EDIT:
+
+			if (notifcationType.equals(HCConstants.SMS)) {
+				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_SMS_NOTIFICATION);
+			} else if (notifcationType.equals(HCConstants.EMAIL)) {
+
+				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_EMAIL_NOTIFICATION);
+			} else if (notifcationType.equals(HCConstants.PUSH)) {
+				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_PUSH_NOTIFICATION);
+			}
+			if(text != null)
+			{
+			text = text.replace(HCConstants.SMS_NOTIFICATION_EMP_NAME_KEY,  serviceReq.getOwnerName())
+					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_ID, serviceReq.getService_request_id_old())
+					.replace(HCConstants.NOTIFICATION_SERVICEREQUEST_ID_NEW, serviceReq.getService_request_id())
+					.replace(HCConstants.SMS_NOTIFICATION_SERVICEREQUEST_DATE_KEY, genratedDate);
+			}
+			break;
+			
+		case WorkFlowConfigs.ACTION_INITIATED:
 
 			if (notifcationType.equals(HCConstants.SMS)) {
 				text = messageMap.get(HCConstants.HC_CITIZEN_REQUEST_FOR_UPDATE_SMS_NOTIFICATION);
@@ -958,7 +1036,13 @@ public class HCNotificationConsumer {
 		
     	 for (ActionInfo actionInfo : serviceReqRequest.getActionInfo()) {
              if (null != actionInfo && (!StringUtils.isEmpty(actionInfo.getStatus()))) {
-                 ServiceRequestData service = serviceReqRequest.getServices().get(0);            
+                 ServiceRequestData service = serviceReqRequest.getServices().get(0);      
+                 
+                 	//call to mdms and get servicetype
+ 				
+ 					String mdmsServiceTypeName = getMdmsServiceTypeName(service);
+ 				
+ 					service.setServiceType(mdmsServiceTypeName); 
              
                 	{ 	
                      if (hcConfiguration.getIsSMSNotificationEnabled()) {
@@ -976,7 +1060,8 @@ public class HCNotificationConsumer {
                      	EmailRequest emailRequests = prepareEmailRequest(service, actionInfo, serviceReqRequest.getRequestInfo(),messageMap,action,serviceRequestDate,days);
                      	log.info(" Sending mail : "+ emailRequests);
                      	hCProducer.push(hcConfiguration.getEmailNotifTopic(), emailRequests);
-                         
+                   
+
                      }
 //                     
 //
@@ -1173,6 +1258,35 @@ public class HCNotificationConsumer {
 	 	   return null;
 	     return EmailRequest.builder().email(emailIdRetrived).subject(subject).body(message).isHTML(true).build();
 	 }
+	 
+	 public static String sendPostRequest(String requestUrl, String payload) {
+			StringBuffer jsonString = new StringBuffer();
+			try {
+				URL url = new URL(requestUrl);
+				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+				connection.setDoInput(true);
+				connection.setDoOutput(true);
+				connection.setRequestMethod("POST");
+				connection.setRequestProperty("Accept", "application/json");
+				connection.setRequestProperty("Content-Type", "application/json");
+				OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+				writer.write(payload);
+				writer.close();
+				BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+				String line;
+				while ((line = br.readLine()) != null) {
+					jsonString.append(line);
+					System.out.println(line);
+				}
+				br.close();
+				connection.disconnect();
+			} catch (Exception e) {
+				throw new RuntimeException(e.getMessage());
+			}
+			return jsonString.toString();
+		}
 	 
 
 }

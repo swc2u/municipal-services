@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.egov.common.contract.request.User;
 import org.egov.hc.contract.ServiceRequest;
 import org.egov.hc.model.ServiceRequestData;
 import org.egov.hc.producer.HCConfiguration;
@@ -46,7 +47,7 @@ public class WorkflowIntegrator {
 
 	private static final String DOCUMENTSKEY = "documents";
 
-	private static final String ASSIGNEEKEY = "assignes";
+	private static final String ASSIGNEEKEY = "assignee";
 
 	private static final String MODULENAMEVALUE = "HORTICULTURE";
 
@@ -59,12 +60,17 @@ public class WorkflowIntegrator {
 	private static final String BUSINESSIDJOSNKEY = "$.businessId";
 
 	private static final String STATUSJSONKEY = "$.state.applicationStatus";
+	
+	private static final String ADITIONALDETAILSKEY = "additionalDetails";
 
 	@Autowired
 	private RestTemplate rest;
 	
 	@Autowired
 	private HCConfiguration config;
+	
+	@Autowired
+	private HCConfiguration hcConfiguration;  	
 
 	@Autowired
 	public WorkflowIntegrator(RestTemplate rest, HCConfiguration config) {
@@ -82,7 +88,7 @@ public class WorkflowIntegrator {
 	 * @param ServiceRequest
 	 * @throws JSONException 
 	 */
-	public  boolean callWorkFlow(ServiceRequest request, String service_request_id) throws JSONException {
+	public  boolean callWorkFlow(ServiceRequest request, String service_request_id,String role, String employeeUuid) throws JSONException {
 		boolean status = false;
 		
 		if(!request.getServices().isEmpty())
@@ -154,7 +160,7 @@ public class WorkflowIntegrator {
 						}
 				}
 				
-				obj.put("businesssServiceSla", servicerequestdata.getBusinessservicesla());
+				//obj.put("businesssServiceSla", servicerequestdata.getBusinessservicesla());
 
 				obj.put(DOCUMENTSKEY, wfDocument);
 				obj.put(BUSINESSIDKEY, service_request_id);
@@ -168,7 +174,22 @@ public class WorkflowIntegrator {
 				obj.put(ACTIONKEY, servicerequestdata.getAction());		
 				obj.put(COMMENTKEY, servicerequestdata.getComment());
 
-				obj.put(ASSIGNEEKEY, servicerequestdata.getAssignee());
+				User user = new User();
+				if(null != employeeUuid)
+				{	
+					user.setUuid(employeeUuid);
+					obj.put(ASSIGNEEKEY, user);
+				}
+				else
+				{
+			
+				JSONObject roleJson = new JSONObject();
+
+				roleJson.put("role", role);
+
+				obj.put(ADITIONALDETAILSKEY, roleJson);
+
+				}
 				array.add(obj);
 			
 		}
@@ -238,5 +259,124 @@ public class WorkflowIntegrator {
 		return status;
 		
 	}
+	
+	
+	public String parseBussinessServiceData(String bussinessServiceData, ServiceRequest request) throws JSONException {
+		
+		String newactions = null;
+		String newState = null;
+		
+		String roles = null;
+		Boolean found = false;
+		
+		for (int businessCnt = 0; businessCnt <= bussinessServiceData.length(); businessCnt++) 
+		{
+			org.json.JSONObject bussinessServiceDetails = new org.json.JSONObject(
+					bussinessServiceData.toString());
+
+			org.json.JSONArray businessServicesObj = bussinessServiceDetails.getJSONArray("BusinessServices");
+			
+			for (int businessServiceCnt = 0; businessServiceCnt <= businessServicesObj.length(); businessServiceCnt++) 
+			{
+			
+				org.json.JSONObject businessServicesSingleObj = new org.json.JSONObject(
+						businessServicesObj.get(businessServiceCnt).toString());
+				
+				org.json.JSONArray stateObj = businessServicesSingleObj.getJSONArray("states");
+				
+				for (int stateCnt = 0; stateCnt <= stateObj.length(); stateCnt++) 
+				{
+					org.json.JSONObject stateSingleObj = new org.json.JSONObject(
+							stateObj.get(stateCnt).toString());
+					
+					org.json.JSONArray actionsObj = stateSingleObj.getJSONArray("actions");
+					
+					for (int actionCnt = 0; actionCnt < actionsObj.length(); actionCnt++) 
+					{
+						org.json.JSONObject actionsSingleObj = new org.json.JSONObject(
+								actionsObj.get(actionCnt).toString());
+						
+						
+						newactions = actionsSingleObj.getString("action");
+						newState = actionsSingleObj.getString("nextState");
+
+						if(newactions.equals(request.getServices().get(0).getAction()))
+						{
+							for (int stateCnt1 = 0; stateCnt1 <= stateObj.length(); stateCnt1++) 
+							{
+								
+								org.json.JSONObject stateSingleObj1 = new org.json.JSONObject(
+										stateObj.get(stateCnt1).toString());
+								
+								String uuid = stateSingleObj1.getString("uuid");
+								
+								if(newState.equals(uuid))
+								{
+								
+									org.json.JSONArray actionsObj1 = stateSingleObj1.getJSONArray("actions");
+									
+									for (int actionCnt1 = 0; actionCnt1 <= actionsObj1.length(); actionCnt1++) 
+									{
+										org.json.JSONObject actionsSingleObj1 = new org.json.JSONObject(
+												actionsObj1.get(actionCnt1).toString());
+										
+										org.json.JSONArray roleObj = actionsSingleObj1.getJSONArray("roles");
+										
+										
+										for (int roleCnt = 0; roleCnt < roleObj.length(); roleCnt++) 
+										{
+											String role = roleObj.getString(roleCnt);
+											
+											if(null != roles)
+												{
+												roles = roles +","+role;
+												
+												}
+											else 
+												{	
+												roles = role;
+												}
+												found = true;
+												log.info("businessServicesObj" + actionsObj);
+												
+										 }
+										break;
+										///if(found) break;
+									}
+									if(found) break;
+								}
+								if(found) break;
+							}
+							if(found) break; 
+						}
+						
+						if(found) break;
+					}	
+					if(found) break;
+				}	
+				if(found) break;
+			}
+			if(found) break;	
+		}
+		return roles ;
+		
+	}
+	
+	
+public String getbussinessServiceDatafromprocesinstanceEdit(ServiceRequest serviceRequestGetData) {
+		
+		String bussinessServiceData = null;
+		{
+			
+			 bussinessServiceData = rest.postForObject(
+					hcConfiguration.getWfHost().concat(hcConfiguration.getWfBusinessServiceSearchPath()).concat("?").concat(
+							"tenantId=" + serviceRequestGetData.getServices().get(0).getCity() + "&businessServices=" + serviceRequestGetData.getServices().get(0).getServiceType().toUpperCase()
+							),
+					serviceRequestGetData, String.class);
+			
+		}
+		return bussinessServiceData;
+	}
+
 	
 }

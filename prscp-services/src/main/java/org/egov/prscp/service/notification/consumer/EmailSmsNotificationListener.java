@@ -1,6 +1,10 @@
 package org.egov.prscp.service.notification.consumer;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.egov.prscp.config.PrScpConfiguration;
 import org.egov.prscp.service.notification.EmailSmsEventInvitationService;
 import org.egov.prscp.service.notification.EmailSmsEventReminderInvitationService;
 import org.egov.prscp.service.notification.LibraryNotificationService;
@@ -24,6 +28,8 @@ public class EmailSmsNotificationListener {
 	private LibraryNotificationService libraryNotificationService;
 	private ObjectMapper objectMapper;
 	private ResendEmailSmsEventInvitationService resendEmailSmsEventInvitationService;
+	
+	private PrScpConfiguration config;
 
 	@Autowired
 	public EmailSmsNotificationListener(EmailSmsEventInvitationService emailSmsService,
@@ -50,8 +56,11 @@ public class EmailSmsNotificationListener {
 		log.info("Send Notofication Kafka Topic : " + data);
 		NotificationReceiver notificationReceiver = objectMapper.convertValue(data.value(), NotificationReceiver.class);
 		log.info("Send Notofication Kafka Topic : " + notificationReceiver.toString());
+		
 		emailSmsService.sendEmailAndSMS(notificationReceiver);
+		
 	}
+
 
 	/**
 	 * Consumer for event,press note, tender re-send notification

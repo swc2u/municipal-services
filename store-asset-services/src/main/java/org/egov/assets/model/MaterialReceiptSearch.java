@@ -13,6 +13,8 @@ public class MaterialReceiptSearch {
 
 	private List<String> ids;
 
+	private boolean forprint;
+
 	private List<String> mrnNumber;
 
 	private List<String> mrnStatus;

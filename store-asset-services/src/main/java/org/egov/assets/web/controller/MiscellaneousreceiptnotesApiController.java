@@ -90,4 +90,12 @@ public class MiscellaneousreceiptnotesApiController {
 				tenantId);
 		return new ResponseEntity<>(materialReceiptResponse, HttpStatus.OK);
 	}
+	@PostMapping(value = "/_updateStatus", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<MaterialReceiptResponse> miscellaneousnotesUpdateStatusPost(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@Valid @RequestBody MaterialReceiptRequest materialReceipt) {
+		MaterialReceiptResponse materialReceiptResponse = miscellaneousReceiptNoteService.updateStatus(materialReceipt, tenantId);
+		return new ResponseEntity<>(materialReceiptResponse, HttpStatus.OK);
+	}
+
 }

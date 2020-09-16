@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 
 import java.io.IOException;
 import java.util.Collections;
+
 import org.egov.common.contract.request.Role;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.nulm.common.CommonConstants;
@@ -70,7 +71,8 @@ public class UserUtil {
 			user.setType("CITIZEN");
 			Role role = getCitizenRole(organization.getTenantId());
 			user.setRoles(Collections.singletonList(role));
-
+			Role ngoNGO = getNGORole(organization.getTenantId());
+			user.setRoles(Collections.singletonList(ngoNGO));
 			JsonNode response = restTemplate.postForObject(url, new CreateUserRequest(request.getRequestInfo(), user), JsonNode.class);
 
 			if (!isNull(response)) {
@@ -96,10 +98,17 @@ public class UserUtil {
 	 */
 	private Role getCitizenRole(String tenantId) {
 		Role role = new Role();
+		role.setCode("CITIZEN");
+		role.setName("Citizen");
+		role.setTenantId(tenantId.split("\\.")[0]);
+		return role;
+	}
+	
+	private Role getNGORole(String tenantId) {
+		Role role = new Role();
 		role.setCode("NGO");
 		role.setName("NGO");
 		role.setTenantId(tenantId.split("\\.")[0]);
 		return role;
 	}
-
 }

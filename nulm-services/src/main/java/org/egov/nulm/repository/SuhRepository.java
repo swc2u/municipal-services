@@ -81,6 +81,8 @@ public class SuhRepository {
 		paramValues.put("tenantId", suh.getTenantId());
 		paramValues.put("fromDate", suh.getFromDate());
 		paramValues.put("toDate", suh.getToDate());
+		paramValues.put("nameOfShelter", suh.getNameOfShelter());
+		
 		try {
 			for (Role roleobj : role) {
 				if ((roleobj.getCode()).equalsIgnoreCase(config.getRoleEmployee())) {
@@ -94,7 +96,7 @@ public class SuhRepository {
 					}
 					paramValues.put("status", statusEmplyee);
 					paramValues.put("createdBy", "");
-					paramValues.put("suhUuid", suh.getSuhUuid());
+					paramValues.put("suhId", suh.getSuhId());
 					
 
 					return suhApp = namedParameterJdbcTemplate.query(NULMQueryBuilder.GET_SUH_QUERY, paramValues,
@@ -114,7 +116,7 @@ public class SuhRepository {
 			statusCitizen.add(suh.getApplicationStatus() == null ? "" : suh.getApplicationStatus().toString());
 			paramValues.put("status", statusCitizen);
 			paramValues.put("createdBy", userId.toString());
-			paramValues.put("suhUuid", suh.getSuhUuid());
+			paramValues.put("suhId", suh.getSuhId());
 
 			return suhApp = namedParameterJdbcTemplate.query(NULMQueryBuilder.GET_SUH_QUERY, paramValues, suhrowMapper);
 

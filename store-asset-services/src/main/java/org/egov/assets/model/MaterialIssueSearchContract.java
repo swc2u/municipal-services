@@ -17,37 +17,38 @@ import lombok.ToString;
 @Setter
 @Builder
 public class MaterialIssueSearchContract {
-
+	
 	private String tenantId;
-
+	
 	private List<String> id;
-
+	
 	private String fromStore;
-
+	
 	private String toStore;
-
+	
 	private String issueNoteNumber;
-
+	
 	private String issuePurpose;
-
+	
 	private Long issueDate;
 
 	private String supplier;
 
 	private String materialIssueStatus;
-
+	
 	private String description;
-
+	
 	private BigDecimal totalIssueValue;
-
+	
 	private Boolean scrapCreated;
 
 	private Integer pageNumber;
-
+		
 	private String sortBy;
-
+	
 	private Integer pageSize;
-
+	
 	private String searchPurpose;
+	
 
 }

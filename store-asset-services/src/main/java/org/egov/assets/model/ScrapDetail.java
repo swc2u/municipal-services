@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * This object holds the scrap details information.
  */
-public class ScrapDetail  {
+public class ScrapDetail {
 	@JsonProperty("id")
 	private String id = null;
 

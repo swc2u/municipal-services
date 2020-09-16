@@ -21,6 +21,23 @@ public class TransferInwardRequest   {
 
   @JsonProperty("transferInwards")
   private List<MaterialReceipt> transferInwards = new ArrayList<MaterialReceipt>();
+  
+	@JsonProperty("workFlowDetails")
+	private WorkFlowDetails workFlowDetails;
+
+	public TransferInwardRequest workFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+		return this;
+	}
+
+	public WorkFlowDetails getWorkFlowDetails() {
+		return workFlowDetails;
+	}
+
+	public void setWorkFlowDetails(WorkFlowDetails workFlowDetails) {
+		this.workFlowDetails = workFlowDetails;
+	}
+
 
   public TransferInwardRequest requestInfo(RequestInfo requestInfo) {
     this.requestInfo = requestInfo;

@@ -22,7 +22,10 @@ public class User {
     @JsonProperty("id")
     private Long id = null;
 
-    @JsonProperty("userName")
+    @JsonProperty("uuid")
+    private String uuid = null;
+
+	@JsonProperty("userName")
     private String userName = null;
 
     @JsonProperty("password")
@@ -124,6 +127,20 @@ public class User {
     @JsonProperty("tenantId")
     private String tenantId = null;
 
+    public User uuid(String uuid) {
+        this.uuid = uuid;
+        return this;
+    }
+
+    public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+    
     public User id(Long id) {
         this.id = id;
         return this;

@@ -1,5 +1,6 @@
 package org.egov.assets.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import javax.validation.Valid;
@@ -26,11 +27,17 @@ public class Department {
 	@JsonProperty("name")
 	private String name = null;
 
+	@JsonProperty("deductionPercentage")
+	private BigDecimal deductionPercentage;
+
 	@JsonProperty("active")
 	private Boolean active = null;
 
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
+	
+	@JsonProperty("deptCategory")
+	private String deptCategory = null;
 
 	public Department id(String id) {
 		this.id = id;
@@ -108,6 +115,28 @@ public class Department {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public BigDecimal getDeductionPercentage() {
+		return deductionPercentage;
+	}
+
+	public void setDeductionPercentage(BigDecimal deductionPercentage) {
+		this.deductionPercentage = deductionPercentage;
+	}
+	
+	public String getDeptCategory() {
+		return deptCategory;
+	}
+
+	public void setDeptCategory(String deptCategory) {
+		this.deptCategory = deptCategory;
+	}
+	
+	public Department deptCategory(String deptCategory) {
+		this.deptCategory = deptCategory;
+		return this;
+	}
+
 
 	public Department active(Boolean active) {
 		this.active = active;

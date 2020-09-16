@@ -12,11 +12,13 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
 import org.egov.assets.common.MdmsRepository;
 import org.egov.assets.common.Pagination;
+import org.egov.assets.common.exception.CustomBindException;
 import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
 import org.egov.assets.model.Material;
@@ -31,10 +33,15 @@ import org.egov.assets.model.Scrap.ScrapStatusEnum;
 import org.egov.assets.model.ScrapDetail;
 import org.egov.assets.model.ScrapRequest;
 import org.egov.assets.model.Uom;
+import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.ReceiptNoteRepository;
 import org.egov.assets.repository.entity.MaterialIssueEntity;
 import org.egov.assets.repository.entity.MaterialReceiptEntity;
+import org.egov.assets.wf.WorkflowIntegrator;
+import org.egov.assets.wf.model.Action;
+import org.egov.assets.wf.model.ProcessInstance;
+import org.egov.assets.wf.model.ProcessInstanceResponse;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.tracer.kafka.LogAwareKafkaTemplate;
@@ -44,6 +51,7 @@ import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,6 +68,12 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 	@Value("${inv.miscellaneousreceiptnote.save.key}")
 	private String saveTopicKey;
 
+	@Value("${inv.miscellaneousreceiptnote.updatestatus.topic}")
+	private String updatestatusTopic;
+
+	@Value("${inv.miscellaneousreceiptnote.updatestatus.key}")
+	private String updatestatusTopicKey;
+
 	@Autowired
 	private MaterialReceiptService materialReceiptService;
 
@@ -68,6 +82,9 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 
 	@Autowired
 	private ReceiptNoteRepository receiptNoteRepository;
+
+	@Autowired
+	WorkflowIntegrator workflowIntegrator;
 
 	@Autowired
 	private MdmsRepository mdmsRepository;
@@ -79,7 +96,7 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 		materialReceipts.forEach(materialReceipt -> {
 			materialReceipt.setId(receiptNoteRepository.getSequence("seq_materialreceipt"));
 			materialReceipt.setMrnNumber(appendString(materialReceipt));
-			materialReceipt.setMrnStatus(MaterialReceipt.MrnStatusEnum.APPROVED);
+			materialReceipt.setMrnStatus(MaterialReceipt.MrnStatusEnum.CREATED);
 			materialReceipt.setReceiptType(MaterialReceipt.ReceiptTypeEnum.MISCELLANEOUS_RECEIPT);
 			materialReceipt.setAuditDetails(getAuditDetails(materialReceiptRequest.getRequestInfo(), tenantId));
 			if (StringUtils.isEmpty(materialReceipt.getTenantId())) {
@@ -89,6 +106,9 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 			materialReceipt.getReceiptDetails().forEach(materialReceiptDetail -> {
 				setMaterialDetails(tenantId, materialReceiptDetail);
 			});
+			WorkFlowDetails workFlowDetails = materialReceiptRequest.getWorkFlowDetails();
+			workFlowDetails.setBusinessId(materialReceipt.getMrnNumber());
+			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(), workFlowDetails, tenantId);
 		});
 
 		logAwareKafkaTemplate.send(saveTopic, saveTopicKey, materialReceiptRequest);
@@ -329,6 +349,7 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 
 			JSONObject requestMain = new JSONObject();
 			DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			DateTimeFormatter wfdateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 			ObjectMapper mapper = new ObjectMapper();
 			try {
@@ -363,7 +384,7 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 					matsDetail.put("srNo", i++);
 					matsDetail.put("materialCode", detail.getMaterial().getCode());
 					matsDetail.put("materialName", detail.getMaterial().getName());
-					matsDetail.put("uomName", detail.getUom().getCode());
+					matsDetail.put("uomName", detail.getUom().getName());
 					matsDetail.put("quantityReceived", detail.getReceivedQty());
 					matsDetail.put("unitRate", detail.getUnitRate());
 					matsDetail.put("totalValue", detail.getReceivedQty().multiply(detail.getUnitRate()));
@@ -373,15 +394,29 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 
 				// Need to integrate Workflow
 
+				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo,
+						in.getMrnNumber(), in.getTenantId());
 				JSONArray workflows = new JSONArray();
-				JSONObject jsonWork = new JSONObject();
-				jsonWork.put("reviewApprovalDate", "02-05-2020");
-				jsonWork.put("reviewerApproverName", "Aniket");
-				jsonWork.put("designation", "MD");
-				jsonWork.put("action", "Forwarded");
-				jsonWork.put("sendTo", "Prakash");
-				jsonWork.put("approvalStatus", "APPROVED");
-				workflows.add(jsonWork);
+				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
+					ProcessInstance processData = workflowData.getProcessInstances().get(j);
+					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
+					// Need to integrate Workflow
+					JSONObject jsonWork = new JSONObject();
+					jsonWork.put("date", wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())));
+					jsonWork.put("updatedBy", processData.getAssigner().getName());
+					jsonWork.put("comments", processData.getComment());
+					if (processData.getAssignee() == null) {
+						if (!processData.getState().getIsTerminateState()) {
+							jsonWork.put("currentAssignee",
+									processData.getState().getActions().get(0).getRoles().get(0));
+						} else
+							jsonWork.put("currentAssignee", "NA");
+					} else
+						jsonWork.put("currentAssignee", processData.getAssignee().getName());
+
+					jsonWork.put("status", processData.getState().getApplicationStatus());
+					workflows.add(jsonWork);
+				}
 				material.put("workflowDetails", workflows);
 
 				materials.add(material);
@@ -393,6 +428,23 @@ public class MiscellaneousReceiptNoteService extends DomainService {
 		}
 		return PDFResponse.builder()
 				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+	}
+
+	@Transactional
+	public MaterialReceiptResponse updateStatus(MaterialReceiptRequest materialReceiptRequest, String tenantId) {
+
+		try {
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
+					materialReceiptRequest.getWorkFlowDetails(),
+					materialReceiptRequest.getWorkFlowDetails().getTenantId());
+			materialReceiptRequest.setWorkFlowDetails(workFlowDetails);
+			kafkaQue.send(updatestatusTopic, updatestatusTopicKey, materialReceiptRequest);
+			MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
+			return materialReceiptResponse.responseInfo(null)
+					.materialReceipt(materialReceiptRequest.getMaterialReceipt());
+		} catch (CustomBindException e) {
+			throw e;
+		}
 	}
 
 }

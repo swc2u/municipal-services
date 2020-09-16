@@ -9,6 +9,8 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.egov.assets.model.MaterialIssueRequest;
+import org.egov.assets.model.MaterialIssueResponse;
 import org.egov.assets.model.MaterialReceiptSearch;
 import org.egov.assets.model.PDFRequest;
 import org.egov.assets.model.PDFResponse;
@@ -80,4 +82,13 @@ public class TransferinwardsApiController {
 		return new ResponseEntity<TransferInwardResponse>(
 				transferinwardsService.update(transferInwardRequest, tenantId), HttpStatus.OK);
 	}
+
+	@PostMapping(value = "/_updateStatus", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<TransferInwardResponse> transferinwardsUpdateStatusPost(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
+			@Valid @RequestBody TransferInwardRequest transferInwardRequest) {
+		TransferInwardResponse response = transferinwardsService.updateStatus(transferInwardRequest);
+		return new ResponseEntity(response, HttpStatus.OK);
+	}
+
 }

@@ -32,7 +32,7 @@ public class SmidShgController {
 		return service.getGroup(shgrequest);
 	}
 	@PostMapping(value = "/_update")
-	public ResponseEntity<ResponseInfoWrapper> updateGroup(@Valid @RequestBody NulmShgRequest shgrequest) {
+	public ResponseEntity<ResponseInfoWrapper> updateGroup( @RequestBody NulmShgRequest shgrequest) {
 		return service.updateGroup(shgrequest);
 	}
 	@PostMapping(value = "/_delete")
@@ -44,6 +44,12 @@ public class SmidShgController {
 	public ResponseEntity<ResponseInfoWrapper> updateGroupStatus(@Valid @RequestBody NulmShgRequest shgrequest) {
 		return service.updateGroupStatus(shgrequest);
 	}
+	@PostMapping(value = "/_forwardToApproval")
+	public ResponseEntity<ResponseInfoWrapper> forwardToApproval(@Valid @RequestBody NulmShgRequest shgrequest) {
+		return service.forwardToApproval(shgrequest);
+	}
+	
+
 	
 	
 }

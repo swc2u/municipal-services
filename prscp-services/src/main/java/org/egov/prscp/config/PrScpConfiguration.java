@@ -268,4 +268,71 @@ public class PrScpConfiguration {
 
 	@Value("${egov.notification.resend.text.footer}")
 	private String notificationResendTextFooter;
+	
+	@Value("${notification.email.enabled}")
+	private Boolean isEmailNotificationEnabled;
+
+	@Value("${notification.sms.enabled}")
+	private Boolean isSMSNotificationEnabled;
+	
+	@Value("${notification.event.resend.email.enabled}")
+	private Boolean isEventResendEmailNotificationEnabled;
+
+	@Value("${notification.event.resend.sms.enabled}")
+	private Boolean isEventResendSmsNotificationEnabled;
+
+	@Value("${notification.pressnote.send.email.enabled}")
+	private Boolean isPressnoteSendEmailNotificationEnabled;
+
+	@Value("${notification.pressnote.send.sms.enabled}")
+	private Boolean isPressnoteSendSmsNotificationEnabled;
+
+	@Value("${notification.pressnote.resend.email.enabled}")
+	private Boolean isPressnoteResendEmailNotificationEnabled;
+
+	@Value("${notification.pressnote.resend.sms.enabled}")
+	private Boolean isPressnoteResendSmsNotificationEnabled;
+
+	@Value("${notification.tender.send.email.enabled}")
+	private Boolean isTenderSendEmailNotificationEnabled;
+
+	@Value("${notification.tender.send.sms.enabled}")
+	private Boolean isTenderSendSmsNotificationEnabled;
+
+	@Value("${notification.tender.resend.email.enabled}")
+	private Boolean isTenderResendEmailNotificationEnabled;
+
+	@Value("${notification.tender.resend.sms.enabled}")
+	private Boolean isTenderResendSmsNotificationEnabled;
+
+	@Value("${notification.eventupdate.send.email.enabled}")
+	private Boolean isEventUpdateSendEmailNotificationEnabled;
+
+	@Value("${notification.eventupdate.send.sms.enabled}")
+	private Boolean isEventUpdateSendSmsNotificationEnabled;
+
+	@Value("${notification.eventcancel.send.email.enabled}")
+	private Boolean isEventCancelSendEmailNotificationEnabled;
+
+	@Value("${notification.eventcancel.send.sms.enabled}")
+	private Boolean isEventCancelSendSmsNotificationEnabled;
+
+	@Value("${notification.reminderinvitation.send.email.enabled}")
+	private Boolean isReminderInvitationSendEmailNotificationEnabled;
+
+	@Value("${notification.reminderinvitation.send.sms.enabled}")
+	private Boolean isReminderInvitationSendSmsNotificationEnabled;
+
+	@Value("${notification.libraryupload.send.email.enabled}")
+	private Boolean isLibraryUploadSendEmailNotificationEnabled;
+
+	@Value("${notification.libraryupload.send.sms.enabled}")
+	private Boolean isLibraryUploadSendSmsNotificationEnabled;
+
+	@Value("${notification.event.send.email.enabled}")
+	private Boolean isEventSendEmailNotificationEnabled;
+
+	@Value("${notification.event.send.sms.enabled}")
+	private Boolean isEventSendSmsNotificationEnabled;
+	
 }
