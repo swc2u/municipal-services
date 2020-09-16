@@ -19,4 +19,5 @@ public class ExcelSearchCriteria {
 
 	private String fileStoreId;
 
+	private String fileFormat;
 }
