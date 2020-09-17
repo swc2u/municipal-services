@@ -41,7 +41,7 @@ public class ReadExcelController {
 	@PostMapping("/read")
 	public ResponseEntity<RentDemandResponse> readExcel(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
 			@Valid @ModelAttribute ExcelSearchCriteria searchCriteria) {
-		log.info("Start controller method readExcel() Request:"+searchCriteria);
+		log.info("Start controller method readExcel() Request:" + searchCriteria);
 		RentDemandResponse data = new RentDemandResponse();
 		try {
 			String filePath = fileStoreUtils.fetchFileStoreUrl(searchCriteria);
@@ -52,12 +52,12 @@ public class ReadExcelController {
 				} else if (0 == formatFlag) {
 					data = readExcelService.getDatafromExcel(new UrlResource(filePath).getInputStream(), 0);
 				}
-				log.info("End controller method readExcel formatFlag :"+formatFlag);
+				log.info("End controller method readExcel formatFlag :" + formatFlag);
 			}
-			log.info("End controller method readExcel Demand data:"+data.getDemand().size()+
-					" & Payment data:"+data.getPayment().size());
+			log.info("End controller method readExcel Demand data:" + data.getDemand().size() + " & Payment data:"
+					+ data.getPayment().size());
 		} catch (Exception e) {
-			log.error("Error occur during runnig controller method readExcel():" + e.getMessage());
+			log.error("Error occur during runnig controller method readExcel():" + e.getMessage(), e);
 		}
 		return new ResponseEntity<>(data, HttpStatus.OK);
 	}
