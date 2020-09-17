@@ -99,7 +99,7 @@ public class MaterialReceiptEntity {
 				.supplierBillDate(supplierBillDate).challanNo(challanNo).challanDate(challanDate)
 				.description(description).receivedBy(receivedBy).designation(designation).bill(bill)
 				.inspectedBy(inspectedBy).inspectionDate(inspectionDate)
-				.mrnStatus(null != mrnStatus ? MaterialReceipt.MrnStatusEnum.valueOf(mrnStatus) : null)
+				.mrnStatus(null != mrnStatus ? MaterialReceipt.MrnStatusEnum.fromValue(mrnStatus) : null)
 				.inspectionRemarks(inspectionRemarks).receiptDetails(Collections.emptyList())
 				.totalReceiptValue(totalReceiptValue).fileStoreId(fileStoreId).paymentTerms(paymentTerms)
 				.tenantId(tenantId)

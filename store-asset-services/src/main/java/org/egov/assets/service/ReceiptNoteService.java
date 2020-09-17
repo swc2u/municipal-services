@@ -30,6 +30,7 @@ import org.egov.assets.model.MaterialBalanceRate;
 import org.egov.assets.model.MaterialBalanceRateResponse;
 import org.egov.assets.model.MaterialReceipt;
 import org.egov.assets.model.MaterialReceipt.MrnStatusEnum;
+import org.egov.assets.model.MaterialReceipt.ReceiptTypeEnum;
 import org.egov.assets.model.MaterialReceiptDetail;
 import org.egov.assets.model.MaterialReceiptDetailAddnlinfo;
 import org.egov.assets.model.MaterialReceiptRequest;
@@ -258,7 +259,7 @@ public class ReceiptNoteService extends DomainService {
 							"purchaseorderdetail", hashMap, null);
 
 					receiptNoteRepository.updateColumn(new PurchaseOrderEntity(), "purchaseorder", new HashMap<>(),
-							"status = (case when status = 'RECEIPTED' then 'APPROVED' ELSE status end)"
+							"status = (case when status = 'RECEIPTED' then 'Approved' ELSE status end)"
 									+ " where purchaseordernumber = (select purchaseorder from purchaseorderdetail where id = '"
 									+ materialReceiptDetail.getPurchaseOrderDetail().getId() + "') and tenantid = '"
 									+ tenantId + "'");
@@ -297,7 +298,7 @@ public class ReceiptNoteService extends DomainService {
 				purchaseOrderSearch.setTenantId(tenantId);
 				if (purchaseOrderService.checkAllItemsSuppliedForPo(purchaseOrderSearch))
 					receiptNoteRepository.updateColumn(new PurchaseOrderEntity(), "purchaseorder", new HashMap<>(),
-							"status = (case when status = 'RECEIPTED' then 'APPROVED' ELSE status end)"
+							"status = (case when status = 'RECEIPTED' then 'Approved' ELSE status end)"
 									+ " where purchaseordernumber = ('" + purchaseOrderSearch.getPurchaseOrderNumber()
 									+ "') and tenantid = '" + tenantId + "'");
 			}
@@ -879,13 +880,14 @@ public class ReceiptNoteService extends DomainService {
 	public MaterialReceiptResponse updateStatus(MaterialReceiptRequest materialReceiptRequest, String tenantId) {
 
 		try {
-			workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(materialReceiptRequest.getRequestInfo(),
 					materialReceiptRequest.getWorkFlowDetails(),
 					materialReceiptRequest.getWorkFlowDetails().getTenantId());
+			materialReceiptRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updateStatusTopic, updateStatusTopicKey, materialReceiptRequest);
 			MaterialReceiptResponse materialReceiptResponse = new MaterialReceiptResponse();
 
-			if (materialReceiptRequest.getWorkFlowDetails().getAction().equals(MrnStatusEnum.APPROVED.toString())) {
+			if (materialReceiptRequest.getWorkFlowDetails().getStatus().equals(MrnStatusEnum.APPROVED.toString())) {
 				MaterialReceiptSearch materialReceiptSearch = new MaterialReceiptSearch();
 				materialReceiptSearch
 						.setMrnNumber(Arrays.asList(materialReceiptRequest.getWorkFlowDetails().getBusinessId()));
@@ -893,7 +895,10 @@ public class ReceiptNoteService extends DomainService {
 				MaterialReceiptResponse receiptResponse = search(materialReceiptSearch);
 				for (MaterialReceipt materialReceipt : receiptResponse.getMaterialReceipt()) {
 						// generate PO
+					if (materialReceipt.getReceiptType() != null && materialReceipt.getReceiptType().toString()
+							.equals(ReceiptTypeEnum.NON_PURCHASE_RECEIPT.toString())) {
 						CreateNonPurchaseOrder(materialReceipt);
+					}
 					
 				}
 			}

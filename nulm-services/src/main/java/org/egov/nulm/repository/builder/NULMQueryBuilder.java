@@ -51,7 +51,7 @@ public class NULMQueryBuilder {
 	 		"'bankName',MB.bank_name,'branchName',MB.branch_name,'remark',MB.remark,'tenantId',MB.tenant_id,'isActive',MB.is_active,'createdBy',MB.created_by,'createdTime',MB.created_time\n" + 
 	 		",'lastModifiedBy',MB.last_modified_by,'lastModifiedTime',MB.last_modified_time) ))as member  from nulm_smid_shg_detail GP LEFT JOIN  nulm_smid_shg_member_details MB on GP.shg_uuid=MB.shg_uuid AND GP.tenant_id=MB.tenant_id  \n" + 
 	 		"  where GP.created_by=(case when :createdBy <>'' then :createdBy else GP.created_by end) and GP.tenant_id=:tenantId and GP.is_active='true'AND\n" + 
-	 		"GP.status IN (:status) AND MB.application_status IN(:applicationStatus) AND GP.shg_id=(case when :shgId <>'' then :shgId else GP.shg_id end)  AND TO_DATE(TO_CHAR(TO_TIMESTAMP(GP.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') >= CASE WHEN :fromDate<>'' THEN DATE(:fromDate) ELSE\n" + 
+	 		"GP.status IN (:status) AND (MB.application_status IN(:applicationStatus) OR  MB.application_status is null )AND GP.shg_id=(case when :shgId <>'' then :shgId else GP.shg_id end)  AND TO_DATE(TO_CHAR(TO_TIMESTAMP(GP.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') >= CASE WHEN :fromDate<>'' THEN DATE(:fromDate) ELSE\n" + 
 	 		"		TO_DATE(TO_CHAR(TO_TIMESTAMP(GP.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(GP.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <= CASE WHEN :toDate<>'' THEN DATE(:toDate) ELSE \n" + 
 	 		"		TO_DATE(TO_CHAR(TO_TIMESTAMP(GP.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END  AND UPPER(GP.name) like concat('%',case when UPPER(:name)<>'' then UPPER(:name) else UPPER(GP.name) end,'%') \n" + 
 	 		" GROUP BY GP.shg_uuid ORDER BY created_time desc";
@@ -132,7 +132,7 @@ public class NULMQueryBuilder {
 
 	 public static final String GET_SUSV_QUERY="SELECT SA.application_uuid, SA.application_id, SA.nulm_application_id, SA.application_status,SA.name_of_applicant, SA.gender, SA.age, SA.adhar_no, SA.mother_name, SA.father_or_husband_name,\n" + 
 	 		"SA.permanent_address, SA.present_address, SA.mobile_no, SA.is_disability,SA.category, SA.qualification, SA.blood_group, SA.category_of_vending, SA.proposed_location_of_vending,\n" + 
-	 		"SA.proposed_time_of_vending, SA.goverment_scheme, SA.name_of_nominee,SA.tenant_id, SA.remark,  SA.is_active, SA.created_by,\n" + 
+	 		"SA.proposed_time_of_vending, SA.goverment_scheme, SA.name_of_nominee,SA.tenant_id, SA.remark,SA.is_undertaking,SA.date,SA.place,  SA.is_active, SA.created_by,\n" + 
 	 		"SA.created_time, SA.last_modified_by, SA.last_modified_time,ND.document,NF.familymembers\n" + 
 	 		"FROM public.nulm_susv_application_detail SA  left join (SELECT count(application_uuid) docs, application_uuid,max(tenant_id) tenant_id, array_to_json(array_agg(json_build_object('documentType',document_type,'filestoreId',filestore_id,'documnetUuid',document_uuid,'isActive',is_active, \n" + 
 	 		"'tenantId',tenant_id,'applicationUuid',application_uuid) ))as document FROM nulm_susv_application_document GROUP BY application_uuid) ND on SA.application_uuid=ND.application_uuid and SA.tenant_id=ND.tenant_id \n" + 
@@ -140,8 +140,7 @@ public class NULMQueryBuilder {
 	 		"'tenantId',tenant_id,'applicationUuid',application_uuid))) as familymembers FROM nulm_susv_familiy_detail GROUP BY application_uuid) NF \n" + 
 	 		"on SA.application_uuid=NF.application_uuid and SA.tenant_id=NF.tenant_id \n" + 
 	 		"where SA.application_id=(case when :applicationId  <>'' then :applicationId  else SA.application_id end) and SA.created_by=(case when :createdBy  <>'' then :createdBy  else SA.created_by end) AND SA.tenant_id=:tenantId\n" + 
-	 		"AND SA.application_status IN( :applicationStatus)\n" + 
-	 		"AND SA.is_active='true'  AND \n" + 
+	 		"AND SA.is_active='true'  AND SA.application_status NOT IN(:applicationStaus) and \n" + 
 	 		"TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') >= CASE WHEN :fromDate <> ''THEN DATE(:fromDate) ELSE\n" + 
 	 		"TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END\n" + 
 	 		"AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <= CASE WHEN :toDate <>'' THEN DATE(:toDate) ELSE\n" + 
