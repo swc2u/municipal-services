@@ -64,6 +64,10 @@ public class PTConstants {
 
 	public static final String BILLING_BUSINESS_SERVICE_DC = "RentedProperties.DuplicateAllotmentLetter";
 
+	public static final String TAX_HEAD_CODE_APPLICATION_CHARGE = "APPLICATION";
+
+	public static final String TAX_HEAD_CODE_PUBLICATION_CHARGE = "PUBLICATION";
+
 	public static final String BILLING_BUSINESS_SERVICE_RENT = "RentedProperties.Rent";
 
 	public static final String BUSINESS_SERVICE_DC = "DuplicateCopyOfAllotmentLetterRP";
@@ -104,7 +108,7 @@ public class PTConstants {
 
 	public static final String BILL_AMOUNT_JSONPATH = "$.billResponse.Bill[0].totalAmount";
 
-	public static final String MODULE = "rainmaker-tl";
+	public static final String MODULE = "rainmaker-rp";
 
 	public static final String NOTIFICATION_LOCALE = "en_IN";
 

@@ -174,7 +174,7 @@ public class NotificationUtil {
 				log.info("Messages from localization couldn't be fetched!");
 			for (EmailRequest emailRequest : emailRequestList) {
 				producer.pushEmail(config.getEmailNotifTopic(), emailRequest.getEmail(), emailRequest.getBody(),
-						PTConstants.EMAIL_SUBJECT, false);
+						PTConstants.EMAIL_SUBJECT, emailRequest.isHTML());
 				log.info("EmailAddress: " + emailRequest.getEmail() + " Messages: " + emailRequest.getBody());
 			}
 		}

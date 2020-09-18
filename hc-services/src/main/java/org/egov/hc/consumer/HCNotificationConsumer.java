@@ -1,5 +1,10 @@
 package org.egov.hc.consumer;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,12 +48,15 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONObject;
 
 @org.springframework.stereotype.Service
 @Slf4j
 public class HCNotificationConsumer {
+	
 
 	@Autowired
 	private HCProducer hCProducer;
@@ -96,6 +104,7 @@ public class HCNotificationConsumer {
 		if (!CollectionUtils.isEmpty(serviceReqRequest.getActionInfo())) {
 
 			sendNotification(serviceReqRequest, messageMap, null);
+			
 
 			// check citizen raised a request, then get Executive engg role user list from
 			
@@ -108,6 +117,9 @@ public class HCNotificationConsumer {
 			if (serviceReqRequest.getActionInfo().get(0).getAction().equals(WorkFlowConfigs.ACTION_OPEN)) {
 				//String role = HCConstants.EXECUTIVE_ENGINEER;
 				
+				String serviceCode = getServiceCode(serviceReqRequest);
+				serviceReqRequest.getServices().get(0).setServiceType(serviceCode);
+				
 				String role = workflowIntegrator.parseBussinessServiceData(workflowIntegrator.getbussinessServiceDatafromprocesinstanceEdit(serviceReqRequest),serviceReqRequest);
 
 				getRolewiseUserList(serviceReqRequest, role, messageMap);
@@ -116,6 +128,49 @@ public class HCNotificationConsumer {
 
 		}
 
+	}
+
+	private String getServiceCode(ServiceRequest service) {
+		String servicetype =service.getServices().get(0).getServiceType();
+		
+		try
+		{
+			
+			String payloadData ="{\"RequestInfo\": {\"apiId\": \"Rainmaker\",\"ver\": \".01\",\"ts\": \"\",\"action\": \"_search\",\"did\": \"1\",\"key\": \"\",\"msgId\": \"20170310130900|en_IN\",\"authToken\": null},\"MdmsCriteria\": {\"tenantId\": \"ch\",\"moduleDetails\": [{\"moduleName\": \"eg-horticulture\",\"masterDetails\": [{\"name\": \"ServiceType\"}]}]}}" ;
+
+			String mdmsData =  sendPostRequest(
+					hcConfiguration.getMdmsHost().concat(hcConfiguration.getMdmsEndpoint()).concat("?").concat("&tenantId=ch"),
+					payloadData);
+
+			if(null != mdmsData)
+			{
+				org.json.JSONObject mdmsDataobj = new org.json.JSONObject(mdmsData);
+				org.json.JSONObject MdmsResObj = mdmsDataobj.getJSONObject("MdmsRes");
+				org.json.JSONObject eghorticultureObj = MdmsResObj.getJSONObject("eg-horticulture");
+			
+				org.json.JSONArray mdmsServiceTypes = eghorticultureObj.getJSONArray("ServiceType");
+				
+				for(int cnt =0 ; cnt <= mdmsServiceTypes.length() ; cnt ++)
+				{
+					org.json.JSONObject mdmsServiceTypesObj = new org.json.JSONObject(
+							mdmsServiceTypes.get(cnt).toString());
+					
+					String serviceName = mdmsServiceTypesObj.getString("name");
+					
+					if(serviceName.equals(service.getServices().get(0).getServiceType()))
+					{
+						servicetype = mdmsServiceTypesObj.getString("code");
+						break;
+					}
+				}
+			}
+
+			
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
+		return servicetype;
 	}
 
 	public void getRolewiseUserList(ServiceRequest serviceReqRequest, String role, Map<String, String> messageMap) {
@@ -222,12 +277,20 @@ public class HCNotificationConsumer {
 
 	}
 
-	public void sendNotification(ServiceRequest serviceReqRequest, Map<String, String> messageMap,
+	public void sendNotification(ServiceRequest serviceReqRequest, Map<String, String> messageMap, 
 			String service_request_id_new) {
 
 		for (ActionInfo actionInfo : serviceReqRequest.getActionInfo()) {
 			if (null != actionInfo && (!StringUtils.isEmpty(actionInfo.getStatus()))) {
 				ServiceRequestData service = serviceReqRequest.getServices().get(0);
+				
+				//call to mdms and get servicetype
+				
+				String mdmsServiceTypeName =service.getServiceType();
+				mdmsServiceTypeName=getMdmsServiceTypeName(serviceReqRequest);
+				
+				service.setServiceType(mdmsServiceTypeName); 
+				 
 				if (isNotificationEnabled(actionInfo.getStatus())) {
 					if (hcConfiguration.getIsSMSNotificationEnabled()) {
 						SMSRequest smsRequest = prepareSMSRequest(service, actionInfo,
@@ -269,6 +332,50 @@ public class HCNotificationConsumer {
 			}
 		}
 
+	}
+
+	private String getMdmsServiceTypeName(ServiceRequest service) {
+		
+		String servicetype =service.getServices().get(0).getServiceType();
+		
+		try
+		{
+			
+			String payloadData ="{\"RequestInfo\": {\"apiId\": \"Rainmaker\",\"ver\": \".01\",\"ts\": \"\",\"action\": \"_search\",\"did\": \"1\",\"key\": \"\",\"msgId\": \"20170310130900|en_IN\",\"authToken\": null},\"MdmsCriteria\": {\"tenantId\": \"ch\",\"moduleDetails\": [{\"moduleName\": \"eg-horticulture\",\"masterDetails\": [{\"name\": \"ServiceType\"}]}]}}" ;
+
+			String mdmsData =  sendPostRequest(
+					hcConfiguration.getMdmsHost().concat(hcConfiguration.getMdmsEndpoint()).concat("?").concat("&tenantId=ch"),
+					payloadData);
+
+			if(null != mdmsData)
+			{
+				org.json.JSONObject mdmsDataobj = new org.json.JSONObject(mdmsData);
+				org.json.JSONObject MdmsResObj = mdmsDataobj.getJSONObject("MdmsRes");
+				org.json.JSONObject eghorticultureObj = MdmsResObj.getJSONObject("eg-horticulture");
+			
+				org.json.JSONArray mdmsServiceTypes = eghorticultureObj.getJSONArray("ServiceType");
+				
+				for(int cnt =0 ; cnt <= mdmsServiceTypes.length() ; cnt ++)
+				{
+					org.json.JSONObject mdmsServiceTypesObj = new org.json.JSONObject(
+							mdmsServiceTypes.get(cnt).toString());
+					
+					String servicecode = mdmsServiceTypesObj.getString("code");
+					
+					if(servicecode.equals(service.getServices().get(0).getServiceType()))
+					{
+						servicetype = mdmsServiceTypesObj.getString("name");
+						break;
+					}
+				}
+			}
+
+			
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+		}
+		return servicetype;
 	}
 
 	/**
@@ -985,7 +1092,13 @@ public class HCNotificationConsumer {
 		
     	 for (ActionInfo actionInfo : serviceReqRequest.getActionInfo()) {
              if (null != actionInfo && (!StringUtils.isEmpty(actionInfo.getStatus()))) {
-                 ServiceRequestData service = serviceReqRequest.getServices().get(0);            
+                 ServiceRequestData service = serviceReqRequest.getServices().get(0);      
+                 
+                 	//call to mdms and get servicetype
+ 				
+                 	String mdmsServiceTypeName =service.getServiceType();
+ 					mdmsServiceTypeName=getMdmsServiceTypeName(serviceReqRequest);
+ 					service.setServiceType(mdmsServiceTypeName); 
              
                 	{ 	
                      if (hcConfiguration.getIsSMSNotificationEnabled()) {
@@ -1003,7 +1116,8 @@ public class HCNotificationConsumer {
                      	EmailRequest emailRequests = prepareEmailRequest(service, actionInfo, serviceReqRequest.getRequestInfo(),messageMap,action,serviceRequestDate,days);
                      	log.info(" Sending mail : "+ emailRequests);
                      	hCProducer.push(hcConfiguration.getEmailNotifTopic(), emailRequests);
-                         
+                   
+
                      }
 //                     
 //
@@ -1200,6 +1314,35 @@ public class HCNotificationConsumer {
 	 	   return null;
 	     return EmailRequest.builder().email(emailIdRetrived).subject(subject).body(message).isHTML(true).build();
 	 }
+	 
+	 public static String sendPostRequest(String requestUrl, String payload) {
+			StringBuffer jsonString = new StringBuffer();
+			try {
+				URL url = new URL(requestUrl);
+				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+				connection.setDoInput(true);
+				connection.setDoOutput(true);
+				connection.setRequestMethod("POST");
+				connection.setRequestProperty("Accept", "application/json");
+				connection.setRequestProperty("Content-Type", "application/json");
+				OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+				writer.write(payload);
+				writer.close();
+				BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+				String line;
+				while ((line = br.readLine()) != null) {
+					jsonString.append(line);
+					System.out.println(line);
+				}
+				br.close();
+				connection.disconnect();
+			} catch (Exception e) {
+				throw new RuntimeException(e.getMessage());
+			}
+			return jsonString.toString();
+		}
 	 
 
 }
