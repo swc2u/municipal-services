@@ -201,18 +201,35 @@ public class SepApplication {
 	@JsonProperty("branchName")
 	private String branchName;
 	
-	@JsonProperty("committeeDecision")
-	private JSONObject  committeeDecision;
+	@JsonProperty("taskCommitteeApprovedAmount")
+	private String taskCommitteeApprovedAmount;
 	
-	@JsonProperty("sanctionDetails")
-	private JSONObject sanctionDetails;
+	@JsonProperty("taskCommitteeRemark")
+	private String taskCommitteeRemark;
 	
-	@JsonProperty("bankProcessingDetails")
-	private JSONObject bankProcessingDetails;
+	@JsonProperty("taskCommitteeActionDate")
+	private String taskCommitteeActionDate;
+	
+	@JsonProperty("taskCommitteeStatus")
+	private String taskCommitteeStatus;
+	
+	@JsonProperty("committeeBankName")
+	private String committeeBankName;
+	
+	@JsonProperty("committeeBranchName")
+	private String committeeBranchName;
+	
+	@JsonProperty("applicationForwardedOnDate")
+	private String applicationForwardedOnDate;
+	
+	@JsonProperty("sanctionDate")
+	private String sanctionDate;
+	
+	@JsonProperty("sanctionRemarks")
+	private String sanctionRemarks;
 	
 	@JsonProperty("applicationDocument")
 	private List<SepApplicationDocument> applicationDocument;
-	
 	
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails ;
