@@ -11,6 +11,7 @@ import org.egov.waterconnection.model.WaterConnectionRequest;
 import org.egov.waterconnection.model.workflow.ProcessInstance;
 import org.egov.waterconnection.model.workflow.ProcessInstanceRequest;
 import org.egov.waterconnection.model.workflow.ProcessInstanceResponse;
+import org.egov.waterconnection.util.WaterServicesUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -40,6 +41,9 @@ public class WorkflowIntegrator {
 	
 	@Autowired
 	private RestTemplate rest;
+	
+	@Autowired
+	private WaterServicesUtil wsUtil;
 
 	/**
 	 * Method to integrate with workflow
@@ -53,10 +57,14 @@ public class WorkflowIntegrator {
 	 * @param waterConnectionRequest
 	 */
 	public void callWorkFlow(WaterConnectionRequest waterConnectionRequest, Property property) {
+		String wfBusinessServiceName = config.getBusinessServiceValue();
+		if(wsUtil.isModifyConnectionRequest(waterConnectionRequest)) {
+			wfBusinessServiceName = config.getModifyWSBusinessServiceName();
+		}
 		ProcessInstance processInstance = ProcessInstance.builder()
 				.businessId(waterConnectionRequest.getWaterConnection().getApplicationNo())
 				.tenantId(property.getTenantId())
-				.businessService(config.getBusinessServiceValue()).moduleName(MODULENAMEVALUE)
+				.businessService(wfBusinessServiceName).moduleName(MODULENAMEVALUE)
 				.action(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()).build();
 		if (!StringUtils.isEmpty(waterConnectionRequest.getWaterConnection().getProcessInstance())) {
 			if (!CollectionUtils
