@@ -1,5 +1,5 @@
-ALTER TABLE eg_ws_connection ADD COLUMN connectionusagestype TYPE varchar (50);
-ALTER TABLE eg_ws_connection_audit ADD COLUMN connectionusagestype TYPE varchar (50);
+ALTER TABLE eg_ws_connection ADD COLUMN connectionusagestype character varying(50);
+ALTER TABLE eg_ws_connection_audit ADD COLUMN connectionusagestype character varying(50);
 ALTER TABLE eg_ws_connection ADD COLUMN inworkflow boolean DEFAULT false;
 ALTER TABLE eg_ws_connection_audit ADD COLUMN inworkflow boolean DEFAULT false;
 ALTER TABLE eg_ws_applicationdocument RENAME COLUMN wsid to applicationid;

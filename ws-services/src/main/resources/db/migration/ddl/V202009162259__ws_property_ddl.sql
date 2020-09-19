@@ -9,5 +9,5 @@ CREATE TABLE eg_ws_property
 	lastmodifiedby character varying(64),
 	createdtime bigint,
 	lastmodifiedtime bigint,
-	CONSTRAINT eg_ws_application_pkey PRIMARY KEY (id)
+	CONSTRAINT eg_ws_property_pkey PRIMARY KEY (id)
 )
