@@ -426,7 +426,9 @@ public class EstimationService {
 			if (property.getUsageCategory().equalsIgnoreCase(WSCalculationConstant.WS_COMMERCIAL) && slabs.getCode().equalsIgnoreCase("GENERAL_BOOTHS")
 					&& property.getLandArea() > slabs.getFrom() && property.getLandArea() < slabs.getTo()) {
 				multiplier = slabs.getCharge();
-			} else if (property.getLandArea() > slabs.getFrom() && property.getLandArea() < slabs.getTo()) {
+				break;
+			} else if (property.getLandArea() > slabs.getFrom() && property.getLandArea() < slabs.getTo()
+					&& (!property.getUsageCategory().equalsIgnoreCase(WSCalculationConstant.WS_COMMERCIAL))) {
 				multiplier = slabs.getCharge();
 			}
 
@@ -491,6 +493,10 @@ public class EstimationService {
 
 			}
 			BigDecimal roadCuttingCharge = BigDecimal.ZERO;
+			if (criteria.getWaterConnection().getApplicationStatus().equalsIgnoreCase(WSCalculationConstant.WS_SECURITY_CHARGE_STATUS))
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_SECURITY_CHARGE)
+						.estimateAmount(securityFee.setScale(2, 2)).build());
+			else {
 			if (criteria.getWaterConnection().getRoadType() != null)
 				roadCuttingCharge = getChargeForRoadCutting(masterData, criteria.getWaterConnection().getRoadType(),
 						criteria.getWaterConnection().getRoadCuttingArea());
@@ -509,7 +515,7 @@ public class EstimationService {
 			if (!(roadCuttingCharge.compareTo(BigDecimal.ZERO) == 0))
 				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_ROAD_CUTTING_CHARGE)
 						.estimateAmount(roadCuttingCharge.setScale(2, 2)).build());
-
+			}
 			return estimates;
 
 		}
@@ -640,8 +646,9 @@ public class EstimationService {
 				return BigDecimal.ZERO;
 			JSONObject master = mapper.convertValue(filteredMasters.get(0), JSONObject.class);
 			charge = new BigDecimal(master.getAsNumber(WSCalculationConstant.UNIT_COST_CONST).toString());
-			charge = charge.add(charge.multiply(gst_tax.divide(WSCalculationConstant.HUNDRED)));
+			charge = charge.multiply(new BigDecimal (roadCuttingArea));
 			charge = charge.add(charge.multiply(supervision_tax.divide(WSCalculationConstant.HUNDRED)));
+			charge = charge.add(charge.multiply(gst_tax.divide(WSCalculationConstant.HUNDRED)));
 
 		}
 		return charge;

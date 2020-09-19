@@ -42,7 +42,10 @@ public class DuplicateCopyPropertyRowMapper implements ResultSetExtractor<List<D
 				currentapplication = DuplicateCopy.builder().id(applicationId).property(property)
 						.tenantId(rs.getString("tenantid")).state(rs.getString("state")).action(rs.getString("action"))
 						.applicationNumber(rs.getString("app_number"))
-						.allotmentNumber(rs.getString("owner_allot_number")).auditDetails(auditdetails).build();
+						.allotmentNumber(rs.getString("owner_allot_number"))
+						.allotmentStartDate(rs.getString("allot_start_date"))
+						.allotmentEndDate(rs.getString("allot_end_date"))
+						.auditDetails(auditdetails).build();
 				applicationMap.put(applicationId, currentapplication);
 			}
 			addChildrenToProperty(rs, currentapplication);
