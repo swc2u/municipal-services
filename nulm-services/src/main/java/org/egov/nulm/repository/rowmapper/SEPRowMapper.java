@@ -31,25 +31,25 @@ public class SEPRowMapper implements ResultSetExtractor<List<SepApplication>> {
 	@Override
 	public List<SepApplication> extractData(ResultSet rs) throws SQLException, DataAccessException {
 		Map<String, SepApplication> sepMap = new HashMap<>();
-		JSONObject committeeDecision = new JSONObject();
-		JSONObject bankProcessingDetails = new JSONObject();
-		JSONObject sanctionDetails = new JSONObject();
-		List<SepApplication> listSEPApplication = new ArrayList<>();
 		
+		List<SepApplication> listSEPApplication = new ArrayList<>();
+
 		try {
 			while (rs.next()) {
 				String id = rs.getString("application_uuid");
 				SepApplication sepapp = new SepApplication();
-				JSONParser jsonParser = new JSONParser();
+				
 				sepapp = sepapp.builder().build();
 				if (!sepMap.containsKey(id)) {
-					AuditDetails audit=AuditDetails.builder().createdBy(rs.getString("created_by")).createdTime(rs.getLong("created_time")).
-							lastModifiedBy(rs.getString("last_modified_by")).lastModifiedTime(rs.getLong("last_modified_time")).build();
+					AuditDetails audit = AuditDetails.builder().createdBy(rs.getString("created_by"))
+							.createdTime(rs.getLong("created_time")).lastModifiedBy(rs.getString("last_modified_by"))
+							.lastModifiedTime(rs.getLong("last_modified_time")).build();
 					sepapp.setAddress(rs.getString("address"));
 					sepapp.setAdharNo(rs.getString("adhar_no"));
 					sepapp.setAge(rs.getInt("age"));
 					sepapp.setApplicationId(rs.getString("application_id"));
-			    	sepapp.setApplicationStatus(SepApplication.StatusEnum.fromValue(rs.getString("application_status")));
+					sepapp.setApplicationStatus(
+							SepApplication.StatusEnum.fromValue(rs.getString("application_status")));
 					sepapp.setApplicationUuid(rs.getString("application_uuid"));
 					sepapp.setBplNo(rs.getString("bpl_no"));
 					sepapp.setCategory(rs.getString("category"));
@@ -83,19 +83,16 @@ public class SEPRowMapper implements ResultSetExtractor<List<SepApplication>> {
 					sepapp.setAccountName(rs.getString("account_name"));
 					sepapp.setBankName(rs.getString("bank_name"));
 					sepapp.setBranchName(rs.getString("branch_name"));
-					sepapp.setIsDisabilityCertificateAvailable(rs.getBoolean("is_disability_certificate_available"));	
-					if (rs.getString("committee_decision") != null) {
-						committeeDecision = (JSONObject) jsonParser.parse(rs.getString("committee_decision"));
-					}
-					if (rs.getString("bank_processing_details") != null) {
-						bankProcessingDetails = (JSONObject) jsonParser.parse(rs.getString("bank_processing_details"));
-					}
-					if (rs.getString("sanction_details") != null) {
-						sanctionDetails = (JSONObject) jsonParser.parse(rs.getString("sanction_details"));
-					}
-					sepapp.setCommitteeDecision(committeeDecision);
-					sepapp.setBankProcessingDetails(bankProcessingDetails);
-					sepapp.setSanctionDetails(sanctionDetails);
+					sepapp.setIsDisabilityCertificateAvailable(rs.getBoolean("is_disability_certificate_available"));
+					sepapp.setTaskCommitteeApprovedAmount(rs.getString("task_committee_approved_amount"));
+					sepapp.setTaskCommitteeRemark(rs.getString("task_committee_remark"));
+					sepapp.setTaskCommitteeActionDate(rs.getString("task_committee_action_date"));
+					sepapp.setTaskCommitteeStatus(rs.getString("task_committee_status"));
+					sepapp.setCommitteeBankName(rs.getString("committee_bank_name"));
+					sepapp.setCommitteeBranchName(rs.getString("committee_branch_name"));
+					sepapp.setApplicationForwardedOnDate(rs.getString("application_forwarded_on_date"));
+					sepapp.setSanctionDate(rs.getString("sanction_date"));
+					sepapp.setSanctionRemarks(rs.getString("sanction_remarks"));
 					sepapp.setTypeOfBusinessToBeStarted(rs.getString("type_of_business_to_be_started"));
 					List<SepApplicationDocument> documentAttachment = null;
 					if (rs.getString("document") != null) {
@@ -104,14 +101,14 @@ public class SEPRowMapper implements ResultSetExtractor<List<SepApplication>> {
 					}
 					sepapp.setApplicationDocument(documentAttachment);
 					sepMap.put(id, sepapp);
-				listSEPApplication.add(sepapp);
+					listSEPApplication.add(sepapp);
 				}
 			}
-		
-	} catch (Exception e) {
-		throw new CustomException(CommonConstants.SEP_APPLICATION_EXCEPTION_CODE, e.getMessage());
+
+		} catch (Exception e) {
+			throw new CustomException(CommonConstants.SEP_APPLICATION_EXCEPTION_CODE, e.getMessage());
+		}
+		return listSEPApplication;
 	}
-	return listSEPApplication;
-}
 
 }

@@ -8,10 +8,18 @@ ADD COLUMN account_name character varying(255),
 ADD COLUMN bank_name character varying(255),
 ADD COLUMN branch_name character varying(255),
 ADD COLUMN is_disability_certificate_available Boolean,
-ADD COLUMN committee_decision jsonb,
-ADD COLUMN bank_processing_details jsonb,
-ADD COLUMN sanction_details jsonb;
+ADD COLUMN task_committee_approved_amount character varying(255),
+ADD COLUMN task_committee_remark character varying(255),
+ADD COLUMN task_committee_action_date timestamp without time zone,
+ADD COLUMN task_committee_status character varying(255),
+ADD COLUMN committee_bank_name character varying(255),
+ADD COLUMN committee_branch_name character varying(255),
+ADD COLUMN application_forwarded_on_date timestamp without time zone,,
+ADD COLUMN sanction_date timestamp without time zone,
+ADD COLUMN sanction_remarks character varying(255);
 
+
+ 
 alter table nulm_suh_application_detail
 ADD COLUMN assigned_to character varying(64) ;
 
