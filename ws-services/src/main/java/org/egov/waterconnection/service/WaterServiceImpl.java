@@ -150,7 +150,7 @@ public class WaterServiceImpl implements WaterService {
 		waterDaoImpl.pushForEditNotification(waterConnectionRequest);
 		//Enrich file store Id After payment
 		enrichmentService.enrichFileStoreIds(waterConnectionRequest);
-	//	userService.updateUser(waterConnectionRequest, searchResult);
+		userService.updateUser(waterConnectionRequest, searchResult);
 		//Call workflow
 		wfIntegrator.callWorkFlow(waterConnectionRequest, property);
 		enrichmentService.postStatusEnrichment(waterConnectionRequest);

@@ -139,6 +139,7 @@ public class EnrichmentService {
 					"The Id of WaterConnection returned by idgen is not equal to number of WaterConnection");
 			throw new CustomException(errorMap);
 		}
+		waterConnection.setApplicationNo(applicationNumbers.get(0));
 		waterConnection.getWaterApplication().setApplicationNo(applicationNumbers.get(0));
 	}
 
