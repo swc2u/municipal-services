@@ -809,10 +809,9 @@ public class EnrichmentService {
 	}
 
 	public void enrichDuplicateCopySearchCriteria(RequestInfo requestInfo, DuplicateCopySearchCriteria criteria) {
-		if (criteria.isEmpty() && requestInfo.getUserInfo().getType().equalsIgnoreCase("CITIZEN")) {
-			criteria.setApplicantMobNo(requestInfo.getUserInfo().getUserName());
+		if (criteria.isEmpty() && requestInfo.getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_CITIZEN)) {
+			criteria.setCreatedBy(String.valueOf(requestInfo.getUserInfo().getId()));
 		}
-
 	}
 
 	public void enrichNoticeCreateRequest(NoticeGenerationRequest noticeGenerationRequest) {
