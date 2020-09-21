@@ -28,12 +28,12 @@ public class WsQueryBuilder {
 	@Autowired
 	private UserService userService;
 
-	private static final String INNER_JOIN_STRING = "INNER JOIN";
+	private static final String INNER_JOIN_STRING = " INNER JOIN ";
     private static final String LEFT_OUTER_JOIN_STRING = " LEFT OUTER JOIN ";
 
 	private static String holderSelectValues = "connectionholder.tenantid as holdertenantid, connectionholder.connectionid as holderapplicationId, userid, connectionholder.status as holderstatus, isprimaryholder, connectionholdertype, holdershippercentage, connectionholder.relationship as holderrelationship, connectionholder.createdby as holdercreatedby, connectionholder.createdtime as holdercreatedtime, connectionholder.lastmodifiedby as holderlastmodifiedby, connectionholder.lastmodifiedtime as holderlastmodifiedtime, ";
 	
-private static final String WATER_SEARCH_QUERY = "SELECT "
+	private static final String WATER_SEARCH_QUERY = "SELECT "
 			/* + " conn.*, wc.*, document.*, plumber.*, application.*, property.*, " */
 			+ " wc.connectionCategory, wc.connectionType, wc.waterSource,"
 			+ " wc.meterId, wc.meterInstallationDate, wc.pipeSize, wc.noOfTaps, wc.proposedPipeSize, wc.proposedTaps, wc.connection_id as connection_Id, wc.connectionExecutionDate, wc.initialmeterreading, wc.appCreatedDate,"
@@ -52,20 +52,22 @@ private static final String WATER_SEARCH_QUERY = "SELECT "
 			+ " property.id as waterpropertyid, property.usagecategory, property.usagesubcategory "
 			+ " FROM eg_ws_connection conn "
 			+  INNER_JOIN_STRING 
-			+" eg_ws_service wc ON wc.connection_id = conn.id"
+			+ "eg_ws_service wc ON wc.connection_id = conn.id"
 			+  INNER_JOIN_STRING
-			+ "eg_ws_property property ON property.property_id = conn.property_id"
+			+ "eg_ws_application application ON application.wsid = conn.id"
 			+  INNER_JOIN_STRING
+			+ "eg_ws_property property ON property.wsid = conn.id"
+			+  LEFT_OUTER_JOIN_STRING
 			+ "eg_ws_applicationdocument document ON document.applicationid = application.id"
 			+  LEFT_OUTER_JOIN_STRING
 			+ "eg_ws_plumberinfo plumber ON plumber.wsid = conn.id"
-			+  LEFT_OUTER_JOIN_STRING
-			+ "eg_ws_application application ON application.wsid = conn.id";			
+			+ LEFT_OUTER_JOIN_STRING
+		    + "eg_ws_connectionholder connectionholder ON connectionholder.connectionid = conn.id";
 	
 	private static final String NO_OF_CONNECTION_SEARCH_QUERY = "SELECT count(*) FROM eg_ws_connection WHERE";
 	
 	private static final String PAGINATION_WRAPPER = "SELECT * FROM " +
-            "(SELECT *, DENSE_RANK() OVER (ORDER BY conn_id) offset_ FROM " +
+            "(SELECT *, DENSE_RANK() OVER (ORDER BY app_applicationno) offset_ FROM " +
             "({})" +
             " result) result_offset " +
             "WHERE offset_ > ? AND offset_ <= ?";
