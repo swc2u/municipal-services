@@ -56,7 +56,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 				currentWaterConnection.setSecurityCharge(rs.getDouble("securityCharge"));
 				currentWaterConnection.setConnectionUsagesType(rs.getString("connectionusagestype"));
 				currentWaterConnection.setInWorkflow(rs.getBoolean("inWorkflow"));
-				currentWaterConnection.setActivityType(rs.getString("water_activitytype"));
+				currentWaterConnection.setActivityType(rs.getString("app_activitytype"));
 				currentWaterConnection.setRoadCuttingArea(rs.getFloat("roadcuttingarea"));
 				currentWaterConnection.setRoadType(rs.getString("roadtype"));
 				currentWaterConnection.setPropertyId(rs.getString("property_id"));
