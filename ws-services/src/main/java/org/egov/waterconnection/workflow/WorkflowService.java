@@ -23,6 +23,9 @@ public class WorkflowService {
 
 	@Autowired
     private WSConfiguration config;
+
+	@Autowired
+    private WorkflowIntegrator workflowIntegrator;
 	
 	@Autowired
     private ServiceRequestRepository serviceRequestRepository;
@@ -36,9 +39,10 @@ public class WorkflowService {
      * @param requestInfo The RequestInfo object of the request
      * @return BusinessService for the the given tenantId
      */
-    public BusinessService getBusinessService(String tenantId, RequestInfo requestInfo, String businessServiceName) {
+    public BusinessService getBusinessService(String tenantId, RequestInfo requestInfo, String activityType) {
         RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
-        Object result = serviceRequestRepository.fetchResult(getSearchURLWithParams(tenantId, businessServiceName), requestInfoWrapper);
+        String BusinessService= workflowIntegrator.getBusinessService(activityType); 
+        Object result = serviceRequestRepository.fetchResult(getSearchURLWithParams(tenantId, "NewWS1"), requestInfoWrapper);
         BusinessServiceResponse response = null;
         try {
             response = mapper.convertValue(result,BusinessServiceResponse.class);
@@ -60,7 +64,7 @@ public class WorkflowService {
         url.append(config.getWfBusinessServiceSearchPath());
         url.append("?tenantId=");
         url.append(tenantId);
-        url.append("&businessservices=");
+        url.append("&businessServices=");
         url.append(businessServiceName);
         return url;
     }
@@ -182,16 +186,17 @@ public class WorkflowService {
 	 * @param requestInfo
 	 * @param tenantId
 	 */
-	public void validateInProgressWF(List<WaterConnection> waterConnectionList, RequestInfo requestInfo,
-									 String tenantId) {
-		WaterConnection waterConnectionWithWF = null;
-		Set<String> applicationNos = waterConnectionList.stream().map(WaterConnection::getApplicationNo).collect(Collectors.toSet());
-		List<ProcessInstance> processInstanceList = getProcessInstance(requestInfo, applicationNos, tenantId, config.getModifyWSBusinessServiceName());
-		processInstanceList.forEach(processInstance -> {
-			if (!processInstance.getState().getIsTerminateState()) {
-				throw new CustomException("WS_APP_EXIST_IN_WF",
-						"Application already exist in WorkFlow. Cannot modify connection.");
-			}
-		});
-	}
+	/*
+	 * public void validateInProgressWF(List<WaterConnection> waterConnectionList,
+	 * RequestInfo requestInfo, String tenantId) { WaterConnection
+	 * waterConnectionWithWF = null; Set<String> applicationNos =
+	 * waterConnectionList.stream().map(WaterConnection::getApplicationNo).collect(
+	 * Collectors.toSet()); List<ProcessInstance> processInstanceList =
+	 * getProcessInstance(requestInfo, applicationNos, tenantId,
+	 * config.getModifyWSBusinessServiceName());
+	 * processInstanceList.forEach(processInstance -> { if
+	 * (!processInstance.getState().getIsTerminateState()) { throw new
+	 * CustomException("WS_APP_EXIST_IN_WF",
+	 * "Application already exist in WorkFlow. Cannot modify connection."); } }); }
+	 */
 }

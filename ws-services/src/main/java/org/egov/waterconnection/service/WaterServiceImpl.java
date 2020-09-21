@@ -9,6 +9,7 @@ import java.util.Set;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.egov.waterconnection.config.WSConfiguration;
+import org.egov.waterconnection.constants.WCConstants;
 import org.egov.waterconnection.model.Property;
 import org.egov.waterconnection.model.SearchCriteria;
 import org.egov.waterconnection.model.WaterConnection;
@@ -133,14 +134,13 @@ public class WaterServiceImpl implements WaterService {
 		waterConnectionValidator.validateWaterConnection(waterConnectionRequest, true);
 		mDMSValidator.validateMasterData(waterConnectionRequest);
 		BusinessService businessService = workflowService.getBusinessService(waterConnectionRequest.getWaterConnection().getTenantId(), 
-				waterConnectionRequest.getRequestInfo(), config.getBusinessServiceValue());
+				waterConnectionRequest.getRequestInfo(), waterConnectionRequest.getWaterConnection().getActivityType());
 		log.info("businessService:"+businessService);
 		WaterConnection searchResult = getConnectionForUpdateRequest(waterConnectionRequest.getWaterConnection().getId(), waterConnectionRequest.getRequestInfo());
 		Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
 		String previousApplicationStatus = workflowService.getApplicationStatus(waterConnectionRequest.getRequestInfo(),
 				waterConnectionRequest.getWaterConnection().getApplicationNo(),
-				waterConnectionRequest.getWaterConnection().getTenantId(),
-				config.getBusinessServiceValue());
+				waterConnectionRequest.getWaterConnection().getTenantId(),wfIntegrator.getBusinessService(waterConnectionRequest.getWaterConnection().getActivityType()));
 		enrichmentService.enrichUpdateWaterConnection(waterConnectionRequest);
 		actionValidator.validateUpdateRequest(waterConnectionRequest, businessService, previousApplicationStatus);
 		validateProperty.validatePropertyCriteria(property);
@@ -150,12 +150,14 @@ public class WaterServiceImpl implements WaterService {
 		waterDaoImpl.pushForEditNotification(waterConnectionRequest);
 		//Enrich file store Id After payment
 		enrichmentService.enrichFileStoreIds(waterConnectionRequest);
-		userService.updateUser(waterConnectionRequest, searchResult);
+	//	userService.updateUser(waterConnectionRequest, searchResult);
 		//Call workflow
 		wfIntegrator.callWorkFlow(waterConnectionRequest, property);
 		enrichmentService.postStatusEnrichment(waterConnectionRequest);
 		boolean isStateUpdatable = waterServiceUtil.getStatusForUpdate(businessService, previousApplicationStatus);
+		
 		waterDao.updateWaterConnection(waterConnectionRequest, isStateUpdatable);
+		
 		enrichmentService.postForMeterReading(waterConnectionRequest);
 		return Arrays.asList(waterConnectionRequest.getWaterConnection());
 	}
