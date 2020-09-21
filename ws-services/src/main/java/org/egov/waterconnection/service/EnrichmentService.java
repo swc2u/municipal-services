@@ -140,6 +140,7 @@ public class EnrichmentService {
 			throw new CustomException(errorMap);
 		}
 		waterConnection.setApplicationNo(applicationNumbers.get(0));
+		waterConnection.getWaterApplication().setApplicationNo(applicationNumbers.get(0));
 	}
 
 	private List<String> getIdList(RequestInfo requestInfo, String tenantId, String idKey, String idformat) {
@@ -182,7 +183,24 @@ public class EnrichmentService {
 			});
 		}
 		enrichingAdditionalDetails(waterConnectionRequest);
+		enrichWaterApplication(waterConnectionRequest);
 	}
+	/**
+	 * Enrich water connection Application
+	 * 
+	 * @param waterConnectionrequest 
+	 */
+	public void enrichWaterApplication(WaterConnectionRequest waterConnectionrequest) {
+		if (waterConnectionrequest.getWaterConnection().getProcessInstance().getAction().equalsIgnoreCase(WCConstants.ACTION_INITIATE)) {
+			waterConnectionrequest.getWaterConnection().getWaterApplication().setId(UUID.randomUUID().toString());
+			waterConnectionrequest.getWaterConnection().getWaterApplication().setActivityType(waterConnectionrequest.getWaterConnection().getActivityType());
+			waterConnectionrequest.getWaterConnection().getWaterApplication().setAction(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction());
+			
+			
+			setApplicationIdgenIds(waterConnectionrequest);
+		}
+	}
+	
 	
 	/**
 	 * Enrich water connection request and add connection no if status is approved

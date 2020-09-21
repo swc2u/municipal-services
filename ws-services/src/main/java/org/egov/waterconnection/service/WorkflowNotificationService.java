@@ -293,7 +293,7 @@ public class WorkflowNotificationService {
 				messageToreplace = getMessageForPlumberInfo(waterConnectionRequest.getWaterConnection(), messageToreplace);
 			
 			if (messageToreplace.contains("<SLA>"))
-				messageToreplace = messageToreplace.replace("<SLA>", getSLAForState(waterConnectionRequest, property, config.getBusinessServiceValue()));
+				messageToreplace = messageToreplace.replace("<SLA>", getSLAForState(waterConnectionRequest, property, waterConnectionRequest.getWaterConnection().getActivityType()));
 
 			if (messageToreplace.contains("<Application number>"))
 				messageToreplace = messageToreplace.replace("<Application number>", waterConnectionRequest.getWaterConnection().getApplicationNo());
