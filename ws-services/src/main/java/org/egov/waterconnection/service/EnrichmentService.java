@@ -71,7 +71,12 @@ public class EnrichmentService {
 	 */
 	public void enrichWaterConnection(WaterConnectionRequest waterConnectionRequest) {
 		WaterApplication waterApplication = new WaterApplication();
+		waterApplication.setId(UUID.randomUUID().toString());
+		waterApplication.setActivityType(waterConnectionRequest.getWaterConnection().getActivityType());
+		waterApplication.setApplicationStatus(waterConnectionRequest.getWaterConnection().getApplicationStatus());
+		waterApplication.setAction(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction());
 		waterConnectionRequest.getWaterConnection().setWaterApplication(waterApplication);
+		waterConnectionRequest.getWaterConnection().getWaterProperty().setId(UUID.randomUUID().toString());
 		
 		if(WCConstants.APPLICATION_PROPERTY_TYPE_DOMESTIC.equalsIgnoreCase(
 				waterConnectionRequest.getWaterConnection().getWaterProperty().getUsageCategory())) {
@@ -205,7 +210,9 @@ public class EnrichmentService {
 			WaterApplication waterApplication = new WaterApplication();
 			waterConnectionrequest.getWaterConnection().setWaterApplication(waterApplication);
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setId(UUID.randomUUID().toString());
+			waterConnectionrequest.getWaterConnection().getWaterApplication().setApplicationNo(waterConnectionrequest.getWaterConnection().getApplicationNo());
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setActivityType(waterConnectionrequest.getWaterConnection().getActivityType());
+			waterConnectionrequest.getWaterConnection().getWaterApplication().setApplicationStatus(waterConnectionrequest.getWaterConnection().getApplicationStatus());
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setAction(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction());
 			
 			setApplicationIdgenIds(waterConnectionrequest);
