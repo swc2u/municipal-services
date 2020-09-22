@@ -20,6 +20,7 @@ import org.egov.waterconnection.model.Connection.StatusEnum;
 import org.egov.waterconnection.model.ConnectionHolderInfo;
 import org.egov.waterconnection.model.SearchCriteria;
 import org.egov.waterconnection.model.Status;
+import org.egov.waterconnection.model.WaterApplication;
 import org.egov.waterconnection.model.WaterConnection;
 import org.egov.waterconnection.model.WaterConnectionRequest;
 import org.egov.waterconnection.model.Idgen.IdResponse;
@@ -69,6 +70,15 @@ public class EnrichmentService {
 	 * @param waterConnectionRequest
 	 */
 	public void enrichWaterConnection(WaterConnectionRequest waterConnectionRequest) {
+		WaterApplication waterApplication = new WaterApplication();
+		waterConnectionRequest.getWaterConnection().setWaterApplication(waterApplication);
+		
+		if(WCConstants.APPLICATION_PROPERTY_TYPE_DOMESTIC.equalsIgnoreCase(
+				waterConnectionRequest.getWaterConnection().getWaterProperty().getUsageCategory())) {
+			waterConnectionRequest.getWaterConnection().setConnectionUsagesType(WCConstants.APPLICATION_PROPERTY_TYPE_DOMESTIC);
+		}
+			
+		waterConnectionRequest.getWaterConnection().setConnectionUsagesType("");
 		AuditDetails auditDetails = waterServicesUtil
 				.getAuditDetails(waterConnectionRequest.getRequestInfo().getUserInfo().getUuid(), true);
 		waterConnectionRequest.getWaterConnection().setAuditDetails(auditDetails);
@@ -192,10 +202,11 @@ public class EnrichmentService {
 	 */
 	public void enrichWaterApplication(WaterConnectionRequest waterConnectionrequest) {
 		if (waterConnectionrequest.getWaterConnection().getProcessInstance().getAction().equalsIgnoreCase(WCConstants.ACTION_INITIATE)) {
+			WaterApplication waterApplication = new WaterApplication();
+			waterConnectionrequest.getWaterConnection().setWaterApplication(waterApplication);
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setId(UUID.randomUUID().toString());
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setActivityType(waterConnectionrequest.getWaterConnection().getActivityType());
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setAction(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction());
-			
 			
 			setApplicationIdgenIds(waterConnectionrequest);
 		}

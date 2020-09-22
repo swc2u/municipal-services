@@ -230,19 +230,22 @@ public class WCConstants {
 	public static final String APPLICATION_TYPE_TEMPORARY = "TEMPORARY";
 	
 	public static final String APPLICATION_TYPE_REGULAR = "REGULAR";
+	
+	public static final String APPLICATION_PROPERTY_TYPE_DOMESTIC = "DOMESTIC";
+	public static final String APPLICATION_PROPERTY_TYPE_COMMERCIAL = "COMMERCIAL";
 
 	//Activity TYpe
-		public static final String WS_NEWCONNECTION = "NEW_WS_CONNECTION";
+	public static final String WS_NEWCONNECTION = "NEW_WS_CONNECTION";
 
-		public static final String WS_PERMANENT_DISCONNECTION = "PERMANENT_DISCONNECTION";
-		
-		public static final String WS_TEMPORARY_DISCONNECTION = "TEMPORARY_DISCONNECTION";
-		
-		public static final String WS_REACTIVATE = "REACTIVATE_CONNECTION";
+	public static final String WS_PERMANENT_DISCONNECTION = "PERMANENT_DISCONNECTION";
+	
+	public static final String WS_TEMPORARY_DISCONNECTION = "TEMPORARY_DISCONNECTION";
+	
+	public static final String WS_REACTIVATE = "REACTIVATE_CONNECTION";
 
-		public static final String WS_CHANGE_OWNER_INFO = "UPDATE_CONNECTION_HOLDER_INFO";
+	public static final String WS_CHANGE_OWNER_INFO = "UPDATE_CONNECTION_HOLDER_INFO";
 
-		public static final String WS_CONVERSION = "CONNECTION_CONVERSION";
+	public static final String WS_CONVERSION = "CONNECTION_CONVERSION";
 
-		public static final String WS_APPLY_FOR_REGULAR_INFO = "APPLY_FOR_REGULAR_INFO";
+	public static final String WS_APPLY_FOR_REGULAR_INFO = "APPLY_FOR_REGULAR_INFO";
 }
