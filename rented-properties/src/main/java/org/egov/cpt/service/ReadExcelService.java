@@ -250,7 +250,11 @@ public class ReadExcelService implements IReadExcelService {
 			}
 
 			if (shouldParseRows) {
-				Integer currentRowYear = ((Double) getValueFromCell(currentRow.getCell(0))).intValue();
+				Object value = getValueFromCell(currentRow.getCell(0));
+				if (!(value instanceof Double)) {
+					continue;
+				}
+				Integer currentRowYear = ((Double) value).intValue();
 				for (int i = 1; i < currentRow.getLastCellNum() - 1; i++) {
 					if (rentDurations.contains(1 + "-" + MONTHS[i - 1] + "-" + currentRowYear)) {
 						payments.add(RentPayment.builder().amountPaid((Double) getValueFromCell(currentRow.getCell(i)))
