@@ -62,7 +62,7 @@ public class WorkflowIntegrator {
 		String activityType = waterConnectionRequest.getWaterConnection().getActivityType();
 		String businessService = getBusinessService(activityType);
 				
-				ProcessInstance processInstance = ProcessInstance.builder()
+		ProcessInstance processInstance = ProcessInstance.builder()
 				.businessId(waterConnectionRequest.getWaterConnection().getApplicationNo())
 				.tenantId(property.getTenantId())
 				.businessService(businessService).moduleName(MODULENAMEVALUE)

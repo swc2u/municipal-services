@@ -73,7 +73,6 @@ public class EnrichmentService {
 		WaterApplication waterApplication = new WaterApplication();
 		waterApplication.setId(UUID.randomUUID().toString());
 		waterApplication.setActivityType(waterConnectionRequest.getWaterConnection().getActivityType());
-		waterApplication.setApplicationStatus(waterConnectionRequest.getWaterConnection().getApplicationStatus());
 		waterApplication.setAction(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction());
 		waterConnectionRequest.getWaterConnection().setWaterApplication(waterApplication);
 		waterConnectionRequest.getWaterConnection().getWaterProperty().setId(UUID.randomUUID().toString());
@@ -83,7 +82,7 @@ public class EnrichmentService {
 			waterConnectionRequest.getWaterConnection().setConnectionUsagesType(WCConstants.APPLICATION_PROPERTY_TYPE_DOMESTIC);
 		}
 			
-		waterConnectionRequest.getWaterConnection().setConnectionUsagesType("");
+		waterConnectionRequest.getWaterConnection().setInWorkflow(true);
 		AuditDetails auditDetails = waterServicesUtil
 				.getAuditDetails(waterConnectionRequest.getRequestInfo().getUserInfo().getUuid(), true);
 		waterConnectionRequest.getWaterConnection().setAuditDetails(auditDetails);
@@ -212,10 +211,11 @@ public class EnrichmentService {
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setId(UUID.randomUUID().toString());
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setApplicationNo(waterConnectionrequest.getWaterConnection().getApplicationNo());
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setActivityType(waterConnectionrequest.getWaterConnection().getActivityType());
-			waterConnectionrequest.getWaterConnection().getWaterApplication().setApplicationStatus(waterConnectionrequest.getWaterConnection().getApplicationStatus());
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setAction(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction());
 			
 			setApplicationIdgenIds(waterConnectionrequest);
+			
+			waterConnectionrequest.getWaterConnection().setInWorkflow(true);
 		}
 	}
 	
@@ -226,8 +226,8 @@ public class EnrichmentService {
 	 * @param waterConnectionrequest 
 	 */
 	public void postStatusEnrichment(WaterConnectionRequest waterConnectionrequest) {
-		if (WCConstants.ACTIVATE_CONNECTION
-				.equalsIgnoreCase(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction())) {
+		if (WCConstants.ACTIVATE_CONNECTION.equalsIgnoreCase(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction())
+				|| WCConstants.ACTION_APPROVE_TEMP_CONNECTION.equalsIgnoreCase(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction())) {
 			setConnectionNO(waterConnectionrequest);
 		}
 	}
