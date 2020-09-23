@@ -24,7 +24,7 @@ public class SWQueryBuilder {
 	@Autowired
 	private SWConfiguration config;
 
-	private static final String INNER_JOIN_STRING = "INNER JOIN";
+	private static final String INNER_JOIN_STRING = " INNER JOIN ";
 	 private static final String LEFT_OUTER_JOIN_STRING = " LEFT OUTER JOIN ";
 	//private static final String Offset_Limit_String = "OFFSET ? LIMIT ?";
 	
@@ -38,9 +38,13 @@ public class SWQueryBuilder {
 			+ " conn.lastModifiedBy as sw_lastModifiedBy, conn.createdTime as sw_createdTime, conn.lastModifiedTime as sw_lastModifiedTime, "
 			+ " conn.adhocpenaltyreason, conn.adhocpenaltycomment, conn.adhocrebatereason, conn.adhocrebatecomment,"
 			+ " conn.roadtype, document.id as doc_Id, document.documenttype, document.filestoreid, document.active as doc_active, plumber.id as plumber_id, plumber.name as plumber_name, plumber.licenseno,"
-			+ " plumber.mobilenumber as plumber_mobileNumber, plumber.gender as plumber_gender, plumber.fatherorhusbandname, plumber.correspondenceaddress, plumber.relationship FROM eg_sw_connection conn "
+			+ " plumber.mobilenumber as plumber_mobileNumber, plumber.gender as plumber_gender, plumber.fatherorhusbandname, plumber.correspondenceaddress, plumber.relationship, "
+			+ " property.id as seweragepropertyid, property.usagecategory, property.usagesubcategory "
+			+ " FROM eg_sw_connection conn "
 	+  INNER_JOIN_STRING 
 	+" eg_sw_service sc ON sc.connection_id = conn.id"
+	+  INNER_JOIN_STRING
+	+ "eg_sw_property property ON property.swid = conn.id"
 	+  LEFT_OUTER_JOIN_STRING
 	+ "eg_sw_applicationdocument document ON document.swid = conn.id" 
 	+  LEFT_OUTER_JOIN_STRING

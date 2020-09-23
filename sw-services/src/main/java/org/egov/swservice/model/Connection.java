@@ -90,6 +90,10 @@ public class Connection {
 	@JsonProperty("plumberInfo")
 	@Valid
 	private List<PlumberInfo> plumberInfo = null;
+	
+	@JsonProperty("swProperty")
+	@Valid
+	private SWProperty swProperty = null;
 
 	@JsonProperty("roadType")
 	private String roadType = null;
@@ -555,5 +559,13 @@ public class Connection {
 			return "null";
 		}
 		return o.toString().replace("\n", "\n    ");
+	}
+
+	public SWProperty getSwProperty() {
+		return swProperty;
+	}
+
+	public void setSwProperty(SWProperty swProperty) {
+		this.swProperty = swProperty;
 	}
 }
