@@ -1,7 +1,6 @@
 package org.egov.pm.web.controller;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
@@ -41,16 +40,6 @@ public class NocController {
 	@Autowired
 	private ReportGenerationSchecduler schedularService;
 
-	@PostMapping("_gettest")
-	@ResponseBody
-	public String gettest(@RequestBody RequestData requestData) {
-		Pattern scriptPattern = Pattern.compile("(.*?)src[\\r\\n]*=[\\r\\n]*\\\'(.*?)\\\'(.*?)",Pattern.CASE_INSENSITIVE);
-         //value = scriptPattern.matcher(value).replaceAll("");	
-         if (scriptPattern.matcher(requestData.getApplicationType()).matches()) {
-			return "Scuess";
-		}
-		return "Fail";
-	}
 	/**
 	 * Get the Application Data for the given request
 	 * 
