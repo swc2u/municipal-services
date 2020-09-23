@@ -139,7 +139,7 @@ public class WorkflowIntegrator {
 		case WCConstants.WS_NEWCONNECTION:
 		case WCConstants.WS_APPLY_FOR_REGULAR_INFO:
 			
-			return config.getBusinessServiceConversionValue();
+			return config.getBusinessServiceValue();
 			
 		case WCConstants.WS_PERMANENT_DISCONNECTION:
 		case WCConstants.WS_TEMPORARY_DISCONNECTION:
