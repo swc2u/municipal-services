@@ -325,12 +325,13 @@ public class RentCollectionService implements IRentCollectionService {
 		return RentDemand.builder().collectionPrincipal(rentDemand.getCollectionPrincipal())
 				.status(PaymentStatusEnum.UNPAID).generationDate(rentDemand.getGenerationDate())
 				.interestSince(rentDemand.getGenerationDate()).initialGracePeriod(rentDemand.getInitialGracePeriod())
-				.remainingPrincipal(rentDemand.getRemainingPrincipal()).build();
+				.remainingPrincipal(rentDemand.getCollectionPrincipal()).build();
 	}
 
 	private RentPayment clonePayment(RentPayment rentPayment) {
 		return RentPayment.builder().amountPaid(rentPayment.getAmountPaid())
-				.dateOfPayment(rentPayment.getDateOfPayment()).processed(false).build();
+				.dateOfPayment(rentPayment.getDateOfPayment()).receiptNo(rentPayment.getReceiptNo())
+				.processed(false).build();
 	}
 
 	private RentSummary getSummaryForDemand(double interestRate, RentAccount rentAccount,
@@ -354,6 +355,7 @@ public class RentCollectionService implements IRentCollectionService {
 		statement.setDate(currentPayment.getDateOfPayment());
 		statement.setAmount(currentPayment.getAmountPaid());
 		statement.setType(Type.C);
+		statement.setReceiptNo(currentPayment.getReceiptNo());
 		return rentSummary;
 	}
 

@@ -46,6 +46,9 @@ public class WaterConnection extends Connection {
 	@JsonProperty("securityCharge")
 	private Double securityCharge = null;
 	
+	@JsonProperty("connectionUsagesType")
+	private String connectionUsagesType = null;
+	
 	@JsonProperty("inWorkflow")
 	private Boolean inWorkflow = false;
 	
@@ -220,6 +223,10 @@ public class WaterConnection extends Connection {
 		sb.append("    waterSource: ").append(toIndentedString(waterSource)).append("\n");
 		sb.append("    meterId: ").append(toIndentedString(meterId)).append("\n");
 		sb.append("    meterInstallationDate: ").append(toIndentedString(meterInstallationDate)).append("\n");
+		sb.append("    waterApplicationType: ").append(toIndentedString(waterApplicationType)).append("\n");
+		sb.append("    securityCharge: ").append(toIndentedString(securityCharge)).append("\n");
+		sb.append("    connectionUsagesType: ").append(toIndentedString(connectionUsagesType)).append("\n");
+		sb.append("    inWorkflow: ").append(toIndentedString(inWorkflow)).append("\n");
 		sb.append("}");
 		return sb.toString();
 	}
@@ -265,5 +272,13 @@ public class WaterConnection extends Connection {
 
 	public void setActivityType(String activityType) {
 		this.activityType = activityType;
+	}
+
+	public String getConnectionUsagesType() {
+		return connectionUsagesType;
+	}
+
+	public void setConnectionUsagesType(String connectionUsagesType) {
+		this.connectionUsagesType = connectionUsagesType;
 	}
 }

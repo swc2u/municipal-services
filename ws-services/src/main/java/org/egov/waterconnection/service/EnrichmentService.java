@@ -4,8 +4,10 @@ package org.egov.waterconnection.service;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -15,10 +17,15 @@ import org.egov.waterconnection.config.WSConfiguration;
 import org.egov.waterconnection.constants.WCConstants;
 import org.egov.waterconnection.model.AuditDetails;
 import org.egov.waterconnection.model.Connection.StatusEnum;
+import org.egov.waterconnection.model.ConnectionHolderInfo;
+import org.egov.waterconnection.model.SearchCriteria;
 import org.egov.waterconnection.model.Status;
+import org.egov.waterconnection.model.WaterApplication;
 import org.egov.waterconnection.model.WaterConnection;
 import org.egov.waterconnection.model.WaterConnectionRequest;
 import org.egov.waterconnection.model.Idgen.IdResponse;
+import org.egov.waterconnection.model.users.UserDetailResponse;
+import org.egov.waterconnection.model.users.UserSearchRequest;
 import org.egov.waterconnection.repository.IdGenRepository;
 import org.egov.waterconnection.repository.WaterDaoImpl;
 import org.egov.waterconnection.util.WaterServicesUtil;
@@ -51,6 +58,11 @@ public class EnrichmentService {
 	private WaterDaoImpl waterDao;
 	
 
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private WaterServiceImpl waterService;
 
 	/**
 	 * Enrich water connection
@@ -58,18 +70,41 @@ public class EnrichmentService {
 	 * @param waterConnectionRequest
 	 */
 	public void enrichWaterConnection(WaterConnectionRequest waterConnectionRequest) {
+		WaterApplication waterApplication = new WaterApplication();
+		waterApplication.setId(UUID.randomUUID().toString());
+		waterApplication.setActivityType(waterConnectionRequest.getWaterConnection().getActivityType());
+		waterApplication.setAction(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction());
+		waterConnectionRequest.getWaterConnection().setWaterApplication(waterApplication);
+		waterConnectionRequest.getWaterConnection().getWaterProperty().setId(UUID.randomUUID().toString());
+		
+		if(WCConstants.APPLICATION_PROPERTY_TYPE_DOMESTIC.equalsIgnoreCase(
+				waterConnectionRequest.getWaterConnection().getWaterProperty().getUsageCategory())) {
+			waterConnectionRequest.getWaterConnection().setConnectionUsagesType(WCConstants.APPLICATION_PROPERTY_TYPE_DOMESTIC);
+		}
+			
+		waterConnectionRequest.getWaterConnection().setInWorkflow(true);
 		AuditDetails auditDetails = waterServicesUtil
 				.getAuditDetails(waterConnectionRequest.getRequestInfo().getUserInfo().getUuid(), true);
 		waterConnectionRequest.getWaterConnection().setAuditDetails(auditDetails);
 		waterConnectionRequest.getWaterConnection().setId(UUID.randomUUID().toString());
 		waterConnectionRequest.getWaterConnection().setStatus(StatusEnum.ACTIVE);
-		//Application creation date
 		HashMap<String, Object> additionalDetail = new HashMap<>();
-	    additionalDetail.put(WCConstants.APP_CREATED_DATE, BigDecimal.valueOf(System.currentTimeMillis()));
-	    waterConnectionRequest.getWaterConnection().setAdditionalDetails(additionalDetail);
+		if (waterConnectionRequest.getWaterConnection().getAdditionalDetails() == null) {
+			for (String constValue : WCConstants.ADDITIONAL_OBJ_CONSTANT) {
+				additionalDetail.put(constValue, null);
+			}
+		} else {
+			additionalDetail = mapper
+					.convertValue(waterConnectionRequest.getWaterConnection().getAdditionalDetails(), HashMap.class);
+		}
+		//Application creation date
+		additionalDetail.put(WCConstants.APP_CREATED_DATE, BigDecimal.valueOf(System.currentTimeMillis()));
+		waterConnectionRequest.getWaterConnection().setAdditionalDetails(additionalDetail);
+		//Setting ApplicationType
+		waterConnectionRequest.getWaterConnection()
+				.setApplicationType(WCConstants.NEW_WATER_CONNECTION);
 		setApplicationIdgenIds(waterConnectionRequest);
 		setStatusForCreate(waterConnectionRequest);
-		
 	}
 	@SuppressWarnings("unchecked")
 	public void enrichingAdditionalDetails(WaterConnectionRequest waterConnectionRequest) {
@@ -119,6 +154,7 @@ public class EnrichmentService {
 			throw new CustomException(errorMap);
 		}
 		waterConnection.setApplicationNo(applicationNumbers.get(0));
+		waterConnection.getWaterApplication().setApplicationNo(applicationNumbers.get(0));
 	}
 
 	private List<String> getIdList(RequestInfo requestInfo, String tenantId, String idKey, String idformat) {
@@ -161,7 +197,27 @@ public class EnrichmentService {
 			});
 		}
 		enrichingAdditionalDetails(waterConnectionRequest);
+		enrichWaterApplication(waterConnectionRequest);
 	}
+	/**
+	 * Enrich water connection Application
+	 * 
+	 * @param waterConnectionrequest 
+	 */
+	public void enrichWaterApplication(WaterConnectionRequest waterConnectionrequest) {
+		if (waterConnectionrequest.getWaterConnection().getProcessInstance().getAction().equalsIgnoreCase(WCConstants.ACTION_INITIATE)) {
+			WaterApplication waterApplication = new WaterApplication();
+			waterConnectionrequest.getWaterConnection().setWaterApplication(waterApplication);
+			waterConnectionrequest.getWaterConnection().getWaterApplication().setId(UUID.randomUUID().toString());
+			waterConnectionrequest.getWaterConnection().getWaterApplication().setApplicationNo(waterConnectionrequest.getWaterConnection().getApplicationNo());
+			waterConnectionrequest.getWaterConnection().getWaterApplication().setActivityType(waterConnectionrequest.getWaterConnection().getActivityType());
+			
+			setApplicationIdgenIds(waterConnectionrequest);
+			
+			waterConnectionrequest.getWaterConnection().setInWorkflow(true);
+		}
+	}
+	
 	
 	/**
 	 * Enrich water connection request and add connection no if status is approved
@@ -169,8 +225,8 @@ public class EnrichmentService {
 	 * @param waterConnectionrequest 
 	 */
 	public void postStatusEnrichment(WaterConnectionRequest waterConnectionrequest) {
-		if (WCConstants.ACTIVATE_CONNECTION
-				.equalsIgnoreCase(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction())) {
+		if (WCConstants.ACTIVATE_CONNECTION.equalsIgnoreCase(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction())
+				|| WCConstants.ACTION_APPROVE_TEMP_CONNECTION.equalsIgnoreCase(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction())) {
 			setConnectionNO(waterConnectionrequest);
 		}
 	}
@@ -222,7 +278,7 @@ public class EnrichmentService {
 	/**
 	 * Sets status for create request
 	 * 
-	 * @param WaterConnectionRequest
+	 * @param waterConnectionRequest
 	 *            The create request
 	 */
 	private void setStatusForCreate(WaterConnectionRequest waterConnectionRequest) {
@@ -230,6 +286,57 @@ public class EnrichmentService {
 				.equalsIgnoreCase(WCConstants.ACTION_INITIATE)) {
 			waterConnectionRequest.getWaterConnection().setApplicationStatus(WCConstants.STATUS_INITIATED);
 		}
+	}
+
+	/**
+	 * Enrich water connection list
+	 * 
+	 * @param waterConnectionList
+	 * @param requestInfo
+	 */
+	public void enrichConnectionHolderDeatils(List<WaterConnection> waterConnectionList, SearchCriteria criteria,
+			RequestInfo requestInfo) {
+		if (CollectionUtils.isEmpty(waterConnectionList))
+			return;
+		Set<String> connectionHolderIds = new HashSet<>();
+		for (WaterConnection waterConnection : waterConnectionList) {
+			if (!CollectionUtils.isEmpty(waterConnection.getConnectionHolders())) {
+				connectionHolderIds.addAll(waterConnection.getConnectionHolders().stream()
+						.map(ConnectionHolderInfo::getUuid).collect(Collectors.toSet()));
+			}
+		}
+		if (CollectionUtils.isEmpty(connectionHolderIds))
+			return;
+		UserSearchRequest userSearchRequest = userService.getBaseUserSearchRequest(criteria.getTenantId(), requestInfo);
+		userSearchRequest.setUuid(connectionHolderIds);
+		UserDetailResponse userDetailResponse = userService.getUser(userSearchRequest);
+		enrichConnectionHolderInfo(userDetailResponse, waterConnectionList);
+	}
+
+	/**
+	 * Populates the owner fields inside of the water connection objects from the
+	 * response got from calling user API
+	 * 
+	 * @param userDetailResponse
+	 * @param waterConnectionList List of water connection whose owner's are to be
+	 *                            populated from userDetailsResponse
+	 */
+	public void enrichConnectionHolderInfo(UserDetailResponse userDetailResponse,
+			List<WaterConnection> waterConnectionList) {
+		List<ConnectionHolderInfo> connectionHolderInfos = userDetailResponse.getUser();
+		Map<String, ConnectionHolderInfo> userIdToConnectionHolderMap = new HashMap<>();
+		connectionHolderInfos.forEach(user -> userIdToConnectionHolderMap.put(user.getUuid(), user));
+		waterConnectionList.forEach(waterConnection -> {
+			if(!CollectionUtils.isEmpty(waterConnection.getConnectionHolders())){
+				waterConnection.getConnectionHolders().forEach(holderInfo -> {
+					if (userIdToConnectionHolderMap.get(holderInfo.getUuid()) == null)
+						throw new CustomException("OWNER SEARCH ERROR", "The owner of the water application"
+								+ waterConnection.getApplicationNo() + " is not coming in user search");
+					else
+						holderInfo.addUserDetail(userIdToConnectionHolderMap.get(holderInfo.getUuid()));
+				});
+			}
+		});
 	}
 
 }
