@@ -113,7 +113,9 @@ public class WCConstants {
 	
 	public static final String ACTIVATE_CONNECTION_CONST = "ACTIVATE_CONNECTION";
 	
-	public static final String APPLY_SECURITY_DEPOSIT = "METER_INSTALLED";
+	public static final String APPLY_SECURITY_DEPOSIT = "APPLY_SECURITY_DEPOSIT";
+	
+	public static final String APPROVE_FOR_CONNECTION_CONVERSION = "APPROVE_FOR_CONNECTION_CONVERSION";
 	
 	
 	public static final List<String> NOTIFICATION_ENABLE_FOR_STATUS = Collections
