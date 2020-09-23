@@ -11,6 +11,6 @@ CREATE TABLE eg_sw_property
 	createdtime bigint,
 	lastmodifiedtime bigint,
 	CONSTRAINT eg_sw_property_pkey PRIMARY KEY (id),
-	CONSTRAINT fk_eg_sw_property_connection_id FOREIGN KEY (wsid)
+	CONSTRAINT fk_eg_sw_property_connection_id FOREIGN KEY (swid)
 		REFERENCES eg_sw_connection (id) ON UPDATE CASCADE ON DELETE CASCADE
 )
