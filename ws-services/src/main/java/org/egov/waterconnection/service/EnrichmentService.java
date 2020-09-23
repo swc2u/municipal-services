@@ -211,7 +211,6 @@ public class EnrichmentService {
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setId(UUID.randomUUID().toString());
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setApplicationNo(waterConnectionrequest.getWaterConnection().getApplicationNo());
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setActivityType(waterConnectionrequest.getWaterConnection().getActivityType());
-			waterConnectionrequest.getWaterConnection().getWaterApplication().setAction(waterConnectionrequest.getWaterConnection().getProcessInstance().getAction());
 			
 			setApplicationIdgenIds(waterConnectionrequest);
 			

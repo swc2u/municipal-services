@@ -160,6 +160,8 @@ public class WaterServiceImpl implements WaterService {
 		
 		waterConnectionRequest.getWaterConnection().getWaterApplication().setApplicationStatus(
 				waterConnectionRequest.getWaterConnection().getApplicationStatus());
+		waterConnectionRequest.getWaterConnection().getWaterApplication().setAction(
+				waterConnectionRequest.getWaterConnection().getProcessInstance().getAction());
 		
 		log.info("Next applicationStatus: {}",waterConnectionRequest.getWaterConnection().getApplicationStatus());
 		boolean isTerminateState = workflowService.isTerminateState(waterConnectionRequest.getWaterConnection().getApplicationStatus(), businessService);
