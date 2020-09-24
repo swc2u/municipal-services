@@ -137,7 +137,7 @@ public class WorkflowIntegrator {
 
 		switch (activityType) {
 		case WCConstants.WS_NEWCONNECTION:
-		case WCConstants.WS_APPLY_FOR_REGULAR_INFO:
+		case WCConstants.WS_APPLY_FOR_REGULAR_CON:
 			
 			return config.getBusinessServiceValue();
 			

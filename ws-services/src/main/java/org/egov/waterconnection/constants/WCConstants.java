@@ -250,5 +250,9 @@ public class WCConstants {
 
 	public static final String WS_CONVERSION = "CONNECTION_CONVERSION";
 
-	public static final String WS_APPLY_FOR_REGULAR_INFO = "APPLY_FOR_REGULAR_INFO";
+	public static final String WS_APPLY_FOR_REGULAR_CON = "APPLY_FOR_REGULAR_INFO";
+
+	public static final String STATUS_PENDING_FOR_REGULAR = "PENDING_FOR_REGULAR_CONNECTION";
+
+	public static final String STATUS_TEMPORARY_TO_REGULAR = "TEMPORARY_TO_REGULAR";
 }
