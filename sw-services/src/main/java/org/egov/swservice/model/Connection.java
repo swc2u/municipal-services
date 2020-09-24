@@ -508,6 +508,7 @@ public class Connection {
 				&& Objects.equals(this.oldConnectionNo, connection.oldConnectionNo)
 				&& Objects.equals(this.documents, connection.documents)
 				&& Objects.equals(this.plumberInfo, connection.plumberInfo)
+				&& Objects.equals(this.swProperty, connection.swProperty)
 				&& Objects.equals(this.roadType, connection.roadType)
 				&& Objects.equals(this.roadCuttingArea, connection.roadCuttingArea)
 				&& Objects.equals(this.connectionExecutionDate, connection.connectionExecutionDate)
@@ -520,7 +521,7 @@ public class Connection {
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, tenantId, propertyId, applicationNo, applicationStatus, status, connectionNo,
-				oldConnectionNo, documents, plumberInfo, roadType, roadCuttingArea, connectionExecutionDate,
+				oldConnectionNo, documents, plumberInfo, swProperty, roadType, roadCuttingArea, connectionExecutionDate,
 				connectionCategory, connectionType, additionalDetails, auditDetails);
 	}
 
@@ -539,6 +540,7 @@ public class Connection {
 		sb.append("    oldConnectionNo: ").append(toIndentedString(oldConnectionNo)).append("\n");
 		sb.append("    documents: ").append(toIndentedString(documents)).append("\n");
 		sb.append("    plumberInfo: ").append(toIndentedString(plumberInfo)).append("\n");
+		sb.append("    swProperty: ").append(toIndentedString(swProperty)).append("\n");
 		sb.append("    roadType: ").append(toIndentedString(roadType)).append("\n");
 		sb.append("    roadCuttingArea: ").append(toIndentedString(roadCuttingArea)).append("\n");
 		sb.append("    connectionExecutionDate: ").append(toIndentedString(connectionExecutionDate)).append("\n");
