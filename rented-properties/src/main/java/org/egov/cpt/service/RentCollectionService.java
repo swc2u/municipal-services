@@ -270,10 +270,11 @@ public class RentCollectionService implements IRentCollectionService {
 	public List<RentAccountStatement> getAccountStatement(List<RentDemand> demands, List<RentPayment> payments,
 			double interestRate, Long fromDateTimestamp, Long toDateTimestamp) {
 		long endTimestamp = toDateTimestamp == null ? System.currentTimeMillis() : toDateTimestamp.longValue();
-		demands = demands.stream().filter(demand -> demand.getGenerationDate() <= endTimestamp)
-				.collect(Collectors.toList());
+		demands = demands.stream().filter(demand -> demand.getGenerationDate() >= fromDateTimestamp.longValue()
+				&& demand.getGenerationDate() <= endTimestamp).collect(Collectors.toList());
 		payments = payments.stream().filter(payment -> payment.getAmountPaid() > 0)
-				.filter(p -> p.getDateOfPayment() <= endTimestamp).collect(Collectors.toList());
+				.filter(p -> p.getDateOfPayment() >= fromDateTimestamp && p.getDateOfPayment() <= endTimestamp)
+				.collect(Collectors.toList());
 		Collections.sort(demands);
 		Collections.sort(payments);
 		List<RentAccountStatement> accountStatementItems = new ArrayList<RentAccountStatement>();
