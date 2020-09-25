@@ -80,12 +80,8 @@ public class WaterConnectionValidator {
 	 * @param searchResult water connection search result
 	 */
 	public void validateUpdate(WaterConnectionRequest request, WaterConnection searchResult) {
-		if (!request.getWaterConnection().getProcessInstance().getAction()
-				.equalsIgnoreCase(WCConstants.ACTION_INITIATE)) {
-			validateAllIds(request.getWaterConnection(), searchResult);
-			setFieldsFromSearch(request, searchResult);
-		}
-
+		validateAllIds(request.getWaterConnection(), searchResult);
+		setFieldsFromSearch(request, searchResult);
 		validateDuplicateDocuments(request);
 
 	}

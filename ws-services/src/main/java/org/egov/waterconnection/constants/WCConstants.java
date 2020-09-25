@@ -254,5 +254,4 @@ public class WCConstants {
 
 	public static final String STATUS_PENDING_FOR_REGULAR = "PENDING_FOR_REGULAR_CONNECTION";
 
-	public static final String STATUS_TEMPORARY_TO_REGULAR = "TEMPORARY_TO_REGULAR";
 }

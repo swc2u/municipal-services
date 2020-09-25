@@ -135,7 +135,16 @@ public class WaterServiceImpl implements WaterService {
 		log.info("Update WaterConnection: {}", waterConnectionRequest.getWaterConnection());
 		waterConnectionValidator.validateWaterConnection(waterConnectionRequest, true);
 		mDMSValidator.validateMasterData(waterConnectionRequest);
-		enrichmentService.enrichWaterApplication(waterConnectionRequest);
+		
+		if (WCConstants.ACTION_INITIATE.equalsIgnoreCase(
+				waterConnectionRequest.getWaterConnection().getProcessInstance().getAction())) {
+			if (WCConstants.STATUS_PENDING_FOR_REGULAR.equalsIgnoreCase(
+					waterConnectionRequest.getWaterConnection().getApplicationStatus())){
+				waterConnectionRequest.getWaterConnection().setActivityType(WCConstants.WS_APPLY_FOR_REGULAR_CON);
+			}
+			enrichmentService.enrichWaterApplication(waterConnectionRequest);
+			waterDao.updateWaterConnection(waterConnectionRequest, true);
+		}
 		BusinessService businessService = workflowService.getBusinessService(waterConnectionRequest.getWaterConnection().getTenantId(), 
 				waterConnectionRequest.getRequestInfo(), waterConnectionRequest.getWaterConnection().getActivityType());
 		log.info("businessService: {},Business: {}",businessService.getBusinessService(),businessService.getBusiness());
@@ -167,8 +176,8 @@ public class WaterServiceImpl implements WaterService {
 		log.info("Next applicationStatus: {}",waterConnectionRequest.getWaterConnection().getApplicationStatus());
 		boolean isTerminateState = workflowService.isTerminateState(waterConnectionRequest.getWaterConnection().getApplicationStatus(), businessService);
 		if(isTerminateState) {
-			if(WCConstants.STATUS_TEMPORARY_TO_REGULAR.equalsIgnoreCase(
-					waterConnectionRequest.getWaterConnection().getWaterApplicationType())){
+			if(WCConstants.WS_APPLY_FOR_REGULAR_CON.equalsIgnoreCase(
+					waterConnectionRequest.getWaterConnection().getActivityType())){
 				waterConnectionRequest.getWaterConnection().setWaterApplicationType(WCConstants.APPLICATION_TYPE_REGULAR);
 			}
 			waterConnectionRequest.getWaterConnection().setInWorkflow(false);
