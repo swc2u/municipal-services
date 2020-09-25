@@ -139,14 +139,17 @@ public class WaterServiceImpl implements WaterService {
 		validateProperty.validatePropertyCriteria(property);
 		boolean isTerminateState = false;
 		boolean isStateUpdatable = true;
-				
+			
+		if (WCConstants.STATUS_PENDING_FOR_REGULAR.equalsIgnoreCase(
+				waterConnectionRequest.getWaterConnection().getApplicationStatus())
+				&& WCConstants.ACTION_APPLY_FOR_REGULAR_CONNECTION.equalsIgnoreCase(
+						waterConnectionRequest.getWaterConnection().getProcessInstance().getAction())){
+			waterConnectionRequest.getWaterConnection().setActivityType(WCConstants.WS_APPLY_FOR_REGULAR_CON);
+			waterConnectionRequest.getWaterConnection().setWaterApplicationType(WCConstants.APPLICATION_TYPE_REGULAR);
+		}
+		
 		if (WCConstants.ACTION_INITIATE.equalsIgnoreCase(
 				waterConnectionRequest.getWaterConnection().getProcessInstance().getAction())) {
-			if (WCConstants.STATUS_PENDING_FOR_REGULAR.equalsIgnoreCase(
-					waterConnectionRequest.getWaterConnection().getApplicationStatus())){
-				waterConnectionRequest.getWaterConnection().setActivityType(WCConstants.WS_APPLY_FOR_REGULAR_CON);
-				waterConnectionRequest.getWaterConnection().setWaterApplicationType(WCConstants.APPLICATION_TYPE_REGULAR);
-			}
 			waterConnectionRequest.getWaterConnection().setDocuments(null);
 			enrichmentService.enrichWaterApplication(waterConnectionRequest);
 			enrichmentService.enrichUpdateWaterConnection(waterConnectionRequest);
