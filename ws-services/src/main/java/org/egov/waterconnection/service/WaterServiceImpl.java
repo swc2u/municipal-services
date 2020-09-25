@@ -137,7 +137,6 @@ public class WaterServiceImpl implements WaterService {
 		mDMSValidator.validateMasterData(waterConnectionRequest);
 		Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
 		validateProperty.validatePropertyCriteria(property);
-		enrichmentService.enrichUpdateWaterConnection(waterConnectionRequest);
 		boolean isTerminateState = false;
 		boolean isStateUpdatable = true;
 				
@@ -148,7 +147,9 @@ public class WaterServiceImpl implements WaterService {
 				waterConnectionRequest.getWaterConnection().setActivityType(WCConstants.WS_APPLY_FOR_REGULAR_CON);
 				waterConnectionRequest.getWaterConnection().setWaterApplicationType(WCConstants.APPLICATION_TYPE_REGULAR);
 			}
+			waterConnectionRequest.getWaterConnection().setDocuments(null);
 			enrichmentService.enrichWaterApplication(waterConnectionRequest);
+			enrichmentService.enrichUpdateWaterConnection(waterConnectionRequest);
 			//waterDao.saveWaterSubActivity(waterConnectionRequest);
 		}else {
 		
@@ -159,6 +160,7 @@ public class WaterServiceImpl implements WaterService {
 			String previousApplicationStatus = workflowService.getApplicationStatus(waterConnectionRequest.getRequestInfo(),
 					waterConnectionRequest.getWaterConnection().getApplicationNo(),
 					waterConnectionRequest.getWaterConnection().getTenantId(),wfIntegrator.getBusinessService(waterConnectionRequest.getWaterConnection().getActivityType()));
+			enrichmentService.enrichUpdateWaterConnection(waterConnectionRequest);
 			actionValidator.validateUpdateRequest(waterConnectionRequest, businessService, previousApplicationStatus);
 			waterConnectionValidator.validateUpdate(waterConnectionRequest, searchResult);
 			calculationService.calculateFeeAndGenerateDemand(waterConnectionRequest, property);		
