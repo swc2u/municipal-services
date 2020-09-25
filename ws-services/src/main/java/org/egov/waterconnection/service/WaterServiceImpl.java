@@ -193,6 +193,7 @@ public class WaterServiceImpl implements WaterService {
 	 * @return water connection
 	 */
 	public WaterConnection getConnectionForUpdateRequest(String id, RequestInfo requestInfo) {
+		log.info("Water Application Id:{}",id);
 		Set<String> ids = new HashSet<>(Arrays.asList(id));
 		SearchCriteria criteria = new SearchCriteria();
 		criteria.setIds(ids);
