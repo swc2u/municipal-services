@@ -266,7 +266,11 @@ public class EnrichmentService {
 			if (waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
 					.equalsIgnoreCase(WCConstants.APPROVE_CONNECTION_CONST)
 					|| waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
-							.equalsIgnoreCase(WCConstants.ACTION_PAY)) {
+							.equalsIgnoreCase(WCConstants.ACTION_PAY)
+					|| waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
+					.equalsIgnoreCase(WCConstants.ACTION_PAY_FOR_REGULAR_CONNECTION)
+					|| waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
+					.equalsIgnoreCase(WCConstants.ACTION_PAY_FOR_TEMPORARY_CONNECTION)) {
 				waterDao.enrichFileStoreIds(waterConnectionRequest);
 			}
 		} catch (Exception ex) {
