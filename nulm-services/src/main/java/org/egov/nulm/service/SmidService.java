@@ -74,6 +74,7 @@ public class SmidService {
 					.responseBody(smidapplication).build(), HttpStatus.CREATED);
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new CustomException(CommonConstants.SMID_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
