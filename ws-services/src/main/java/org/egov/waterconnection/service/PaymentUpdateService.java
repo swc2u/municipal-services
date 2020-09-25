@@ -110,7 +110,8 @@ public class PaymentUpdateService {
 					for (WaterConnection waterConnection : waterConnections) {
 						if(WCConstants.APPLICATION_TYPE_TEMPORARY.equalsIgnoreCase(waterConnection.getWaterApplicationType())){
 							waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY_FOR_TEMPORARY_CONNECTION);
-						}else if(WCConstants.APPLICATION_TYPE_REGULAR.equalsIgnoreCase(waterConnection.getWaterApplicationType())){
+						}else if(WCConstants.APPLICATION_TYPE_REGULAR.equalsIgnoreCase(waterConnection.getWaterApplicationType())
+								|| WCConstants.STATUS_TEMPORARY_TO_REGULAR.equalsIgnoreCase(waterConnection.getWaterApplicationType())){
 							if(WCConstants.STATUS_PENDING_FOR_PAYMENT.equalsIgnoreCase(waterConnection.getApplicationStatus())){
 								waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY_FOR_REGULAR_CONNECTION);
 							}else {

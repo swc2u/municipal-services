@@ -167,6 +167,10 @@ public class WaterServiceImpl implements WaterService {
 		log.info("Next applicationStatus: {}",waterConnectionRequest.getWaterConnection().getApplicationStatus());
 		boolean isTerminateState = workflowService.isTerminateState(waterConnectionRequest.getWaterConnection().getApplicationStatus(), businessService);
 		if(isTerminateState) {
+			if(WCConstants.STATUS_TEMPORARY_TO_REGULAR.equalsIgnoreCase(
+					waterConnectionRequest.getWaterConnection().getWaterApplicationType())){
+				waterConnectionRequest.getWaterConnection().setWaterApplicationType(WCConstants.APPLICATION_TYPE_REGULAR);
+			}
 			waterConnectionRequest.getWaterConnection().setInWorkflow(false);
 		}
 		waterDao.updateWaterConnection(waterConnectionRequest, isStateUpdatable);
