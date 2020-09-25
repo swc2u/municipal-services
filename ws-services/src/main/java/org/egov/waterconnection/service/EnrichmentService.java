@@ -202,7 +202,7 @@ public class EnrichmentService {
 			
 		}
 		enrichingAdditionalDetails(waterConnectionRequest);
-		enrichWaterApplication(waterConnectionRequest);
+		//enrichWaterApplication(waterConnectionRequest);
 	}
 	/**
 	 * Enrich water connection Application
@@ -214,7 +214,7 @@ public class EnrichmentService {
 			WaterApplication waterApplication = new WaterApplication();
 			waterConnectionrequest.getWaterConnection().setWaterApplication(waterApplication);
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setId(UUID.randomUUID().toString());
-			waterConnectionrequest.getWaterConnection().getWaterApplication().setApplicationNo(waterConnectionrequest.getWaterConnection().getApplicationNo());
+			//waterConnectionrequest.getWaterConnection().getWaterApplication().setApplicationNo(waterConnectionrequest.getWaterConnection().getApplicationNo());
 			waterConnectionrequest.getWaterConnection().getWaterApplication().setActivityType(waterConnectionrequest.getWaterConnection().getActivityType());
 			
 			setApplicationIdgenIds(waterConnectionrequest);

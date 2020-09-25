@@ -135,6 +135,7 @@ public class WaterServiceImpl implements WaterService {
 		log.info("Update WaterConnection: {}", waterConnectionRequest.getWaterConnection());
 		waterConnectionValidator.validateWaterConnection(waterConnectionRequest, true);
 		mDMSValidator.validateMasterData(waterConnectionRequest);
+		enrichmentService.enrichWaterApplication(waterConnectionRequest);
 		BusinessService businessService = workflowService.getBusinessService(waterConnectionRequest.getWaterConnection().getTenantId(), 
 				waterConnectionRequest.getRequestInfo(), waterConnectionRequest.getWaterConnection().getActivityType());
 		log.info("businessService: {},Business: {}",businessService.getBusinessService(),businessService.getBusiness());
