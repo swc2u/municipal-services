@@ -211,6 +211,9 @@ public class EnrichmentService {
 		
 		setApplicationIdgenIds(waterConnectionrequest);
 		
+		AuditDetails auditDetails = waterServicesUtil
+				.getAuditDetails(waterConnectionrequest.getRequestInfo().getUserInfo().getUuid(), true);
+		waterConnectionrequest.getWaterConnection().getWaterApplication().setAuditDetails(auditDetails);
 		waterConnectionrequest.getWaterConnection().setInWorkflow(true);
 	}
 	

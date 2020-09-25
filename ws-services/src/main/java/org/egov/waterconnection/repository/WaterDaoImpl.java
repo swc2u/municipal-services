@@ -45,6 +45,9 @@ public class WaterDaoImpl implements WaterDao {
 	@Value("${egov.waterservice.updatewaterconnection}")
 	private String updateWaterConnection;
 	
+	@Value("${egov.waterservice.createwatersubactivity}")
+	private String createWaterSubActivity;
+	
 	@Override
 	public void saveWaterConnection(WaterConnectionRequest waterConnectionRequest) {
 		waterConnectionProducer.push(createWaterConnection, waterConnectionRequest);
@@ -122,6 +125,11 @@ public class WaterDaoImpl implements WaterDao {
 	 */
 	public void saveFileStoreIds(WaterConnectionRequest waterConnectionRequest) {
 		waterConnectionProducer.push(wsConfiguration.getSaveFileStoreIdsTopic(), waterConnectionRequest);
+	}
+	
+	@Override
+	public void saveWaterSubActivity(WaterConnectionRequest waterConnectionRequest) {
+		waterConnectionProducer.push(createWaterSubActivity, waterConnectionRequest);
 	}
 
 }

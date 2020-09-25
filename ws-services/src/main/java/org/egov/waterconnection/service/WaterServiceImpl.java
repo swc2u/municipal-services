@@ -141,9 +141,10 @@ public class WaterServiceImpl implements WaterService {
 			if (WCConstants.STATUS_PENDING_FOR_REGULAR.equalsIgnoreCase(
 					waterConnectionRequest.getWaterConnection().getApplicationStatus())){
 				waterConnectionRequest.getWaterConnection().setActivityType(WCConstants.WS_APPLY_FOR_REGULAR_CON);
+				waterConnectionRequest.getWaterConnection().setWaterApplicationType(WCConstants.APPLICATION_TYPE_REGULAR);
 			}
 			enrichmentService.enrichWaterApplication(waterConnectionRequest);
-			waterDao.updateWaterConnection(waterConnectionRequest, true);
+			waterDao.saveWaterSubActivity(waterConnectionRequest);
 		}
 		BusinessService businessService = workflowService.getBusinessService(waterConnectionRequest.getWaterConnection().getTenantId(), 
 				waterConnectionRequest.getRequestInfo(), waterConnectionRequest.getWaterConnection().getActivityType());
@@ -176,10 +177,6 @@ public class WaterServiceImpl implements WaterService {
 		log.info("Next applicationStatus: {}",waterConnectionRequest.getWaterConnection().getApplicationStatus());
 		boolean isTerminateState = workflowService.isTerminateState(waterConnectionRequest.getWaterConnection().getApplicationStatus(), businessService);
 		if(isTerminateState) {
-			if(WCConstants.WS_APPLY_FOR_REGULAR_CON.equalsIgnoreCase(
-					waterConnectionRequest.getWaterConnection().getActivityType())){
-				waterConnectionRequest.getWaterConnection().setWaterApplicationType(WCConstants.APPLICATION_TYPE_REGULAR);
-			}
 			waterConnectionRequest.getWaterConnection().setInWorkflow(false);
 		}
 		waterDao.updateWaterConnection(waterConnectionRequest, isStateUpdatable);
