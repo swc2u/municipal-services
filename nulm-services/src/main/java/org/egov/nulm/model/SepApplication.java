@@ -7,8 +7,6 @@ import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
-import org.json.simple.JSONObject;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -45,8 +43,11 @@ public class SepApplication {
 	    APPROVED("APPROVED"),
 		REJECTED("REJECTED"),
 	    FORWARDEDTOTASKFORCECOMMITTEE("Forwarded to Task force Committee"),
-		SENDTOBANKFORPROCESSING("Send to bank for processing"),
+	    APPROVEDBYTASKFORCECOMMITTEE("Approved by Task force committee"),
+	    REJECTEDBYTASKFORCECOMMITTEE("Rejected by Task force committee"),
+		SENDTOBANKFORPROCESSING("Sent to bank for processing"),
 		SANCTIONEDBYBANKBank("Sanctioned by Bank");
+		
 	    private String value;
 
 	    StatusEnum(String value) {
@@ -68,7 +69,8 @@ public class SepApplication {
 	      }
 	      return null;
 	    }
-	  }
+	}
+	
 	@NotNull
 	@JsonProperty("tenantId")
 	private String tenantId ;
@@ -89,7 +91,7 @@ public class SepApplication {
 	@JsonProperty("dob")
 	private String dob ;
 	
-	 @Pattern(regexp = "^[0-9]{4,4}$", message = "AdharNumber should be last 4 digit number")
+	@Pattern(regexp = "^[0-9]{4,4}$", message = "AdharNumber should be last 4 digit number")
 	@JsonProperty("adharNo")
 	private String adharNo ;
 	
@@ -109,7 +111,7 @@ public class SepApplication {
 	@JsonProperty("address")
 	private String address ;
 	
-	 @Pattern(regexp = "^[6-9][0-9]{9}$", message = "Invalid contact number")
+	@Pattern(regexp = "^[6-9][0-9]{9}$", message = "Invalid contact number")
 	@JsonProperty("contact")
 	private String contact ;
 	
