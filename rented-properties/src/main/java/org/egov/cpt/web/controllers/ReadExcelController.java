@@ -2,6 +2,7 @@ package org.egov.cpt.web.controllers;
 
 import java.io.File;
 import java.net.URI;
+
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
@@ -9,7 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.egov.cpt.models.ExcelSearchCriteria;
 import org.egov.cpt.models.RentDemandResponse;
 import org.egov.cpt.models.RequestInfoWrapper;
-import org.egov.cpt.service.ReadExcelService;
+import org.egov.cpt.service.xlsxparsing.ReadExcelService;
 import org.egov.cpt.util.FileStoreUtils;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;

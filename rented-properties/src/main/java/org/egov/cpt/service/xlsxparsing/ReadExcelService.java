@@ -1,4 +1,4 @@
-package org.egov.cpt.service;
+package org.egov.cpt.service.xlsxparsing;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,25 +6,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.egov.cpt.models.RentDemand;
 import org.egov.cpt.models.RentDemandResponse;
 import org.egov.cpt.models.RentPayment;
@@ -35,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class ReadExcelService implements IReadExcelService {
+public class ReadExcelService extends AbstractExcelService implements IReadExcelService {
 
 	public RentDemandResponse getDatafromExcelPath(String filePath) {
 		RentDemandResponse response = new RentDemandResponse();
@@ -46,19 +41,6 @@ public class ReadExcelService implements IReadExcelService {
 		}
 		return response;
 	}
-
-	private static final int CELL_DATE = 0;
-	private static final int CELL_PRINCIPAL = 1;
-	private static final int CELL_REALIZATION = 2;
-	private static final int CELL_RECEIPT_NO = 8;
-
-	private static final String HEADER_CELL = "Month";
-	private static final String FOOTER_CELL = "Total";
-	private static final String RENT_CELL = "RENT";
-	private static final String HEADER_CELL_FORMAT2 = "YEAR";
-	private static final String FOOTER_CELL_FORMAT2 = "G.TOTAL";
-	private static final String[] MONTHS = new String[] { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP",
-			"OCT", "NOV", "DEC" };
 
 	private Integer checkFormatOfexcel(Workbook workbook, int sheetIndex) {
 		try {
@@ -105,13 +87,14 @@ public class ReadExcelService implements IReadExcelService {
 	}
 
 	private RentDemandResponse getDataFromWorkBook(Workbook workbook, int sheetIndex) {
-		Integer formatFlag = this.checkFormatOfexcel(workbook, 0);
+		Integer formatFlag = this.checkFormatOfexcel(workbook, sheetIndex);
 		if (1 == formatFlag) {
-			return this.getDataFromWorkbookFormat2(workbook, 0);
+			return this.getDataFromWorkbookFormat2(workbook, sheetIndex);
 		} else if (0 == formatFlag) {
-			return this.getDataFromWorkbookFormat1(workbook, 0);
-		}else
-		throw new CustomException("INVALID_RENT_HISTORY_FORMAT", "Uploaded rent history format cannot be determined");
+			return this.getDataFromWorkbookFormat1(workbook, sheetIndex);
+		} else
+			throw new CustomException("INVALID_RENT_HISTORY_FORMAT",
+					"Uploaded rent history format cannot be determined");
 	}
 
 	private RentDemandResponse getDataFromWorkbookFormat1(Workbook workbook, int sheetIndex) {
@@ -139,77 +122,14 @@ public class ReadExcelService implements IReadExcelService {
 			}
 
 			if (shouldParseRows) {
-				RentDemand demand = new RentDemand();
-
-				/**
-				 * First cell as month year.
-				 */
-				Object generationDateCell = getValueFromCell(
-						currentRow.getCell(CELL_DATE, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-
-				if (generationDateCell instanceof String && !generationDateCell.toString().isEmpty()) {
-					log.debug("Parsing first cell with value {} as date", generationDateCell);
-					try {
-						demand.setGenerationDate(extractDateFromString(generationDateCell.toString()));
-					} catch (DateTimeParseException exception) {
-						log.debug(exception.getLocalizedMessage());
-						continue;
-					}
-				} else if (generationDateCell instanceof Long && !generationDateCell.toString().isEmpty()) {
-					demand.setGenerationDate((Long) generationDateCell);
-				} else {
+				RentDemandPayment demandPayment = getDemandAndPaymentFromRow(currentRow);
+				if (demandPayment == null) {
 					continue;
 				}
-
-				/**
-				 * generated rent amount for the month.
-				 */
-
-				if (!generationDateCell.toString().isEmpty()) {
-					demand.setCollectionPrincipal((Double) getValueFromCell(
-							currentRow.getCell(CELL_PRINCIPAL, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)));
-
-					/**
-					 * collected payment amount for the month.
-					 */
-					if (currentRow.getCell(CELL_REALIZATION, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL) != null) {
-						RentPayment payment = RentPayment.builder()
-								.amountPaid(Double.parseDouble(String.valueOf(getValueFromCell(currentRow
-										.getCell(CELL_REALIZATION, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)))))
-								.build();
-
-						/**
-						 * parse last cell data for receipt no and receipt date.
-						 */
-						String lastCellData = String.valueOf(getValueFromCell(
-								currentRow.getCell(CELL_RECEIPT_NO, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)));
-						String[] components = lastCellData.split("\\s+");
-						if (components.length == 0 || components[0].trim().length() == 0) {
-							payment.setReceiptNo("");
-							payment.setDateOfPayment(demand.getGenerationDate());
-						} else if (components.length == 1) {
-							payment.setReceiptNo(components[0]);
-							payment.setDateOfPayment(demand.getGenerationDate());
-						} else if (components.length > 1) {
-							try {
-								payment.setReceiptNo(components[0]);
-								int date = this.extractFirstNumericPart(components[1]);
-								Calendar calendar = Calendar.getInstance();
-								calendar.setTimeInMillis(demand.getGenerationDate());
-								calendar.set(Calendar.DATE, date);
-								payment.setDateOfPayment(calendar.getTimeInMillis());
-							} catch (Exception exception) {
-								log.debug(exception.getLocalizedMessage());
-							}
-						}
-						payments.add(payment);
-					}
-					demand.setRemainingPrincipal(demand.getCollectionPrincipal());
-					demand.setInterestSince(demand.getGenerationDate());
-					demands.add(demand);
-
+				demands.add(demandPayment.demand);
+				if (demandPayment.payment != null) {
+					payments.add(demandPayment.payment);
 				}
-
 			}
 		}
 		return new RentDemandResponse(demands, payments);
@@ -250,14 +170,15 @@ public class ReadExcelService implements IReadExcelService {
 			}
 
 			if (shouldParseRows) {
-				Object value = getValueFromCell(currentRow.getCell(0));
+				Object value = getValueFromCell(currentRow, 0, MissingCellPolicy.RETURN_NULL_AND_BLANK);
 				if (!(value instanceof Double)) {
 					continue;
 				}
 				Integer currentRowYear = ((Double) value).intValue();
 				for (int i = 1; i < 13; i++) {
 					if (rentDurations.contains(1 + "-" + MONTHS[i - 1] + "-" + currentRowYear)) {
-						payments.add(RentPayment.builder().amountPaid((Double) getValueFromCell(currentRow.getCell(i)))
+						payments.add(RentPayment.builder().amountPaid(
+								(Double) getValueFromCell(currentRow, i, MissingCellPolicy.RETURN_NULL_AND_BLANK))
 								.dateOfPayment(convertStrDatetoLong(1 + "-" + MONTHS[i - 1] + "-" + currentRowYear))
 								.build());
 					}
@@ -266,48 +187,6 @@ public class ReadExcelService implements IReadExcelService {
 			}
 		}
 		return new RentDemandResponse(demands, payments);
-	}
-
-	private int extractFirstNumericPart(String str) throws NumberFormatException {
-		Pattern pattern = Pattern.compile("^\\d*");
-		Matcher matcher = pattern.matcher(str);
-		if (matcher.find()) {
-			return Integer.parseInt(matcher.group());
-		}
-		throw new NumberFormatException("Could not exract numeric part from " + str);
-	}
-
-	/**
-	 * Parse values like Aug.-20 Sep. 20
-	 * 
-	 * @param str
-	 * @return
-	 * @throws DateTimeParseException
-	 */
-	private Long extractDateFromString(String str) throws DateTimeParseException {
-		Pattern monthPattern = Pattern.compile("^\\w*");
-		Matcher monthMatcher = monthPattern.matcher(str);
-		if (monthMatcher.find()) {
-			String month = monthMatcher.group().toUpperCase();
-			int monthIndex = Arrays.asList(MONTHS).indexOf(month.substring(0, 3));
-			if (monthIndex < 0) {
-				throw new DateTimeParseException("Cannot parse " + str + " as a date.", "", 0);
-			}
-			Pattern datePattern = Pattern.compile("\\d*$");
-			Matcher dateMatcher = datePattern.matcher(str);
-			if (dateMatcher.find()) {
-				String twoYearDate = dateMatcher.group();
-				int twoYearDateInt = Integer.parseInt(twoYearDate);
-				if (twoYearDateInt >= 100) {
-					throw new DateTimeParseException("Cannot parse " + str + " as a date.", "", 0);
-				}
-				int year = twoYearDateInt < 50 ? 2000 + twoYearDateInt : 1900 + twoYearDateInt;
-				Calendar calendar = Calendar.getInstance();
-				calendar.set(year, monthIndex, 1, 12, 0);
-				return calendar.getTimeInMillis();
-			}
-		}
-		throw new DateTimeParseException("Cannot parse " + str + " as a date.", "", 0);
 	}
 
 	private Map<String, Double> getRentYearDeatils(Sheet sheet) {
@@ -368,31 +247,5 @@ public class ReadExcelService implements IReadExcelService {
 			log.error("Date parsing issue occur :" + e.getMessage());
 		}
 		return 0;
-	}
-
-	private Object getValueFromCell(Cell cell1) {
-		Object objValue = "";
-		switch (cell1.getCellType()) {
-			case BLANK:
-				objValue = "";
-				break;
-			case STRING:
-				objValue = cell1.getRichStringCellValue().getString();
-				break;
-			case NUMERIC:
-				if (DateUtil.isCellDateFormatted(cell1)) {
-					objValue = cell1.getDateCellValue().getTime();
-				} else {
-					objValue = cell1.getNumericCellValue();
-				}
-				break;
-			case FORMULA:
-				objValue = cell1.getNumericCellValue();
-				break;
-
-			default:
-				objValue = "";
-		}
-		return objValue;
 	}
 }
