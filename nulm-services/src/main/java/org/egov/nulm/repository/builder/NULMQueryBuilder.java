@@ -124,10 +124,10 @@ public class NULMQueryBuilder {
 			+ "TO_DATE(TO_CHAR(TO_TIMESTAMP(created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END and tenant_id=? and is_active='true'";
 
 	public static final String GET_SUH_LOG_DATE_QUERY = "SELECT log_uuid,created_time FROM public.nulm_suh_occupancy_log where log_uuid=? and tenant_id=? and is_active='true';";
-	public static final String GET_SUH_SHELTER_NAME_QUERY = "SELECT NA.name_of_shelter,NA.suh_id,NA.tenant_id,NA.suh_uuid,NA.assigned_to FROM public.nulm_suh_application_detail NA \n"
-			+ "inner join nulm_organization OG on  OG.tenant_Id=NA.tenant_id where NA.tenant_id=:tenantId AND NA.application_status IN (:status) \n"
-			+ "and assigned_to in (select organization_uuid from nulm_organization where user_id=(:userId) )\n"
-			+ "	 		AND NA.is_active='true'  GROUP BY NA.suh_uuid";
+	public static final String GET_SUH_SHELTER_NAME_QUERY = "select suh.suh_uuid, suh.suh_id, suh.tenant_id, suh.name_of_shelter \n" + 
+			"from nulm_suh_application_detail suh \n" + 
+			"left join nulm_organization og on suh.assigned_to = og.organization_uuid \n" + 
+			"where suh.is_active='true' \n";
 
 	public static final String GET_SUSV_DOCUMENT_QUERY = "SELECT count(*)  FROM public.nulm_susv_application_document  WHERE application_uuid=? and tenant_id=? and filestore_id=? and document_type=? and is_active='true';";
 
