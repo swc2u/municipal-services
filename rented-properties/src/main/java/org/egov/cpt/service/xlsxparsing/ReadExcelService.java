@@ -177,10 +177,13 @@ public class ReadExcelService extends AbstractExcelService implements IReadExcel
 				Integer currentRowYear = ((Double) value).intValue();
 				for (int i = 1; i < 13; i++) {
 					if (rentDurations.contains(1 + "-" + MONTHS[i - 1] + "-" + currentRowYear)) {
-						payments.add(RentPayment.builder().amountPaid(
-								(Double) getValueFromCell(currentRow, i, MissingCellPolicy.RETURN_NULL_AND_BLANK))
-								.dateOfPayment(convertStrDatetoLong(1 + "-" + MONTHS[i - 1] + "-" + currentRowYear))
-								.build());
+						if (!String.valueOf(getValueFromCell(currentRow, i, MissingCellPolicy.RETURN_NULL_AND_BLANK))
+								.isEmpty()) {
+							payments.add(RentPayment.builder().amountPaid(
+									(Double) getValueFromCell(currentRow, i, MissingCellPolicy.RETURN_NULL_AND_BLANK))
+									.dateOfPayment(convertStrDatetoLong(1 + "-" + MONTHS[i - 1] + "-" + currentRowYear))
+									.build());
+						}
 					}
 
 				}
