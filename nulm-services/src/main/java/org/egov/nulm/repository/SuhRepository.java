@@ -154,7 +154,7 @@ public class SuhRepository {
 					}
 					
 					paramValues.put("createdBy", "");
-					paramValues.put("userId",userId.toString());
+					paramValues.put("userId",userId);
 					paramValues.put("status", statusEmplyee);
 					return suhApp = namedParameterJdbcTemplate.query(NULMQueryBuilder.GET_SUH_SHELTER_NAME_QUERY, paramValues,
 							columnsRowMapper);
@@ -170,7 +170,7 @@ public class SuhRepository {
 			statusCitizen.add(suh.getApplicationStatus() == null ? "" : suh.getApplicationStatus().toString());
 			paramValues.put("status", statusCitizen);
 			paramValues.put("createdBy", userId.toString());
-				paramValues.put("userId",userId.toString());
+				paramValues.put("userId",userId);
 			return suhApp = namedParameterJdbcTemplate.query(NULMQueryBuilder.GET_SUH_SHELTER_NAME_QUERY, paramValues, columnsRowMapper);
 
 		} catch (Exception e) {
