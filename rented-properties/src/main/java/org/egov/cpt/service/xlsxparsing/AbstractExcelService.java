@@ -1,8 +1,12 @@
 package org.egov.cpt.service.xlsxparsing;
 
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,6 +14,7 @@ import org.apache.commons.compress.archivers.dump.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.egov.cpt.models.RentDemand;
 import org.egov.cpt.models.RentPayment;
 
@@ -108,12 +113,11 @@ public abstract class AbstractExcelService {
             demand.setInterestSince(demand.getGenerationDate());
 
         }
-        // if (payment != null) {
-        // java.util.Date d = new java.util.Date(demand.getGenerationDate());
-        // System.out.println(
-        // "++ " + d.getMonth() + " " + demand.getCollectionPrincipal() + " " +
-        // payment.getAmountPaid());
-        // }
+        if (payment != null) {
+            java.util.Date d = new java.util.Date(demand.getGenerationDate());
+            System.out.println(
+                    "++ " + d.getMonth() + " " + demand.getCollectionPrincipal() + " " + payment.getAmountPaid());
+        }
         return new RentDemandPayment(demand, payment);
     }
 
@@ -193,5 +197,66 @@ public abstract class AbstractExcelService {
             return Integer.parseInt(matcher.group());
         }
         throw new NumberFormatException("Could not exract numeric part from " + str);
+    }
+
+    /**
+     * Format 2 related stuff
+     */
+    protected List<String> getAllSequenceOfYears(String rentYears) {
+        String[] yearsCombo = rentYears.split("-");
+        int startMonthnumber = Arrays.asList(MONTHS).indexOf(yearsCombo[0].split("'")[0].trim());
+        int endMonthnumber = Arrays.asList(MONTHS).indexOf(yearsCombo[1].split("'")[0].trim());
+        int startYear = Integer.parseInt(yearsCombo[0].split("'")[1]);
+        int endYear = Integer.parseInt(yearsCombo[1].split("'")[1]);
+        int yearCounter = startYear;
+        boolean startMaking = false;
+        List<String> rentDuration = new ArrayList<>();
+        while (yearCounter <= endYear) {
+            for (String month : MONTHS) {
+                if ((MONTHS[startMonthnumber] + "-" + yearCounter).equalsIgnoreCase(month + "-" + startYear)) {
+                    startMaking = true;
+                }
+                if (startMaking) {
+                    rentDuration.add(1 + "-" + month + "-" + yearCounter);
+                }
+                if ((MONTHS[endMonthnumber] + "-" + yearCounter).equalsIgnoreCase(month + "-" + endYear)) {
+                    break;
+                }
+            }
+            yearCounter++;
+        }
+        return rentDuration;
+    }
+
+    protected long convertStrDatetoLong(String dateStr) {
+        try {
+            SimpleDateFormat f = new SimpleDateFormat("dd-MMM-yyyy");
+            Date d = f.parse(dateStr);
+            return d.getTime();
+        } catch (Exception e) {
+            log.error("Date parsing issue occur :" + e.getMessage());
+        }
+        return 0;
+    }
+
+    protected void parseFormat2Payments(Row currentRow, List<String> rentDurations, List<RentPayment> payments) {
+        Object value = getValueFromCell(currentRow, 0, MissingCellPolicy.RETURN_NULL_AND_BLANK);
+        if (!(value instanceof Double)) {
+            return;
+        }
+        Integer currentRowYear = ((Double) value).intValue();
+        for (int i = 1; i <= MONTHS.length; i++) {
+            if (rentDurations.contains(1 + "-" + MONTHS[i - 1] + "-" + currentRowYear)) {
+                if (!String.valueOf(getValueFromCell(currentRow, i, MissingCellPolicy.RETURN_NULL_AND_BLANK))
+                        .isEmpty()) {
+                    payments.add(RentPayment.builder()
+                            .amountPaid(
+                                    (Double) getValueFromCell(currentRow, i, MissingCellPolicy.RETURN_NULL_AND_BLANK))
+                            .dateOfPayment(convertStrDatetoLong(1 + "-" + MONTHS[i - 1] + "-" + currentRowYear))
+                            .build());
+                }
+            }
+
+        }
     }
 }

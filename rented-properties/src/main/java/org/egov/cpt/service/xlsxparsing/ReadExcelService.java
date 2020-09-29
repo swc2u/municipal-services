@@ -5,10 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +16,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.egov.cpt.models.RentDemand;
 import org.egov.cpt.models.RentDemandResponse;
 import org.egov.cpt.models.RentPayment;
@@ -49,10 +45,10 @@ public class ReadExcelService extends AbstractExcelService implements IReadExcel
 			Iterator<Row> rowIterator = sheet.iterator();
 			while (rowIterator.hasNext()) {
 				Row currentRow = rowIterator.next();
-				if ("Month".equalsIgnoreCase(String.valueOf(currentRow.getCell(0)))) {
+				if (HEADER_CELL.equalsIgnoreCase(String.valueOf(currentRow.getCell(0)))) {
 					formatFlag = 0;
 					break;
-				} else if ("YEAR".equalsIgnoreCase(String.valueOf(currentRow.getCell(0)))) {
+				} else if (HEADER_CELL_FORMAT2.equalsIgnoreCase(String.valueOf(currentRow.getCell(0)))) {
 					formatFlag = 1;
 					break;
 				}
@@ -170,23 +166,7 @@ public class ReadExcelService extends AbstractExcelService implements IReadExcel
 			}
 
 			if (shouldParseRows) {
-				Object value = getValueFromCell(currentRow, 0, MissingCellPolicy.RETURN_NULL_AND_BLANK);
-				if (!(value instanceof Double)) {
-					continue;
-				}
-				Integer currentRowYear = ((Double) value).intValue();
-				for (int i = 1; i < 13; i++) {
-					if (rentDurations.contains(1 + "-" + MONTHS[i - 1] + "-" + currentRowYear)) {
-						if (!String.valueOf(getValueFromCell(currentRow, i, MissingCellPolicy.RETURN_NULL_AND_BLANK))
-								.isEmpty()) {
-							payments.add(RentPayment.builder().amountPaid(
-									(Double) getValueFromCell(currentRow, i, MissingCellPolicy.RETURN_NULL_AND_BLANK))
-									.dateOfPayment(convertStrDatetoLong(1 + "-" + MONTHS[i - 1] + "-" + currentRowYear))
-									.build());
-						}
-					}
-
-				}
+				this.parseFormat2Payments(currentRow, rentDurations, payments);
 			}
 		}
 		return new RentDemandResponse(demands, payments);
@@ -213,42 +193,5 @@ public class ReadExcelService extends AbstractExcelService implements IReadExcel
 					Double.valueOf(String.valueOf(row.getCell(columnRentCell + 2))));
 		}
 		return rentYearDetails;
-	}
-
-	private List<String> getAllSequenceOfYears(String rentYears) {
-		String[] yearsCombo = rentYears.split("-");
-		int startMonthnumber = Arrays.asList(MONTHS).indexOf(yearsCombo[0].split("'")[0].trim());
-		int endMonthnumber = Arrays.asList(MONTHS).indexOf(yearsCombo[1].split("'")[0].trim());
-		int startYear = Integer.parseInt(yearsCombo[0].split("'")[1]);
-		int endYear = Integer.parseInt(yearsCombo[1].split("'")[1]);
-		int yearCounter = startYear;
-		boolean startMaking = false;
-		List<String> rentDuration = new ArrayList<>();
-		while (yearCounter <= endYear) {
-			for (String month : MONTHS) {
-				if ((MONTHS[startMonthnumber] + "-" + yearCounter).equalsIgnoreCase(month + "-" + startYear)) {
-					startMaking = true;
-				}
-				if (startMaking) {
-					rentDuration.add(1 + "-" + month + "-" + yearCounter);
-				}
-				if ((MONTHS[endMonthnumber] + "-" + yearCounter).equalsIgnoreCase(month + "-" + endYear)) {
-					break;
-				}
-			}
-			yearCounter++;
-		}
-		return rentDuration;
-	}
-
-	private long convertStrDatetoLong(String dateStr) {
-		try {
-			SimpleDateFormat f = new SimpleDateFormat("dd-MMM-yyyy");
-			Date d = f.parse(dateStr);
-			return d.getTime();
-		} catch (Exception e) {
-			log.error("Date parsing issue occur :" + e.getMessage());
-		}
-		return 0;
 	}
 }

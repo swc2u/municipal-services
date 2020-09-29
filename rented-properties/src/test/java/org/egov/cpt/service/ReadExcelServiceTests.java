@@ -1,11 +1,7 @@
 package org.egov.cpt.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.time.format.DateTimeParseException;
@@ -19,8 +15,6 @@ import org.egov.cpt.models.RentDemand;
 import org.egov.cpt.models.RentDemandResponse;
 import org.egov.cpt.models.RentPayment;
 import org.egov.cpt.service.xlsxparsing.IReadExcelService;
-import org.egov.cpt.service.xlsxparsing.ReadExcelService;
-import org.egov.cpt.service.xlsxparsing.ReadExcelStreamingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,8 +27,9 @@ public class ReadExcelServiceTests {
 
 	@Before
 	public void setup() {
-		// this.readExcelService = new ReadExcelService();
-		this.readExcelService = new ReadExcelStreamingService();
+		// this.readExcelService = new
+		// org.egov.cpt.service.xlsxparsing.ReadExcelService();
+		this.readExcelService = new org.egov.cpt.service.xlsxparsing.ReadExcelStreamingService();
 	}
 
 	private void _testExcelParsing(String excelFileToParse, int sheetNo, double expectedTotalRent,
@@ -50,16 +45,6 @@ public class ReadExcelServiceTests {
 				.filter(date -> date == null).count());
 		assertEquals(expectedTotalRent, totalRent, 1.0);
 		assertEquals(expectedTotalPaid, totalPaid, 1.0);
-	}
-
-	@Test
-	public void testReadExcelWithNewFormat() throws FileNotFoundException {
-		RentDemandResponse data = new RentDemandResponse();
-		String filepath = "calculations/Vikas Nagar Mauli Jagran (451 to 520).xlsx";
-		InputStream inputStream = ReadExcelServiceTests.class.getClassLoader().getResourceAsStream(filepath);
-		readExcelService.getDatafromExcel(inputStream, 0);
-		assertThat(data.getDemand().size() > 0);
-		assertThat(data.getPayment().size() > 0);
 	}
 
 	@Test

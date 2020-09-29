@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -14,6 +16,7 @@ import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler;
@@ -113,22 +116,114 @@ public class ReadExcelStreamingService extends AbstractExcelService implements I
     }
 
     private class SheetContentsProcessor implements StreamingRowProcessor {
-        boolean isParsing = false;
+
+        private static final int PARSING_WAITING_DEMANDS = 0;
+        private static final int PARSING_DEMANDS = 1;
+        private static final int PARSING_WAITING_PAYMENTS = 2;
+        private static final int PARSING_PAYMENTS = 3;
+        private static final int PARSING_DONE = 4;
         List<RentDemand> demands = new ArrayList<RentDemand>();
         List<RentPayment> payments = new ArrayList<RentPayment>();
+        boolean isFormatIdentified = false;
+        boolean isFormat2 = true;
+
+        boolean isParsingFormat1 = false;
+
+        int format2ParsingState = 0;
+        int format2RentCell = -1;
+        Map<String, Double> format2rentYearDetails = new HashMap<String, Double>();
+        List<String> format2RentDurations = new ArrayList<>();
 
         @Override
         public void processRow(Row currentRow) {
+            if (isFormatIdentified) {
+                if (isFormat2) {
+                    processFormat2(currentRow);
+                } else {
+                    processFormat1(currentRow);
+                }
+                return;
+            }
+            String firstCell = String
+                    .valueOf(getValueFromCell(currentRow, 0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)).trim();
+            if (firstCell.isEmpty()) {
+                return;
+            }
+            if ("Transit Site No.".equalsIgnoreCase(firstCell)) {
+                isFormatIdentified = true;
+                isFormat2 = true;
+                return;
+            }
+            if (HEADER_CELL.equalsIgnoreCase(firstCell)) {
+                isFormatIdentified = true;
+                isFormat2 = false;
+                this.isParsingFormat1 = true;
+                return;
+            }
+        }
+
+        private void processFormat2(Row currentRow) {
+            if (format2ParsingState == PARSING_WAITING_DEMANDS) {
+                for (int i = 0; i < currentRow.getLastCellNum(); i++) {
+                    if (RENT_CELL.equalsIgnoreCase(
+                            String.valueOf(getValueFromCell(currentRow, i, MissingCellPolicy.CREATE_NULL_AS_BLANK)))) {
+                        format2RentCell = i;
+                        format2ParsingState = PARSING_DEMANDS;
+                        return;
+                    }
+                }
+                return;
+            }
+            if (format2ParsingState == PARSING_DEMANDS) {
+                String rentCellValue = String
+                        .valueOf(getValueFromCell(currentRow, format2RentCell, MissingCellPolicy.CREATE_NULL_AS_BLANK))
+                        .trim();
+                if ("TOTAL".equalsIgnoreCase(rentCellValue)) {
+                    format2ParsingState = PARSING_WAITING_PAYMENTS;
+                    return;
+                }
+                format2rentYearDetails.put(rentCellValue, Double.valueOf(String.valueOf(
+                        getValueFromCell(currentRow, format2RentCell + 2, MissingCellPolicy.CREATE_NULL_AS_BLANK))));
+                return;
+            }
+            if (format2ParsingState == PARSING_WAITING_PAYMENTS) {
+                String firstCellValue = String
+                        .valueOf(getValueFromCell(currentRow, 0, MissingCellPolicy.CREATE_NULL_AS_BLANK)).trim();
+                if (HEADER_CELL_FORMAT2.equalsIgnoreCase(firstCellValue)) {
+                    format2ParsingState = PARSING_PAYMENTS;
+                    format2rentYearDetails.forEach((key, value) -> {
+                        List<String> rentDuration = getAllSequenceOfYears(key);
+                        format2RentDurations.addAll(rentDuration);
+                        rentDuration.forEach(rent -> {
+                            demands.add(RentDemand.builder().generationDate(convertStrDatetoLong(rent))
+                                    .interestSince(convertStrDatetoLong(rent)).collectionPrincipal(value)
+                                    .remainingPrincipal(value).build());
+                        });
+                    });
+                }
+                return;
+            }
+            if (format2ParsingState == PARSING_PAYMENTS) {
+                if (FOOTER_CELL_FORMAT2.equalsIgnoreCase(
+                        String.valueOf(getValueFromCell(currentRow, 0, MissingCellPolicy.CREATE_NULL_AS_BLANK)))) {
+                    format2ParsingState = PARSING_DONE;
+                    return;
+                }
+                parseFormat2Payments(currentRow, format2RentDurations, payments);
+            }
+        }
+
+        private void processFormat1(Row currentRow) {
             String firstCell = String
                     .valueOf(getValueFromCell(currentRow, 0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
-            if (!this.isParsing) {
+            if (!this.isParsingFormat1) {
                 if (HEADER_CELL.equalsIgnoreCase(firstCell)) {
-                    this.isParsing = true;
+                    this.isParsingFormat1 = true;
                 }
                 return;
             }
             if (FOOTER_CELL.equalsIgnoreCase(firstCell)) {
-                this.isParsing = false;
+                this.isParsingFormat1 = false;
                 return;
             }
             if (HEADER_CELL.equalsIgnoreCase(firstCell)) {
