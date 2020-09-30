@@ -55,9 +55,10 @@ public class CalculationService {
 			CalculationReq calRequest = CalculationReq.builder().calculationCriteria(Arrays.asList(criteria))
 					.requestInfo(request.getRequestInfo()).isconnectionCalculation(false).build();
 			try {
+				log.info("Call to generate demand for application no {}: {}",criteria.getApplicationNo(),mapper.writeValueAsString(calRequest));
 				Object response = serviceRequestRepository.fetchResult(waterServiceUtil.getCalculatorURL(), calRequest);
 				CalculationRes calResponse = mapper.convertValue(response, CalculationRes.class);
-				log.info(mapper.writeValueAsString(calResponse));
+				log.info("Demand response for application no {}: {}",criteria.getApplicationNo(),mapper.writeValueAsString(calResponse));
 			} catch (Exception ex) {
 				log.error("Calculation response error!!", ex);
 				throw new CustomException("WATER_CALCULATION_EXCEPTION", "Calculation response can not parsed!!!");

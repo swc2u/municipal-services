@@ -274,7 +274,7 @@ public class EnrichmentService {
 				waterDao.enrichFileStoreIds(waterConnectionRequest);
 			}
 		} catch (Exception ex) {
-			log.debug(ex.toString());
+			log.error(ex.toString());
 		}
 	}
 	
