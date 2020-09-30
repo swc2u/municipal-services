@@ -32,7 +32,7 @@ public class WaterFieldValidator implements WaterActionValidator {
 				}
 
 			}
-			if (WCConstants.APPROVE_CONNECTION_CONST
+			if (WCConstants.ACTION_APPROVE_CONNECTION_CONST
 					.equalsIgnoreCase(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction())) {
 				if (StringUtils.isEmpty(waterConnectionRequest.getWaterConnection().getRoadType())) {
 					errorMap.put("INVALID_ROAD_TYPE", "Road type should not be empty");

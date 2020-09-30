@@ -128,7 +128,7 @@ public class EnrichmentService {
 				}
 			}
 			if (waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
-					.equalsIgnoreCase(WCConstants.APPROVE_CONNECTION_CONST)) {
+					.equalsIgnoreCase(WCConstants.ACTION_APPROVE_CONNECTION_CONST)) {
 				additionalDetail.put(WCConstants.ESTIMATION_DATE_CONST, System.currentTimeMillis());
 			}
 		}
@@ -264,7 +264,7 @@ public class EnrichmentService {
 	public void enrichFileStoreIds(WaterConnectionRequest waterConnectionRequest) {
 		try {
 			if (waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
-					.equalsIgnoreCase(WCConstants.APPROVE_CONNECTION_CONST)
+					.equalsIgnoreCase(WCConstants.ACTION_APPROVE_CONNECTION_CONST)
 					|| waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
 							.equalsIgnoreCase(WCConstants.ACTION_PAY)
 					|| waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
