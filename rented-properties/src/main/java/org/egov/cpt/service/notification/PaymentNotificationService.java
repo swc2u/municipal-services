@@ -250,7 +250,8 @@ public class PaymentNotificationService {
 	private EmailRequest getDCOwnerEmailRequest(DuplicateCopy copy, Map<String, String> valMap2,
 			String localizationMessages) {
 		String message = util.getDCOwnerPaymentMsg(copy, localizationMessages);
-		message = message.replace("\\n", "<br/>");
+		String emailSignature = util.getMessageTemplate(PTConstants.EMAIL_SIGNATURE, localizationMessages);
+		message=message.concat(emailSignature);
 		EmailRequest emailRequest = EmailRequest.builder().subject(PTConstants.EMAIL_SUBJECT).isHTML(true)
 				.email(copy.getApplicant().get(0).getEmail()).body(message).build();
 
@@ -269,7 +270,8 @@ public class PaymentNotificationService {
 
 	private EmailRequest getOTOwnerEmailRequest(Owner owner, Map<String, String> valMap2, String localizationMessages) {
 		String message = util.getOTOwnerPaymentMsg(owner, localizationMessages);
-		message = message.replace("\\n", "<br/>");
+		String emailSignature = util.getMessageTemplate(PTConstants.EMAIL_SIGNATURE, localizationMessages);
+		message=message.concat(emailSignature);
 		EmailRequest emailRequest = EmailRequest.builder().subject(PTConstants.EMAIL_SUBJECT).isHTML(true)
 				.email(owner.getOwnerDetails().getEmail()).body(message).build();
 
@@ -278,6 +280,7 @@ public class PaymentNotificationService {
 
 	private List<SMSRequest> getDCSMSRequests(DuplicateCopy copy, String localizationMessages) {
 		String message = util.getDCOwnerPaymentMsg(copy, localizationMessages);
+		message = message.replaceAll("<br/>", "");
 		SMSRequest ownerSmsRequest = new SMSRequest(copy.getApplicant().get(0).getPhone(), message);
 
 		/*
@@ -296,6 +299,7 @@ public class PaymentNotificationService {
 
 	private List<SMSRequest> getOTSMSRequests(Owner owner, Map<String, String> valMap, String localizationMessages) {
 		String ownerMessage = util.getOTOwnerPaymentMsg(owner, localizationMessages);
+		ownerMessage = ownerMessage.replaceAll("<br/>", "");
 		SMSRequest ownerSmsRequest = new SMSRequest(owner.getOwnerDetails().getPhone(), ownerMessage);
 
 		/*
@@ -352,7 +356,7 @@ public class PaymentNotificationService {
 			String transitNumber, String transactionNumber) {
 		String ownerMessage = util.getRPOwnerPaymentMsg(owner, paymentDetail, localizationMessages, transitNumber,
 				transactionNumber);
-		ownerMessage = ownerMessage.replace("\\n", "\n");
+		ownerMessage = ownerMessage.replaceAll("<br/>", "");
 		SMSRequest ownerSmsRequest = new SMSRequest(owner.getOwnerDetails().getPhone(), ownerMessage);
 		List<SMSRequest> smsRequestList = new ArrayList<>();
 		smsRequestList.add(ownerSmsRequest);
@@ -375,7 +379,8 @@ public class PaymentNotificationService {
 			String transitNumber, String transactionNumber) {
 		String message = util.getRPOwnerPaymentMsg(owner, paymentDetail, localizationMessages, transitNumber,
 				transactionNumber);
-		message = message.replace("\\n", "<br/>");
+		String emailSignature = util.getMessageTemplate(PTConstants.EMAIL_SIGNATURE, localizationMessages);
+		message=message.concat(emailSignature);
 		EmailRequest emailRequest = EmailRequest.builder().subject(PTConstants.EMAIL_SUBJECT).isHTML(true)
 				.email(owner.getOwnerDetails().getEmail()).body(message).build();
 
