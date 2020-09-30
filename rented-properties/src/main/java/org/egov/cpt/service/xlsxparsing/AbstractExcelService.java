@@ -113,11 +113,12 @@ public abstract class AbstractExcelService {
             demand.setInterestSince(demand.getGenerationDate());
 
         }
-        if (payment != null) {
-            java.util.Date d = new java.util.Date(demand.getGenerationDate());
-            System.out.println(
-                    "++ " + d.getMonth() + " " + demand.getCollectionPrincipal() + " " + payment.getAmountPaid());
-        }
+        // if (payment != null) {
+        // java.util.Date d = new java.util.Date(demand.getGenerationDate());
+        // System.out.println(
+        // "++ " + d.getMonth() + " " + demand.getCollectionPrincipal() + " " +
+        // payment.getAmountPaid());
+        // }
         return new RentDemandPayment(demand, payment);
     }
 
