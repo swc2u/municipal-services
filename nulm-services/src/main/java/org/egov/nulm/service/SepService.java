@@ -21,7 +21,6 @@ import org.egov.nulm.util.AuditDetailsUtil;
 import org.egov.nulm.util.IdGenRepository;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -135,6 +134,7 @@ public class SepService {
 			throw new CustomException(CommonConstants.SEP_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
+	
 	public ResponseEntity<ResponseInfoWrapper> updateSEPApplication(NulmSepRequest seprequest) {
 		try {
 			SepApplication sepapplication = objectMapper.convertValue(seprequest.getNulmSepRequest(),
