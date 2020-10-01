@@ -106,6 +106,7 @@ public class EnrichmentService {
 			waterConnectionRequest.getWaterConnection().setApplicationType(WCConstants.WS_NEW_TUBEWELL_CONNECTION);
 		}else {
 			waterConnectionRequest.getWaterConnection().setApplicationType(WCConstants.NEW_WATER_CONNECTION);
+			waterConnectionRequest.getWaterConnection().setConnectionType(WCConstants.METERED_CONNECTION);
 		}
 		setApplicationIdgenIds(waterConnectionRequest);
 		setStatusForCreate(waterConnectionRequest);
