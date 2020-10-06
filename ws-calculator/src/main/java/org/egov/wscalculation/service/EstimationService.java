@@ -527,7 +527,7 @@ public class EstimationService {
 			}
 			BigDecimal roadCuttingCharge = BigDecimal.ZERO;
 			if (criteria.getWaterConnection().getSecurityCharge() != null
-					|| criteria.getWaterConnection().getSecurityCharge() != 0) {
+					&& criteria.getWaterConnection().getSecurityCharge() != 0) {
 				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_SECURITY_CHARGE)
 						.estimateAmount(securityFee.setScale(2, 2)).build());
 				return estimates;
