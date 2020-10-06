@@ -119,8 +119,12 @@ public class PaymentUpdateService {
 								}
 							}
 						}else if(WCConstants.APPLICATION_TYPE_REGULAR.equalsIgnoreCase(waterConnection.getWaterApplicationType())){
-							if(WCConstants.STATUS_PENDING_FOR_PAYMENT.equalsIgnoreCase(waterConnection.getApplicationStatus())){
-								waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY_FOR_REGULAR_CONNECTION);
+							if(WCConstants.WS_NEWCONNECTION.equalsIgnoreCase(waterConnection.getActivityType())){
+								if(WCConstants.STATUS_PENDING_FOR_PAYMENT.equalsIgnoreCase(waterConnection.getApplicationStatus())){
+									waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY_FOR_REGULAR_CONNECTION);
+								}else {
+									waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY);
+								}
 							}else {
 								waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY);
 							}
