@@ -170,29 +170,24 @@ public class SepService {
 			throw new CustomException(CommonConstants.SEP_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
+	
 	public ResponseEntity<ResponseInfoWrapper> updateSEPApplicationStatus(NulmSepRequest seprequest) {
 		try {
-			SepApplication sepapplication = objectMapper.convertValue(seprequest.getNulmSepRequest(),
-					SepApplication.class);
-			
-		 if(sepapplication.getApplicationStatus() != null  && sepapplication.getApplicationStatus().toString().equalsIgnoreCase(config.getApproved()))
-		 {
-			 sepapplication.setApplicationStatus(SepApplication.StatusEnum.fromValue(sepapplication.getApplicationStatus().toString()));
-			 sepapplication.setNulmApplicationId(UUID.randomUUID().toString());
-			 sepapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(seprequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
-		 }
-		 else if(sepapplication.getApplicationStatus() != null  && sepapplication.getApplicationStatus().toString().equalsIgnoreCase(config.getRejected()))
-			 
-		 {
-			 sepapplication.setApplicationStatus(SepApplication.StatusEnum.fromValue(sepapplication.getApplicationStatus().toString()));
-			 sepapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(seprequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
-			 sepapplication.setNulmApplicationId(UUID.randomUUID().toString());
-		 }
-		 repository.updateSEPApplicationStatus(sepapplication);
-		 return new ResponseEntity<>(ResponseInfoWrapper.builder()
-					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-					.responseBody(sepapplication).build(), HttpStatus.OK);
-
+			 SepApplication sepapplication = objectMapper.convertValue(seprequest.getNulmSepRequest(), SepApplication.class);			
+			 if(sepapplication.getApplicationStatus() != null  && sepapplication.getApplicationStatus().toString().equalsIgnoreCase(config.getApproved())){
+				 sepapplication.setApplicationStatus(SepApplication.StatusEnum.fromValue(sepapplication.getApplicationStatus().toString()));
+				 sepapplication.setNulmApplicationId(UUID.randomUUID().toString());
+				 sepapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(seprequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
+			 }
+			 else if(sepapplication.getApplicationStatus() != null  && sepapplication.getApplicationStatus().toString().equalsIgnoreCase(config.getRejected())){
+				 sepapplication.setApplicationStatus(SepApplication.StatusEnum.fromValue(sepapplication.getApplicationStatus().toString()));
+				 sepapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(seprequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
+				 sepapplication.setNulmApplicationId(UUID.randomUUID().toString());
+			 }
+			 repository.updateSEPApplicationStatus(sepapplication);
+			 return new ResponseEntity<>(ResponseInfoWrapper.builder()
+						.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+						.responseBody(sepapplication).build(), HttpStatus.OK);
 		} catch (Exception e) {
 			throw new CustomException(CommonConstants.SEP_APPLICATION_STATUS_EXCEPTION_CODE, e.getMessage());
 		}

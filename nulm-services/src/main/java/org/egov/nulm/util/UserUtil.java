@@ -54,7 +54,7 @@ public class UserUtil {
 			user.setUserName(organization.getMobileNo());
 			user.setMobileNumber(organization.getMobileNo());
 			user.setTenantId(tenantId.split("\\.")[0]);
-			user.setPermanentCity(tenantId.split("\\.")[0]);
+			user.setPermanentCity(tenantId);
 			user.setName(organization.getRepresentativeName());
 			user.setCorrespondenceAddress(organization.getAddress());
 			user.setEmailId(organization.getEmailId());
