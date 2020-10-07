@@ -51,6 +51,12 @@ public class PurchaseordersApiController {
 			@RequestParam(value = "supplierCode", required = false) String supplierCode,
 			@RequestParam(value = "searchPoAdvReq", required = false) Boolean searchPoAdvReq,
 			@RequestParam(value = "status", required = false) String status,
+			@RequestParam(value = "indentPurpose", required = false) String indentPurpose,
+			@RequestParam(value = "inventoryType", required = false) String inventoryType,
+			@RequestParam(value = "indentRaisedBy", required = false) String indentRaisedBy,
+			@RequestParam(value = "indentFromDate", required = false) Long indentFromDate,
+			@RequestParam(value = "indentToDate", required = false) Long indentToDate,
+			@RequestParam(value = "departmentId", required = false) String departmentId,
 			@Min(0) @Max(100) @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer pageSize,
 			@RequestParam(value = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
 			@RequestParam(value = "sortBy", required = false, defaultValue = "id") String sortBy) {
@@ -65,6 +71,12 @@ public class PurchaseordersApiController {
 		purchaseOrderSearch.setSupplier(supplierCode);
 		purchaseOrderSearch.setSearchPoAdvReq(searchPoAdvReq);
 		purchaseOrderSearch.setStatus(status);
+		purchaseOrderSearch.setIndentPurpose(indentPurpose);
+		purchaseOrderSearch.setIndentRaisedBy(indentRaisedBy);
+		purchaseOrderSearch.setInventoryType(inventoryType);
+		purchaseOrderSearch.setIndentFromDate(indentFromDate);
+		purchaseOrderSearch.setIndentToDate(indentToDate);
+		purchaseOrderSearch.setDepartmentId(departmentId);
 		purchaseOrderSearch.setPageSize(pageSize);
 		purchaseOrderSearch.setPageNumber(pageNumber);
 

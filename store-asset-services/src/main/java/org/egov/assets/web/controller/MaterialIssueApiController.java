@@ -58,11 +58,17 @@ public class MaterialIssueApiController {
 			@Min(0) @Max(100) @RequestParam(value = "pageSize", required = false) Integer pageSize,
 			@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
 			@RequestParam(value = "sortBy", required = false) String sortBy,
-			@RequestParam(value = "purpose", required = false) String purpose) {
+			@RequestParam(value = "purpose", required = false) String purpose,
+			@RequestParam(value = "indentPurpose", required = false) String indentPurpose,
+			@RequestParam(value = "indentingStore", required = false) String indentingStore,
+			@RequestParam(value = "indentRaisedBy", required = false) String indentRaisedBy,
+			@RequestParam(value = "indentFromDate", required = false) Long indentFromDate,
+			@RequestParam(value = "indentToDate", required = false) Long indentToDate) {
 
 		MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(tenantId, ids, fromStore, toStore,
 				issueNoteNumber, issuePurpose, issueDate, null, materialIssueStatus, description, totalIssueValue, null,
-				pageNumber, sortBy, pageSize, purpose);
+				pageNumber, sortBy, pageSize, purpose, indentFromDate, indentToDate, indentingStore, indentPurpose,
+				indentRaisedBy);
 		MaterialIssueResponse materialIssueResponse = materialIssueService.search(searchContract,
 				IssueTypeEnum.INDENTISSUE.toString());
 		return new ResponseEntity(materialIssueResponse, HttpStatus.OK);
@@ -75,7 +81,8 @@ public class MaterialIssueApiController {
 			@RequestParam(value = "issueNoteNumber", required = false) String issueNoteNumber) {
 
 		MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(tenantId, null, null, null,
-				issueNoteNumber, null, null, null, null, null, null, null, null, null, null, null);
+				issueNoteNumber, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+				null, null);
 		PDFResponse pdfResponse = materialIssueService.printPdf(searchContract, IssueTypeEnum.INDENTISSUE.toString(),
 				pdfRequest.getRequestInfo());
 		return new ResponseEntity(pdfResponse, HttpStatus.OK);
