@@ -261,6 +261,7 @@ public class NotificationService {
 	public String getMobileAndIdForNotificationService(RequestInfo requestInfo, String userId, String tenantId, String assignee, String role) {
 		String phoneNumber = null;
 		String uuid = "uuid";
+		String name="";
 		Object response = null;
 		ObjectMapper mapper = pGRUtils.getObjectMapper();
 		StringBuilder uri = new StringBuilder();
@@ -273,6 +274,7 @@ public class NotificationService {
 					UserResponse res = mapper.convertValue(response, UserResponse.class);
 					phoneNumber = res.getUser().get(0).getMobileNumber();
 					uuid = res.getUser().get(0).getUuid();
+					name=uuid = res.getUser().get(0).getName();
 				}
 			}catch(Exception e) {
 				log.error("Couldn't fetch user for id: "+userId+" error: " + e);
@@ -283,9 +285,10 @@ public class NotificationService {
 			if(!StringUtils.isEmpty(employeeDetails.get("phone"))) {
 				phoneNumber = employeeDetails.get("phone");
 				uuid = employeeDetails.get("uuid");
+				name = employeeDetails.get("name");
 			}
 		}
-		return phoneNumber + "|" + uuid;
+		return phoneNumber + "|" + uuid + "|" + name;
 	}
 	
 	/**

@@ -128,6 +128,7 @@ public class PGRNotificationConsumer {
         ServiceRequest serviceReqRequest = new ServiceRequest();
         try {
             serviceReqRequest = mapper.convertValue(record, ServiceRequest.class);
+            log.info("Received value from topic {}, {}",topic,serviceReqRequest);
         } catch (final Exception e) {
             log.error("Error while listening to value: " + record + " on topic: " + topic + ": " + e);
         }
@@ -304,16 +305,13 @@ public class PGRNotificationConsumer {
         Map<String, String> messageMap = NotificationService.localizedMessageMap.get(locale + "|" + tenantId);
         if (null == messageMap)
             return null;
-        log.info("Get listOfValues...");
         List<Object> listOfValues = notificationService.getServiceType(serviceReq, requestInfo, locale);
-        log.info("After listOfValues...");
         
         return getMessage(listOfValues, date, serviceReq, actionInfo, requestInfo, messageMap, role);
 
     }
 
     public String getMessage(List<Object> listOfValues, String date, Service serviceReq, ActionInfo actionInfo, RequestInfo requestInfo, Map<String, String> messageMap, String role) {
-        log.info("Within getMessage()...");
     	if (null == listOfValues || null == listOfValues.get(0)) {
             return getDefaultMessage(messageMap, actionInfo.getStatus(), actionInfo.getAction(), actionInfo.getComment());
         }
@@ -323,13 +321,22 @@ public class PGRNotificationConsumer {
         Map<String, String> employeeDetails = null;
         String department = null;
         String designation = null;
+        String citizenName="";
+        String citizenMobile = "";
+        
+        //Fetch Citizen contact for employee role
+        if(role.equals(PGRConstants.ROLE_EMPLOYEE)) {
+        	String citizenContactRetrived = notificationService.getMobileAndIdForNotificationService(requestInfo, serviceReq.getAccountId(), serviceReq.getTenantId(), actionInfo.getAssignee(), PGRConstants.ROLE_CITIZEN);
+        	citizenMobile = citizenContactRetrived.split("[|]")[0];
+        	citizenName = citizenContactRetrived.split("[|]")[2];
+        }
+        
         if (StringUtils.isEmpty(actionInfo.getStatus()) && !StringUtils.isEmpty(actionInfo.getComment())) {
-        	log.info("Within comment..."+actionInfo.getComment());
+        	log.info("Notification send for comments..."+actionInfo.getComment());
             text = messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT);
             text = text.replaceAll(PGRConstants.SMS_NOTIFICATION_COMMENT_KEY, actionInfo.getComment())
                     .replaceAll(PGRConstants.SMS_NOTIFICATION_USER_NAME_KEY, requestInfo.getUserInfo().getName());
         } else {
-        	log.info("Within else...");
             text = messageMap.get(PGRConstants.getStatusRoleLocalizationKeyMap().get(actionInfo.getStatus() + "|" + role));
             log.info("Notification text: {}",text);
             if (actionInfo.getStatus().equals(WorkFlowConfigs.STATUS_ESCALATED_LEVEL1_PENDING)
@@ -342,7 +349,6 @@ public class PGRNotificationConsumer {
             } else if (actionInfo.getStatus().equals(WorkFlowConfigs.STATUS_ASSIGNED)) {
                 employeeDetails = notificationService.getEmployeeDetails(serviceReq.getTenantId(), actionInfo.getAssignee(), requestInfo);
                 if (null != employeeDetails) {
-                	log.info("Employee found...");
                     List<String> deptCodes = new ArrayList<>();
                     deptCodes.add(employeeDetails.get("department"));
                     //department = notificationService.getDepartmentForNotification(serviceReq, deptCodes, requestInfo);
@@ -350,28 +356,24 @@ public class PGRNotificationConsumer {
                     department = notificationService.getDepartment(requestInfo, deptCodes, serviceReq.getTenantId());
                     designation = notificationService.getDesignation(serviceReq, employeeDetails.get("designation"), requestInfo);
                 } else {
-                	log.info("Employee not found...");
                     return getDefaultMessage(messageMap, actionInfo.getStatus(), actionInfo.getAction(), actionInfo.getComment());
                 }
-                if (StringUtils.isEmpty(designation) || StringUtils.isEmpty(employeeDetails.get("name"))) {
-                	log.info("Designation not found...Employee name {}",employeeDetails.get("name"));
+                if (StringUtils.isEmpty(employeeDetails.get("name"))) {
                     return getDefaultMessage(messageMap, actionInfo.getStatus(), actionInfo.getAction(), actionInfo.getComment());
                 }
 
-                String locality="";
-                try {
-                	locality = messageMap.get(serviceReq.getAddressDetail().getMohalla());
-                }catch(Exception e) {
-                	log.error("Unable to get locality",e);
-                }
-                log.info("locality found...{}",locality);
+                String locality = messageMap.get(serviceReq.getAddressDetail().getMohalla());
+            	if(StringUtils.isEmpty(locality)) {
+            		locality = serviceReq.getAddressDetail().getMohalla();
+            	}
+            	log.info("locality value...{}",locality);
+                
                 text = text.replaceAll(PGRConstants.SMS_NOTIFICATION_EMP_NAME_KEY, employeeDetails.get("name"))
                         .replaceAll(PGRConstants.SMS_NOTIFICATION_EMP_DESIGNATION_KEY, designation)
                         .replaceAll(PGRConstants.SMS_NOTIFICATION_EMP_DEPT_KEY, department)
-                        .replaceAll(PGRConstants.SMS_NOTIFICATION_COMPLAINANT_NAME_KEY, serviceReq.getCitizen().getName())
-                        .replaceAll(PGRConstants.SMS_NOTIFICATION_COMPLAINANT_CONTACT_KEY, serviceReq.getCitizen().getMobileNumber())
+                        .replaceAll(PGRConstants.SMS_NOTIFICATION_COMPLAINANT_NAME_KEY, citizenName)
+                        .replaceAll(PGRConstants.SMS_NOTIFICATION_COMPLAINANT_CONTACT_KEY, citizenMobile)
                         .replaceAll(PGRConstants.SMS_NOTIFICATION_LOCALITY_KEY, locality);
-                log.info("SMS text {}",text);
             } else if (actionInfo.getStatus().equals(WorkFlowConfigs.STATUS_REJECTED)) {
                 if (StringUtils.isEmpty(actionInfo.getComment()))
                     return getDefaultMessage(messageMap, actionInfo.getStatus(), actionInfo.getAction(), actionInfo.getComment());
