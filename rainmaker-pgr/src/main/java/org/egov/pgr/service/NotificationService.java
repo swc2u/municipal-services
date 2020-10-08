@@ -274,12 +274,11 @@ public class NotificationService {
 					UserResponse res = mapper.convertValue(response, UserResponse.class);
 					phoneNumber = res.getUser().get(0).getMobileNumber();
 					uuid = res.getUser().get(0).getUuid();
-					name=uuid = res.getUser().get(0).getName();
+					name = res.getUser().get(0).getName();
 				}
 			}catch(Exception e) {
 				log.error("Couldn't fetch user for id: "+userId+" error: " + e);
 			}
-			return phoneNumber + "|" + uuid;
 		}else if(role.equals(PGRConstants.ROLE_EMPLOYEE)) {
 			Map<String, String> employeeDetails = getEmployeeDetails(tenantId, assignee, requestInfo);
 			if(!StringUtils.isEmpty(employeeDetails.get("phone"))) {
