@@ -304,27 +304,34 @@ public class PGRNotificationConsumer {
         Map<String, String> messageMap = NotificationService.localizedMessageMap.get(locale + "|" + tenantId);
         if (null == messageMap)
             return null;
+        log.info("Get listOfValues...");
         List<Object> listOfValues = notificationService.getServiceType(serviceReq, requestInfo, locale);
-
+        log.info("After listOfValues...");
+        
         return getMessage(listOfValues, date, serviceReq, actionInfo, requestInfo, messageMap, role);
 
     }
 
     public String getMessage(List<Object> listOfValues, String date, Service serviceReq, ActionInfo actionInfo, RequestInfo requestInfo, Map<String, String> messageMap, String role) {
-        if (null == listOfValues.get(0)) {
+        log.info("Within getMessage()...");
+    	if (null == listOfValues || null == listOfValues.get(0)) {
             return getDefaultMessage(messageMap, actionInfo.getStatus(), actionInfo.getAction(), actionInfo.getComment());
         }
+    	log.info("Status..."+actionInfo.getStatus());
         String text = null;
         String[] reasonForRejection = new String[2];
         Map<String, String> employeeDetails = null;
         String department = null;
         String designation = null;
         if (StringUtils.isEmpty(actionInfo.getStatus()) && !StringUtils.isEmpty(actionInfo.getComment())) {
+        	log.info("Within comment..."+actionInfo.getComment());
             text = messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT);
             text = text.replaceAll(PGRConstants.SMS_NOTIFICATION_COMMENT_KEY, actionInfo.getComment())
                     .replaceAll(PGRConstants.SMS_NOTIFICATION_USER_NAME_KEY, requestInfo.getUserInfo().getName());
         } else {
+        	log.info("Within else...");
             text = messageMap.get(PGRConstants.getStatusRoleLocalizationKeyMap().get(actionInfo.getStatus() + "|" + role));
+            log.info("Notification text: {}",text);
             if (actionInfo.getStatus().equals(WorkFlowConfigs.STATUS_ESCALATED_LEVEL1_PENDING)
             		|| actionInfo.getStatus().equals(WorkFlowConfigs.STATUS_ESCALATED_LEVEL2_PENDING)) {
                 if (null != actionInfo.getAction() && actionInfo.getAction().equals(WorkFlowConfigs.ACTION_REOPEN)) {
@@ -335,6 +342,7 @@ public class PGRNotificationConsumer {
             } else if (actionInfo.getStatus().equals(WorkFlowConfigs.STATUS_ASSIGNED)) {
                 employeeDetails = notificationService.getEmployeeDetails(serviceReq.getTenantId(), actionInfo.getAssignee(), requestInfo);
                 if (null != employeeDetails) {
+                	log.info("Employee found...");
                     List<String> deptCodes = new ArrayList<>();
                     deptCodes.add(employeeDetails.get("department"));
                     //department = notificationService.getDepartmentForNotification(serviceReq, deptCodes, requestInfo);
@@ -342,14 +350,28 @@ public class PGRNotificationConsumer {
                     department = notificationService.getDepartment(requestInfo, deptCodes, serviceReq.getTenantId());
                     designation = notificationService.getDesignation(serviceReq, employeeDetails.get("designation"), requestInfo);
                 } else {
+                	log.info("Employee not found...");
                     return getDefaultMessage(messageMap, actionInfo.getStatus(), actionInfo.getAction(), actionInfo.getComment());
                 }
-                if (StringUtils.isEmpty(designation) || StringUtils.isEmpty(employeeDetails.get("name")))
+                if (StringUtils.isEmpty(designation) || StringUtils.isEmpty(employeeDetails.get("name"))) {
+                	log.info("Designation not found...Employee name {}",employeeDetails.get("name"));
                     return getDefaultMessage(messageMap, actionInfo.getStatus(), actionInfo.getAction(), actionInfo.getComment());
+                }
 
+                String locality="";
+                try {
+                	locality = messageMap.get(serviceReq.getAddressDetail().getMohalla());
+                }catch(Exception e) {
+                	log.error("Unable to get locality",e);
+                }
+                log.info("locality found...{}",locality);
                 text = text.replaceAll(PGRConstants.SMS_NOTIFICATION_EMP_NAME_KEY, employeeDetails.get("name"))
                         .replaceAll(PGRConstants.SMS_NOTIFICATION_EMP_DESIGNATION_KEY, designation)
-                        .replaceAll(PGRConstants.SMS_NOTIFICATION_EMP_DEPT_KEY, department);
+                        .replaceAll(PGRConstants.SMS_NOTIFICATION_EMP_DEPT_KEY, department)
+                        .replaceAll(PGRConstants.SMS_NOTIFICATION_COMPLAINANT_NAME_KEY, serviceReq.getCitizen().getName())
+                        .replaceAll(PGRConstants.SMS_NOTIFICATION_COMPLAINANT_CONTACT_KEY, serviceReq.getCitizen().getMobileNumber())
+                        .replaceAll(PGRConstants.SMS_NOTIFICATION_LOCALITY_KEY, locality);
+                log.info("SMS text {}",text);
             } else if (actionInfo.getStatus().equals(WorkFlowConfigs.STATUS_REJECTED)) {
                 if (StringUtils.isEmpty(actionInfo.getComment()))
                     return getDefaultMessage(messageMap, actionInfo.getStatus(), actionInfo.getAction(), actionInfo.getComment());
