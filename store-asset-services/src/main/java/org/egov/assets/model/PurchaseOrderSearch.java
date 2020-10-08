@@ -38,4 +38,11 @@ public class PurchaseOrderSearch {
 	private Integer pageNumber;
 	private String sortBy;
 
+	private String departmentId;
+	private String indentPurpose;
+	private String inventoryType;
+	private Long indentFromDate;
+	private Long indentToDate;
+	private String indentRaisedBy;
+
 }

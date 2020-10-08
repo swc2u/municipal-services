@@ -9,17 +9,17 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.egov.assets.model.IndenUserListResponse;
 import org.egov.assets.model.IndentRequest;
 import org.egov.assets.model.IndentResponse;
 import org.egov.assets.model.IndentSearch;
-import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.PDFRequest;
+import org.egov.assets.model.PDFResponse;
 import org.egov.assets.service.IndentService;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -91,6 +91,14 @@ public class IndentsApiController {
 			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,
 			@Valid @RequestBody IndentRequest indentRequest) {
 		IndentResponse response = indentService.updateStatus(indentRequest);
+		return new ResponseEntity(response, HttpStatus.OK);
+	}
+
+	
+	@PostMapping(value = "/_creatorList", produces = { "application/json" }, consumes = { "application/json" })
+	public ResponseEntity<IndenUserListResponse> indentsCreatorList(
+			@NotNull @RequestParam(value = "tenantId", required = true) String tenantId,@RequestBody RequestInfo requestInfo) {
+		IndenUserListResponse response = indentService.getCreatorList(requestInfo,tenantId);
 		return new ResponseEntity(response, HttpStatus.OK);
 	}
 

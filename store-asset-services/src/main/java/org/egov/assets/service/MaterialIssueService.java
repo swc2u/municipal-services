@@ -885,7 +885,15 @@ public class MaterialIssueService extends DomainService {
 	}
 
 	public MaterialIssueResponse search(final MaterialIssueSearchContract searchContract, String type) {
-		Pagination<MaterialIssue> materialIssues = materialIssueJdbcRepository.search(searchContract, type);
+		Pagination<MaterialIssue> materialIssues = null;
+
+		if (searchContract.getIndentingStore() != null || searchContract.getIndentFromDate() != null
+				|| searchContract.getIndentToDate() != null || searchContract.getIndentRaisedBy() != null
+				|| searchContract.getIndentPurpose() != null) {
+			materialIssues = materialIssueJdbcRepository.searchIndentData(searchContract, type);
+		} else
+			materialIssues = materialIssueJdbcRepository.search(searchContract, type);
+
 		if (materialIssues.getPagedData().size() > 0)
 			for (MaterialIssue materialIssue : materialIssues.getPagedData()) {
 
@@ -1221,8 +1229,8 @@ public class MaterialIssueService extends DomainService {
 				indent.put("materialDetails", indentDetails);
 
 				// Need to integrate Workflow
-				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo, in.getIssueNumber(),
-						in.getTenantId());
+				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo,
+						in.getIssueNumber(), in.getTenantId());
 				LOG.info(workflowData.toString());
 				JSONArray workflows = new JSONArray();
 				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
@@ -1230,7 +1238,7 @@ public class MaterialIssueService extends DomainService {
 					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
 					// Need to integrate Workflow
 					JSONObject jsonWork = new JSONObject();
-					jsonWork.put("date",wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())) );
+					jsonWork.put("date", wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())));
 					jsonWork.put("updatedBy", processData.getAssigner().getName());
 					jsonWork.put("comments", processData.getComment());
 					if (processData.getAssignee() == null) {
@@ -1284,7 +1292,7 @@ public class MaterialIssueService extends DomainService {
 				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(
 						indentIssueRequest.getWorkFlowDetails().getTenantId(), null, null, null,
 						indentIssueRequest.getWorkFlowDetails().getBusinessId(), null, null, null, null, null, null,
-						null, null, null, null, null);
+						null, null, null, null, null, null, null, null, null, null);
 				MaterialIssueResponse issueResponse = search(searchContract, IssueTypeEnum.INDENTISSUE.toString());
 				for (MaterialIssue materialIssues : issueResponse.getMaterialIssues()) {
 					for (MaterialIssueDetail issueDetail : materialIssues.getMaterialIssueDetails()) {
