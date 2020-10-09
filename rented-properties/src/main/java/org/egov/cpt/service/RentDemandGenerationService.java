@@ -157,16 +157,12 @@ public class RentDemandGenerationService {
 		}
 
 		producer.push(config.getUpdatePropertyTopic(), propertyRequest);
-		log.info(">>>>>Rent demand generated>>>>>");
 		demandNotificationService.process(rentDemand, property);
 	}
 
 	private boolean isMonthIncluded(List<Long> dates, Date date) {
-		for(Long dateInList : dates){
-			Date generatedDate = new Date(dateInList);
-			return (date.getYear()==generatedDate.getYear() && date.getMonth()==generatedDate.getMonth());
-		}
-		return false;
+		final Date givenDate = getFirstDaysDate(date);
+		return dates.stream().map(d -> new Date(d)).anyMatch(d -> getFirstDaysDate(d).getTime() == givenDate.getTime());
 	}
 
 	private Date getFirstDaysDate(Date date) {
