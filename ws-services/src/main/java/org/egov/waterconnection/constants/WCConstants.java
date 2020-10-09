@@ -54,7 +54,7 @@ public class WCConstants {
     
     public static final String ACTION_PAY_FOR_TEMPORARY_CONNECTION  = "PAY_FOR_TEMPORARY_CONNECTION";
 
-    public static final String ACTION_APPROVE_TEMP_CONNECTION  = "APPROVE_TEMP_CONNECTION";
+    public static final String ACTION_ACTIVATE_TEMP_CONNECTION  = "ACTIVATE_TEMP_CONNECTION";
 
 
     public static final String STATUS_INITIATED = "INITIATED";
@@ -264,6 +264,8 @@ public class WCConstants {
 
 	public static final String STATUS_PENDING_FOR_REGULAR = "PENDING_FOR_REGULAR_CONNECTION";
 	
+	public static final String WS_ACTION_REACTIVATION = "APPLY_CONNECTION_REACTIVATION";
+
 	public static final String ACTION_APPLY_FOR_REGULAR_CONNECTION = "APPLY_FOR_REGULAR_CONNECTION";
 	
 }

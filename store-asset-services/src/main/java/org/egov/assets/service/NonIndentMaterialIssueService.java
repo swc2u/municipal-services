@@ -1145,7 +1145,7 @@ public class NonIndentMaterialIssueService extends DomainService {
 				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(
 						indentIssueRequest.getWorkFlowDetails().getTenantId(), null, null, null,
 						indentIssueRequest.getWorkFlowDetails().getBusinessId(), null, null, null, null, null, null,
-						null, null, null, null, null);
+						null, null, null, null, null, null, null, null, null, null);
 				MaterialIssueResponse issueResponse = search(searchContract);
 				for (MaterialIssue materialIssues : issueResponse.getMaterialIssues()) {
 					for (MaterialIssueDetail issueDetail : materialIssues.getMaterialIssueDetails()) {
