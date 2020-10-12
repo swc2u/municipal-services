@@ -51,7 +51,7 @@ public class PropertyDetails {
 
 	/**
 	 * One of PROPERTY_TYPE.LEASEHOLD or PROPERTY_TYPE.FREEHOLD defined in mdms at
-	 * `data/ch/EstateProperties/PropertyType.json`
+	 * `data/ch/EstateServices/PropertyType.json`
 	 */
 	@JsonProperty("propertyType")
 	private String propertyType;
@@ -134,7 +134,7 @@ public class PropertyDetails {
 	@JsonProperty("owners")
 	@Builder.Default
 	private List<Owner> owners = new ArrayList<Owner>();
-	
+
 	public PropertyDetails addOwnerItem(Owner newOwnerItem) {
 		if (this.owners == null) {
 			this.owners = new ArrayList<>();
@@ -183,11 +183,11 @@ public class PropertyDetails {
 		this.paymentDetails.add(paymentItem);
 		return this;
 	}
-	
+
 	@JsonProperty("bidders")
 	@Builder.Default
 	private List<AuctionBidder> bidders = new ArrayList<AuctionBidder>();
-	
+
 	public PropertyDetails addBidderItem(AuctionBidder newBidderItem) {
 		if (this.bidders == null) {
 			this.bidders = new ArrayList<>();
@@ -201,7 +201,7 @@ public class PropertyDetails {
 		return this;
 
 	}
-	
+
 	@Valid
 	@JsonProperty
 	private List<AuctionBidder> inActiveBidders;

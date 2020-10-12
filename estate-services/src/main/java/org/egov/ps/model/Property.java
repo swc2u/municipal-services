@@ -38,14 +38,9 @@ public class Property {
 	private String fileNumber;
 
 	/**
-	 * One of the categories from `data/ch/EstateProperties/Categories.json`
-	 * CAT.RESIDENTIAL,
-	 * CAT.COMMERCIAL,
-	 * CAT.INDUSTRIAL,
-	 * CAT.INSTITUTIONAL,
-	 * CAT.GOVPROPERTY,
-	 * CAT.RELIGIOUS,
-	 * CAT.HOSPITAL,
+	 * One of the categories from `data/ch/EstateServices/Categories.json`
+	 * CAT.RESIDENTIAL, CAT.COMMERCIAL, CAT.INDUSTRIAL, CAT.INSTITUTIONAL,
+	 * CAT.GOVPROPERTY, CAT.RELIGIOUS, CAT.HOSPITAL,
 	 * 
 	 */
 	@JsonProperty("category")
@@ -65,7 +60,7 @@ public class Property {
 
 	@JsonProperty("isCancelationOfSite")
 	private Boolean isCancelationOfSite;
-	
+
 	@JsonProperty("state")
 	private String state;
 

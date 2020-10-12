@@ -1,7 +1,7 @@
 {
   "tenantId": "ch",
   "businessService": "ES-EB-PropertyMaster",
-  "business": "EstateProperties",
+  "business": "EstateServices",
   "businessServiceSla": 86400000,
   "states": [
     {
