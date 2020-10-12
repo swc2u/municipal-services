@@ -177,11 +177,10 @@ public class NonIndentMaterialIssueService extends DomainService {
 				materialIssue.setTotalIssueValue(totalIssueValue);
 				WorkFlowDetails workFlowDetails = nonIndentIssueRequest.getWorkFlowDetails();
 				workFlowDetails.setBusinessId(materialIssue.getIssueNumber());
-				//workflowIntegrator.callWorkFlow(nonIndentIssueRequest.getRequestInfo(), workFlowDetails,
-					//	materialIssue.getTenantId());
+				workflowIntegrator.callWorkFlow(nonIndentIssueRequest.getRequestInfo(), workFlowDetails,materialIssue.getTenantId());
 			}
 
-//			kafkaTemplate.send(createTopic, createKey, nonIndentIssueRequest);
+			kafkaTemplate.send(createTopic, createKey, nonIndentIssueRequest);
 			MaterialIssueResponse response = new MaterialIssueResponse();
 			response.setMaterialIssues(nonIndentIssueRequest.getMaterialIssues());
 			response.setResponseInfo(getResponseInfo(nonIndentIssueRequest.getRequestInfo()));
