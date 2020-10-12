@@ -239,19 +239,6 @@ public class PropertyRowMapper implements ResultSetExtractor<List<Property>> {
 			}
 
 		}
-
-		if (hasColumn(rs, "pdid")) {
-			final String purchaseDetailPropertyDetailId = rs.getString("pdproperty_details_id");
-			if (purchaseDetailPropertyDetailId != null
-					&& purchaseDetailPropertyDetailId.equals(property.getPropertyDetails().getId())) {
-
-				final AuditDetails auditdetails = AuditDetails.builder().createdBy(rs.getString("pdcreated_by"))
-						.createdTime(rs.getLong("pdcreated_time")).lastModifiedBy(rs.getString("pdmodified_by"))
-						.lastModifiedTime(rs.getLong("pdmodified_time")).build();
-
-			}
-		}
-
 	}
 
 	public static boolean hasColumn(final ResultSet rs, final String columnName) throws SQLException {

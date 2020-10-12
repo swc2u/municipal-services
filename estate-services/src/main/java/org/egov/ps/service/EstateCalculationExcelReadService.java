@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.map.HashedMap;
-import org.apache.commons.lang.NumberUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -53,14 +53,14 @@ public class EstateCalculationExcelReadService {
 			FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 			Sheet sheet = workbook.getSheetAt(sheetIndex);
 			Iterator<Row> rowIterator = sheet.iterator();
-		
+
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			boolean shouldParseRows = false;
-			List<String> headerCells = new ArrayList<>();		
+			List<String> headerCells = new ArrayList<>();
 			while (rowIterator.hasNext()) {
 				Row currentRow = rowIterator.next();
-				
+
 				if (HEADER_CELL.equalsIgnoreCase(String.valueOf(currentRow.getCell(0)))) {
 					shouldParseRows = true;
 					headerCells = new ArrayList<>();
@@ -84,7 +84,7 @@ public class EstateCalculationExcelReadService {
 					break;
 				}
 
-				if (shouldParseRows && SKIP_ROW_COUNT == 0 && !checkEmpty(currentRow.getCell(0))) {					
+				if (shouldParseRows && SKIP_ROW_COUNT == 0 && !checkEmpty(currentRow.getCell(0))) {
 					Map<String, Object> cellData = new HashedMap<String, Object>();
 					int headerCount = 0;
 					/* Fetching Body Data will read after this */
@@ -101,13 +101,13 @@ public class EstateCalculationExcelReadService {
 					estateCalculations.add(cellData);
 				}
 			}
-			estateCalculations.forEach(estateCalculationMap -> {		
+			estateCalculations.forEach(estateCalculationMap -> {
 				estateDemands.add(EstateDemand.builder().isPrevious(checkPreviousTab(estateCalculationMap.get("month")))
 						.demandDate(checkModifyValueLong(estateCalculationMap.get("dueDateOfRent")))
 						.rent(checkModifyValue(estateCalculationMap.get("rentDue")))
 						.penaltyInterest(checkModifyValue(estateCalculationMap.get("penaltyInterest")))
 						.gstInterest(calculateDelayedPayment(estateCalculationMap))
-						.gst((int)(checkModifyValue(estateCalculationMap.get("stGstRate"))*100))
+						.gst((int) (checkModifyValue(estateCalculationMap.get("stGstRate")) * 100))
 						.collectedRent(checkModifyValue(estateCalculationMap.get("rentReceived")))
 						.collectedGST(checkModifyValue(estateCalculationMap.get("stGstDue")))
 						.noOfDays(checkModifyValue(estateCalculationMap.get("noOfDays")))
@@ -137,7 +137,8 @@ public class EstateCalculationExcelReadService {
 	}
 
 	private Long parseInLong(Object value) {
-		if (value == null || "null".equalsIgnoreCase(value.toString()) || value.toString().isEmpty() || !NumberUtils.isNumber(value.toString())) {
+		if (value == null || "null".equalsIgnoreCase(value.toString()) || value.toString().isEmpty()
+				|| !NumberUtils.isNumber(value.toString())) {
 			return null;
 		} else {
 			return Long.parseLong(value.toString().split("\\.")[0]);
@@ -145,7 +146,8 @@ public class EstateCalculationExcelReadService {
 	}
 
 	private Double parseInDouble(Object value) {
-		if (value == null || "null".equalsIgnoreCase(value.toString()) || value.toString().isEmpty() || !NumberUtils.isNumber(value.toString())) {
+		if (value == null || "null".equalsIgnoreCase(value.toString()) || value.toString().isEmpty()
+				|| !NumberUtils.isNumber(value.toString())) {
 			return null;
 		} else {
 			return Double.parseDouble(value.toString());
@@ -162,13 +164,14 @@ public class EstateCalculationExcelReadService {
 	private Double checkModifyValue(Object value) {
 		return parseInDouble(value) == null ? 0.0 : parseInDouble(value);
 	}
-	
+
 	private Long checkModifyValueLong(Object value) {
-		return parseInLong(value) == null ? Long.parseLong("0"): parseInLong(value);
+		return parseInLong(value) == null ? Long.parseLong("0") : parseInLong(value);
 	}
 
 	private Double calculateDelayedPayment(Map<String, Object> estateCalculationModel) {
-		Double stGSTDue = checkModifyValue(estateCalculationModel.get("stGstRate"))*checkModifyValue(estateCalculationModel.get("rentDue"));
+		Double stGSTDue = checkModifyValue(estateCalculationModel.get("stGstRate"))
+				* checkModifyValue(estateCalculationModel.get("rentDue"));
 		Double stGSTRate = checkModifyValue(estateCalculationModel.get("stGstRate"));
 		Double noOfDays = checkModifyValue(estateCalculationModel.get("noOfDays"));
 		return Double.parseDouble(DOUBLE_RISTRICT.format(stGSTDue * stGSTRate * noOfDays / 365));
@@ -216,28 +219,28 @@ public class EstateCalculationExcelReadService {
 	private Object getValueFromCell(Cell cell1, FormulaEvaluator evaluator) {
 		Object objValue = "";
 		switch (cell1.getCellType()) {
-		case BLANK:
-			objValue = "";
-			break;
-		case STRING:
-			objValue = cell1.getRichStringCellValue().getString();
-			break;
-		case NUMERIC:
-			if (DateUtil.isCellDateFormatted(cell1)) {
-				objValue = cell1.getDateCellValue().getTime();
-			} else {
-				objValue = cell1.getNumericCellValue();
-			}
-			break;
-		case FORMULA:
-			objValue = new DataFormatter().formatCellValue(cell1, evaluator);			
-			if (NumberUtils.isNumber(objValue.toString())) {
-				objValue = cell1.getNumericCellValue();
-			}
-			break;
+			case BLANK:
+				objValue = "";
+				break;
+			case STRING:
+				objValue = cell1.getRichStringCellValue().getString();
+				break;
+			case NUMERIC:
+				if (DateUtil.isCellDateFormatted(cell1)) {
+					objValue = cell1.getDateCellValue().getTime();
+				} else {
+					objValue = cell1.getNumericCellValue();
+				}
+				break;
+			case FORMULA:
+				objValue = new DataFormatter().formatCellValue(cell1, evaluator);
+				if (NumberUtils.isNumber(objValue.toString())) {
+					objValue = cell1.getNumericCellValue();
+				}
+				break;
 
-		default:
-			objValue = "";
+			default:
+				objValue = "";
 		}
 		return objValue;
 	}

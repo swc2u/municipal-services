@@ -26,9 +26,8 @@ public class NumericValidator implements IApplicationValidator {
 
 	@Override
 	public List<String> validate(IValidation validation, IApplicationField field, Object value, Object parent) {
-		// TODO Auto-generated method stub
 
-		if(validation.getType().equalsIgnoreCase("numeric")) {
+		if (validation.getType().equalsIgnoreCase("numeric")) {
 			boolean isEmpty = value == null || value.toString().trim().length() == 0;
 			if (!field.isRequired() && isEmpty) {
 				return null;
@@ -41,11 +40,11 @@ public class NumericValidator implements IApplicationValidator {
 		return null;
 	}
 
-	private static boolean isValid (String fieldValue) {		
+	private static boolean isValid(String fieldValue) {
 		if (null != fieldValue && !fieldValue.isEmpty()) {
-			Pattern p = Pattern.compile(numericRegex);   
+			Pattern p = Pattern.compile(numericRegex);
 			return p.matcher(fieldValue).matches();
-		}else {
+		} else {
 			return false;
 		}
 

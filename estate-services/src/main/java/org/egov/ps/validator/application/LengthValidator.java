@@ -25,36 +25,35 @@ public class LengthValidator implements IApplicationValidator {
 		}
 		return Arrays.asList(String.format(format, value, path));
 	}
-	
-    @Override
-    public List<String> validate(IValidation validation, IApplicationField field, Object value, Object parent) {
-        // TODO: Validate based on the params.
-    	if(validation.getType().equalsIgnoreCase("length")) {
-    		boolean isEmpty = value == null || value.toString().trim().length() == 0;
-    		if (!field.isRequired() && isEmpty) {
-    			return null;
-    		}
-    		
-    		String trimmedValue = isEmpty ? null : value.toString().trim();
-    		if (!isValid(validation, trimmedValue)) {
-    			return this.formatErrorMessage(validation.getErrorMessageFormat(), value, field.getPath());
-    		}
-    	}
-        return null;
-    }
-    
-    private boolean isValid(IValidation validation, String fieldValue) {
-    	if (null != fieldValue && !fieldValue.isEmpty()) {
-    		int max = (int) validation.getParams().get("max");
-    		int min = (int) validation.getParams().get("min");
-        	
-        	if(fieldValue.length() < min || fieldValue.length() > max) {
-        		return false;
-        	}
-        	return true;
-    	}else {
-    		return false;
-    	}
+
+	@Override
+	public List<String> validate(IValidation validation, IApplicationField field, Object value, Object parent) {
+		if (validation.getType().equalsIgnoreCase("length")) {
+			boolean isEmpty = value == null || value.toString().trim().length() == 0;
+			if (!field.isRequired() && isEmpty) {
+				return null;
+			}
+
+			String trimmedValue = isEmpty ? null : value.toString().trim();
+			if (!isValid(validation, trimmedValue)) {
+				return this.formatErrorMessage(validation.getErrorMessageFormat(), value, field.getPath());
+			}
+		}
+		return null;
+	}
+
+	private boolean isValid(IValidation validation, String fieldValue) {
+		if (null != fieldValue && !fieldValue.isEmpty()) {
+			int max = (int) validation.getParams().get("max");
+			int min = (int) validation.getParams().get("min");
+
+			if (fieldValue.length() < min || fieldValue.length() > max) {
+				return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }
