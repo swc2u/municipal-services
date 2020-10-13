@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BooleanValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid boolean  '%s' at path '%s'";
+	private static final String DEFAULT_FORMAT = "Invalid boolean '%s' at path '%s'";
 
 	private List<String> formatErrorMessage(String format, Object value, String path) {
 		if (format == null) {

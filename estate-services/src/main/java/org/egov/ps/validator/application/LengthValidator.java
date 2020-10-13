@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  */
 public class LengthValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid Field '%s' at path '%s'";
+	private static final String DEFAULT_FORMAT = "Length not in valid '%s' for field at path '%s'";
 
 	private List<String> formatErrorMessage(String format, Object value, String path) {
 		if (format == null) {

@@ -15,7 +15,7 @@ import net.minidev.json.JSONArray;
 @Component
 public class ArrayValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid array  '%s' at path '%s'";
+	private static final String DEFAULT_FORMAT = "Invalid array '%s' at path '%s'";
 
 	private List<String> formatErrorMessage(String format, Object value, String path) {
 		if (format == null) {

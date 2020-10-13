@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ArrayLengthValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid array length  '%s' at path '%s'";
+	private static final String DEFAULT_FORMAT = "Invalid array length '%s' at path '%s'";
 
 	private List<String> formatErrorMessage(String format, Object value, String path) {
 		if (format == null) {

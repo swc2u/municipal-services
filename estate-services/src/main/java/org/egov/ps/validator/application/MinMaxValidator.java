@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MinMaxValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid Field '%s' at path '%s'";
+	private static final String DEFAULT_FORMAT = "Value '%s' at path '%s' is out of min max range configured";
 
 	private List<String> formatErrorMessage(String format, Object value, String path) {
 		if (format == null) {

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class NumericValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid Field '%s' at path '%s'";
+	private static final String DEFAULT_FORMAT = "Invalid value '%s' for field at path '%s'";
 	private static final String numericRegex = "[0-9]+";
 
 	private List<String> formatErrorMessage(String format, Object value, String path) {

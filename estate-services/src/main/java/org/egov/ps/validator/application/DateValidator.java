@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DateValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid Date  '%s' at path '%s'";
+	private static final String DEFAULT_FORMAT = "Invalid date '%s' for field at path '%s'";
 
 	private List<String> formatErrorMessage(String format, Object value, String path) {
 		if (format == null) {

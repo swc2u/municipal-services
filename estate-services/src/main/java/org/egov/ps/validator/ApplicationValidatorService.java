@@ -31,6 +31,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONArray;
 
 @Service
 @Slf4j
@@ -60,7 +61,7 @@ public class ApplicationValidatorService {
 		this.mdmsService = mdmsService;
 		this.propertyRepository = propertyRepository;
 		this.objectMapper = objectMapper;
-//		this.mdmsValidator = mdmsValidator;
+		// this.mdmsValidator = mdmsValidator;
 		Map<String, Object> beans = this.context.getBeansWithAnnotation(ApplicationValidator.class);
 
 		/**
@@ -103,10 +104,10 @@ public class ApplicationValidatorService {
 	private void validatePropertyExists(RequestInfo requestInfo, String propertyId) {
 		Property property = propertyRepository.findPropertyById(propertyId);
 		if (property == null) {
-			throw new CustomException("INVALID_PROPERTY", "Could not find property with the given id:"+propertyId);
+			throw new CustomException("INVALID_PROPERTY", "Could not find property with the given id:" + propertyId);
 		}
 		if (!property.getState().contentEquals(PSConstants.PM_APPROVED)) {
-			throw new CustomException("INVALID_PROPERTY", "Property with the given "+propertyId+" is not approved");
+			throw new CustomException("INVALID_PROPERTY", "Property with the given " + propertyId + " is not approved");
 		}
 	}
 
@@ -139,19 +140,40 @@ public class ApplicationValidatorService {
 							.params((Map<String, Object>) validationObject.get("params")).build())
 					.collect(Collectors.toList());
 
-			/**
-			 * Construct the ApplicationField object.
-			 */
-			IApplicationField field = ApplicationField.builder().path(path)
-					.required((boolean) fieldConfigMap.get("required")).rootObject(applicationObject).value(value)
-					.validations(validations).build();
+			if (path.contains("..") && value instanceof JSONArray) {
+				JSONArray valueArray = (JSONArray) value;
+				valueArray.forEach(val -> {
+					/**
+					 * Construct the ApplicationField object.
+					 */
+					IApplicationField field = ApplicationField.builder().path(path)
+							.required((boolean) fieldConfigMap.get("required")).rootObject(applicationObject).value(val)
+							.validations(validations).build();
 
-			/**
-			 * Perform validations.
-			 */
-			List<String> errorMessages = this.performFieldValidations(applicationObject, field);
-			if (errorMessages != null && !errorMessages.isEmpty()) {
-				errorsMap.put(path, errorMessages);
+					/**
+					 * Perform validations.
+					 */
+					List<String> errorMessages = this.performFieldValidations(applicationObject, field);
+					if (!CollectionUtils.isEmpty(errorMessages)) {
+						errorsMap.put(path, errorMessages);
+					}
+				});
+
+			} else {
+				/**
+				 * Construct the ApplicationField object.
+				 */
+				IApplicationField field = ApplicationField.builder().path(path)
+						.required((boolean) fieldConfigMap.get("required")).rootObject(applicationObject).value(value)
+						.validations(validations).build();
+
+				/**
+				 * Perform validations.
+				 */
+				List<String> errorMessages = this.performFieldValidations(applicationObject, field);
+				if (!CollectionUtils.isEmpty(errorMessages)) {
+					errorsMap.put(path, errorMessages);
+				}
 			}
 		}
 		return errorsMap;
@@ -161,7 +183,7 @@ public class ApplicationValidatorService {
 
 	private List<String> performFieldValidations(DocumentContext applicationObject, IApplicationField field) {
 
-		Object value = applicationObject.read(field.getPath());
+		Object value = field.getValue();
 
 		/**
 		 * Perform required validator validation first.
