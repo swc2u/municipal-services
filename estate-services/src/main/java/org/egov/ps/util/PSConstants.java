@@ -2,7 +2,7 @@ package org.egov.ps.util;
 
 public class PSConstants {
 
-	public static final String TENENT_ID = "ch.chandigarh";
+	public static final String TENANT_ID = "ch.chandigarh";
 
 	public static final String PM_DRAFTED = "ES_PM_DRAFTED";
 

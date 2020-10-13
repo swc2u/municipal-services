@@ -11,12 +11,16 @@ import org.egov.ps.web.contracts.RequestInfoWrapper;
 import org.egov.ps.web.contracts.State;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Slf4j
 @Service
 public class WorkflowService {
 
@@ -51,8 +55,10 @@ public class WorkflowService {
 	 * @param requestInfo The RequestInfo object of the request
 	 * @return BusinessService for the the given tenantId
 	 */
+	@Cacheable(value = "businessService", key = "{#tenantId, #businessServiceName}")
 	public BusinessService getBusinessService(String tenantId, RequestInfo requestInfo, String businessServiceName) {
 
+		log.info("Fetching states for business service {} for tenant {}", businessServiceName, tenantId);
 		StringBuilder url = getSearchURLWithParams(tenantId, businessServiceName);
 		RequestInfoWrapper requestInfoWrapper = RequestInfoWrapper.builder().requestInfo(requestInfo).build();
 		Object result = serviceRequestRepository.fetchResult(url, requestInfoWrapper);
