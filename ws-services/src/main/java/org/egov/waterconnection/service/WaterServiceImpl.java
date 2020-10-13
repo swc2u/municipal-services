@@ -170,7 +170,6 @@ public class WaterServiceImpl implements WaterService {
 			waterConnectionRequest.getWaterConnection().setDocuments(null);
 			enrichmentService.enrichWaterApplication(waterConnectionRequest);
 			enrichmentService.enrichUpdateWaterConnection(waterConnectionRequest);
-			//waterDao.saveWaterSubActivity(waterConnectionRequest);
 		}else {
 		
 			businessService = workflowService.getBusinessService(waterConnectionRequest.getWaterConnection().getTenantId(), 
