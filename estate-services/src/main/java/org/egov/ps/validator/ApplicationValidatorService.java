@@ -14,7 +14,7 @@ import org.egov.ps.model.Property;
 import org.egov.ps.repository.PropertyRepository;
 import org.egov.ps.service.MDMSService;
 import org.egov.ps.util.PSConstants;
-import org.egov.ps.validator.application.MDMSValidator;
+import org.egov.ps.validator.application.OwnerValidator;
 import org.egov.ps.web.contracts.ApplicationRequest;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,16 +52,16 @@ public class ApplicationValidatorService {
 	ObjectMapper objectMapper;
 
 	@Autowired
-	MDMSValidator mdmsValidator;
+	OwnerValidator ownerValidator;
 
 	@Autowired
 	ApplicationValidatorService(ApplicationContext context, MDMSService mdmsService,
-			PropertyRepository propertyRepository, ObjectMapper objectMapper) {
+			PropertyRepository propertyRepository, ObjectMapper objectMapper, OwnerValidator ownerValidator) {
 		this.context = context;
 		this.mdmsService = mdmsService;
 		this.propertyRepository = propertyRepository;
 		this.objectMapper = objectMapper;
-		// this.mdmsValidator = mdmsValidator;
+		this.ownerValidator = ownerValidator;
 		Map<String, Object> beans = this.context.getBeansWithAnnotation(ApplicationValidator.class);
 
 		/**
@@ -89,7 +89,7 @@ public class ApplicationValidatorService {
 				String moduleNameString = application.getBranchType() + "_" + application.getModuleType() + "_"
 						+ application.getApplicationType();
 				Map<String, List<String>> errorMap = this.performValidationsFromMDMS(moduleNameString,
-						applicationObjectContext, request.getRequestInfo(), application.getTenantId());
+						applicationObjectContext, request.getRequestInfo(), application.getTenantId(), propertyId);
 
 				if (!errorMap.isEmpty()) {
 					throw new CustomException("INVALID_FIELDS", "Please enter the valid fields " + errorMap.toString());
@@ -112,8 +112,9 @@ public class ApplicationValidatorService {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, List<String>> performValidationsFromMDMS(String applicationType,
-			DocumentContext applicationObject, RequestInfo RequestInfo, String tenantId) {
+	public Map<String, List<String>> performValidationsFromMDMS(final String applicationType,
+			DocumentContext applicationObject, RequestInfo RequestInfo, final String tenantId,
+			final String propertyId) {
 		List<Map<String, Object>> fieldConfigurations = this.mdmsService.getApplicationConfig(applicationType,
 				RequestInfo, tenantId);
 		Map<String, List<String>> errorsMap = new HashMap<String, List<String>>();
@@ -153,7 +154,7 @@ public class ApplicationValidatorService {
 					/**
 					 * Perform validations.
 					 */
-					List<String> errorMessages = this.performFieldValidations(applicationObject, field);
+					List<String> errorMessages = this.performFieldValidations(applicationObject, field, propertyId);
 					if (!CollectionUtils.isEmpty(errorMessages)) {
 						errorsMap.put(path, errorMessages);
 					}
@@ -170,7 +171,7 @@ public class ApplicationValidatorService {
 				/**
 				 * Perform validations.
 				 */
-				List<String> errorMessages = this.performFieldValidations(applicationObject, field);
+				List<String> errorMessages = this.performFieldValidations(applicationObject, field, propertyId);
 				if (!CollectionUtils.isEmpty(errorMessages)) {
 					errorsMap.put(path, errorMessages);
 				}
@@ -181,7 +182,8 @@ public class ApplicationValidatorService {
 
 	private static final String TYPE_REQUIRED = "required";
 
-	private List<String> performFieldValidations(DocumentContext applicationObject, IApplicationField field) {
+	private List<String> performFieldValidations(DocumentContext applicationObject, IApplicationField field,
+			String propertyId) {
 
 		Object value = field.getValue();
 
@@ -206,6 +208,9 @@ public class ApplicationValidatorService {
 		 * single list.
 		 */
 		return field.getValidations().stream().map(validation -> {
+			if (validation.getType().equalsIgnoreCase("owner")) {
+				return ownerValidator.validateOwner(propertyId, (String) value);
+			}
 			IApplicationValidator validator = validators.get(validation.getType());
 			if (validator == null) {
 				log.error("No validator found for {} for path {}", validation.getType(), field.getPath());

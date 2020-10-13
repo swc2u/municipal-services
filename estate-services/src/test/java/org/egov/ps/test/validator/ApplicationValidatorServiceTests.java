@@ -55,7 +55,7 @@ public class ApplicationValidatorServiceTests {
 				mdmsService.getApplicationConfig(eq(SampleApplicationType), any(RequestInfo.class), any(String.class)))
 				.thenReturn(result);
 		Map<String, List<String>> errorMap = this.validatorService.performValidationsFromMDMS(SampleApplicationType,
-				applicationObjectContext, null, null);
+				applicationObjectContext, null, null, null);
 		assertTrue(errorMap.isEmpty());
 	}
 
