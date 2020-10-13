@@ -1,7 +1,6 @@
 package org.egov.ps.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -155,18 +154,14 @@ public class EnrichmentService {
 
 				if (!CollectionUtils.isEmpty(ownerDocuments)) {
 					ownerDocuments.forEach(document -> {
-
 						if (document.getId() == null || document.getId().isEmpty()) {
-
 							document.setId(UUID.randomUUID().toString());
-							document.setTenantId(property.getTenantId());
-							document.setReferenceId(owner.getOwnerDetails().getId());
-							document.setPropertyId(property.getId());
-
 						}
+						document.setTenantId(property.getTenantId());
+						document.setReferenceId(owner.getOwnerDetails().getId());
+						document.setPropertyId(property.getId());
 						AuditDetails docAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 						document.setAuditDetails(docAuditDetails);
-
 					});
 				}
 			});
@@ -435,21 +430,18 @@ public class EnrichmentService {
 				modifyAuditDetails.setLastModifiedTime(auditDetails.getLastModifiedTime());
 				application.setAuditDetails(modifyAuditDetails);
 
-				List<Document> applicationDocs = new ArrayList<>();
 				List<Document> applicationDocuments = application.getApplicationDocuments();
 				if (!CollectionUtils.isEmpty(applicationDocuments)) {
 					AuditDetails docAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 					applicationDocuments.forEach(document -> {
 						if (document.getId() == null) {
-							String gen_doc_id = UUID.randomUUID().toString();
-							document.setId(gen_doc_id);
-							document.setTenantId(application.getTenantId());
-							document.setReferenceId(application.getId());
-							document.setPropertyId(application.getProperty().getId());
+							document.setId(UUID.randomUUID().toString());
 						}
+						document.setTenantId(application.getTenantId());
+						document.setReferenceId(application.getId());
+						document.setPropertyId(application.getProperty().getId());
 						document.setAuditDetails(docAuditDetails);
 					});
-					applicationDocs.addAll(applicationDocuments);
 				}
 				enrichGenerateDemand(application);
 			});

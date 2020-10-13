@@ -1,10 +1,12 @@
 package org.egov.ps.service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.model.Document;
@@ -19,9 +21,6 @@ import org.egov.ps.web.contracts.AuditDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class PostMortgageEnrichmentService {
@@ -97,25 +96,20 @@ public class PostMortgageEnrichmentService {
 		mortgage.setTenantId(property.getTenantId());
 		mortgage.setOwnerId(gen_owner_id);
 
-		List<Document> documentsMortgageResult = new ArrayList<Document>(0);
 		List<Document> documentsMortgage = owner.getMortgageDetails().getMortgageDocuments();
 		if (!CollectionUtils.isEmpty(documentsMortgage)) {
 			AuditDetails docAuditDetails = util.getAuditDetails(application.getRequestInfo().getUserInfo().getUuid(),
 					true);
 			documentsMortgage.forEach(document -> {
 				if (document.getId() == null) {
-					String gen_doc_id = UUID.randomUUID().toString();
-					document.setId(gen_doc_id);
-					document.setTenantId(property.getTenantId());
-					document.setReferenceId(property.getId());
-					document.setPropertyId(property.getId());
+					document.setId(UUID.randomUUID().toString());
 				}
+				document.setTenantId(property.getTenantId());
+				document.setReferenceId(property.getId());
+				document.setPropertyId(property.getId());
 				document.setAuditDetails(docAuditDetails);
-
-				documentsMortgageResult.add(document);
 			});
 		}
-		mortgage.setMortgageDocuments(documentsMortgageResult);
 		return mortgage;
 	}
 }
