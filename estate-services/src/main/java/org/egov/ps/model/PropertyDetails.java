@@ -183,6 +183,10 @@ public class PropertyDetails {
 		this.paymentDetails.add(paymentItem);
 		return this;
 	}
+	
+	@Valid
+	@JsonProperty
+	private List<Payment> inActivePayments;
 
 	@JsonProperty("bidders")
 	@Builder.Default
