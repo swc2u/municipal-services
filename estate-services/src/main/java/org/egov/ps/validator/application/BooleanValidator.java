@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class BooleanValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid boolean  '%s' at path '%s'";
-	
+	private static final String DEFAULT_FORMAT = "Invalid boolean '%s' at path '%s'";
+
 	private List<String> formatErrorMessage(String format, Object value, String path) {
 		if (format == null) {
 			format = DEFAULT_FORMAT;
@@ -24,8 +24,7 @@ public class BooleanValidator implements IApplicationValidator {
 
 	@Override
 	public List<String> validate(IValidation validation, IApplicationField field, Object value, Object parent) {
-		// TODO Auto-generated method stub
-		if(validation.getType().equalsIgnoreCase("boolean")) {
+		if (validation.getType().equalsIgnoreCase("boolean")) {
 			boolean isEmpty = value == null || value.toString().trim().length() == 0;
 			if (!field.isRequired() && isEmpty) {
 				return null;
@@ -37,18 +36,19 @@ public class BooleanValidator implements IApplicationValidator {
 		}
 		return null;
 	}
-	
-	private static boolean isValid (String fieldValue) {
+
+	private static boolean isValid(String fieldValue) {
 		if (null != fieldValue && !fieldValue.isEmpty()) {
-			if ("true".equals(fieldValue) || "false".equals(fieldValue) || "1".equals(fieldValue) || "0".equals(fieldValue)) {
+			if ("true".equals(fieldValue) || "false".equals(fieldValue) || "1".equals(fieldValue)
+					|| "0".equals(fieldValue)) {
 				return true;
-			}else {
+			} else {
 				return false;
 			}
-		}else {
+		} else {
 			return false;
 		}
-		
+
 	}
 
 }

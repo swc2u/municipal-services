@@ -30,8 +30,7 @@ public class ReadExcelBiddersDataServiceTest {
 		InputStream inputStream = ReadExcelBiddersDataServiceTest.class.getClassLoader().getResourceAsStream(filepath);
 
 		List<AuctionBidder> auctions = readExcelService.getDatafromExcel(inputStream, 0);
-		System.out.println(auctions.size());
-		Assert.assertTrue(auctions.size()>0);
+		Assert.assertTrue(auctions.size() > 0);
 
 	}
 

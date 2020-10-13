@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MinMaxValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid Field '%s' at path '%s'";
+	private static final String DEFAULT_FORMAT = "Value '%s' at path '%s' is out of min max range configured";
 
 	private List<String> formatErrorMessage(String format, Object value, String path) {
 		if (format == null) {
@@ -27,8 +27,7 @@ public class MinMaxValidator implements IApplicationValidator {
 
 	@Override
 	public List<String> validate(IValidation validation, IApplicationField field, Object value, Object parent) {
-		// TODO: Validate based on the params.
-		if(validation.getType().equalsIgnoreCase("minmax")) {
+		if (validation.getType().equalsIgnoreCase("minmax")) {
 			boolean isEmpty = value == null || value.toString().trim().length() == 0;
 			if (!field.isRequired() && isEmpty) {
 				return null;
@@ -37,10 +36,10 @@ public class MinMaxValidator implements IApplicationValidator {
 			Integer trimmedValue = null;
 			try {
 				trimmedValue = isEmpty ? null : Integer.parseInt(value.toString().trim());
-			}catch (Exception e) {
+			} catch (Exception e) {
 				return this.formatErrorMessage(validation.getErrorMessageFormat(), value, field.getPath());
 			}
-			
+
 			if (!isValid(validation, trimmedValue)) {
 				return this.formatErrorMessage(validation.getErrorMessageFormat(), value, field.getPath());
 			}
@@ -53,11 +52,11 @@ public class MinMaxValidator implements IApplicationValidator {
 			int max = (int) validation.getParams().get("max");
 			int min = (int) validation.getParams().get("min");
 
-			if(fieldValue < min || fieldValue > max) {
+			if (fieldValue < min || fieldValue > max) {
 				return false;
 			}
 			return true;
-		}else {
+		} else {
 			return false;
 		}
 

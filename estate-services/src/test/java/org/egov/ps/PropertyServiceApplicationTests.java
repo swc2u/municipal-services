@@ -8,10 +8,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 public class PropertyServiceApplicationTests {
-	
+
 	@Test
 	public void testHello() {
-		System.out.println("Hello world");
 	}
 
 }

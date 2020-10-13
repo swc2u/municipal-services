@@ -13,20 +13,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class ObjectValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid object  '%s' at path '%s'";
-	
+	private static final String DEFAULT_FORMAT = "Invalid object '%s' at path '%s'";
+
 	private List<String> formatErrorMessage(String format, Object value, String path) {
 		if (format == null) {
 			format = DEFAULT_FORMAT;
 		}
 		return Arrays.asList(String.format(format, value, path));
 	}
-	
 
 	@Override
 	public List<String> validate(IValidation validation, IApplicationField field, Object value, Object parent) {
-		// TODO Auto-generated method stub
-		if(validation.getType().equalsIgnoreCase("object")) {
+		if (validation.getType().equalsIgnoreCase("object")) {
 			if (!field.isRequired()) {
 				return null;
 			}
@@ -36,13 +34,13 @@ public class ObjectValidator implements IApplicationValidator {
 		}
 		return null;
 	}
-	
-	private static boolean isValid (Object objectValue) {
-		if( objectValue != null) 
+
+	private static boolean isValid(Object objectValue) {
+		if (objectValue != null)
 			return true;
 		else
 			return false;
-		
+
 	}
 
 }

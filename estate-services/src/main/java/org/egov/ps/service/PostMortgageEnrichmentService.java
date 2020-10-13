@@ -45,36 +45,41 @@ public class PostMortgageEnrichmentService {
 						&& application.getProperty().getPropertyDetails().getOwners() != null
 						&& !application.getProperty().getPropertyDetails().getOwners().isEmpty()) {
 
-					//set audit details..
+					// set audit details..
 					application.setAuditDetails(auditDetails);
 
 					List<Owner> ownerList = application.getProperty().getPropertyDetails().getOwners();
 					if (!CollectionUtils.isEmpty(ownerList)) {
 						ownerList.forEach(owner -> {
-						owner.setMortgageDetails(getMortgage(application.getProperty(), owner, request, owner.getId()));
-						validateMortgageDetails(application.getProperty(), owner, request.getRequestInfo(), owner.getId());
-					});
-				}
+							owner.setMortgageDetails(
+									getMortgage(application.getProperty(), owner, request, owner.getId()));
+							validateMortgageDetails(application.getProperty(), owner, request.getRequestInfo(),
+									owner.getId());
+						});
+					}
 				}
 			});
 		}
 	}
 
-	public void validateMortgageDetails(Property property, Owner owner, RequestInfo requestInfo, String id){
-		// TODO Auto-generated method stub
+	public void validateMortgageDetails(Property property, Owner owner, RequestInfo requestInfo, String id) {
 		MortgageDetails mortgage = owner.getMortgageDetails();
 
-		if(mortgage!=null ) {
-			List<Map<String, Object>> fieldConfigurations = mdmsservice.getMortgageDocumentConfig("mortgage", requestInfo, "ch");
+		if (mortgage != null) {
+			List<Map<String, Object>> fieldConfigurations = mdmsservice.getMortgageDocumentConfig("mortgage",
+					requestInfo, "ch");
 
-			//To Do :: write code to validate documents base on master json template.
+			// To Do :: write code to validate documents base on master json template.
 			ObjectMapper mapper = new ObjectMapper();
-			List<EstateDocumentList> mortgageTypeList = mapper.convertValue(fieldConfigurations, new TypeReference<List<EstateDocumentList>>() { });
+			List<EstateDocumentList> mortgageTypeList = mapper.convertValue(fieldConfigurations,
+					new TypeReference<List<EstateDocumentList>>() {
+					});
 			Map<String, String> errorMap = new HashMap<>();
 
-			if(mortgage.getMortgageDocuments() != null && !mortgage.getMortgageDocuments().isEmpty()) {
+			if (mortgage.getMortgageDocuments() != null && !mortgage.getMortgageDocuments().isEmpty()) {
 				mortgage.getMortgageDocuments().stream().forEach(document -> {
-					if(!mortgageTypeList.contains(EstateDocumentList.builder().code(document.getDocumentType()).build())) {
+					if (!mortgageTypeList
+							.contains(EstateDocumentList.builder().code(document.getDocumentType()).build())) {
 						errorMap.put("INVALID DOCUMENT",
 								"Document is not valid for user : " + owner.getOwnerDetails().getOwnerName());
 					}
@@ -83,7 +88,8 @@ public class PostMortgageEnrichmentService {
 		}
 	}
 
-	private MortgageDetails getMortgage(Property property, Owner owner, ApplicationRequest application, String gen_owner_id) {
+	private MortgageDetails getMortgage(Property property, Owner owner, ApplicationRequest application,
+			String gen_owner_id) {
 		String gen_mortgage_id = UUID.randomUUID().toString();
 
 		MortgageDetails mortgage = owner.getMortgageDetails();
@@ -93,8 +99,9 @@ public class PostMortgageEnrichmentService {
 
 		List<Document> documentsMortgageResult = new ArrayList<Document>(0);
 		List<Document> documentsMortgage = owner.getMortgageDetails().getMortgageDocuments();
-		if(!CollectionUtils.isEmpty(documentsMortgage)) {
-			AuditDetails docAuditDetails = util.getAuditDetails(application.getRequestInfo().getUserInfo().getUuid(), true);
+		if (!CollectionUtils.isEmpty(documentsMortgage)) {
+			AuditDetails docAuditDetails = util.getAuditDetails(application.getRequestInfo().getUserInfo().getUuid(),
+					true);
 			documentsMortgage.forEach(document -> {
 				if (document.getId() == null) {
 					String gen_doc_id = UUID.randomUUID().toString();

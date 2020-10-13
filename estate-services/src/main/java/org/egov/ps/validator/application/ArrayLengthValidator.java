@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ArrayLengthValidator implements IApplicationValidator {
 
-
-	private static final String DEFAULT_FORMAT = "Invalid array length  '%s' at path '%s'";
+	private static final String DEFAULT_FORMAT = "Invalid array length '%s' at path '%s'";
 
 	private List<String> formatErrorMessage(String format, Object value, String path) {
 		if (format == null) {
@@ -24,12 +23,10 @@ public class ArrayLengthValidator implements IApplicationValidator {
 		return Arrays.asList(String.format(format, value, path));
 	}
 
-
 	@Override
 	public List<String> validate(IValidation validation, IApplicationField field, Object value, Object parent) {
-		// TODO Auto-generated method stub
 
-		if(validation.getType().equalsIgnoreCase("array-length")) {
+		if (validation.getType().equalsIgnoreCase("array-length")) {
 			boolean isEmpty = value == null || value.toString().trim().length() == 0;
 			if (!field.isRequired() && isEmpty) {
 				return null;
@@ -41,23 +38,23 @@ public class ArrayLengthValidator implements IApplicationValidator {
 		return null;
 	}
 
-	private static boolean isValid (IValidation validation,Object objectValue) {
-		if(objectValue != null) {
+	private static boolean isValid(IValidation validation, Object objectValue) {
+		if (objectValue != null) {
 			boolean checkObject = objectValue.getClass().isArray();
-			if(checkObject == true) {
+			if (checkObject == true) {
 				int arrayLength = Array.getLength(objectValue);
 				int max = (int) validation.getParams().get("max");
 				int min = (int) validation.getParams().get("min");
 
-				if(arrayLength < min || arrayLength > max) {
+				if (arrayLength < min || arrayLength > max) {
 					return false;
 				}
 				return true;
-			}else {
+			} else {
 				return false;
 			}
 
-		}else {
+		} else {
 			return false;
 		}
 

@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DateRangeValidator implements IApplicationValidator {
 
-	private static final String DEFAULT_FORMAT = "Invalid Date Range '%s' at path '%s'";
+	private static final String DEFAULT_FORMAT = "Invalid date '%s' at path '%s' for range";
 	SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
 
 	private List<String> formatErrorMessage(String format, Object value, String path) {
@@ -173,9 +173,9 @@ public class DateRangeValidator implements IApplicationValidator {
 		return null;
 	}
 
-	private Date diffDate(int month, int val) {
+	private Date diffDate(int unit, int val) {
 		Calendar c = Calendar.getInstance();
-		c.add(Calendar.MONTH, val);
+		c.add(unit, val);
 
 		return c.getTime();
 	}
