@@ -40,4 +40,8 @@ public class PSConstants {
 
 	public static final String ESTATE_SERVICE = "EstateService";
 
+	public static final String ES_DRAFT = "DRAFT";
+
+	public static final String ES_APPROVE = "APPROVE";
+
 }
