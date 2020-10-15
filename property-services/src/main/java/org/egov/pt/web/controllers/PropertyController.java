@@ -109,7 +109,6 @@ public class PropertyController {
 	public ResponseEntity<PropertyResponse> sendOTP(
 			 @RequestBody PropertyRequest propertyRequest) {
 		
-		
 		Property property = propertyService.getPropertyDetails(propertyRequest);
 		ResponseInfo resInfo = responseInfoFactory.createResponseInfoFromRequestInfo(propertyRequest.getRequestInfo(), true);
 		PropertyResponse response = PropertyResponse.builder()
@@ -117,9 +116,6 @@ public class PropertyController {
 				.responseInfo(resInfo)
 				.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
-		
-		
-
 	}
 //	@RequestMapping(value = "/_cancel", method = RequestMethod.POST)
 //	public ResponseEntity<PropertyResponse> cancel(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
