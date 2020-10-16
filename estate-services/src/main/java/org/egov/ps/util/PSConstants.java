@@ -2,7 +2,7 @@ package org.egov.ps.util;
 
 public class PSConstants {
 
-	public static final String TENENT_ID = "ch.chandigarh";
+	public static final String TENANT_ID = "ch.chandigarh";
 
 	public static final String PM_DRAFTED = "ES_PM_DRAFTED";
 
@@ -39,5 +39,9 @@ public class PSConstants {
 	public static final String TAX_HEAD_CODE_APPLICATION_CHARGE = "APPLICATION";
 
 	public static final String ESTATE_SERVICE = "EstateService";
+
+	public static final String ES_DRAFT = "DRAFT";
+
+	public static final String ES_APPROVE = "APPROVE";
 
 }

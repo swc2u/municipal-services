@@ -72,7 +72,7 @@ public class MDMSService {
 	}
 
 	public List<String> getMdmsFields(String moduleName, String masterName, String filter) {
-		String tenantId = PSConstants.TENENT_ID;
+		String tenantId = PSConstants.TENANT_ID;
 		RequestInfo requestInfo = RequestInfo.builder().authToken("authToken").build();
 
 		tenantId = tenantId.split("\\.")[0];

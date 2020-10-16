@@ -6,6 +6,7 @@ import org.egov.tracer.config.TracerConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ComponentScan(basePackages = { "org.egov.ps", "org.egov.ps.controller", "org.egov.ps.config",
 		"org.egov.ps.repository" })
 @Import({ TracerConfiguration.class })
+@EnableCaching
 public class PropertyServiceApplication {
 
 	@Value("${app.timezone}")

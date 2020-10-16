@@ -59,6 +59,9 @@ public class PropertyValidator {
 
 		validateProperty(request, errorMap);
 		// validateUserRole(request, errorMap);
+		if (!errorMap.isEmpty()) {
+			throw new CustomException(errorMap);
+		}
 	}
 
 	private void validateProperty(PropertyRequest request, Map<String, String> errorMap) {
@@ -124,10 +127,6 @@ public class PropertyValidator {
 		// if (requestProperty.getPropertyDetails().getDateOfAuction() == null) {
 		// errorMap.put("INVALID_DATE_OF_AUCTION", "Date of auction can not be empty");
 		// }
-
-		if (!errorMap.isEmpty()) {
-			throw new CustomException(errorMap);
-		}
 	}
 
 	public void validateUserRole(PropertyRequest request, Map<String, String> errorMap) {
