@@ -1,6 +1,5 @@
 package org.egov.ps.web.contracts;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -23,6 +22,12 @@ public class EstateDemand {
    */
   @JsonProperty("id")
   private String id;
+  
+  /**
+   * Property details that this demand is generated for.
+   */
+  @JsonProperty("propertyDetailsId")
+  private String propertyDetailsId;
   
   /**
    * Date of demand.
@@ -80,5 +85,9 @@ public class EstateDemand {
    */
   @JsonProperty("paid")
   private Double paid;
+
+  @JsonProperty("auditDetails")
+  @Builder.Default
+  private AuditDetails auditDetails = null;
  
 }
