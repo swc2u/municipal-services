@@ -123,8 +123,7 @@ public class PropertyQueryBuilder {
 	public static final String RELATION_OWNER_DOCUMENTS = "ownerdocs";
 	public static final String RELATION_COURT = "court";
 	public static final String RELATION_BIDDER = "bidder";
-	public static final String RELATION_ESTATE_DEMAND = "estatedemand";
-	public static final String RELATION_ESTATE_PAYMENT = "estatepayment";
+	public static final String RELATION_ESTATE_FINANCE = "finance";
 
 	private String addPaginationWrapper(String query, Map<String, Object> preparedStmtList, PropertyCriteria criteria) {
 

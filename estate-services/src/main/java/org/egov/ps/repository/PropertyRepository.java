@@ -78,8 +78,7 @@ public class PropertyRepository {
 				relations.add(PropertyQueryBuilder.RELATION_OWNER_DOCUMENTS);
 				relations.add(PropertyQueryBuilder.RELATION_COURT);
 				relations.add(PropertyQueryBuilder.RELATION_BIDDER);
-				relations.add(PropertyQueryBuilder.RELATION_ESTATE_DEMAND);
-				relations.add(PropertyQueryBuilder.RELATION_ESTATE_PAYMENT);
+				relations.add(PropertyQueryBuilder.RELATION_ESTATE_FINANCE);
 			}
 		}
 		if (relations.contains(PropertyQueryBuilder.RELATION_OWNER)) {
@@ -94,10 +93,8 @@ public class PropertyRepository {
 		if (relations.contains(PropertyQueryBuilder.RELATION_BIDDER)) {
 			this.addBiddersToProperties(properties);
 		}
-		if (relations.contains(PropertyQueryBuilder.RELATION_ESTATE_DEMAND)) {
+		if (relations.contains(PropertyQueryBuilder.RELATION_ESTATE_FINANCE)) {
 			this.addEstateDemandToProperties(properties);
-		}
-		if (relations.contains(PropertyQueryBuilder.RELATION_ESTATE_PAYMENT)) {
 			this.addEstatePaymentToProperties(properties);
 		}
 		return properties;
