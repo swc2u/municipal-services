@@ -18,6 +18,18 @@ import lombok.Setter;
 public class EstatePayment {
 
 	/**
+	 * Unique id of the payment
+	 */
+	@JsonProperty("id")
+	private String id;
+
+	/**
+	 * Property details that this payment is generated for.
+	 */
+	@JsonProperty("propertyDetailsId")
+	private String propertyDetailsId;
+
+	/**
 	 * Receipt Date of demand.
 	 */
 	@JsonProperty("receiptDate")
@@ -28,10 +40,14 @@ public class EstatePayment {
 	 */
 	@JsonProperty("rentReceived")
 	private Double rentReceived;
-	
+
 	/**
 	 * Rent Received of demand.
 	 */
 	@JsonProperty("receiptNo")
 	private String receiptNo;
+
+	@JsonProperty("auditDetails")
+	@Builder.Default
+	private AuditDetails auditDetails = null;
 }

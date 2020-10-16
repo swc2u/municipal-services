@@ -33,6 +33,8 @@ import org.egov.ps.util.Util;
 import org.egov.ps.web.contracts.ApplicationRequest;
 import org.egov.ps.web.contracts.AuctionSaveRequest;
 import org.egov.ps.web.contracts.AuditDetails;
+import org.egov.ps.web.contracts.EstateDemand;
+import org.egov.ps.web.contracts.EstatePayment;
 import org.egov.ps.web.contracts.PropertyRequest;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,6 +107,8 @@ public class EnrichmentService {
 		enrichCourtCases(property, requestInfo);
 		enrichPaymentDetails(property, requestInfo);
 		enrichBidders(property, requestInfo);
+		enrichEstateDemand(property, requestInfo);
+		enrichEstatePayment(property, requestInfo);
 
 	}
 
@@ -218,16 +222,6 @@ public class EnrichmentService {
 					});
 				}
 			});
-			
-			
-//			boolean hasAnyNewPayment = property.getPropertyDetails().getPaymentDetails().stream()
-//							.filter(payment -> payment.getId() == null || payment.getId().isEmpty()).findAny().isPresent();
-//			if (hasAnyNewPayment) {
-//				List<Payment> existingPayments = propertyRepository.getPaymentDetails(criteria); // create payment repository
-//				property.getPropertyDetails().setInActivePayments(existingPayments);
-//			} else {
-//				property.getPropertyDetails().setInActivePayments(Collections.emptyList());
-//			}
 		}
 	}
 
@@ -266,6 +260,80 @@ public class EnrichmentService {
 			});
 		}
 
+	}
+	
+	private void enrichEstateDemand(Property property, RequestInfo requestInfo) {
+
+		/**
+		 * Delete existing data as new data is coming in.
+		 */
+		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstateDemands())) {
+
+			boolean hasAnyNewEstateDemands = property.getPropertyDetails().getEstateDemands().stream()
+					.filter(estateDemand -> estateDemand.getId() == null || estateDemand.getId().isEmpty()).findAny().isPresent();
+
+			if (hasAnyNewEstateDemands) {
+				List<EstateDemand> existingEstateDemands = propertyRepository.getDemandDetailsForPropertyDetailsIds(
+						Collections.singletonList(property.getPropertyDetails().getId()));
+				property.getPropertyDetails().setInActiveEstateDemands(existingEstateDemands);
+			} else {
+				property.getPropertyDetails().setInActiveEstateDemands(Collections.emptyList());
+			}
+		}
+
+		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstateDemands())) {
+
+			property.getPropertyDetails().getEstateDemands().forEach(estateDemand -> {
+
+				if (estateDemand.getId() == null) {
+
+					estateDemand.setId(UUID.randomUUID().toString());
+					estateDemand.setPropertyDetailsId(property.getPropertyDetails().getId());
+
+				}
+				AuditDetails estateDemandAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+				estateDemand.setAuditDetails(estateDemandAuditDetails);
+
+			});
+		}
+		
+	}
+	
+	private void enrichEstatePayment(Property property, RequestInfo requestInfo) {
+
+		/**
+		 * Delete existing data as new data is coming in.
+		 */
+		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())) {
+
+			boolean hasAnyNewEstatePayments = property.getPropertyDetails().getEstatePayments().stream()
+					.filter(estatePayment -> estatePayment.getId() == null || estatePayment.getId().isEmpty()).findAny().isPresent();
+
+			if (hasAnyNewEstatePayments) {
+				List<EstatePayment> existingEstatePayments = propertyRepository.getEstatePaymentsForPropertyDetailsIds(
+						Collections.singletonList(property.getPropertyDetails().getId()));
+				property.getPropertyDetails().setInActiveEstatePayments(existingEstatePayments);
+			} else {
+				property.getPropertyDetails().setInActiveEstatePayments(Collections.emptyList());
+			}
+		}
+
+		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())) {
+
+			property.getPropertyDetails().getEstatePayments().forEach(estatePayment -> {
+
+				if (estatePayment.getId() == null) {
+
+					estatePayment.setId(UUID.randomUUID().toString());
+					estatePayment.setPropertyDetailsId(property.getPropertyDetails().getId());
+
+				}
+				AuditDetails estatePaymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+				estatePayment.setAuditDetails(estatePaymentAuditDetails);
+
+			});
+		}
+		
 	}
 
 	/**
