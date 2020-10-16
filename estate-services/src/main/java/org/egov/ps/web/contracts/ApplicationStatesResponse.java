@@ -20,14 +20,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ApplicationStatesResponse {
 
-    @JsonProperty("ResponseInfo")
+	@JsonProperty("ResponseInfo")
 	private ResponseInfo responseInfo;
 
-	@JsonProperty("BusinessServices")
-	@Valid
-	private List<State> states;
-
-	@JsonProperty("Status")
+	@JsonProperty("States")
 	@Valid
 	private HashSet<String> status;
 }
