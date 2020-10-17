@@ -33,7 +33,7 @@ public class NotificationService {
 
     public void sendEmail(String email, String subject, String body, boolean isHTML) {
         log.debug("Sending email to '{}' with subject '{}' and body '{}', html {}", email, subject, body, isHTML);
-        this.producer.push(this.notificationSMSTopic,
+        this.producer.push(this.notificationEmailTopic,
                 EmailRequest.builder().subject(subject).email(email).body(body).isHTML(isHTML).build());
     }
 }
