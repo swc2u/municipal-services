@@ -10,6 +10,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.config.Configuration;
 import org.egov.ps.model.Application;
@@ -39,10 +43,6 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Service
 public class EnrichmentService {
@@ -193,13 +193,13 @@ public class EnrichmentService {
 	}
 
 	private void enrichPaymentDetails(Property property, RequestInfo requestInfo) {
-		
+
 		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getOwners())) {
 			property.getPropertyDetails().getOwners().forEach(owner -> {
-				
+
 				List<Payment> payments = property.getPropertyDetails().getPaymentDetails();
 				if (!CollectionUtils.isEmpty(payments)) {
-					
+
 					payments.forEach(payment -> {
 						if (payment.getId() == null || payment.getId().isEmpty()) {
 							AuditDetails paymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
@@ -256,7 +256,7 @@ public class EnrichmentService {
 		}
 
 	}
-	
+
 	private void enrichEstateDemand(Property property, RequestInfo requestInfo) {
 
 		/**
@@ -265,7 +265,8 @@ public class EnrichmentService {
 		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstateDemands())) {
 
 			boolean hasAnyNewEstateDemands = property.getPropertyDetails().getEstateDemands().stream()
-					.filter(estateDemand -> estateDemand.getId() == null || estateDemand.getId().isEmpty()).findAny().isPresent();
+					.filter(estateDemand -> estateDemand.getId() == null || estateDemand.getId().isEmpty()).findAny()
+					.isPresent();
 
 			if (hasAnyNewEstateDemands) {
 				List<EstateDemand> existingEstateDemands = propertyRepository.getDemandDetailsForPropertyDetailsIds(
@@ -291,9 +292,9 @@ public class EnrichmentService {
 
 			});
 		}
-		
+
 	}
-	
+
 	private void enrichEstatePayment(Property property, RequestInfo requestInfo) {
 
 		/**
@@ -302,7 +303,8 @@ public class EnrichmentService {
 		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())) {
 
 			boolean hasAnyNewEstatePayments = property.getPropertyDetails().getEstatePayments().stream()
-					.filter(estatePayment -> estatePayment.getId() == null || estatePayment.getId().isEmpty()).findAny().isPresent();
+					.filter(estatePayment -> estatePayment.getId() == null || estatePayment.getId().isEmpty()).findAny()
+					.isPresent();
 
 			if (hasAnyNewEstatePayments) {
 				List<EstatePayment> existingEstatePayments = propertyRepository.getEstatePaymentsForPropertyDetailsIds(
@@ -323,12 +325,13 @@ public class EnrichmentService {
 					estatePayment.setPropertyDetailsId(property.getPropertyDetails().getId());
 
 				}
-				AuditDetails estatePaymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+				AuditDetails estatePaymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
+						true);
 				estatePayment.setAuditDetails(estatePaymentAuditDetails);
 
 			});
 		}
-		
+
 	}
 
 	/**
