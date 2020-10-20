@@ -164,17 +164,16 @@ public class PropertyQueryBuilder {
 		builder.append(PT_TABLE);
 
 		if (null != criteria.getState()) {
-			if (criteria.getState().contains(PSConstants.PM_DRAFTED)) {
-				addClauseIfRequired(preparedStmtList, builder);
-				builder.append("pt.created_by = '" + criteria.getUserId() + "' AND ");
-				builder.append("pt.state IN (:state)");
-				preparedStmtList.put("state", criteria.getState());
-			} else {
-				addClauseIfRequired(preparedStmtList, builder);
-				builder.append("pt.created_by = '" + criteria.getUserId() + "' OR ");
-				builder.append("pt.state IN (:state)");
-				preparedStmtList.put("state", criteria.getState());
+			addClauseIfRequired(preparedStmtList, builder);
+			if (criteria.getUserId() != null) {
+				if (criteria.getState().contains(PSConstants.PM_DRAFTED)) {
+					builder.append("pt.created_by = '" + criteria.getUserId() + "' AND ");
+				} else {
+					builder.append("pt.created_by = '" + criteria.getUserId() + "' OR ");
+				}
 			}
+			builder.append("pt.state IN (:state)");
+			preparedStmtList.put("state", criteria.getState());
 		}
 
 		if (!ObjectUtils.isEmpty(criteria.getFileNumber())) {

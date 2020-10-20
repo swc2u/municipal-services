@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.egov.ps.model.Application;
@@ -84,8 +85,8 @@ public class ApplicationRepository {
 
 	private void addPropertiesToApplications(List<Application> applications) {
 		// Get all the property ids and fetch properties.
-		List<String> propertyIds = applications.stream().map(application_ -> application_.getProperty().getId())
-				.collect(Collectors.toList());
+		Set<String> propertyIds = applications.stream().map(application_ -> application_.getProperty().getId())
+				.collect(Collectors.toSet());
 
 		PropertyCriteria propertyCriteria = PropertyCriteria.builder().propertyIds(propertyIds)
 				.relations(Collections.emptyList()).build();

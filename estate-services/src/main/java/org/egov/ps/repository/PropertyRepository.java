@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.egov.ps.model.Application;
-import org.egov.ps.model.ApplicationCriteria;
 import org.egov.ps.model.AuctionBidder;
 import org.egov.ps.model.CourtCase;
 import org.egov.ps.model.Document;
@@ -34,12 +32,6 @@ public class PropertyRepository {
 
 	@Autowired
 	private PropertyRowMapper propertyRowMapper;
-
-	@Autowired
-	private ApplicationQueryBuilder applicationQueryBuilder;
-
-	@Autowired
-	private ApplicationRowMapper applicationRowMapper;
 
 	@Autowired
 	private DocumentsRowMapper documentRowMapper;
@@ -105,7 +97,7 @@ public class PropertyRepository {
 		return properties;
 	}
 
-	public void addOwnersToProperties(List<Property> properties) {
+	private void addOwnersToProperties(List<Property> properties) {
 		if (CollectionUtils.isEmpty(properties)) {
 			return;
 		}
@@ -132,7 +124,7 @@ public class PropertyRepository {
 		});
 	}
 
-	public void addOwnerDocumentsToProperties(List<Property> properties) {
+	private void addOwnerDocumentsToProperties(List<Property> properties) {
 		if (CollectionUtils.isEmpty(properties)) {
 			return;
 		}
@@ -164,7 +156,7 @@ public class PropertyRepository {
 		});
 	}
 
-	public void addCourtCasesToProperties(List<Property> properties) {
+	private void addCourtCasesToProperties(List<Property> properties) {
 		/**
 		 * Extract property detail ids.
 		 */
@@ -190,7 +182,7 @@ public class PropertyRepository {
 		});
 	}
 
-	public void addBiddersToProperties(List<Property> properties) {
+	private void addBiddersToProperties(List<Property> properties) {
 		/**
 		 * Extract property detail ids.
 		 */
@@ -285,11 +277,5 @@ public class PropertyRepository {
 			return null;
 		}
 		return properties.get(0);
-	}
-
-	public List<Application> getApplicationsOLD(ApplicationCriteria criteria) {
-		Map<String, Object> preparedStmtList = new HashMap<>();
-		String query = applicationQueryBuilder.getApplicationSearchQuery(criteria, preparedStmtList);
-		return namedParameterJdbcTemplate.query(query, preparedStmtList, applicationRowMapper);
 	}
 }
