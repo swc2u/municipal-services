@@ -62,8 +62,8 @@ public class ApplicationQueryBuilder {
 	private static final String PT_TABLE = " cs_ep_property_v1 pt on app.property_id = pt.id " + LEFT_JOIN
 			+ " cs_ep_property_details_v1 ptdl  ON pt.id =ptdl.property_id ";
 
-	private static final String OWNER_TABLE = " cs_ep_owner_v1 ownership  ON ptdl.id=ownership.property_details_id "
-			+ LEFT_JOIN + " cs_ep_owner_details_v1 od ON ownership.id = od.owner_id ";
+	private static final String OWNER_TABLE = " cs_ep_owner_v1 ownership " + LEFT_JOIN
+			+ " cs_ep_owner_details_v1 od ON ownership.id = od.owner_id ";
 
 	private final String paginationWrapper = "SELECT * FROM "
 			+ " (SELECT *, DENSE_RANK() OVER (ORDER BY applast_modified_time desc) offset_ FROM " + "({})"
@@ -71,7 +71,7 @@ public class ApplicationQueryBuilder {
 
 	public static final String RELATION_OWNER = "owner";
 	public static final String RELATION_OWNER_DOCUMENTS = "ownerdocs";
-	
+
 	private String addPaginationWrapper(String query, Map<String, Object> preparedStmtList,
 			ApplicationCriteria criteria) {
 
@@ -106,7 +106,7 @@ public class ApplicationQueryBuilder {
 			queryString.append(" AND ");
 		}
 	}
-	
+
 	private static final String OWNER_DOCS_COLUMNS = " doc.id as docid, doc.reference_id as docreference_id, doc.tenantid as doctenantid,"
 			+ " doc.is_active as docis_active, doc.document_type, doc.file_store_id, doc.property_id as docproperty_id,"
 			+ " doc.created_by as dcreated_by, doc.created_time as dcreated_time, doc.last_modified_by as dmodified_by, doc.last_modified_time as dmodified_time ";
@@ -119,7 +119,7 @@ public class ApplicationQueryBuilder {
 		params.put("references", ownerDetailIds);
 		return sb.toString();
 	}
-	
+
 	public String getOwnersQuery(List<String> propertyDetailIds, Map<String, Object> params) {
 		StringBuilder sb = new StringBuilder(SELECT);
 		sb.append(OWNER_COLUMNS);
@@ -128,7 +128,7 @@ public class ApplicationQueryBuilder {
 		params.put("propertyDetailIds", propertyDetailIds);
 		return sb.toString();
 	}
-	
+
 	public String getApplicationSearchQuery(ApplicationCriteria criteria, Map<String, Object> preparedStmtList) {
 
 		StringBuilder builder = new StringBuilder(SELECT);
@@ -136,7 +136,7 @@ public class ApplicationQueryBuilder {
 		builder.append(APP_COLUMNS);
 
 		builder.append(APP_TABLE);
-		
+
 		if (!ObjectUtils.isEmpty(criteria.getPropertyId())) {
 			addClauseIfRequired(preparedStmtList, builder);
 			builder.append("app.property_id=:prId");
