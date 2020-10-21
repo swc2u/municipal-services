@@ -167,55 +167,15 @@ public class ApplicationQueryBuilder {
 			builder.append("app.state IN (:state)");
 			preparedStmtList.put("state", criteria.getState());
 		}
-
-		return addPaginationWrapper(builder.toString(), preparedStmtList, criteria);
-	}
-
-	public String getApplicationSearchQueryOLD(ApplicationCriteria criteria, Map<String, Object> preparedStmtList) {
-
-		StringBuilder builder = null;
-
-		if (null != criteria.getApplicationNumber()) {
-			builder = new StringBuilder(SELECT);
-			builder.append(APP_ALL + PT_ALL + OWNER_ALL);
-			builder.append(APP_COLUMNS + "," + PT_COLUMNS + "," + OWNER_COLUMNS);
-			builder.append(APP_TABLE + LEFT_JOIN + PT_TABLE + LEFT_JOIN + OWNER_TABLE);
-		} else {
-			builder = new StringBuilder(SELECT);
-			builder.append(APP_ALL + PT_ALL);
-			builder.append(APP_COLUMNS + "," + PT_COLUMNS);
-			builder.append(APP_TABLE + LEFT_JOIN + PT_TABLE);
-		}
-
-		if (!ObjectUtils.isEmpty(criteria.getPropertyId())) {
+		if (null != criteria.getApplicationType()) {
 			addClauseIfRequired(preparedStmtList, builder);
-			builder.append("app.property_id=:prId");
-			preparedStmtList.put("prId", criteria.getPropertyId());
+			builder.append("app.application_type IN (:applicationType)");
+			preparedStmtList.put("applicationType", criteria.getApplicationType());
 		}
-		if (!ObjectUtils.isEmpty(criteria.getApplicationId())) {
+		if (null != criteria.getModuleType()) {
 			addClauseIfRequired(preparedStmtList, builder);
-			builder.append("app.id=:appId");
-			preparedStmtList.put("appId", criteria.getApplicationId());
-		}
-		if (null != criteria.getTenantId()) {
-			addClauseIfRequired(preparedStmtList, builder);
-			builder.append("app.tenantid=:tenantId");
-			preparedStmtList.put("tenantId", criteria.getTenantId());
-		}
-		if (null != criteria.getFileNumber()) {
-			addClauseIfRequired(preparedStmtList, builder);
-			builder.append("pt.file_number=:fileNumber");
-			preparedStmtList.put("fileNumber", criteria.getFileNumber());
-		}
-		if (null != criteria.getApplicationNumber()) {
-			addClauseIfRequired(preparedStmtList, builder);
-			builder.append("app.application_number=:appNumber");
-			preparedStmtList.put("appNumber", criteria.getApplicationNumber());
-		}
-		if (null != criteria.getState()) {
-			addClauseIfRequired(preparedStmtList, builder);
-			builder.append("app.state IN (:state)");
-			preparedStmtList.put("state", criteria.getState());
+			builder.append("app.module_type IN (:moduleType)");
+			preparedStmtList.put("moduleType", criteria.getModuleType());
 		}
 
 		return addPaginationWrapper(builder.toString(), preparedStmtList, criteria);
