@@ -1,9 +1,14 @@
 package org.egov.ps.service.calculation;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.config.Configuration;
+import org.egov.ps.model.BillResponseV2;
+import org.egov.ps.model.BillV2;
+import org.egov.ps.model.CollectionPaymentRequest;
+import org.egov.ps.model.CollectionPaymentResponse;
 import org.egov.ps.model.calculation.Demand;
 import org.egov.ps.model.calculation.DemandRequest;
 import org.egov.ps.model.calculation.DemandResponse;
@@ -66,6 +71,34 @@ public class DemandRepository {
 		}
 		return response.getDemands();
 
+	}
+	
+	public List<BillV2> fetchBill(RequestInfo requestInfo, String tenantId, String consumerCode,
+			String businessService) {
+		StringBuilder url = new StringBuilder(config.getBillingHost());
+		String uri = config.getBillGenearateEndpoint().replace("$tenantId", tenantId)
+				.replace("$consumerCode", consumerCode).replace("$businessService", businessService);
+		url.append(uri);
+		Object result = serviceRequestRepository.fetchResult(url, Collections.singletonMap("requestInfo", requestInfo));
+		BillResponseV2 response = null;
+		try {
+			response = mapper.convertValue(result, BillResponseV2.class);
+		} catch (IllegalArgumentException e) {
+			throw new CustomException("PARSING ERROR", "Failed to parse response of update demand");
+		}
+		return response.getBill();
+	}
+
+	public Object savePayment(CollectionPaymentRequest paymentRequest) {
+		StringBuilder url = new StringBuilder(config.getCollectionPaymentHost());
+		url.append(config.getCollectionPaymentEndPoint());
+		Object result = serviceRequestRepository.fetchResult(url, paymentRequest);
+		try {
+			CollectionPaymentResponse response = mapper.convertValue(result, CollectionPaymentResponse.class);
+			return response.getPayments();
+		} catch (IllegalArgumentException e) {
+			throw new CustomException("PARSING ERROR", "Failed to parse response of update demand");
+		}
 	}
 
 }

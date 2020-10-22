@@ -84,4 +84,15 @@ public class ApplicationController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 
 	}
+
+	@PostMapping("/_offlinepayment")
+	public ResponseEntity<ApplicationResponse> offlinePayment(
+			@Valid @RequestBody ApplicationRequest applicationRequest) {
+		List<Application> applications = applicationService.generateFinanceDemand(applicationRequest);
+		ResponseInfo resInfo = responseInfoFactory
+				.createResponseInfoFromRequestInfo(applicationRequest.getRequestInfo(), true);
+		ApplicationResponse response = ApplicationResponse.builder().applications(applications).responseInfo(resInfo)
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }
