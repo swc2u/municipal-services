@@ -243,7 +243,7 @@ public class ApplicationValidatorService {
 		return (!CollectionUtils.isEmpty(applicationRequest) && applicationRequest.size() == 1);
 	}
 
-	public ApplicationCriteria getApplicationCriteria(ApplicationRequest request) {
+	private ApplicationCriteria getApplicationCriteria(ApplicationRequest request) {
 		ApplicationCriteria applicationCriteria = new ApplicationCriteria();
 		if (!CollectionUtils.isEmpty(request.getApplications())) {
 			request.getApplications().forEach(application -> {

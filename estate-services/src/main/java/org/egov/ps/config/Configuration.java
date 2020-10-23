@@ -148,5 +148,5 @@ public class Configuration {
 	private String collectionPaymentEndPoint;
 	
 	@Value("${egov.bill.gen.endpoint}")
-	private String billGenearateEndpoint;
+	private String billGenerateEndpoint;
 }
