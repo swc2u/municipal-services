@@ -38,13 +38,13 @@ public class EstateDemand implements Comparable<EstateDemand> {
   @Builder.Default
   @JsonProperty("initialGracePeriod")
   private int initialGracePeriod = 10;
-
   /**
    * Date of generation of this demand.
    */
   @JsonProperty("generationDate")
   private Long generationDate;
 
+ 
   /**
    * The principal rent amount that is to be collected
    */
@@ -64,12 +64,7 @@ public class EstateDemand implements Comparable<EstateDemand> {
   @JsonProperty("interestSince")
   private Long interestSince;
 
-  /**
-   * Date of demand.
-   */
-  @JsonProperty("demandDate")
-  private Long demandDate;
-
+  
   @JsonProperty("isPrevious")
   private Boolean isPrevious;
 
@@ -100,26 +95,30 @@ public class EstateDemand implements Comparable<EstateDemand> {
   /**
    * Collected Rent of demand.
    */
+  @Builder.Default
   @JsonProperty("collectedRent")
-  private Double collectedRent;
+  private Double collectedRent=0.0;
 
   /**
    * Collected GST of demand.
    */
+  @Builder.Default
   @JsonProperty("collectedGST")
-  private Double collectedGST;
+  private Double collectedGST=0.0;
 
   /**
    * Collected Rent Penalty of demand.
    */
+  @Builder.Default
   @JsonProperty("collectedRentPenalty")
-  private Double collectedRentPenalty;
+  private Double collectedRentPenalty= 0.0;
 
   /**
    * Collected STt Penalty of demand.
    */
+  @Builder.Default
   @JsonProperty("collectedGSTPenalty")
-  private Double collectedGSTPenalty;
+  private Double collectedGSTPenalty= 0.0;
 
   /**
    * No of days of demand.
@@ -162,12 +161,7 @@ public class EstateDemand implements Comparable<EstateDemand> {
         DATE_FORMAT.format(this.generationDate));
   }
 
-  /**
-   * Last date on which payment made
-   */
-  @JsonProperty("paymentSince")
-  private Long paymentSince;
-
+  
   /**
    * The remaining rent that still has to be collected.
    */
@@ -198,7 +192,7 @@ public class EstateDemand implements Comparable<EstateDemand> {
 
   @Override
   public int compareTo(EstateDemand other) {
-    return this.getDemandDate().compareTo(other.getDemandDate());
+    return this.getGenerationDate().compareTo(other.getGenerationDate());
   }
 
   @JsonProperty("auditDetails")
