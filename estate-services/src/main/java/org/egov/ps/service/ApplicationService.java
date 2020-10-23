@@ -10,7 +10,6 @@ import org.egov.ps.model.ApplicationCriteria;
 import org.egov.ps.producer.Producer;
 import org.egov.ps.repository.ApplicationRepository;
 import org.egov.ps.repository.PropertyRepository;
-import org.egov.ps.service.calculation.DemandRepository;
 import org.egov.ps.service.calculation.DemandService;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.validator.ApplicationValidatorService;
@@ -56,9 +55,6 @@ public class ApplicationService {
 	@Autowired
 	private WorkflowService wfService;
 
-	@Autowired
-	private DemandRepository demandRepository;
-
 	public List<Application> createApplication(ApplicationRequest request) {
 		validator.validateCreateRequest(request);
 		applicationEnrichmentService.enrichCreateApplication(request);
@@ -102,40 +98,5 @@ public class ApplicationService {
 
 		return status;
 	}
-
-//	public List<Application> generateFinanceDemand(ApplicationRequest applicationRequest) {
-//		ApplicationCriteria criteria = validator.getApplicationCriteria(applicationRequest);
-//
-//		List<Application> applications = applicationRepository.getApplications(criteria);
-//		Application application = applications.get(0);
-//
-//		if (CollectionUtils.isEmpty(applications)) {
-//			return Collections.emptyList();
-//		}
-//		/**
-//		 * Get the bill generated.
-//		 */
-//		List<BillV2> bills = demandRepository.fetchBill(applicationRequest.getRequestInfo(), application.getTenantId(),
-//				application.getPaymentConsumerCode(), application.getBillingBusinessService());
-//		if (CollectionUtils.isEmpty(bills)) {
-//			throw new CustomException("BILL_NOT_GENERATED",
-//					"No bills were found for the consumer code " + application.getPaymentConsumerCode());
-//		}
-//
-//		/**
-//		 * create an offline payment.
-//		 */
-//		demandService.createCashPayment(applicationRequest.getRequestInfo(), application.getPaymentAmount(),
-//				bills.get(0).getId(), application, application.getBillingBusinessService());
-//
-//		OfflinePaymentDetails offlinePaymentDetails = OfflinePaymentDetails.builder().id(UUID.randomUUID().toString())
-//				.propertyId(application.getId()).demandId(bills.get(0).getBillDetails().get(0).getDemandId())
-//				.amount(application.getPaymentAmount()).bankName(application.getBankName())
-//				.transactionNumber(application.getTransactionId()).build();
-//		
-//		application.setOfflinePaymentDetails(Collections.singletonList(offlinePaymentDetails));
-//		applicationRequest.setApplications(Collections.singletonList(application));
-//		producer.push(config.getUpdatePropertyTopic(), applicationRequest);
-//		return null;
-//	}
+	
 }
