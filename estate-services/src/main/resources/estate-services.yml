@@ -602,7 +602,7 @@ serviceMaps:
       fromTopic: save-application-topic
       isTransaction: true
       queryMaps:
-        - query: INSERT INTO cs_ep_application_v1 (id, tenantid, property_id, application_number, branch_type, module_type, application_type, comments, hardcopy_received_date, application_details, state, action, created_by, last_modified_by, created_time, last_modified_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?, ?, ?, ?, ?, ?);
+        - query: INSERT INTO cs_ep_application_v1 (id, tenantid, property_id, application_number, branch_type, module_type, application_type, comments, hardcopy_received_date, application_details, state, action, bank_name, transaction_number, amount, payment_type, created_by, last_modified_by, created_time, last_modified_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
           basePath: Applications.*
           jsonMaps:
             - jsonPath: $.Applications.*.id
@@ -630,6 +630,14 @@ serviceMaps:
             - jsonPath: $.Applications.*.state
 
             - jsonPath: $.Applications.*.action
+            
+            - jsonPath: $.Applications.*.bankName
+
+            - jsonPath: $.Applications.*.transactionId
+
+            - jsonPath: $.Applications.*.paymentAmount
+            
+            - jsonPath: $.Applications.*.paymentType
 
             - jsonPath: $.Applications.*.auditDetails.createdBy
 
@@ -644,7 +652,7 @@ serviceMaps:
       fromTopic: update-application-topic
       isTransaction: true
       queryMaps:
-        - query: UPDATE cs_ep_application_v1 SET branch_type = ?, module_type = ?, application_type = ?, comments = ?, hardcopy_received_date = ?, application_details = ?::jsonb, state = ?, action = ?, last_modified_by = ?, last_modified_time = ? WHERE id = ?;
+        - query: UPDATE cs_ep_application_v1 SET branch_type = ?, module_type = ?, application_type = ?, comments = ?, hardcopy_received_date = ?, application_details = ?::jsonb, state = ?, action = ?, bank_name = ?, transaction_number = ?, amount = ?, payment_type = ?, last_modified_by = ?, last_modified_time = ? WHERE id = ?;
           basePath: Applications.*
           jsonMaps:
             - jsonPath: $.Applications.*.branchType
@@ -664,6 +672,14 @@ serviceMaps:
             - jsonPath: $.Applications.*.state
 
             - jsonPath: $.Applications.*.action
+            
+            - jsonPath: $.Applications.*.bankName
+
+            - jsonPath: $.Applications.*.transactionId
+
+            - jsonPath: $.Applications.*.paymentAmount
+            
+            - jsonPath: $.Applications.*.paymentType
 
             - jsonPath: $.Applications.*.auditDetails.lastModifiedBy
 

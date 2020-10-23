@@ -220,4 +220,6 @@ public class Application {
 	@Size(max = 256, message = "transaction id must be between 0 and 256 characters in length")
 	private String transactionId;
 	
+	@JsonProperty("paymentType")
+	private String paymentType;
 }

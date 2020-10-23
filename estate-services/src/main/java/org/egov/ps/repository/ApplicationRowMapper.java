@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.egov.ps.model.Application;
 import org.egov.ps.model.Document;
 import org.egov.ps.model.Owner;
@@ -21,6 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class ApplicationRowMapper implements ResultSetExtractor<List<Application>> {
@@ -53,7 +53,8 @@ public class ApplicationRowMapper implements ResultSetExtractor<List<Application
 							.applicationType(rs.getString("appapplication_type")).comments(rs.getString("appcomments"))
 							.hardcopyReceivedDate(rs.getLong("apphardcopy_received_date"))
 							.state(rs.getString("appstate")).action(rs.getString("appaction"))
-							.auditDetails(auditdetails).build();
+							.bankName(rs.getString("appbank_name")).transactionId(rs.getString("apptransaction_number"))
+							.paymentAmount(rs.getDouble("appamount")).paymentType(rs.getString("apppayment_type")).auditDetails(auditdetails).build();
 
 					PGobject applicationDetailsPgObject = (PGobject) rs.getObject("appapplication_details");
 					if (applicationDetailsPgObject != null) {
