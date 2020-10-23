@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.Size;
+
 import org.egov.common.contract.request.User;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.util.PSConstants;
@@ -207,4 +209,20 @@ public class Application {
 	public String getMDMSModuleName() {
 		return String.format("%s_%s_%s", this.getBranchType(), this.getModuleType(), this.getApplicationType());
 	}
+	
+	/**
+	 * Amount to be paid
+	 */
+	@JsonProperty("paymentAmount")
+	private Double paymentAmount;
+	
+
+	@JsonProperty("bankName")
+	@Size(max = 256, message = "bank name must be between 0 and 256 characters in length")
+	private String bankName;
+	
+	@JsonProperty("transactionId")
+	@Size(max = 256, message = "transaction id must be between 0 and 256 characters in length")
+	private String transactionId;
+	
 }

@@ -137,4 +137,16 @@ public class Configuration {
 
 	@Value("${egov.demand.update.endpoint}")
 	private String demandUpdateEndpoint;
+
+	/**
+	 * Collection Service
+	 */
+	@Value("${egov.collectionservice.host}")
+	private String collectionPaymentHost;
+
+	@Value("${egov.collectionservice.payment.create.path}")
+	private String collectionPaymentEndPoint;
+	
+	@Value("${egov.bill.gen.endpoint}")
+	private String billGenerateEndpoint;
 }

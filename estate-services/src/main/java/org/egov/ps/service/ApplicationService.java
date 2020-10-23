@@ -45,7 +45,7 @@ public class ApplicationService {
 
 	@Autowired
 	ApplicationRepository applicationRepository;
-	
+
 	@Autowired
 	WorkflowIntegrator wfIntegrator;
 
@@ -68,8 +68,9 @@ public class ApplicationService {
 		}
 		List<Application> applications = applicationRepository.getApplications(criteria);
 
-		if (CollectionUtils.isEmpty(applications))
+		if (CollectionUtils.isEmpty(applications)) {
 			return Collections.emptyList();
+		}
 		return applications;
 	}
 
@@ -97,4 +98,5 @@ public class ApplicationService {
 
 		return status;
 	}
+	
 }

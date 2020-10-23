@@ -15,6 +15,10 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.ps.config.Configuration;
 import org.egov.ps.model.Application;
+import org.egov.ps.model.CollectionPayment;
+import org.egov.ps.model.CollectionPaymentDetail;
+import org.egov.ps.model.CollectionPaymentModeEnum;
+import org.egov.ps.model.CollectionPaymentRequest;
 import org.egov.ps.model.UserResponse;
 import org.egov.ps.model.UserSearchRequestCore;
 import org.egov.ps.model.calculation.Demand;
@@ -31,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -198,7 +203,7 @@ public class DemandService {
 	/**
 	 * Returns the list of new DemandDetail to be added for updating the demand
 	 * 
-	 * @param application         The calculation object for the update tequest
+	 * @param application   The calculation object for the update tequest
 	 * @param demandDetails The list of demandDetails from the existing demand
 	 * @return The list of new DemandDetails
 	 */
@@ -241,5 +246,37 @@ public class DemandService {
 		combinedBillDetials.addAll(newDemandDetails);
 		return combinedBillDetials;
 	}
-	
+
+	/**
+	 * 
+	 * @param requestInfo   RequestInfo object from the original request.
+	 * @param paymentAmount Total amount paid.
+	 * @param billId        The bill that was generated for this payment.
+	 * @param tenantId      The tenantId to look up mdmsService businessService from bill.
+	 * @return
+	 */
+	public Object createCashPayment(RequestInfo requestInfo, Double paymentAmount, String billId,
+			Application application, String billingBusinessService) {
+
+		JsonNode applicationDetails = application.getApplicationDetails();
+		String ownerName = applicationDetails.get("transferee").get("name").asText();
+		String ownerPhone = applicationDetails.get("transferee").get("mobileNo").asText();
+		String tenantId = application.getTenantId();
+//		OwnerDetails ownerDetails = application.getOwnerDetails();
+
+		CollectionPaymentDetail paymentDetail = CollectionPaymentDetail.builder().tenantId(tenantId)
+				.totalAmountPaid(BigDecimal.valueOf(paymentAmount)).receiptDate(System.currentTimeMillis())
+				.businessService(billingBusinessService).billId(billId).build();
+		
+		CollectionPayment payment = CollectionPayment.builder().paymentMode(CollectionPaymentModeEnum.CASH)
+				.tenantId(tenantId).totalAmountPaid(BigDecimal.valueOf(paymentAmount)).payerName(ownerName)
+				.paidBy("COUNTER").mobileNumber(ownerPhone).paymentDetails(Collections.singletonList(paymentDetail))
+				.build();
+
+		CollectionPaymentRequest paymentRequest = CollectionPaymentRequest.builder().requestInfo(requestInfo)
+				.payment(payment).build();
+
+		return demandRepository.savePayment(paymentRequest);
+	}
+
 }

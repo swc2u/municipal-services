@@ -9,6 +9,7 @@ import org.egov.common.contract.response.ResponseInfo;
 import org.egov.ps.model.Application;
 import org.egov.ps.model.ApplicationCriteria;
 import org.egov.ps.service.ApplicationService;
+import org.egov.ps.service.calculation.DemandService;
 import org.egov.ps.util.ResponseInfoFactory;
 import org.egov.ps.web.contracts.ApplicationRequest;
 import org.egov.ps.web.contracts.ApplicationResponse;
@@ -33,6 +34,9 @@ public class ApplicationController {
 
 	@Autowired
 	private ResponseInfoFactory responseInfoFactory;
+	
+	@Autowired
+	private DemandService demandService;
 
 	@PostMapping("/_create")
 	public ResponseEntity<ApplicationResponse> create(@Valid @RequestBody ApplicationRequest applicationRequest) {
@@ -83,5 +87,17 @@ public class ApplicationController {
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
 
+	}
+
+	@PostMapping("/_collect_payment")
+	public ResponseEntity<ApplicationResponse> offlinePayment(
+			@Valid @RequestBody ApplicationRequest applicationRequest) {
+//		List<Application> applications = applicationService.generateFinanceDemand(applicationRequest);
+		demandService.createDemand(applicationRequest.getRequestInfo(), applicationRequest.getApplications());
+		ResponseInfo resInfo = responseInfoFactory
+				.createResponseInfoFromRequestInfo(applicationRequest.getRequestInfo(), true);
+		ApplicationResponse response = ApplicationResponse.builder().applications(applicationRequest.getApplications()).responseInfo(resInfo)
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }
