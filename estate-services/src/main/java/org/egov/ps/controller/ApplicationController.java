@@ -89,7 +89,7 @@ public class ApplicationController {
 
 	}
 
-	@PostMapping("/_offlinepayment")
+	@PostMapping("/_collect_payment")
 	public ResponseEntity<ApplicationResponse> offlinePayment(
 			@Valid @RequestBody ApplicationRequest applicationRequest) {
 //		List<Application> applications = applicationService.generateFinanceDemand(applicationRequest);

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
 import org.egov.common.contract.request.User;
@@ -207,14 +206,6 @@ public class Application {
 	}
 	
 	/**
-	 * Pending consumer code. This needs to be saved in the database for online
-	 * payments.
-	 */
-	@JsonProperty("paymentConsumerCode")
-	@Size(max = 256, message = "payment consumer code must be between 0 and 256 characters in length")
-	private String paymentConsumerCode;
-	
-	/**
 	 * Amount to be paid
 	 */
 	@JsonProperty("paymentAmount")
@@ -228,9 +219,5 @@ public class Application {
 	@JsonProperty("transactionId")
 	@Size(max = 256, message = "transaction id must be between 0 and 256 characters in length")
 	private String transactionId;
-	
-	@Valid
-	@JsonProperty
-	private List<OfflinePaymentDetails> offlinePaymentDetails;
 	
 }
