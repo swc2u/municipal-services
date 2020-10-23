@@ -1,7 +1,9 @@
 package org.egov.ps.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
@@ -10,6 +12,7 @@ import org.egov.common.contract.request.User;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.web.contracts.AuditDetails;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -129,18 +132,19 @@ public class Application {
 	}
 
 	public String getBillingBusinessService() {
-		return String.format("%s_%s.%s", PSConstants.ESTATE_SERVICE, camelToSnake(this.getBranchType()), camelToSnake(this.getApplicationType()));
+		return String.format("%s_%s.%s", PSConstants.ESTATE_SERVICE, camelToSnake(this.getBranchType()),
+				camelToSnake(this.getApplicationType()));
 	}
-	
+
 	/**
 	 * Convert camel case string to snake case string and capitalise string.
 	 */
-	public static String camelToSnake(String str)  { 
-        String regex = "([a-z])([A-Z]+)"; 
-        String replacement = "$1_$2"; 
-        str = str .replaceAll(regex, replacement).toUpperCase(); 
-        return str; 
-    } 
+	public static String camelToSnake(String str) {
+		String regex = "([a-z])([A-Z]+)";
+		String replacement = "$1_$2";
+		str = str.replaceAll(regex, replacement).toUpperCase();
+		return str;
+	}
 
 	private String extractPrefix(String inputString) {
 		String outputString = "";
@@ -156,7 +160,16 @@ public class Application {
 	 * Documents uploaded for this application.
 	 */
 	@JsonProperty("applicationDocuments")
-	private List<Document> applicationDocuments;
+	@Builder.Default
+	private List<Document> applicationDocuments = new ArrayList<Document>();
+
+	public List<Document> getApplicationDocuments() {
+		if (CollectionUtils.isEmpty(this.applicationDocuments)) {
+			return Collections.emptyList();
+		}
+		return this.applicationDocuments.stream()
+				.filter(doc -> !doc.getDocumentType().startsWith(PSConstants.ES_WF_DOCS)).collect(Collectors.toList());
+	}
 
 	public Application addApplicationDocumentsItem(Document applicationDocumentItem) {
 		if (this.applicationDocuments == null) {
@@ -169,6 +182,17 @@ public class Application {
 		}
 		this.applicationDocuments.add(applicationDocumentItem);
 		return this;
+	}
+
+	@JsonProperty(value = "wfDocuments", access = JsonProperty.Access.READ_ONLY)
+	private List<Document> wfDocuments;
+
+	public List<Document> getWfDocuments() {
+		if (CollectionUtils.isEmpty(this.applicationDocuments)) {
+			return Collections.emptyList();
+		}
+		return this.applicationDocuments.stream()
+				.filter(doc -> doc.getDocumentType().startsWith(PSConstants.ES_WF_DOCS)).collect(Collectors.toList());
 	}
 
 	@JsonProperty("calculation")
