@@ -25,6 +25,8 @@ public class ApplicationQueryBuilder {
 			+ " app.state as appstate, app.action as appaction," + " app.application_details as appapplication_details,"
 			+ " app.created_by as appcreated_by, app.last_modified_by as applast_modified_by,"
 			+ " app.created_time as appcreated_time, app.last_modified_time as applast_modified_time, "
+			+ " app.bank_name as appbank_name, app.transaction_number as apptransaction_number, "
+			+ " app.amount as appamount,  app.payment_type as apppayment_type, "
 
 			+ " doc.id as docid, doc.reference_id as docapplication_id, doc.tenantid as doctenantid,"
 			+ " doc.is_active as docis_active, doc.document_type, doc.file_store_id, doc.property_id as docproperty_id,"
