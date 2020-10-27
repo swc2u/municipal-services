@@ -289,6 +289,6 @@ public class PropertyQueryBuilder {
 			builder.append(" where account.property_id IN (:propId)");
 			preparedStmtList.put("propId", criteria.getPropertyId());
 		}
-		return addPaginationWrapper(builder.toString(), preparedStmtList, criteria);
+		return builder.toString();
 	}
 }
