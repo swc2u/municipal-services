@@ -186,11 +186,6 @@ public class NonIndentMaterialIssueService extends DomainService {
 			response.setMaterialIssues(nonIndentIssueRequest.getMaterialIssues());
 			response.setResponseInfo(getResponseInfo(nonIndentIssueRequest.getRequestInfo()));
 
-			if ((issuePurpose != null && !issuePurpose.isEmpty())
-					&& issuePurpose.equals(IssuePurposeEnum.WRITEOFFORSCRAP.toString())) {
-				addScrapDetails(nonIndentIssueRequest, tenantId);
-			}
-
 			return response;
 		} catch (CustomBindException e) {
 			throw e;
@@ -330,7 +325,8 @@ public class NonIndentMaterialIssueService extends DomainService {
 					scrapDetail.setLotNumber("0");
 					scrapDetail.setUserQuantity(materialIssueDetail.getUserQuantityIssued());
 					scrapDetail.setScrapQuantity(materialIssueDetail.getUserQuantityIssued());
-					scrapDetail.setScrapValue(materialIssueDetail.getScrapValue());
+					// scrapDetail.setScrapValue(materialIssueDetail.getScrapValue());
+					scrapDetail.setScrapValue(materialIssueDetail.getValue());
 					scrapDetail.setExistingValue(materialIssueDetail.getValue());
 					scrapDetail.setQuantity(
 							materialIssueDetail.getQuantityIssued() != null ? materialIssueDetail.getQuantityIssued()
@@ -1138,6 +1134,7 @@ public class NonIndentMaterialIssueService extends DomainService {
 			MaterialIssueResponse response = new MaterialIssueResponse();
 			response.setMaterialIssues(indentIssueRequest.getMaterialIssues());
 			response.setResponseInfo(getResponseInfo(indentIssueRequest.getRequestInfo()));
+			// indentIssueRequest.getWorkFlowDetails().setStatus("Approved");
 			if (indentIssueRequest.getWorkFlowDetails().getStatus()
 					.equals(MaterialIssueStatusEnum.REJECTED.toString())) {
 				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(
@@ -1145,6 +1142,7 @@ public class NonIndentMaterialIssueService extends DomainService {
 						indentIssueRequest.getWorkFlowDetails().getBusinessId(), null, null, null, null, null, null,
 						null, null, null, null, null, null, null);
 				MaterialIssueResponse issueResponse = search(searchContract);
+
 				for (MaterialIssue materialIssues : issueResponse.getMaterialIssues()) {
 					for (MaterialIssueDetail issueDetail : materialIssues.getMaterialIssueDetails()) {
 						issueDetail.rejectedIssuedQuantity(issueDetail.getQuantityIssued());
@@ -1160,6 +1158,20 @@ public class NonIndentMaterialIssueService extends DomainService {
 							indentIssueRequest.getWorkFlowDetails().getTenantId());
 				}
 
+			} else if (indentIssueRequest.getWorkFlowDetails().getStatus()
+					.equals(MaterialIssueStatusEnum.APPROVED.toString())) {
+				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(
+						indentIssueRequest.getWorkFlowDetails().getTenantId(), null, null, null,
+						indentIssueRequest.getWorkFlowDetails().getBusinessId(), null, null, null, null, null, null,
+						null, null, null, null, null, null, null);
+				MaterialIssueResponse issueResponse = search(searchContract);
+
+				if ((issueResponse.getMaterialIssues().get(0).getIssuePurpose() != null)
+						&& issueResponse.getMaterialIssues().get(0).getIssuePurpose().toString()
+								.equals(IssuePurposeEnum.WRITEOFFORSCRAP.toString())) {
+					indentIssueRequest.setMaterialIssues(issueResponse.getMaterialIssues());
+					addScrapDetails(indentIssueRequest, indentIssueRequest.getWorkFlowDetails().getTenantId());
+				}
 			}
 			return response;
 		} catch (CustomBindException e) {

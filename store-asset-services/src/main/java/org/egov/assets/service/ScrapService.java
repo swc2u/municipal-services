@@ -211,10 +211,10 @@ public class ScrapService extends DomainService {
 								"Store " + scrapData.getStore().getCode());
 					}
 				}
-				if (null == scrapData.getDescription() || scrapData.getDescription().isEmpty()) {
+/*				if (null == scrapData.getDescription() || scrapData.getDescription().isEmpty()) {
 					errors.addDataError(ErrorCode.NOT_NULL.getCode(), "Description", null);
 				}
-
+*/
 				for (ScrapDetail scrapDetail : scrapData.getScrapDetails()) {
 					if (null == scrapDetail.getUserQuantity()) {
 						errors.addDataError(ErrorCode.NOT_NULL.getCode(), "Scrap Quantity", null);
@@ -283,7 +283,8 @@ public class ScrapService extends DomainService {
 			for (ScrapDetail scrapDetails : scrap.getScrapDetails()) {
 				//search scrap by issue number
 				MaterialIssueSearchContract searchContract = MaterialIssueSearchContract.builder()
-						.id(Arrays.asList(scrapDetails.getIssueDetail().getId()))
+						//.id(Arrays.asList(scrapDetails.getIssueDetail().getId()))
+						.issueNoteNumber(scrap.getIssueNumber())
 						.issuePurpose(MaterialIssue.IssuePurposeEnum.WRITEOFFORSCRAP.toString())
 						.materialIssueStatus(MaterialIssueStatusEnum.APPROVED.toString()).scrapCreated(false)
 						.tenantId(tenantId).build();
