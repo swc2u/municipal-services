@@ -51,13 +51,10 @@ public class PropertyService {
 
 	@Autowired
 	private WorkflowService workflowService;
-	
-	@Autowired
-	private IRentCollectionService rentCollectionService;
 
 	@Autowired
 	private IEstateRentCollectionService estateRentCollectionService;
-	
+
 	
 	public List<Property> createProperty(PropertyRequest request) {
 		propertyValidator.validateCreateRequest(request);
@@ -157,7 +154,8 @@ public class PropertyService {
 				.getProperties(PropertyCriteria.builder().propertyId(accountStatementCriteria.getPropertyid())
 						.relations(Collections.singletonList("finance")).build());
 		if (CollectionUtils.isEmpty(properties)) {
-			return AccountStatementResponse.builder().rentAccountStatements(Collections.emptyList()).build();
+			return AccountStatementResponse.builder().estateAccountStatements(Collections.emptyList())
+					.build();
 		}
 
 		Property property = properties.get(0);
@@ -168,8 +166,8 @@ public class PropertyService {
 				.getEstatePaymentsForPropertyDetailsIds(Collections.singletonList(property.getPropertyDetails().getId()));
 
 		return AccountStatementResponse.builder()
-				.rentAccountStatements(rentCollectionService.getAccountStatement(demands, payments,
-						18.00, // property.getPropertyDetails().getInterestRate(), // TODO: hard coded for now
+				.estateAccountStatements(estateRentCollectionService.getAccountStatement(demands, payments,
+						18.00,
 						accountStatementCriteria.getFromDate(), accountStatementCriteria.getToDate()))
 				.build();
 	}
