@@ -93,5 +93,22 @@ public class Property {
 	@JsonProperty("estateRentSummary")
 	private EstateRentSummary estateRentSummary;
 	
-
+	
+	@Valid
+	@JsonProperty
+	private List<EstateDemand> demands;
+	
+	@Valid
+	@JsonProperty
+	private List<EstatePayment> payments;
+	
+	
+	@Valid
+	@JsonProperty("estateAccount")
+	private EstateAccount estateAccount;
+	
+	@Valid
+	@JsonProperty
+	private List<EstateRentCollection> rentCollections;
+	
 }

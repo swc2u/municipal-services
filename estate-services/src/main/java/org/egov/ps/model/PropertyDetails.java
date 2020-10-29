@@ -286,5 +286,5 @@ public class PropertyDetails {
 	@Builder.Default
 	@JsonProperty("interestRate")
 	private Double interestRate = 0.0;
-	
+			
 }
