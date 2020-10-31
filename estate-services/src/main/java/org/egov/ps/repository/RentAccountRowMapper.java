@@ -3,8 +3,6 @@ package org.egov.ps.repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.egov.ps.web.contracts.AuditDetails;
-import org.egov.ps.web.contracts.EstateAccount;
 import org.egov.ps.model.RentAccount;
 import org.egov.ps.web.contracts.AuditDetails;
 import org.springframework.dao.DataAccessException;
