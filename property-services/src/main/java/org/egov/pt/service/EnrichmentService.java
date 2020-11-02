@@ -49,7 +49,7 @@ public class EnrichmentService {
 		property.setAccountId(requestInfo.getUserInfo().getUuid());
 		enrichUuidsForPropertyCreate(requestInfo, property);
 		setIdgenIds(request);
-	//	enrichBoundary(property, requestInfo);
+		enrichBoundary(property, requestInfo);
 	}
 
 	private void enrichUuidsForPropertyCreate(RequestInfo requestInfo, Property property) {
@@ -153,9 +153,9 @@ public class EnrichmentService {
 			property.setStatus(Status.ACTIVE);
 		}
 		
-		String pId = propertyutil.getIdList(requestInfo, tenantId, config.getPropertyIdGenName(), config.getPropertyIdGenFormat(), 1).get(0);
+		//String pId = propertyutil.getIdList(requestInfo, tenantId, config.getPropertyIdGenName(), config.getPropertyIdGenFormat(), 1).get(0);
 		String ackNo = propertyutil.getIdList(requestInfo, tenantId, config.getAckIdGenName(), config.getAckIdGenFormat(), 1).get(0);
-		property.setPropertyId(pId);
+		//property.setPropertyId(pId);
 		property.setAcknowldgementNumber(ackNo);
 	}
 
