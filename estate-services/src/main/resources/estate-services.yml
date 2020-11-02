@@ -558,20 +558,6 @@ serviceMaps:
 
             - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.remainingGST
 
-            - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.remainingRentPenalty
-
-            - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.remainingGSTPenalty
-
-            - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.remainingRent
-
-            - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.collectedGSTPenalty
-
-            - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.collectedRentPenalty
-
-            - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.interestSince
-
-            - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.remainingGST
-
             - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.auditDetails.createdBy
 
             - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.auditDetails.lastModifiedBy
@@ -599,8 +585,6 @@ serviceMaps:
             - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.noOfDays
 
             - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.paid
-
-            - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.remainingRentPenalty
 
             - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.remainingRentPenalty
 
