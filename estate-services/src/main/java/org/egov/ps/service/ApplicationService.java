@@ -1,13 +1,16 @@
 package org.egov.ps.service;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.config.Configuration;
 import org.egov.ps.model.Application;
 import org.egov.ps.model.ApplicationCriteria;
 import org.egov.ps.producer.Producer;
+import org.egov.ps.repository.ApplicationRepository;
 import org.egov.ps.repository.PropertyRepository;
 import org.egov.ps.service.calculation.DemandService;
 import org.egov.ps.util.PSConstants;
@@ -25,7 +28,7 @@ import org.springframework.util.CollectionUtils;
 public class ApplicationService {
 
 	@Autowired
-	private EnrichmentService enrichmentService;
+	private ApplicationEnrichmentService applicationEnrichmentService;
 
 	@Autowired
 	private ApplicationsNotificationService applicationNotificationService;
@@ -43,6 +46,9 @@ public class ApplicationService {
 	PropertyRepository repository;
 
 	@Autowired
+	ApplicationRepository applicationRepository;
+
+	@Autowired
 	WorkflowIntegrator wfIntegrator;
 
 	@Autowired
@@ -53,7 +59,7 @@ public class ApplicationService {
 
 	public List<Application> createApplication(ApplicationRequest request) {
 		validator.validateCreateRequest(request);
-		enrichmentService.enrichCreateApplication(request);
+		applicationEnrichmentService.enrichCreateApplication(request);
 		producer.push(config.getSaveApplicationTopic(), request);
 		return request.getApplications();
 	}
@@ -62,16 +68,17 @@ public class ApplicationService {
 		if (criteria.getFileNumber() != null) {
 			criteria.setFileNumber(criteria.getFileNumber().toUpperCase());
 		}
-		List<Application> applications = repository.getApplications(criteria);
+		List<Application> applications = applicationRepository.getApplications(criteria);
 
-		if (CollectionUtils.isEmpty(applications))
+		if (CollectionUtils.isEmpty(applications)) {
 			return Collections.emptyList();
+		}
 		return applications;
 	}
 
 	public List<Application> updateApplication(ApplicationRequest applicationRequest) {
 		validator.getApplications(applicationRequest);
-		enrichmentService.enrichUpdateApplication(applicationRequest);
+		applicationEnrichmentService.enrichUpdateApplication(applicationRequest);
 		String action = applicationRequest.getApplications().get(0).getAction();
 		String state = applicationRequest.getApplications().get(0).getState();
 
@@ -93,4 +100,29 @@ public class ApplicationService {
 
 		return status;
 	}
+
+	public void collectPayment(ApplicationRequest applicationRequest) {
+		applicationEnrichmentService.collectPayment(applicationRequest);
+		demandService.generateFinanceDemand(applicationRequest);
+	}
+
+	public void updatePostPayment(ApplicationRequest applicationRequest, Map<String, Boolean> idToIsStateUpdatableMap) {
+		RequestInfo requestInfo = applicationRequest.getRequestInfo();
+		List<Application> applications = applicationRequest.getApplications();
+
+		List<Application> applicationsForUpdate = new LinkedList<>();
+
+		for (Application application : applications) {
+			if (idToIsStateUpdatableMap.get(application.getId())) {
+				applicationsForUpdate.add(application);
+			}
+		}
+
+		if (!CollectionUtils.isEmpty(applicationsForUpdate)) {
+			wfIntegrator.callApplicationWorkFlow(new ApplicationRequest(requestInfo, applicationsForUpdate));
+			producer.push(config.getUpdateApplicationTopic(),
+					new ApplicationRequest(requestInfo, applicationsForUpdate));
+		}
+	}
+
 }

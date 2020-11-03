@@ -1,17 +1,23 @@
 package org.egov.ps.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
+import javax.validation.constraints.Size;
 
 import org.egov.common.contract.request.User;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.web.contracts.AuditDetails;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -126,7 +132,18 @@ public class Application {
 	}
 
 	public String getBillingBusinessService() {
-		return String.format("%s.%s.%s", PSConstants.ESTATE_SERVICE, this.getBranchType(), this.getApplicationType());
+		return String.format("%s_%s.%s", PSConstants.ESTATE_SERVICE, camelToSnake(this.getBranchType()),
+				camelToSnake(this.getApplicationType()));
+	}
+
+	/**
+	 * Convert camel case string to snake case string and capitalise string.
+	 */
+	public static String camelToSnake(String str) {
+		String regex = "([a-z])([A-Z]+)";
+		String replacement = "$1_$2";
+		str = str.replaceAll(regex, replacement).toUpperCase();
+		return str;
 	}
 
 	private String extractPrefix(String inputString) {
@@ -143,7 +160,16 @@ public class Application {
 	 * Documents uploaded for this application.
 	 */
 	@JsonProperty("applicationDocuments")
-	private List<Document> applicationDocuments;
+	@Builder.Default
+	private List<Document> applicationDocuments = new ArrayList<Document>();
+
+	public List<Document> getApplicationDocuments() {
+		if (CollectionUtils.isEmpty(this.applicationDocuments)) {
+			return Collections.emptyList();
+		}
+		return this.applicationDocuments.stream()
+				.filter(doc -> !doc.getDocumentType().startsWith(PSConstants.ES_WF_DOCS)).collect(Collectors.toList());
+	}
 
 	public Application addApplicationDocumentsItem(Document applicationDocumentItem) {
 		if (this.applicationDocuments == null) {
@@ -158,6 +184,22 @@ public class Application {
 		return this;
 	}
 
+	@JsonProperty(value = "wfDocuments", access = JsonProperty.Access.READ_ONLY)
+	private List<Document> wfDocuments;
+
+	public List<Document> getWfDocuments() {
+		if (CollectionUtils.isEmpty(this.applicationDocuments)) {
+			return Collections.emptyList();
+		}
+		return this.applicationDocuments.stream()
+				.filter(doc -> doc.getDocumentType().startsWith(PSConstants.ES_WF_DOCS)).collect(Collectors.toList());
+	}
+
+	public List<Document> getAllDocuments() {
+
+		return this.applicationDocuments;
+	}
+
 	@JsonProperty("calculation")
 	Calculation calculation;
 
@@ -168,4 +210,26 @@ public class Application {
 	public String getMDMSModuleName() {
 		return String.format("%s_%s_%s", this.getBranchType(), this.getModuleType(), this.getApplicationType());
 	}
+	
+	/**
+	 * Amount to be paid
+	 */
+	@JsonProperty("paymentAmount")
+	private BigDecimal paymentAmount;
+	
+
+	@JsonProperty("bankName")
+	@Size(max = 256, message = "bank name must be between 0 and 256 characters in length")
+	private String bankName;
+	
+	@JsonProperty("transactionId")
+	@Size(max = 256, message = "transaction id must be between 0 and 256 characters in length")
+	private String transactionId;
+	
+	@JsonProperty("paymentType")
+	private String paymentType;
+	
+	@JsonProperty("dateOfPayment")
+	private Long dateOfPayment;
+	
 }

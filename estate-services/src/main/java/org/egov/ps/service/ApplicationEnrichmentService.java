@@ -1,7 +1,6 @@
 package org.egov.ps.service;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,42 +9,42 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.config.Configuration;
 import org.egov.ps.model.Application;
-import org.egov.ps.model.AuctionBidder;
+import org.egov.ps.model.ApplicationCriteria;
 import org.egov.ps.model.Document;
 import org.egov.ps.model.MortgageDetails;
 import org.egov.ps.model.Owner;
-import org.egov.ps.model.OwnerDetails;
-import org.egov.ps.model.Payment;
 import org.egov.ps.model.Property;
 import org.egov.ps.model.PropertyDetails;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.model.calculation.Category;
 import org.egov.ps.model.calculation.TaxHeadEstimate;
 import org.egov.ps.model.idgen.IdResponse;
+import org.egov.ps.repository.ApplicationRepository;
 import org.egov.ps.repository.IdGenRepository;
 import org.egov.ps.repository.PropertyRepository;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.util.Util;
 import org.egov.ps.web.contracts.ApplicationRequest;
-import org.egov.ps.web.contracts.AuctionSaveRequest;
 import org.egov.ps.web.contracts.AuditDetails;
-import org.egov.ps.web.contracts.EstateDemand;
-import org.egov.ps.web.contracts.EstatePayment;
 import org.egov.ps.web.contracts.PropertyRequest;
 import org.egov.tracer.model.CustomException;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.jaegertracing.thriftjava.Log;
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @Service
-public class EnrichmentService {
+public class ApplicationEnrichmentService {
 
 	@Autowired
 	Util util;
@@ -65,274 +64,10 @@ public class EnrichmentService {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	public void enrichPropertyRequest(PropertyRequest request) {
+	MDMSService mdmsService;
 
-		RequestInfo requestInfo = request.getRequestInfo();
-
-		if (!CollectionUtils.isEmpty(request.getProperties())) {
-			request.getProperties().forEach(property -> {
-				AuditDetails propertyAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
-						property.getId() == null);
-
-				if (property.getId() == null) {
-					property.setId(UUID.randomUUID().toString());
-					property.setState(PSConstants.PM_DRAFTED);
-					property.setFileNumber(property.getFileNumber().toUpperCase());
-				}
-
-				property.setAuditDetails(propertyAuditDetails);
-
-				enrichPropertyDetail(property, requestInfo);
-
-			});
-		}
-	}
-
-	private void enrichPropertyDetail(Property property, RequestInfo requestInfo) {
-
-		PropertyDetails propertyDetail = property.getPropertyDetails();
-
-		AuditDetails propertyDetailsAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
-				propertyDetail.getId() == null);
-
-		if (propertyDetail.getId() == null) {
-			propertyDetail.setId(UUID.randomUUID().toString());
-			propertyDetail.setTenantId(property.getTenantId());
-			propertyDetail.setPropertyId(property.getId());
-		}
-		propertyDetail.setAuditDetails(propertyDetailsAuditDetails);
-
-		enrichOwners(property, requestInfo);
-		enrichCourtCases(property, requestInfo);
-		enrichPaymentDetails(property, requestInfo);
-		enrichBidders(property, requestInfo);
-		enrichEstateDemand(property, requestInfo);
-		enrichEstatePayment(property, requestInfo);
-
-	}
-
-	private void enrichOwners(Property property, RequestInfo requestInfo) {
-
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getOwners())) {
-
-			property.getPropertyDetails().getOwners().forEach(owner -> {
-
-				if (owner.getId() == null) {
-
-					owner.setId(UUID.randomUUID().toString());
-					owner.setTenantId(property.getTenantId());
-					owner.setPropertyDetailsId(property.getPropertyDetails().getId());
-
-				}
-				AuditDetails ownerAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-				owner.setAuditDetails(ownerAuditDetails);
-				enrichOwnerDetail(property, owner, requestInfo);
-
-			});
-		}
-	}
-
-	private void enrichOwnerDetail(Property property, Owner owner, RequestInfo requestInfo) {
-
-		OwnerDetails ownerDetails = owner.getOwnerDetails();
-
-		if (ownerDetails.getId() == null || ownerDetails.getId().isEmpty()) {
-
-			ownerDetails.setId(UUID.randomUUID().toString());
-			ownerDetails.setTenantId(property.getTenantId());
-			ownerDetails.setOwnerId(owner.getId());
-
-		}
-
-		AuditDetails ownerDetailsAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-		ownerDetails.setAuditDetails(ownerDetailsAuditDetails);
-		enrichOwnerDocs(property, requestInfo);
-
-	}
-
-	private void enrichOwnerDocs(Property property, RequestInfo requestInfo) {
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getOwners())) {
-
-			property.getPropertyDetails().getOwners().forEach(owner -> {
-				List<Document> ownerDocuments = owner.getOwnerDetails().getOwnerDocuments();
-
-				if (!CollectionUtils.isEmpty(ownerDocuments)) {
-					ownerDocuments.forEach(document -> {
-						if (document.getId() == null || document.getId().isEmpty()) {
-							document.setId(UUID.randomUUID().toString());
-						}
-						document.setTenantId(property.getTenantId());
-						document.setReferenceId(owner.getOwnerDetails().getId());
-						document.setPropertyId(property.getId());
-						AuditDetails docAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-						document.setAuditDetails(docAuditDetails);
-					});
-				}
-			});
-		}
-	}
-
-	private void enrichCourtCases(Property property, RequestInfo requestInfo) {
-
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getCourtCases())) {
-
-			property.getPropertyDetails().getCourtCases().forEach(courtCase -> {
-
-				if (courtCase.getId() == null || courtCase.getId().isEmpty()) {
-
-					courtCase.setId(UUID.randomUUID().toString());
-					courtCase.setTenantId(property.getTenantId());
-					courtCase.setPropertyDetailsId(property.getPropertyDetails().getId());
-
-				}
-				AuditDetails courtCaseAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-				courtCase.setAuditDetails(courtCaseAuditDetails);
-
-			});
-		}
-	}
-
-	private void enrichPaymentDetails(Property property, RequestInfo requestInfo) {
-
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getOwners())) {
-			property.getPropertyDetails().getOwners().forEach(owner -> {
-
-				List<Payment> payments = property.getPropertyDetails().getPaymentDetails();
-				if (!CollectionUtils.isEmpty(payments)) {
-
-					payments.forEach(payment -> {
-						if (payment.getId() == null || payment.getId().isEmpty()) {
-							AuditDetails paymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
-									true);
-							String gen_payment_detail_id = UUID.randomUUID().toString();
-							payment.setId(gen_payment_detail_id);
-							payment.setTenantId(property.getTenantId());
-							payment.setOwnerDetailsId(owner.getOwnerDetails().getId());
-							payment.setAuditDetails(paymentAuditDetails);
-						} else {
-							AuditDetails paymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
-									true);
-							payment.setAuditDetails(paymentAuditDetails);
-						}
-					});
-				}
-			});
-		}
-	}
-
-	private void enrichBidders(Property property, RequestInfo requestInfo) {
-
-		/**
-		 * Delete existing data as new data is coming in.
-		 */
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getBidders())) {
-
-			boolean hasAnyNewBidder = property.getPropertyDetails().getBidders().stream()
-					.filter(bidder -> bidder.getId() == null || bidder.getId().isEmpty()).findAny().isPresent();
-
-			if (hasAnyNewBidder) {
-				List<AuctionBidder> existingBidders = propertyRepository.getBiddersForPropertyDetailsIds(
-						Collections.singletonList(property.getPropertyDetails().getId()));
-				property.getPropertyDetails().setInActiveBidders(existingBidders);
-			} else {
-				property.getPropertyDetails().setInActiveBidders(Collections.emptyList());
-			}
-		}
-
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getBidders())) {
-
-			property.getPropertyDetails().getBidders().forEach(bidder -> {
-
-				if (bidder.getId() == null) {
-
-					bidder.setId(UUID.randomUUID().toString());
-					bidder.setPropertyDetailsId(property.getPropertyDetails().getId());
-
-				}
-				AuditDetails buidderAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-				bidder.setAuditDetails(buidderAuditDetails);
-
-			});
-		}
-
-	}
-
-	private void enrichEstateDemand(Property property, RequestInfo requestInfo) {
-
-		/**
-		 * Delete existing data as new data is coming in.
-		 */
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstateDemands())) {
-
-			boolean hasAnyNewEstateDemands = property.getPropertyDetails().getEstateDemands().stream()
-					.filter(estateDemand -> estateDemand.getId() == null || estateDemand.getId().isEmpty()).findAny()
-					.isPresent();
-
-			if (hasAnyNewEstateDemands) {
-				List<EstateDemand> existingEstateDemands = propertyRepository.getDemandDetailsForPropertyDetailsIds(
-						Collections.singletonList(property.getPropertyDetails().getId()));
-				property.getPropertyDetails().setInActiveEstateDemands(existingEstateDemands);
-			} else {
-				property.getPropertyDetails().setInActiveEstateDemands(Collections.emptyList());
-			}
-		}
-
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstateDemands())) {
-
-			property.getPropertyDetails().getEstateDemands().forEach(estateDemand -> {
-
-				if (estateDemand.getId() == null) {
-
-					estateDemand.setId(UUID.randomUUID().toString());
-					estateDemand.setPropertyDetailsId(property.getPropertyDetails().getId());
-
-				}
-				AuditDetails estateDemandAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-				estateDemand.setAuditDetails(estateDemandAuditDetails);
-
-			});
-		}
-
-	}
-
-	private void enrichEstatePayment(Property property, RequestInfo requestInfo) {
-
-		/**
-		 * Delete existing data as new data is coming in.
-		 */
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())) {
-
-			boolean hasAnyNewEstatePayments = property.getPropertyDetails().getEstatePayments().stream()
-					.filter(estatePayment -> estatePayment.getId() == null || estatePayment.getId().isEmpty()).findAny()
-					.isPresent();
-
-			if (hasAnyNewEstatePayments) {
-				List<EstatePayment> existingEstatePayments = propertyRepository.getEstatePaymentsForPropertyDetailsIds(
-						Collections.singletonList(property.getPropertyDetails().getId()));
-				property.getPropertyDetails().setInActiveEstatePayments(existingEstatePayments);
-			} else {
-				property.getPropertyDetails().setInActiveEstatePayments(Collections.emptyList());
-			}
-		}
-
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())) {
-
-			property.getPropertyDetails().getEstatePayments().forEach(estatePayment -> {
-
-				if (estatePayment.getId() == null) {
-
-					estatePayment.setId(UUID.randomUUID().toString());
-					estatePayment.setPropertyDetailsId(property.getPropertyDetails().getId());
-
-				}
-				AuditDetails estatePaymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
-						true);
-				estatePayment.setAuditDetails(estatePaymentAuditDetails);
-
-			});
-		}
-
-	}
+	@Autowired
+	ApplicationRepository applicationRepository;
 
 	/**
 	 * Application Related Enrich
@@ -517,20 +252,18 @@ public class EnrichmentService {
 				modifyAuditDetails.setLastModifiedTime(auditDetails.getLastModifiedTime());
 				application.setAuditDetails(modifyAuditDetails);
 
-				List<Document> applicationDocuments = application.getApplicationDocuments();
-				if (!CollectionUtils.isEmpty(applicationDocuments)) {
-					AuditDetails docAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-					applicationDocuments.forEach(document -> {
-						if (document.getId() == null) {
-							document.setId(UUID.randomUUID().toString());
-						}
+				List<Document> applicationDocuments = application.getAllDocuments();
+				AuditDetails docAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+				applicationDocuments.forEach(document -> {
+					if (document.getId() == null) {
+						document.setId(UUID.randomUUID().toString());
 						document.setTenantId(application.getTenantId());
 						document.setReferenceId(application.getId());
 						document.setPropertyId(application.getProperty().getId());
 						document.setAuditDetails(docAuditDetails);
-					});
-				}
-				enrichGenerateDemand(application);
+					}
+				});
+				enrichGenerateDemand(application, request.getRequestInfo());
 			});
 		}
 	}
@@ -572,21 +305,92 @@ public class EnrichmentService {
 		return mortgage;
 	}
 
-	private void enrichGenerateDemand(Application application) {
+	private void enrichGenerateDemand(Application application, RequestInfo requestInfo) {
 		List<TaxHeadEstimate> estimates = new LinkedList<>();
-
+		
 		if (application.getState().contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
 
+			// TODO : We have to fetch the data from MDMS
+			// Master name -> module name
+			List<Map<String, Object>> feesConfigurations;
+			try {
+				feesConfigurations = mdmsservice
+						.getApplicationFees(application.getMDMSModuleName(), requestInfo, application.getTenantId());
+
 			TaxHeadEstimate estimateDue = new TaxHeadEstimate();
-			estimateDue.setEstimateAmount(new BigDecimal(500.00));
+
+			// TODO : replace 500 from the MDMS data , get it dynamic based on application
+			// cat and sub cat provided by FE
+			BigDecimal estimateAmount = fetchEstimateAmountFromMDMSJson(feesConfigurations,application);
+			BigDecimal gstEstimateAmount = estimateAmount.multiply( 
+					feesGSTOfApplication(application,requestInfo)).divide(new BigDecimal(100.0));
+			estimateDue.setEstimateAmount(estimateAmount.add(gstEstimateAmount));
 			estimateDue.setCategory(Category.FEE);
 			estimateDue.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
 					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
 			estimates.add(estimateDue);
+			} catch (JSONException e) {
+				log.error("Can not parse Json file",e);
+			}
 		}
+
 		Calculation calculation = Calculation.builder().applicationNumber(application.getApplicationNumber())
 				.taxHeadEstimates(estimates).tenantId(application.getTenantId()).build();
 		application.setCalculation(calculation);
+	}
+	
+	// Used for get feePercentGST 
+	public BigDecimal feesGSTOfApplication(Application application, RequestInfo requestInfo) {
+		BigDecimal responseGSTEstateAmount = new BigDecimal(0.0);
+		List<Map<String, Object>> feeGsts;
+		try {
+			feeGsts = mdmsservice.getApplicationGST(application.getMDMSModuleName(),
+					requestInfo, application.getTenantId());
+		
+		if(!feeGsts.isEmpty()) {
+			responseGSTEstateAmount = new BigDecimal(feeGsts.get(0).get("gst").toString());
+		}
+		} catch (JSONException e) {
+			log.error("Can not parse Json fie",e);
+		}
+		return responseGSTEstateAmount;
+	}
+	
+	// Used for filter fees by using category and sub-category  
+	public BigDecimal fetchEstimateAmountFromMDMSJson(List<Map<String, Object>> feesConfigurations, Application application) {
+		BigDecimal responseEstimateAmount = new BigDecimal(0.0);
+		Integer compareVarForEstimateAmount = 0;
+		for (Map<String, Object> feesConfig : feesConfigurations) {
+			if (application.getProperty().getCategory().equalsIgnoreCase(feesConfig.get("category").toString())) {
+				/* Category And Sub-category both meet than directly return a amount for that */
+				if (application.getProperty().getSubCategory()
+						.equalsIgnoreCase(feesConfig.get("subCategory").toString())) {
+					return new BigDecimal(feesConfig.get("amount").toString());
+				}
+				/*
+				 * Main Category is available but no sub-category available than go with
+				 * category default amount
+				 */
+				if ("*".equalsIgnoreCase(feesConfig.get("subCategory").toString())) {
+					responseEstimateAmount = new BigDecimal(feesConfig.get("amount").toString());
+					compareVarForEstimateAmount++;
+				}
+			}
+		}
+		/*
+		 * If there is not any equal category and sub-category than estate amount could
+		 * be default amount Where Category is : * And Sub-Category is :*
+		 */
+		if (compareVarForEstimateAmount == 0) {
+			List<Map<String, Object>> feesConfigurationsForCommonCatandSubCat = feesConfigurations.stream()
+					.filter(feesConfig -> "*".equalsIgnoreCase(feesConfig.get("category").toString()))
+					.filter(feesConfig -> "*".equalsIgnoreCase(feesConfig.get("subCategory").toString()))
+					.collect(Collectors.toList());
+			responseEstimateAmount = !feesConfigurationsForCommonCatandSubCat.isEmpty()
+					? new BigDecimal(feesConfigurationsForCommonCatandSubCat.get(0).get("amount").toString())
+					: new BigDecimal("0");
+		}
+		return responseEstimateAmount;
 	}
 
 	// To be used in future
@@ -611,15 +415,49 @@ public class EnrichmentService {
 		return String.format("%s_%s_%s", billingBusService, chargeFor, category.toString());
 	}
 
-	public void enrichUpdateAuctionRequest(AuctionSaveRequest request, List<AuctionBidder> auctionFromSearch) {
-		RequestInfo requestInfo = request.getRequestInfo();
-		AuditDetails auditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid().toString(), false);
+	public void collectPayment(ApplicationRequest applicationRequest) {
+		List<Application> applicationsFromDB = applicationRepository
+				.getApplications(getApplicationCriteria(applicationRequest));
 
-		if (!CollectionUtils.isEmpty(request.getAuctions())) {
-			request.getAuctions().forEach(auction -> {
-				auction.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
-				auction.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
+		Application applicationFromDb = applicationsFromDB.get(0);
+
+		applicationRequest.getApplications().forEach(application -> {
+			application.setTenantId(applicationFromDb.getTenantId());
+			application.setBranchType(applicationFromDb.getBranchType());
+			application.setModuleType(applicationFromDb.getModuleType());
+			application.setApplicationType(applicationFromDb.getApplicationType());
+			application.setApplicationDetails(applicationFromDb.getApplicationDetails());
+			application.setAuditDetails(applicationFromDb.getAuditDetails());
+			
+			enrichCollectPaymentDemand(application, applicationRequest.getRequestInfo());
+		});
+	}
+
+	public ApplicationCriteria getApplicationCriteria(ApplicationRequest request) {
+		ApplicationCriteria applicationCriteria = new ApplicationCriteria();
+		if (!CollectionUtils.isEmpty(request.getApplications())) {
+			request.getApplications().forEach(application -> {
+				if (application.getApplicationNumber() != null)
+					applicationCriteria.setApplicationNumber(application.getApplicationNumber());
 			});
 		}
+		return applicationCriteria;
 	}
+
+	private void enrichCollectPaymentDemand(Application application, RequestInfo requestInfo) {
+		List<TaxHeadEstimate> estimates = new LinkedList<>();
+
+		TaxHeadEstimate estimateDue = new TaxHeadEstimate();
+
+		estimateDue.setEstimateAmount(application.getPaymentAmount());
+		estimateDue.setCategory(Category.FEE);
+		estimateDue.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+				PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
+		estimates.add(estimateDue);
+
+		Calculation calculation = Calculation.builder().applicationNumber(application.getApplicationNumber())
+				.taxHeadEstimates(estimates).tenantId(application.getTenantId()).build();
+		application.setCalculation(calculation);
+	}
+
 }

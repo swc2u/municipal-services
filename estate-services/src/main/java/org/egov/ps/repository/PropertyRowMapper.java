@@ -48,6 +48,7 @@ public class PropertyRowMapper implements ResultSetExtractor<List<Property>> {
 
 					final PropertyDetails propertyDetails = PropertyDetails.builder().id(propertyDetailId)
 							.propertyId(rs.getString("pdproperty_id")).propertyType(rs.getString("pdproperty_type"))
+							.branchType(rs.getString("branch_type"))
 							.tenantId(tenantId).typeOfAllocation(rs.getString("type_of_allocation"))
 							.modeOfAuction(rs.getString("mode_of_auction")).schemeName(rs.getString("scheme_name"))
 							.areaSqft(rs.getInt("area_sqft")).dateOfAuction(rs.getLong("date_of_auction"))
@@ -60,7 +61,8 @@ public class PropertyRowMapper implements ResultSetExtractor<List<Property>> {
 							.emdDate(rs.getLong("emd_date")).decreeDate(rs.getLong("decree_date"))
 							.courtDetails(rs.getString("court_details")).civilTitledAs(rs.getString("civil_titled_as"))
 							.companyRegistrationDate(rs.getLong("company_registration_date"))
-							.entityType(rs.getString("entity_type"))
+							.entityType(rs.getString("entity_type")).houseNumber(rs.getString("house_number"))
+							.village(rs.getString("village")).mohalla(rs.getString("mohalla"))
 							.propertyRegisteredTo(rs.getString("property_registered_to"))
 							.companyOrFirm(rs.getString("company_or_firm")).auditDetails(pdAuditdetails).build();
 
