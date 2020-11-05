@@ -110,9 +110,9 @@ public class SusvService {
 			});
 		if(!susvApplication.getAction().toString().equalsIgnoreCase(SusvApplication.StatusEnum.DRAFTED.toString())) {
 			 //workflow service call to integrate nulm workflow
-			String workflowStatus=workflowIntegration(request.getRequestInfo(), susvApplication);
-			System.out.println(workflowStatus);
-			susvApplication.setApplicationStatus(SusvApplication.StatusEnum.fromValue(workflowStatus));
+//			String workflowStatus=workflowIntegration(request.getRequestInfo(), susvApplication);
+//			susvApplication.setApplicationStatus(SusvApplication.StatusEnum.fromValue(workflowStatus));
+			susvApplication.setApplicationStatus(SusvApplication.StatusEnum.fromValue("Created"));
 		}
 			repository.createSusvApplication(susvApplication);
 
