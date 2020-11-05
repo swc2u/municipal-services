@@ -40,8 +40,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.jaegertracing.thriftjava.Log;
 import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Service
 public class ApplicationEnrichmentService {
@@ -307,30 +307,36 @@ public class ApplicationEnrichmentService {
 
 	private void enrichGenerateDemand(Application application, RequestInfo requestInfo) {
 		List<TaxHeadEstimate> estimates = new LinkedList<>();
-		
+
 		if (application.getState().contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
 
-			// TODO : We have to fetch the data from MDMS
-			// Master name -> module name
 			List<Map<String, Object>> feesConfigurations;
 			try {
-				feesConfigurations = mdmsservice
-						.getApplicationFees(application.getMDMSModuleName(), requestInfo, application.getTenantId());
+				feesConfigurations = mdmsservice.getApplicationFees(application.getMDMSModuleName(), requestInfo,
+						application.getTenantId());
 
-			TaxHeadEstimate estimateDue = new TaxHeadEstimate();
+				TaxHeadEstimate estimateDue = new TaxHeadEstimate();
+				BigDecimal estimateAmount = fetchEstimateAmountFromMDMSJson(feesConfigurations, application);
+				estimateDue.setEstimateAmount(estimateAmount);
+				estimateDue.setCategory(Category.FEE);
+				estimateDue.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
+				estimates.add(estimateDue);
 
-			// TODO : replace 500 from the MDMS data , get it dynamic based on application
-			// cat and sub cat provided by FE
-			BigDecimal estimateAmount = fetchEstimateAmountFromMDMSJson(feesConfigurations,application);
-			BigDecimal gstEstimateAmount = estimateAmount.multiply( 
-					feesGSTOfApplication(application,requestInfo)).divide(new BigDecimal(100.0));
-			estimateDue.setEstimateAmount(estimateAmount.add(gstEstimateAmount));
-			estimateDue.setCategory(Category.FEE);
-			estimateDue.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
-					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
-			estimates.add(estimateDue);
+				TaxHeadEstimate estimateGst = new TaxHeadEstimate();
+				BigDecimal gstEstimatePercentage = feesGSTOfApplication(application, requestInfo);
+				if (null != gstEstimatePercentage && null != estimateAmount) {
+					BigDecimal gstEstimateAmount = (estimateAmount.multiply(gstEstimatePercentage))
+							.divide(new BigDecimal(100));
+					estimateGst.setEstimateAmount(gstEstimateAmount);
+					estimateGst.setCategory(Category.TAX);
+					estimateGst.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+							PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.TAX));
+					estimates.add(estimateGst);
+				}
+
 			} catch (JSONException e) {
-				log.error("Can not parse Json file",e);
+				log.error("Can not parse Json file", e);
 			}
 		}
 
@@ -338,26 +344,27 @@ public class ApplicationEnrichmentService {
 				.taxHeadEstimates(estimates).tenantId(application.getTenantId()).build();
 		application.setCalculation(calculation);
 	}
-	
-	// Used for get feePercentGST 
+
+	// Used for get feePercentGST
 	public BigDecimal feesGSTOfApplication(Application application, RequestInfo requestInfo) {
 		BigDecimal responseGSTEstateAmount = new BigDecimal(0.0);
 		List<Map<String, Object>> feeGsts;
 		try {
-			feeGsts = mdmsservice.getApplicationGST(application.getMDMSModuleName(),
-					requestInfo, application.getTenantId());
-		
-		if(!feeGsts.isEmpty()) {
-			responseGSTEstateAmount = new BigDecimal(feeGsts.get(0).get("gst").toString());
-		}
+			feeGsts = mdmsservice.getApplicationGST(application.getMDMSModuleName(), requestInfo,
+					application.getTenantId());
+
+			if (!feeGsts.isEmpty()) {
+				responseGSTEstateAmount = new BigDecimal(feeGsts.get(0).get("gst").toString());
+			}
 		} catch (JSONException e) {
-			log.error("Can not parse Json fie",e);
+			log.error("Can not parse Json fie", e);
 		}
 		return responseGSTEstateAmount;
 	}
-	
-	// Used for filter fees by using category and sub-category  
-	public BigDecimal fetchEstimateAmountFromMDMSJson(List<Map<String, Object>> feesConfigurations, Application application) {
+
+	// Used for filter fees by using category and sub-category
+	public BigDecimal fetchEstimateAmountFromMDMSJson(List<Map<String, Object>> feesConfigurations,
+			Application application) {
 		BigDecimal responseEstimateAmount = new BigDecimal(0.0);
 		Integer compareVarForEstimateAmount = 0;
 		for (Map<String, Object> feesConfig : feesConfigurations) {
@@ -411,7 +418,7 @@ public class ApplicationEnrichmentService {
 		application.setCalculation(calculation);
 	}
 
-	private String getTaxHeadCodeWithCharge(String billingBusService, String chargeFor, Category category) {
+	public String getTaxHeadCodeWithCharge(String billingBusService, String chargeFor, Category category) {
 		return String.format("%s_%s_%s", billingBusService, chargeFor, category.toString());
 	}
 
@@ -428,7 +435,7 @@ public class ApplicationEnrichmentService {
 			application.setApplicationType(applicationFromDb.getApplicationType());
 			application.setApplicationDetails(applicationFromDb.getApplicationDetails());
 			application.setAuditDetails(applicationFromDb.getAuditDetails());
-			
+
 			enrichCollectPaymentDemand(application, applicationRequest.getRequestInfo());
 		});
 	}
@@ -447,13 +454,20 @@ public class ApplicationEnrichmentService {
 	private void enrichCollectPaymentDemand(Application application, RequestInfo requestInfo) {
 		List<TaxHeadEstimate> estimates = new LinkedList<>();
 
-		TaxHeadEstimate estimateDue = new TaxHeadEstimate();
-
-		estimateDue.setEstimateAmount(application.getPaymentAmount());
-		estimateDue.setCategory(Category.FEE);
-		estimateDue.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+		TaxHeadEstimate estimateFee = new TaxHeadEstimate();
+		estimateFee.setEstimateAmount(application.getPaymentAmount());
+		estimateFee.setCategory(Category.FEE);
+		estimateFee.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
 				PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
-		estimates.add(estimateDue);
+
+		TaxHeadEstimate estimateGst = new TaxHeadEstimate();
+		estimateGst.setEstimateAmount(application.getGst());
+		estimateGst.setCategory(Category.TAX);
+		estimateGst.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+				PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.TAX));
+
+		estimates.add(estimateFee);
+		estimates.add(estimateGst);
 
 		Calculation calculation = Calculation.builder().applicationNumber(application.getApplicationNumber())
 				.taxHeadEstimates(estimates).tenantId(application.getTenantId()).build();

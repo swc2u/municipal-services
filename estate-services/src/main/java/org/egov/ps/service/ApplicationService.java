@@ -83,7 +83,7 @@ public class ApplicationService {
 		String state = applicationRequest.getApplications().get(0).getState();
 
 		if (state.contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
-			demandService.createDemand(applicationRequest.getRequestInfo(), applicationRequest.getApplications());
+			demandService.generateDemand(applicationRequest.getRequestInfo(), applicationRequest.getApplications());
 		}
 		if (config.getIsWorkflowEnabled() && !action.contentEquals("")) {
 			wfIntegrator.callApplicationWorkFlow(applicationRequest);
@@ -95,10 +95,7 @@ public class ApplicationService {
 	}
 
 	public List<State> getStates(RequestInfoMapper requestInfoWrapper) {
-
-		List<State> status = wfService.getApplicationStatus("ch", requestInfoWrapper);
-
-		return status;
+		return wfService.getApplicationStatus("ch", requestInfoWrapper);
 	}
 
 	public void collectPayment(ApplicationRequest applicationRequest) {

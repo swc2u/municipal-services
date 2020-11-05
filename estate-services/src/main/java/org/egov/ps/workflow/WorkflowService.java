@@ -1,9 +1,16 @@
 package org.egov.ps.workflow;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.config.Configuration;
 import org.egov.ps.repository.ServiceRequestRepository;
+import org.egov.ps.util.PSConstants;
 import org.egov.ps.web.contracts.BusinessService;
 import org.egov.ps.web.contracts.BusinessServiceRequest;
 import org.egov.ps.web.contracts.BusinessServiceResponse;
@@ -16,11 +23,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Service
@@ -88,26 +90,21 @@ public class WorkflowService {
 	public List<State> getApplicationStatus(String tenantId, RequestInfoMapper requestInfoWrapper) {
 
 		log.info("Fetching states for application states {} for tenant {}", tenantId);
-		StringBuilder applicationStatusUrl = getSearchURLWithApplicationStatusParams(tenantId);
-		Object result = serviceRequestRepository.fetchResult(applicationStatusUrl, requestInfoWrapper);
-		BusinessServiceResponse response = null;
-		List<State> appStatus = new ArrayList<>();
 		try {
-			response = mapper.convertValue(result, BusinessServiceResponse.class);
-
-			response.getBusinessServices().forEach(statesTemp -> {
-				List<State> appStatus1List = statesTemp.getStates();
-				appStatus.addAll(appStatus1List);
-			});
-
+			StringBuilder allBusinessServicesSearchURL = getSearchURLWithApplicationStatusParams(tenantId);
+			Object result = serviceRequestRepository.fetchResult(allBusinessServicesSearchURL, requestInfoWrapper);
+			BusinessServiceResponse response = mapper.convertValue(result, BusinessServiceResponse.class);
+			if (CollectionUtils.isEmpty(response.getBusinessServices())) {
+				throw new CustomException("NO BUSINESS SERVICE FOUND",
+						"Could not find any business services for tenant id '" + tenantId + "'");
+			}
+			return response.getBusinessServices().stream()
+					.filter(businessService -> businessService.getBusiness()
+							.equalsIgnoreCase(PSConstants.MDMS_PS_MODULE_NAME))
+					.map(BusinessService::getStates).flatMap(Collection::stream).collect(Collectors.toList());
 		} catch (IllegalArgumentException e) {
 			throw new CustomException("PARSING ERROR", "Failed to parse response of getBusinessService");
 		}
-		if (CollectionUtils.isEmpty(response.getBusinessServices())) {
-			throw new CustomException("NO BUSINESS SERVICE FOUND",
-					"Could not find business service for tenant id '" + tenantId + "'");
-		}
-		return appStatus;
 	}
 
 	/**
@@ -121,8 +118,10 @@ public class WorkflowService {
 		url.append(config.getWfBusinessServiceSearchPath());
 		url.append("?tenantId=");
 		url.append(tenantId);
-		url.append("&businessServices=");
-		url.append(businessServiceName);
+		if (businessServiceName != null) {
+			url.append("&businessServices=");
+			url.append(businessServiceName);
+		}
 		return url;
 	}
 
@@ -133,11 +132,7 @@ public class WorkflowService {
 	 * @return The search url
 	 */
 	private StringBuilder getSearchURLWithApplicationStatusParams(String tenantId) {
-		StringBuilder url = new StringBuilder(config.getWfHost());
-		url.append(config.getWfBusinessServiceSearchPath());
-		url.append("?tenantId=");
-		url.append(tenantId);
-		return url;
+		return this.getSearchURLWithParams(tenantId, null);
 	}
 
 	/**

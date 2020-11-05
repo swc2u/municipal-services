@@ -8,6 +8,8 @@ public class PSConstants {
 
 	public static final String PM_APPROVED = "ES_APPROVED";
 
+	public static final String ES_APPROVED = "ES_PM_APPROVED";
+
 	public static final String ES_WF_DOCS = "WF_DOCS";
 
 	public static final String ESTATE_BRANCH = "ESTATE_BRANCH";
@@ -19,6 +21,8 @@ public class PSConstants {
 	public static final String JSONPATH_PROPERTY_SERVICE = "$.MdmsRes.OwnershipTransferSaleDeed";
 
 	public static final String MDMS_PS_MODULE_NAME = "EstateServices";
+
+	public static final String ES_MODULE_PREFIX = "ES_";
 
 	public static final String MDMS_PS_FIELDS = "EstateBranch_OwnershipTransfer_SaleDeed";
 
