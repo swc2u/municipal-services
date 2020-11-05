@@ -9,6 +9,7 @@ import org.egov.common.contract.response.ResponseInfo;
 import org.egov.ps.model.Application;
 import org.egov.ps.model.ApplicationCriteria;
 import org.egov.ps.service.ApplicationService;
+import org.egov.ps.util.PSConstants;
 import org.egov.ps.util.ResponseInfoFactory;
 import org.egov.ps.web.contracts.ApplicationRequest;
 import org.egov.ps.web.contracts.ApplicationResponse;
@@ -71,9 +72,9 @@ public class ApplicationController {
 	public ResponseEntity<ApplicationStatesResponse> states(@Valid @RequestBody RequestInfoMapper requestInfoWrapper) {
 		List<State> states = applicationService.getStates(requestInfoWrapper);
 		HashSet<String> appStatus = new HashSet<>();
-
 		states.forEach(state -> {
-			if (state.getApplicationStatus().startsWith("ES_")) {
+			if (state.getApplicationStatus() != null
+					&& state.getApplicationStatus().startsWith(PSConstants.ES_MODULE_PREFIX)) {
 				appStatus.add(state.getApplicationStatus());
 			}
 		});
@@ -91,8 +92,8 @@ public class ApplicationController {
 		applicationService.collectPayment(applicationRequest);
 		ResponseInfo resInfo = responseInfoFactory
 				.createResponseInfoFromRequestInfo(applicationRequest.getRequestInfo(), true);
-		ApplicationResponse response = ApplicationResponse.builder().applications(applicationRequest.getApplications()).responseInfo(resInfo)
-				.build();
+		ApplicationResponse response = ApplicationResponse.builder().applications(applicationRequest.getApplications())
+				.responseInfo(resInfo).build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

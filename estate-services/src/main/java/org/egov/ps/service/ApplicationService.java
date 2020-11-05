@@ -95,10 +95,7 @@ public class ApplicationService {
 	}
 
 	public List<State> getStates(RequestInfoMapper requestInfoWrapper) {
-
-		List<State> status = wfService.getApplicationStatus("ch", requestInfoWrapper);
-
-		return status;
+		return wfService.getApplicationStatus("ch", requestInfoWrapper);
 	}
 
 	public void collectPayment(ApplicationRequest applicationRequest) {
