@@ -1,14 +1,20 @@
 package org.egov.ps.controller;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.validation.Valid;
 
 import org.egov.common.contract.response.ResponseInfo;
+import org.egov.ps.model.AccountStatementCriteria;
 import org.egov.ps.model.Property;
 import org.egov.ps.model.PropertyCriteria;
+import org.egov.ps.service.AccountStatementExcelGenerationService;
 import org.egov.ps.service.PropertyService;
 import org.egov.ps.util.ResponseInfoFactory;
+import org.egov.ps.web.contracts.AccountStatementRequest;
+import org.egov.ps.web.contracts.AccountStatementResponse;
 import org.egov.ps.web.contracts.PropertyRequest;
 import org.egov.ps.web.contracts.PropertyResponse;
 import org.egov.ps.web.contracts.RequestInfoMapper;
@@ -30,6 +36,9 @@ public class PropertyController {
 
 	@Autowired
 	private ResponseInfoFactory responseInfoFactory;
+
+	@Autowired
+	private AccountStatementExcelGenerationService accountStatementExcelGenerationService;
 
 	@PostMapping("/_create")
 	public ResponseEntity<PropertyResponse> create(@Valid @RequestBody PropertyRequest propertyRequest) {
@@ -60,5 +69,49 @@ public class PropertyController {
 				.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	@PostMapping("/_accountstatement")
+	public ResponseEntity<AccountStatementResponse> searchDateWise(
+			@Valid @RequestBody AccountStatementRequest request) {
+		/* Set current date in a toDate if it is null */
+		request.getCriteria().setToDate(
+				request.getCriteria().getToDate() == null ? new Date().getTime() : request.getCriteria().getToDate());
+		AccountStatementCriteria accountStatementCriteria = request.getCriteria();
+		AccountStatementResponse resposne = propertyService.searchPayments(accountStatementCriteria,
+				request.getRequestInfo());
+		return new ResponseEntity<>(resposne, HttpStatus.OK);
+	}
 
+	/**
+	 * Offline payment : Employees Request { amount :  } Response { property }
+	 *  
+	 * Online payment : Citizen Request { amount :  }
+	 * 
+	 * Response { consumerCode : }
+	 * 
+	 * @apiNote For offline payment, we need to get the existing demand, update it
+	 *          with new amount if one does not exist and send that consumer code.
+	 * @param propertyRentRequest
+	 * @return
+	 */
+	@PostMapping("/_payrent")
+	public ResponseEntity<PropertyResponse> rentPayment(@Valid @RequestBody PropertyRequest propertyRequest) {
+		List<Property> properties = propertyService.generateFinanceDemand(propertyRequest);
+		ResponseInfo resInfo = responseInfoFactory.createResponseInfoFromRequestInfo(propertyRequest.getRequestInfo(),
+				true);
+		PropertyResponse response = PropertyResponse.builder().properties(properties).responseInfo(resInfo).build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@PostMapping("/_accountstatementxlsx")
+	public ResponseEntity<List<HashMap<String, String>>> generateAccountStatementExcel(
+			@Valid @RequestBody AccountStatementRequest request) {
+		/* Set current date in a toDate if it is null */
+		request.getCriteria().setToDate(
+				request.getCriteria().getToDate() == null ? new Date().getTime() : request.getCriteria().getToDate());
+		AccountStatementCriteria accountStatementCriteria = request.getCriteria();
+		List<HashMap<String, String>> response = accountStatementExcelGenerationService
+				.generateAccountStatementExcel(accountStatementCriteria, request.getRequestInfo());
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 }

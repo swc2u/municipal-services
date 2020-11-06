@@ -8,15 +8,32 @@ public class PSConstants {
 
 	public static final String PM_APPROVED = "ES_APPROVED";
 
+	public static final String ES_APPROVED = "ES_PM_APPROVED";
+
+	public static final String ES_WF_DOCS = "WF_DOCS";
+
+	public static final String ESTATE_BRANCH = "ESTATE_BRANCH";
+
+	public static final String BUILDING_BRANCH = "BUILDING_BRANCH";
+
+	public static final String MANIMAJRA_BRANCH = "MANIMAJRA_BRANCH";
+
 	public static final String JSONPATH_PROPERTY_SERVICE = "$.MdmsRes.OwnershipTransferSaleDeed";
 
 	public static final String MDMS_PS_MODULE_NAME = "EstateServices";
+
+	public static final String ES_MODULE_PREFIX = "ES_";
 
 	public static final String MDMS_PS_FIELDS = "EstateBranch_OwnershipTransfer_SaleDeed";
 
 	public static final String MDMS_PS_CODE_FILTER = "$.*.code";
 
 	public static final String MDMS_PS_FIELD_FILTER = "[0].fields";
+
+	public static final String MDMS_PS_FEES_FILTER = "[0].fees";
+
+	public static final String MDMS_PS_FEE_GST_FILTER = "[0].feePercentGST";
+
 	public static final String MDMS_PS_NOTIFICATIONS_FILTER = "[0].notifications";
 
 	public static final String MDMS_DOCUMENT_FIELD_FILTER = ".*.documentList.*";
@@ -39,10 +56,20 @@ public class PSConstants {
 
 	public static final String TAX_HEAD_CODE_APPLICATION_CHARGE = "APPLICATION";
 
-	public static final String ESTATE_SERVICE = "EstateService";
+	public static final String ESTATE_SERVICE = "ESTATE_SERVICE";
 
 	public static final String ES_DRAFT = "DRAFT";
 
 	public static final String ES_APPROVE = "APPROVE";
+
+	public static final String ROLE_EMPLOYEE = "EMPLOYEE";
+
+	public static final String ACTION_PAY = "PAY";
+
+	public static final String PROPERTY_MASTER = "PROPERTY_MASTER";
+
+	public static final String BUSINESS_SERVICE_EB_RENT = "ESTATE_SERVICE_ESTATE_BRANCH.PROPERTY_MASTER";
+	public static final String BUSINESS_SERVICE_BB_RENT = "ESTATE_SERVICE_BUILDING_BRANCH.PROPERTY_MASTER";
+	public static final String BUSINESS_SERVICE_MB_RENT = "ESTATE_SERVICE_MANIMAJRA_BRANCH.PROPERTY_MASTER";
 
 }

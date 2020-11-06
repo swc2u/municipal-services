@@ -23,6 +23,7 @@ import org.egov.ps.util.Util;
 import org.egov.ps.web.contracts.ApplicationRequest;
 import org.egov.ps.web.contracts.PropertyRequest;
 import org.egov.tracer.model.CustomException;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @Component
 public class PropertyValidator {
 
@@ -90,20 +93,22 @@ public class PropertyValidator {
 		if (requestProperty.getSiteNumber() == null || requestProperty.getSiteNumber().trim().isEmpty()) {
 			errorMap.put("INVALID_SITE_NUMBER", "Site number can not be empty");
 		}
-		if (requestProperty.getPropertyDetails().getPropertyType() == null
-				|| requestProperty.getPropertyDetails().getPropertyType().trim().isEmpty()) {
-			errorMap.put("INVALID_PROPERTY_TYPE", "Property type can not be empty");
-		}
-		if (requestProperty.getPropertyDetails().getTypeOfAllocation() == null
-				|| requestProperty.getPropertyDetails().getTypeOfAllocation().trim().isEmpty()) {
-			errorMap.put("INVALID_TYPE_OF_ALLOCATION", "Type of allocation can not be empty");
-		}
-		if (requestProperty.getPropertyDetails().getAreaSqft() < 1) {
-			errorMap.put("INVALID_AREA_SQFT", "Area per sq.ft can not be empty");
-		}
-		if (requestProperty.getPropertyDetails().getRatePerSqft() == null
-				|| requestProperty.getPropertyDetails().getRatePerSqft().signum() < 1) {
-			errorMap.put("INVALID_RATE_PER_SQFT", "Rate per sq.ft can not be less than or equals to zero");
+		if (requestProperty.getPropertyDetails().getBranchType() == PSConstants.ESTATE_BRANCH) {
+			if (requestProperty.getPropertyDetails().getPropertyType() == null
+					|| requestProperty.getPropertyDetails().getPropertyType().trim().isEmpty()) {
+				errorMap.put("INVALID_PROPERTY_TYPE", "Property type can not be empty");
+			}
+			if (requestProperty.getPropertyDetails().getTypeOfAllocation() == null
+					|| requestProperty.getPropertyDetails().getTypeOfAllocation().trim().isEmpty()) {
+				errorMap.put("INVALID_TYPE_OF_ALLOCATION", "Type of allocation can not be empty");
+			}
+			if (requestProperty.getPropertyDetails().getAreaSqft() < 1) {
+				errorMap.put("INVALID_AREA_SQFT", "Area per sq.ft can not be empty");
+			}
+			if (requestProperty.getPropertyDetails().getRatePerSqft() == null
+					|| requestProperty.getPropertyDetails().getRatePerSqft().signum() < 1) {
+				errorMap.put("INVALID_RATE_PER_SQFT", "Rate per sq.ft can not be less than or equals to zero");
+			}
 		}
 
 		// Mandatory for allotment of site
@@ -182,24 +187,31 @@ public class PropertyValidator {
 						|| o.getOwnerDetails().getGuardianName().trim().isEmpty()) {
 					errorMap.put("INVALID_GUARDIAN_NAME", "Owner Father/Husband name can not be empty");
 				}
-				if (o.getOwnerDetails().getGuardianRelation() == null
-						|| o.getOwnerDetails().getGuardianRelation().trim().isEmpty()) {
-					errorMap.put("INVALID_GUARDIAN_RELATION", "Owner relation with guardian can not be empty");
-				}
 				if (o.getOwnerDetails().getAddress() == null || o.getOwnerDetails().getAddress().trim().isEmpty()) {
 					errorMap.put("INVALID_ADDRESS", "Address can not be empty");
-				}
-				if (o.getShare() < 1) {
-					errorMap.put("INVALID_SHARE", "Share can not be less than or equals to zero");
 				}
 				if (o.getOwnerDetails().getPossesionDate() == null) {
 					errorMap.put("INVALID_POSSESSION_DATE", "Possesion date can not be empty");
 				}
+				if (property_Optional.get().getPropertyDetails().getBranchType() == PSConstants.ESTATE_BRANCH) {
+
+					if (o.getShare() < 1) {
+						errorMap.put("INVALID_SHARE", "Share can not be less than or equals to zero");
+					}
+					if (o.getOwnerDetails().getGuardianRelation() == null
+							|| o.getOwnerDetails().getGuardianRelation().trim().isEmpty()) {
+						errorMap.put("INVALID_GUARDIAN_RELATION", "Owner relation with guardian can not be empty");
+					}
+				}
 
 				// Document Validation
 				if (null != o.getOwnerDetails() && null != o.getOwnerDetails().getOwnerDocuments()) {
-					validateDocumentsOnType(request.getRequestInfo(), property_Optional.get().getTenantId(), o,
-							errorMap, "");
+					try {
+						validateDocumentsOnType(request.getRequestInfo(), property_Optional.get().getTenantId(), o,
+								errorMap, "");
+					} catch (Exception e) {
+						log.error("Can not parse Json fie",e);
+					}
 				}
 
 			});
@@ -216,7 +228,7 @@ public class PropertyValidator {
 	}
 
 	public void validateDocumentsOnType(RequestInfo requestInfo, String tenantId, Owner owner,
-			Map<String, String> errorMap, String code) {
+			Map<String, String> errorMap, String code) throws JSONException {
 
 		List<Map<String, Object>> fieldConfigurations = mdmsservice.getDocumentConfig("documents", requestInfo,
 				tenantId);
