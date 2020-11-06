@@ -11,12 +11,14 @@ import org.egov.ps.annotation.ApplicationValidator;
 import org.egov.ps.model.Application;
 import org.egov.ps.model.ApplicationCriteria;
 import org.egov.ps.model.Property;
+import org.egov.ps.repository.ApplicationRepository;
 import org.egov.ps.repository.PropertyRepository;
 import org.egov.ps.service.MDMSService;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.validator.application.OwnerValidator;
 import org.egov.ps.web.contracts.ApplicationRequest;
 import org.egov.tracer.model.CustomException;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -55,6 +57,9 @@ public class ApplicationValidatorService {
 	OwnerValidator ownerValidator;
 
 	@Autowired
+	ApplicationRepository applicationRepository;
+	
+	@Autowired
 	ApplicationValidatorService(ApplicationContext context, MDMSService mdmsService,
 			PropertyRepository propertyRepository, ObjectMapper objectMapper, OwnerValidator ownerValidator) {
 		this.context = context;
@@ -86,14 +91,18 @@ public class ApplicationValidatorService {
 				String applicationDetailsString = this.objectMapper.writeValueAsString(applicationDetails);
 				Configuration conf = Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS);
 				DocumentContext applicationObjectContext = JsonPath.using(conf).parse(applicationDetailsString);
-				Map<String, List<String>> errorMap = this.performValidationsFromMDMS(application.getMDMSModuleName(),
-						applicationObjectContext, request.getRequestInfo(), application.getTenantId(), propertyId);
+				Map<String, List<String>> errorMap;
+					errorMap = this.performValidationsFromMDMS(application.getMDMSModuleName(),
+							applicationObjectContext, request.getRequestInfo(), application.getTenantId(), propertyId);
+				
 
 				if (!errorMap.isEmpty()) {
 					throw new CustomException("INVALID_FIELDS", "Please enter the valid fields " + errorMap.toString());
 				}
 			} catch (JsonProcessingException e) {
-				e.printStackTrace();
+				log.error("Can not parse Json fie",e);
+			} catch (Exception e) {
+				log.error("Exception",e);
 			}
 
 		});
@@ -104,7 +113,7 @@ public class ApplicationValidatorService {
 		if (property == null) {
 			throw new CustomException("INVALID_PROPERTY", "Could not find property with the given id:" + propertyId);
 		}
-		if (!property.getState().contentEquals(PSConstants.PM_APPROVED)) {
+		if (!property.getState().contentEquals(PSConstants.PM_APPROVED) && !property.getState().contentEquals(PSConstants.ES_APPROVED) ) {
 			throw new CustomException("INVALID_PROPERTY", "Property with the given " + propertyId + " is not approved");
 		}
 	}
@@ -112,7 +121,7 @@ public class ApplicationValidatorService {
 	@SuppressWarnings("unchecked")
 	public Map<String, List<String>> performValidationsFromMDMS(final String applicationType,
 			DocumentContext applicationObject, RequestInfo RequestInfo, final String tenantId,
-			final String propertyId) {
+			final String propertyId) throws JSONException {
 		List<Map<String, Object>> fieldConfigurations = this.mdmsService.getApplicationConfig(applicationType,
 				RequestInfo, tenantId);
 		Map<String, List<String>> errorsMap = new HashMap<String, List<String>>();
@@ -225,7 +234,7 @@ public class ApplicationValidatorService {
 
 	public List<Application> getApplications(ApplicationRequest applicationRequest) {
 		ApplicationCriteria criteria = getApplicationCriteria(applicationRequest);
-		List<Application> applications = propertyRepository.getApplications(criteria);
+		List<Application> applications = applicationRepository.getApplications(criteria);
 
 		boolean ifApplicationExists = ApplicationExists(applications);
 		if (!ifApplicationExists) {

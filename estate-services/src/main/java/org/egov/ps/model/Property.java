@@ -1,11 +1,16 @@
 package org.egov.ps.model;
 
-import org.egov.ps.web.contracts.AuditDetails;
-import org.springframework.validation.annotation.Validated;
-
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.egov.ps.model.calculation.Calculation;
+import org.egov.ps.web.contracts.AuditDetails;
+import org.egov.ps.web.contracts.EstateRentSummary;
+import org.springframework.validation.annotation.Validated;
 
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -43,7 +48,7 @@ public class Property {
 	 * One of the categories from `data/ch/EstateServices/Categories.json`
 	 * CAT.RESIDENTIAL, CAT.COMMERCIAL, CAT.INDUSTRIAL, CAT.INSTITUTIONAL,
 	 * CAT.GOVPROPERTY, CAT.RELIGIOUS, CAT.HOSPITAL,
-	 * 
+	 *
 	 */
 	@JsonProperty("category")
 	private String category;
@@ -68,7 +73,7 @@ public class Property {
 
 	@JsonProperty("action")
 	private String action;
-	
+
 	@JsonProperty("assignee")
 	@Builder.Default
 	private List<String> assignee = null;
@@ -81,5 +86,20 @@ public class Property {
 
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails;
+
+	@Valid
+	@JsonProperty("estateRentSummary")
+	private EstateRentSummary estateRentSummary;
+
+	/**
+	 * Pending consumer code. This needs to be saved in the database for online
+	 * payments.
+	 */
+	@JsonProperty("rentPaymentConsumerCode")
+	@Size(max = 256, message = "Rent payment consumer code must be between 0 and 256 characters in length")
+	private String rentPaymentConsumerCode;
+
+	@JsonProperty("calculation")
+	Calculation calculation;
 
 }

@@ -9,12 +9,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.ps.config.Configuration;
 import org.egov.ps.model.Application;
+import org.egov.ps.model.BillV2;
+import org.egov.ps.model.CollectionPayment;
+import org.egov.ps.model.CollectionPaymentDetail;
+import org.egov.ps.model.CollectionPaymentModeEnum;
+import org.egov.ps.model.CollectionPaymentRequest;
+import org.egov.ps.model.Owner;
+import org.egov.ps.model.OwnerDetails;
+import org.egov.ps.model.Property;
 import org.egov.ps.model.UserResponse;
 import org.egov.ps.model.UserSearchRequestCore;
 import org.egov.ps.model.calculation.Demand;
@@ -22,15 +31,19 @@ import org.egov.ps.model.calculation.Demand.StatusEnum;
 import org.egov.ps.model.calculation.DemandDetail;
 import org.egov.ps.model.calculation.DemandResponse;
 import org.egov.ps.model.calculation.TaxHeadEstimate;
+import org.egov.ps.producer.Producer;
+import org.egov.ps.repository.ApplicationRepository;
 import org.egov.ps.repository.ServiceRequestRepository;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.util.Util;
+import org.egov.ps.web.contracts.ApplicationRequest;
 import org.egov.ps.web.contracts.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -54,9 +67,15 @@ public class DemandService {
 	@Autowired
 	private Util utils;
 
+	@Autowired
+	ApplicationRepository applicationRepository;
+
+	@Autowired
+	private Producer producer;
+
 	/**
 	 * Creates demand for the given list of calculations
-	 * 
+	 *
 	 * @param requestInfo  The RequestInfo of the calculation request
 	 * @param applications List of calculation object
 	 * @return Demands that are created
@@ -130,7 +149,7 @@ public class DemandService {
 
 	/**
 	 * Updates demand for the given list of calculations
-	 * 
+	 *
 	 * @param requestInfo  The RequestInfo of the calculation request
 	 * @param calculations List of calculation object
 	 * @return Demands that are updated
@@ -165,7 +184,7 @@ public class DemandService {
 
 	/**
 	 * Searches demand for the given consumerCode and tenantIDd
-	 * 
+	 *
 	 * @param tenantId      The tenantId of the tradeLicense
 	 * @param consumerCodes The set of consumerCode of the demands
 	 * @param requestInfo   The RequestInfo of the incoming request
@@ -197,8 +216,8 @@ public class DemandService {
 
 	/**
 	 * Returns the list of new DemandDetail to be added for updating the demand
-	 * 
-	 * @param application         The calculation object for the update tequest
+	 *
+	 * @param application   The calculation object for the update tequest
 	 * @param demandDetails The list of demandDetails from the existing demand
 	 * @return The list of new DemandDetails
 	 */
@@ -241,5 +260,249 @@ public class DemandService {
 		combinedBillDetials.addAll(newDemandDetails);
 		return combinedBillDetials;
 	}
-	
+
+	public List<Application> generateFinanceDemand(ApplicationRequest applicationRequest) {
+
+		/**
+		 * Generate an actual finance demand
+		 */
+		generateFinanceApplicationDemand(applicationRequest.getRequestInfo(), applicationRequest.getApplications());
+
+		for (Application application : applicationRequest.getApplications()) {
+
+			/**
+			 * Get the bill generated.
+			 */
+			List<BillV2> bills = demandRepository.fetchBill(applicationRequest.getRequestInfo(),
+					application.getTenantId(), application.getApplicationNumber(),
+					application.getBillingBusinessService());
+			if (CollectionUtils.isEmpty(bills)) {
+				throw new CustomException("BILL_NOT_GENERATED",
+						"No bills were found for the consumer code " + application.getApplicationNumber());
+			}
+
+			if (applicationRequest.getRequestInfo().getUserInfo().getType()
+					.equalsIgnoreCase(PSConstants.ROLE_EMPLOYEE)) {
+				/**
+				 * create an offline payment.
+				 */
+				createCashPayment(applicationRequest.getRequestInfo(), application.getPaymentAmount(),
+						bills.get(0).getId(), application, application.getBillingBusinessService());
+
+				applicationRequest.setApplications(Collections.singletonList(application));
+				producer.push(config.getUpdateApplicationTopic(), applicationRequest);
+			}
+		}
+		;
+		return null;
+	}
+
+	public List<Demand> generateFinanceApplicationDemand(RequestInfo requestInfo, List<Application> applications) {
+		List<Demand> demands = new LinkedList<>();
+
+		for (Application application : applications) {
+
+			List<Demand> searchResult = searchDemand(application.getTenantId(),
+					Collections.singleton(application.getApplicationNumber()), requestInfo,
+					application.getBillingBusinessService());
+
+			if (!CollectionUtils.isEmpty(searchResult)) {
+				Demand demand = searchResult.get(0);
+				List<DemandDetail> demandDetails = demand.getDemandDetails();
+				List<DemandDetail> updatedDemandDetails = getUpdatedDemandDetails(application, demandDetails);
+				demand.setDemandDetails(updatedDemandDetails);
+				demands.add(demand);
+				demands = demandRepository.updateDemand(requestInfo, demands);
+				log.info("Demand generated");
+				return demands;
+			}
+		}
+		;
+
+		// Generate a new demands.
+		return createDemand(requestInfo, applications);
+	}
+
+	/**
+	 *
+	 * @param requestInfo   RequestInfo object from the original request.
+	 * @param paymentAmount Total amount paid.
+	 * @param billId        The bill that was generated for this payment.
+	 * @param tenantId      The tenantId to look up mdmsService businessService from
+	 *                      bill.
+	 * @return
+	 */
+	public Object createCashPayment(RequestInfo requestInfo, BigDecimal paymentAmount, String billId,
+			Application application, String billingBusinessService) {
+
+		JsonNode applicationDetails = application.getApplicationDetails();
+		String tenantId = application.getTenantId();
+		String ownerName = null;
+		String ownerPhone = null;
+
+		if (applicationDetails.get("transferee") != null) {
+			ownerName = applicationDetails.get("transferee").get("name").asText();
+			ownerPhone = applicationDetails.get("transferee").get("mobileNo").asText();
+
+		} else if (applicationDetails.get("transferor") != null) {
+			ownerName = applicationDetails.get("transferor").get("transferorDetails").get("ownerName").asText();
+			ownerPhone = applicationDetails.get("transferor").get("transferorDetails").get("mobileNumber").asText();
+
+		} else if (applicationDetails.get("owner") != null) {
+			ownerName = applicationDetails.get("owner").get("transferorDetails").get("ownerName").asText();
+			ownerPhone = applicationDetails.get("owner").get("transferorDetails").get("mobileNumber").asText();
+		}
+
+		CollectionPaymentDetail paymentDetail = CollectionPaymentDetail.builder().tenantId(tenantId)
+				.totalAmountPaid(paymentAmount).receiptDate(System.currentTimeMillis())
+				.businessService(billingBusinessService).billId(billId).build();
+
+		CollectionPayment payment = CollectionPayment.builder().paymentMode(CollectionPaymentModeEnum.CASH)
+				.tenantId(tenantId).totalAmountPaid(paymentAmount).payerName(ownerName).paidBy("COUNTER")
+				.mobileNumber(ownerPhone).paymentDetails(Collections.singletonList(paymentDetail)).build();
+
+		CollectionPaymentRequest paymentRequest = CollectionPaymentRequest.builder().requestInfo(requestInfo)
+				.payment(payment).build();
+
+		return demandRepository.savePayment(paymentRequest);
+	}
+
+	public Object createCashPaymentProperty(RequestInfo requestInfo, BigDecimal paymentAmount, String billId,
+			Owner owner, String billingBusinessService) {
+		String tenantId = owner.getTenantId();
+		OwnerDetails ownerDetails = owner.getOwnerDetails();
+		CollectionPaymentDetail paymentDetail = CollectionPaymentDetail.builder().tenantId(tenantId)
+				.totalAmountPaid(paymentAmount).receiptDate(System.currentTimeMillis())
+				.businessService(billingBusinessService).billId(billId).build();
+		CollectionPayment payment = CollectionPayment.builder().paymentMode(CollectionPaymentModeEnum.CASH)
+				.tenantId(tenantId).totalAmountPaid(paymentAmount).payerName(ownerDetails.getOwnerName())
+				.paidBy("COUNTER").mobileNumber(ownerDetails.getMobileNumber())
+				.paymentDetails(Collections.singletonList(paymentDetail)).build();
+
+		CollectionPaymentRequest paymentRequest = CollectionPaymentRequest.builder().requestInfo(requestInfo)
+				.payment(payment).build();
+
+		return demandRepository.savePayment(paymentRequest);
+	}
+
+	public List<Demand> generateFinanceRentDemand(RequestInfo requestInfo, Property property) {
+		List<Demand> demands = new LinkedList<>();
+		String existingConsumerCode = property.getRentPaymentConsumerCode();
+		if (existingConsumerCode != null) {
+			List<Demand> searchResult = searchDemand(property.getTenantId(),
+					Collections.singleton(property.getRentPaymentConsumerCode()), requestInfo,
+					config.getAosBusinessServiceValue());
+
+			if (!CollectionUtils.isEmpty(searchResult)) {
+				Demand demand = searchResult.get(0);
+				List<DemandDetail> demandDetails = demand.getDemandDetails();
+				List<DemandDetail> updatedDemandDetails = getUpdatedDemandDetails(property, demandDetails);
+				demand.setDemandDetails(updatedDemandDetails);
+				demands.add(demand);
+				demands = demandRepository.updateDemand(requestInfo, demands);
+				log.info("Demand generated");
+				return demands;
+			}
+		}
+		// Generate a new consumer code and new demands.
+		property.setRentPaymentConsumerCode(utils.getPropertyRentConsumerCode(property.getFileNumber()));
+		return createRentDemand(requestInfo, property);
+	}
+
+	private List<DemandDetail> getUpdatedDemandDetails(Property property, List<DemandDetail> demandDetails) {
+		List<DemandDetail> newDemandDetails = new ArrayList<>();
+		Map<String, List<DemandDetail>> taxHeadToDemandDetail = new HashMap<>();
+
+		demandDetails.forEach(demandDetail -> {
+			if (!taxHeadToDemandDetail.containsKey(demandDetail.getTaxHeadMasterCode())) {
+				List<DemandDetail> demandDetailList = new LinkedList<>();
+				demandDetailList.add(demandDetail);
+				taxHeadToDemandDetail.put(demandDetail.getTaxHeadMasterCode(), demandDetailList);
+			} else
+				taxHeadToDemandDetail.get(demandDetail.getTaxHeadMasterCode()).add(demandDetail);
+		});
+
+		BigDecimal diffInTaxAmount;
+		List<DemandDetail> demandDetailList;
+		BigDecimal total;
+
+		for (TaxHeadEstimate taxHeadEstimate : property.getCalculation().getTaxHeadEstimates()) {
+			if (!taxHeadToDemandDetail.containsKey(taxHeadEstimate.getTaxHeadCode()))
+				newDemandDetails.add(DemandDetail.builder().taxAmount(taxHeadEstimate.getEstimateAmount())
+						.taxHeadMasterCode(taxHeadEstimate.getTaxHeadCode()).tenantId(property.getTenantId())
+						.collectionAmount(BigDecimal.ZERO).build());
+			else {
+				demandDetailList = taxHeadToDemandDetail.get(taxHeadEstimate.getTaxHeadCode());
+				total = demandDetailList.stream().map(DemandDetail::getTaxAmount).reduce(BigDecimal.ZERO,
+						BigDecimal::add);
+				diffInTaxAmount = taxHeadEstimate.getEstimateAmount().subtract(total);
+				if (diffInTaxAmount.compareTo(BigDecimal.ZERO) != 0) {
+					newDemandDetails.add(DemandDetail.builder().taxAmount(diffInTaxAmount)
+							.taxHeadMasterCode(taxHeadEstimate.getTaxHeadCode()).tenantId(property.getTenantId())
+							.collectionAmount(BigDecimal.ZERO).build());
+				}
+			}
+		}
+		List<DemandDetail> combinedBillDetials = new LinkedList<>(demandDetails);
+		combinedBillDetials.addAll(newDemandDetails);
+		return combinedBillDetials;
+	}
+
+	private List<Demand> createRentDemand(RequestInfo requestInfo, Property property) {
+		User user = null;
+		if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PSConstants.ROLE_EMPLOYEE)) {
+			user = getEgovUser(property, requestInfo);
+		} else {
+			user = requestInfo.getUserInfo();
+		}
+		List<DemandDetail> demandDetails = new LinkedList<>();
+		if (!CollectionUtils.isEmpty(property.getCalculation().getTaxHeadEstimates())) {
+			property.getCalculation().getTaxHeadEstimates().forEach(taxHeadEstimate -> {
+				demandDetails.add(DemandDetail.builder().taxAmount(taxHeadEstimate.getEstimateAmount())
+						.taxHeadMasterCode(taxHeadEstimate.getTaxHeadCode()).collectionAmount(BigDecimal.ZERO)
+						.tenantId(property.getTenantId()).build());
+			});
+		}
+
+		Long taxPeriodFrom = System.currentTimeMillis();
+		Long taxPeriodTo = System.currentTimeMillis();
+
+		List<Demand> demands = Collections.singletonList(Demand.builder().status(StatusEnum.ACTIVE)
+				.consumerCode(property.getRentPaymentConsumerCode()).demandDetails(demandDetails).payer(user)
+				.minimumAmountPayable(config.getMinimumPayableAmount()).tenantId(property.getTenantId())
+				.taxPeriodFrom(taxPeriodFrom).taxPeriodTo(taxPeriodTo).consumerType("rentedproperties")
+				.businessService(property.getPropertyDetails().getBillingBusinessService()).additionalDetails(null)
+				.build());
+		return demandRepository.saveDemand(requestInfo, demands);
+	}
+
+	/**
+	 * Get EGov User details based on current owner.
+	 */
+	private User getEgovUser(Property property, RequestInfo requestInfo) {
+		String url = config.getUserHost().concat(config.getUserSearchEndpoint());
+
+		Owner owner = utils.getCurrentOwnerFromProperty(property);
+		String mobileNumber = owner.getOwnerDetails().getMobileNumber();
+
+		String statelevelTenantId = utils.getStateLevelTenantId(property.getTenantId());
+
+		UserSearchRequestCore userSearchRequest = UserSearchRequestCore.builder().requestInfo(requestInfo)
+				.userName(mobileNumber).tenantId(statelevelTenantId).build();
+
+		List<org.egov.ps.model.User> ownerUser = mapper
+				.convertValue(serviceRequestRepository.fetchResult(url, userSearchRequest), UserResponse.class)
+				.getUser();
+		List<org.egov.ps.model.User> requiredOwner = ownerUser.stream()
+				.filter(o -> o.getUserName().equalsIgnoreCase(mobileNumber)).collect(Collectors.toList());
+
+		log.info("ownerUser:" + requiredOwner);
+
+		User requestUser = requiredOwner.get(0).toCommonUser();
+		log.info("requestUser:" + requestUser);
+
+		return User.builder().id(requestUser.getId()).userName(requestUser.getUserName()).name(requestUser.getName())
+				.type(requestInfo.getUserInfo().getType()).mobileNumber(mobileNumber).emailId(requestUser.getEmailId())
+				.roles(requestUser.getRoles()).tenantId(requestUser.getTenantId()).uuid(requestUser.getUuid()).build();
+	}
 }
