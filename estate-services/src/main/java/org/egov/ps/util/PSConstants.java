@@ -72,6 +72,9 @@ public class PSConstants {
 	public static final String BUSINESS_SERVICE_BB_RENT = "ESTATE_SERVICE_BUILDING_BRANCH.PROPERTY_MASTER";
 	public static final String BUSINESS_SERVICE_MB_RENT = "ESTATE_SERVICE_MANIMAJRA_BRANCH.PROPERTY_MASTER";
 
-	public static final String PROPERTY_VIOLATION = "PROPERTY_VIOLATION";
+	public static final String LOCALIZATION_MSGS_JSONPATH = "$.messages";
+	public static final String LOCALIZATION_MODULE = "rainmaker-es";
+	public static final String LOCALIZATION_LOCALE = "en_IN";
 
+	public static final String PROPERTY_VIOLATION = "PROPERTY_VIOLATION";
 }
