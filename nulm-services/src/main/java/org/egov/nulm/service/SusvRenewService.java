@@ -99,14 +99,17 @@ public class SusvRenewService {
 					susvdoc.add(documnet);
 				}
 				susvRenewapplication.setApplicationDocument(susvdoc);
-				susvRenewapplication.getSusvApplicationFamilyDetails().stream().forEach(element -> {
-					element.setUuid( UUID.randomUUID().toString());
-					element.setApplicationUuid(susvId);
-					element.setIsActive(true);
-					element.setTenantId(susvRenewapplication.getTenantId());
-					element.setAuditDetails(auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_CREATE));
-				
-				});
+				if (susvRenewapplication.getSusvApplicationFamilyDetails() != null)
+				{
+					susvRenewapplication.getSusvApplicationFamilyDetails().stream().forEach(element -> {
+						element.setUuid( UUID.randomUUID().toString());
+						element.setApplicationUuid(susvId);
+						element.setIsActive(true);
+						element.setTenantId(susvRenewapplication.getTenantId());
+						element.setAuditDetails(auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_CREATE));
+					
+					});
+				}
 			if(!susvRenewapplication.getAction().toString().equalsIgnoreCase(SusvApplication.StatusEnum.DRAFTED.toString())) {
 				 //workflow service call to integrate nulm workflow
 				String workflowStatus=workflowIntegration(request.getRequestInfo(), susvRenewapplication);
