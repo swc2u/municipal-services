@@ -30,7 +30,7 @@ public class ReportTest {
 
 		
 		assertNotNull(result);
-		assertEquals("Report(reportType=null, challanId=null, paymentAmount=null, fromDate=null, toDate=null, violationDate=null, paymentStatus=null, sector=null, encroachmentType=null, siName=null, challanStatus=null, violatorName=null, age=null, violationUuid=null, vehicleNumber=null, paymentMode=null, itemsAgeFrom=null, itemsAgeTo=null, itemName=null, itemQuantity=null, itemStoreDepositDate=null, createdBy=null, createdTime=null, lastModifiedBy=null, lastModifiedTime=null, tenantId=null)", result.toString());
+		assertEquals("Report(reportType=null, challanId=null, paymentAmount=null, fromDate=null, toDate=null, violationDate=null, paymentStatus=null, sector=null, encroachmentType=null, siName=null, challanStatus=null, violatorName=null, age=null, violationUuid=null, vehicleNumber=null, paymentMode=null, itemsAgeFrom=null, itemsAgeTo=null, itemName=null, itemQuantity=null, itemStoreDepositDate=null, createdBy=null, createdTime=null, lastModifiedBy=null, lastModifiedTime=null, tenantId=null, transactionId=null)", result.toString());
 		assertEquals(null, result.getLastModifiedTime());
 		assertEquals(null, result.getCreatedTime());
 		assertEquals(null, result.getCreatedBy());
@@ -54,6 +54,7 @@ public class ReportTest {
 		assertEquals(null, result.getItemStoreDepositDate());
 		assertEquals(null, result.getChallanStatus());
 		assertEquals(null, result.getTenantId());
+		assertEquals(null, result.getTransactionId());
 	}
 
 	/**
@@ -98,7 +99,7 @@ public class ReportTest {
 
 		
 		assertNotNull(result);
-		assertEquals("Report(reportType=, challanId=, paymentAmount=null, fromDate=null, toDate=null, violationDate=, paymentStatus=, sector=, encroachmentType=, siName=, challanStatus=, violatorName=, age=null, violationUuid=, vehicleNumber=, paymentMode=, itemsAgeFrom=, itemsAgeTo=, itemName=, itemQuantity=null, itemStoreDepositDate=, createdBy=, createdTime=1, lastModifiedBy=, lastModifiedTime=1, tenantId=)", result.toString());
+		assertEquals("Report(reportType=, challanId=, paymentAmount=null, fromDate=null, toDate=null, violationDate=, paymentStatus=, sector=, encroachmentType=, siName=, challanStatus=, violatorName=, age=null, violationUuid=, vehicleNumber=, paymentMode=, itemsAgeFrom=, itemsAgeTo=, itemName=, itemQuantity=null, itemStoreDepositDate=, createdBy=, createdTime=1, lastModifiedBy=, lastModifiedTime=1, tenantId=, transactionId=)", result.toString());
 		assertEquals(new Long(1L), result.getLastModifiedTime());
 		assertEquals(new Long(1L), result.getCreatedTime());
 		assertEquals("", result.getCreatedBy());
@@ -123,7 +124,8 @@ public class ReportTest {
 		assertEquals("", result.getViolatorName());
 		assertEquals(null, result.getAge());
 		assertEquals("", result.getTenantId());
-		
+		assertEquals("", result.getTransactionId());
+
 	}
 
 	/**
@@ -141,7 +143,7 @@ public class ReportTest {
 
 		
 		assertNotNull(result);
-		assertEquals("Report.ReportBuilder(reportType=null, challanId=null, paymentAmount=null, fromDate=null, toDate=null, violationDate=null, paymentStatus=null, sector=null, encroachmentType=null, siName=null, challanStatus=null, violatorName=null, age=null, violationUuid=null, vehicleNumber=null, paymentMode=null, itemsAgeFrom=null, itemsAgeTo=null, itemName=null, itemQuantity=null, itemStoreDepositDate=null, createdBy=null, createdTime=null, lastModifiedBy=null, lastModifiedTime=null, tenantId=null)", result.toString());
+		assertEquals("Report.ReportBuilder(reportType=null, challanId=null, paymentAmount=null, fromDate=null, toDate=null, violationDate=null, paymentStatus=null, sector=null, encroachmentType=null, siName=null, challanStatus=null, violatorName=null, age=null, violationUuid=null, vehicleNumber=null, paymentMode=null, itemsAgeFrom=null, itemsAgeTo=null, itemName=null, itemQuantity=null, itemStoreDepositDate=null, createdBy=null, createdTime=null, lastModifiedBy=null, lastModifiedTime=null, tenantId=null, transactionId=null)", result.toString());
 	}
 	
 	@Test
