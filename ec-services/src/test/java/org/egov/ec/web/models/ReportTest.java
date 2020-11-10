@@ -92,8 +92,9 @@ public class ReportTest {
 		String violatorName="";
 		Integer age=null;
 		String tenantId="";
+		String transactionId = "";
 		
-		Report result = new Report(reportType, challanId, paymentAmount,fromDate, toDate, ViolationDate, paymentStatus, sector, encroachmentType, siName, challanStatus, violatorName, age, violationUuid, vehicleNumber, paymentMode, itemsAgeFrom, itemsAgeTo, itemName, itemQuantity, itemStoreDepositDate, createdBy, createdTime, lastModifiedBy, lastModifiedTime, tenantId);
+		Report result = new Report(reportType, challanId, paymentAmount,fromDate, toDate, ViolationDate, paymentStatus, sector, encroachmentType, siName, challanStatus, violatorName, age, violationUuid, vehicleNumber, paymentMode, itemsAgeFrom, itemsAgeTo, itemName, itemQuantity, itemStoreDepositDate, createdBy, createdTime, lastModifiedBy, lastModifiedTime, tenantId,transactionId);
 
 		
 		assertNotNull(result);
@@ -220,7 +221,7 @@ public class ReportTest {
 	@Test
 	public void testGetViolationDate_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getViolationDate();
 
@@ -238,7 +239,7 @@ public class ReportTest {
 	@Test
 	public void testGetChallanId_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getChallanId();
 
@@ -256,7 +257,7 @@ public class ReportTest {
 	@Test
 	public void testGetCreatedBy_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getCreatedBy();
 
@@ -274,7 +275,7 @@ public class ReportTest {
 	@Test
 	public void testGetCreatedTime_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		long result = fixture.getCreatedTime();
 
@@ -292,7 +293,7 @@ public class ReportTest {
 	@Test
 	public void testGetEncroachmentType_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getEncroachmentType();
 
@@ -310,7 +311,7 @@ public class ReportTest {
 	@Test
 	public void testGetFromDate_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, null, null, "", "", "", "", "", "", "", null, "", "", "", "", null, "", null, "", null, 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, null, null, "", "", "", "", "", "", "", null, "", "", "", "", null, "", null, "", null, 1L, "", 1L,"", null);
 
 		Date result = fixture.getFromDate();
 		assertEquals(null, result);
@@ -326,7 +327,7 @@ public class ReportTest {
 	@Test
 	public void testGetItemsAgeFrom_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getItemsAgeFrom();
 
@@ -344,7 +345,7 @@ public class ReportTest {
 	@Test
 	public void testGetItemsAgeTo_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getItemsAgeTo();
 
@@ -362,7 +363,7 @@ public class ReportTest {
 	@Test
 	public void testGetLastModifiedBy_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getLastModifiedBy();
 
@@ -380,7 +381,7 @@ public class ReportTest {
 	@Test
 	public void testGetLastModifiedTime_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		long result = fixture.getLastModifiedTime();
 
@@ -398,7 +399,7 @@ public class ReportTest {
 	@Test
 	public void testGetPaymentMode_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getPaymentMode();
 
@@ -416,7 +417,7 @@ public class ReportTest {
 	@Test
 	public void testGetPaymentStatus_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getPaymentStatus();
 
@@ -434,7 +435,7 @@ public class ReportTest {
 	@Test
 	public void testGetReportType_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getReportType();
 
@@ -452,7 +453,7 @@ public class ReportTest {
 	@Test
 	public void testGetSector_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getSector();
 
@@ -470,7 +471,7 @@ public class ReportTest {
 	@Test
 	public void testGetSiName_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getSiName();
 
@@ -488,7 +489,7 @@ public class ReportTest {
 	@Test
 	public void testGetToDate_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, null, null, "", "", "", "", "", "", "", null, "", "", "", "", null, "", null, "", null, 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, null, null, "", "", "", "", "", "", "", null, "", "", "", "", null, "", null, "", null, 1L, "", 1L,"", null);
 
 		Date result = fixture.getToDate();
 		assertEquals(null,result);
@@ -504,7 +505,7 @@ public class ReportTest {
 	@Test
 	public void testGetVehicleNumber_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getVehicleNumber();
 
@@ -522,7 +523,7 @@ public class ReportTest {
 	@Test
 	public void testGetItemName_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getItemName();		
 		assertEquals("", result);
@@ -531,7 +532,7 @@ public class ReportTest {
 	@Test
 	public void testGetItemQuantity_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		Integer result = fixture.getItemQuantity();		
 		assertEquals(null, result);
@@ -539,7 +540,7 @@ public class ReportTest {
 	@Test
 	public void testGetItemStoreDepositDate_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getItemStoreDepositDate();
 		
@@ -548,7 +549,7 @@ public class ReportTest {
 	@Test
 	public void testGetViolationUuid_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getViolationUuid();
 		assertEquals("", result);
@@ -557,7 +558,7 @@ public class ReportTest {
 	@Test
 	public void testGetChallanStatus_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getChallanStatus();
 		assertEquals("", result);
@@ -566,7 +567,7 @@ public class ReportTest {
 	@Test
 	public void testGetViolatorName_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getViolatorName();
 		assertEquals("", result);
@@ -575,7 +576,7 @@ public class ReportTest {
 	@Test
 	public void testGetAge_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		Integer result = fixture.getAge();
 		assertEquals(null, result);
@@ -584,7 +585,7 @@ public class ReportTest {
 	@Test
 	public void testGetTenantId_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 
 		String result = fixture.getTenantId();
 		assertEquals("", result);
@@ -600,7 +601,7 @@ public class ReportTest {
 	@Test
 	public void testSetViolationDate_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String ViolationDate = "";
 
 		fixture.setViolationDate(ViolationDate);
@@ -618,7 +619,7 @@ public class ReportTest {
 	@Test
 	public void testSetChallanId_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String challanId = "";
 
 		fixture.setChallanId(challanId);
@@ -636,7 +637,7 @@ public class ReportTest {
 	@Test
 	public void testSetCreatedBy_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String createdBy = "";
 
 		fixture.setCreatedBy(createdBy);
@@ -654,7 +655,7 @@ public class ReportTest {
 	@Test
 	public void testSetCreatedTime_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		long createdTime = 1L;
 
 		fixture.setCreatedTime(createdTime);
@@ -672,7 +673,7 @@ public class ReportTest {
 	@Test
 	public void testSetEncroachmentType_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String encroachmentType = "";
 
 		fixture.setEncroachmentType(encroachmentType);
@@ -690,7 +691,7 @@ public class ReportTest {
 	@Test
 	public void testSetFromDate_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		Date fromDate = new Date();
 
 		fixture.setFromDate(fromDate);
@@ -708,7 +709,7 @@ public class ReportTest {
 	@Test
 	public void testSetItemsAgeFrom_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String itemsAgeFrom = "";
 
 		fixture.setItemsAgeFrom(itemsAgeFrom);
@@ -726,7 +727,7 @@ public class ReportTest {
 	@Test
 	public void testSetItemsAgeTo_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String itemsAgeTo = "";
 
 		fixture.setItemsAgeTo(itemsAgeTo);
@@ -744,7 +745,7 @@ public class ReportTest {
 	@Test
 	public void testSetLastModifiedBy_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String lastModifiedBy = "";
 
 		fixture.setLastModifiedBy(lastModifiedBy);
@@ -762,7 +763,7 @@ public class ReportTest {
 	@Test
 	public void testSetLastModifiedTime_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		long lastModifiedTime = 1L;
 
 		fixture.setLastModifiedTime(lastModifiedTime);
@@ -780,7 +781,7 @@ public class ReportTest {
 	@Test
 	public void testSetPaymentMode_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String paymentMode = "";
 
 		fixture.setPaymentMode(paymentMode);
@@ -798,7 +799,7 @@ public class ReportTest {
 	@Test
 	public void testSetPaymentStatus_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String paymentStatus = "";
 
 		fixture.setPaymentStatus(paymentStatus);
@@ -816,7 +817,7 @@ public class ReportTest {
 	@Test
 	public void testSetReportType_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String reportType = "";
 
 		fixture.setReportType(reportType);
@@ -834,7 +835,7 @@ public class ReportTest {
 	@Test
 	public void testSetSector_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String sector = "";
 
 		fixture.setSector(sector);
@@ -852,7 +853,7 @@ public class ReportTest {
 	@Test
 	public void testSetSiName_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String siName = "";
 
 		fixture.setSiName(siName);
@@ -870,7 +871,7 @@ public class ReportTest {
 	@Test
 	public void testSetToDate_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		Date toDate = new Date();
 
 		fixture.setToDate(toDate);
@@ -888,7 +889,7 @@ public class ReportTest {
 	@Test
 	public void testSetVehicleNumber_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String vehicleNumber = "";
 
 		fixture.setVehicleNumber(vehicleNumber);
@@ -906,7 +907,7 @@ public class ReportTest {
 	@Test
 	public void testSetViolationUuid_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String violationUuid = "";
 
 		fixture.setViolationUuid(violationUuid);
@@ -917,7 +918,7 @@ public class ReportTest {
 	@Test
 	public void testSetPaymentAmount_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		Integer paymentAmount = null;
 
 		fixture.setPaymentAmount(paymentAmount);
@@ -928,7 +929,7 @@ public class ReportTest {
 	@Test
 	public void testSetItemName_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String itemName = null;
 
 		fixture.setItemName(itemName);
@@ -939,7 +940,7 @@ public class ReportTest {
 	@Test
 	public void testSetItemStoreDepositDate_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String itemStoreDepositDate = null;
 
 		fixture.setItemStoreDepositDate(itemStoreDepositDate);
@@ -950,7 +951,7 @@ public class ReportTest {
 	@Test
 	public void testSetItemQuantity_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		Integer itemQuantity = null;
 
 		fixture.setItemQuantity(itemQuantity);;
@@ -961,7 +962,7 @@ public class ReportTest {
 	@Test
 	public void testSetChallanStatus_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String challanStatus = null;
 
 		fixture.setChallanStatus(challanStatus);;
@@ -972,7 +973,7 @@ public class ReportTest {
 	@Test
 	public void testSetViolatorName_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String violatorName = null;
 
 		fixture.setViolatorName(violatorName);;
@@ -983,7 +984,7 @@ public class ReportTest {
 	@Test
 	public void testSetAge_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		Integer age = null;
 
 		fixture.setAge(age);;
@@ -994,7 +995,7 @@ public class ReportTest {
 	@Test
 	public void testSetTenantId_1()
 		throws Exception {
-		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"");
+		Report fixture = new Report("", "", null, new Date(), new Date(), "", "", "", "", "", "", "", null, "", "", "" ,"", "", "", null, "", "", 1L, "", 1L,"", null);
 		String tenantId = null;
 
 		fixture.setTenantId(tenantId);
