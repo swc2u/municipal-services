@@ -123,11 +123,11 @@ public class SusvRenewService {
 					.responseBody(susvRenewapplication).build(), HttpStatus.CREATED);
 
 		} catch (Exception e) {
-			throw new CustomException(CommonConstants.SUH_APPLICATION_EXCEPTION_CODE, e.getMessage());
+			throw new CustomException(CommonConstants.SUSV_RENEW_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
 
-	public ResponseEntity<ResponseInfoWrapper> updateSusvApplication(NulmSusvRenewRequest request) {
+	public ResponseEntity<ResponseInfoWrapper> updateSusvRenewApplication(NulmSusvRenewRequest request) {
 		try {
 			SusvRenewApplication susvRenewApplication = objectMapper.convertValue(request.getNulmSusvRenewRequest(),
 					SusvRenewApplication.class);
@@ -165,15 +165,14 @@ public class SusvRenewService {
 				String workflowStatus = workflowIntegration(request.getRequestInfo(), susvRenewApplication);
 				susvRenewApplication.setApplicationStatus(SusvRenewApplication.StatusEnum.fromValue(workflowStatus));
 			}
-//			susvRenewApplication.setApplicationStatus(SusvRenewApplication.StatusEnum.fromValue("Created"));
-			repository.updateSusvApplication(susvRenewApplication);
+			repository.updateSusvRenewApplication(susvRenewApplication);
 
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
 					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
 					.responseBody(susvRenewApplication).build(), HttpStatus.OK);
 
 		} catch (Exception e) {
-			throw new CustomException(CommonConstants.SUSV_APPLICATION_EXCEPTION_CODE, e.getMessage());
+			throw new CustomException(CommonConstants.SUSV_RENEW_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
 
@@ -195,11 +194,11 @@ public class SusvRenewService {
 					.responseBody(susvRenewApplication).build(), HttpStatus.OK);
 
 		} catch (Exception e) {
-			throw new CustomException(CommonConstants.SUSV_APPLICATION_EXCEPTION_CODE, e.getMessage());
+			throw new CustomException(CommonConstants.SUSV_RENEW_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
 
-	public ResponseEntity<ResponseInfoWrapper> getSuhRenewApplication(NulmSusvRenewRequest request) {
+	public ResponseEntity<ResponseInfoWrapper> getSusvRenewApplication(NulmSusvRenewRequest request) {
 		try {
 
 			SusvRenewApplication susvRenewapplication = objectMapper.convertValue(request.getNulmSusvRenewRequest(),
@@ -212,7 +211,7 @@ public class SusvRenewService {
 					.responseBody(SuhApplicationresult).build(), HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new CustomException(CommonConstants.SUH_APPLICATION_EXCEPTION_CODE, e.getMessage());
+			throw new CustomException(CommonConstants.SUSV_RENEW_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
 
@@ -254,7 +253,7 @@ public class SusvRenewService {
 			workflowResponse = workFlowRepository.createWorkflowRequest(workflowRequest);
 
 		} catch (Exception e) {
-			throw new CustomException(CommonConstants.SUSV_APPLICATION_EXCEPTION_CODE, e.getMessage());
+			throw new CustomException(CommonConstants.SUSV_RENEW_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 
 		/*
