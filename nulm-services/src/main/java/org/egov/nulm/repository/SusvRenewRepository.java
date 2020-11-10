@@ -55,7 +55,7 @@ public class SusvRenewRepository {
 		producer.push(config.getSusvRenewApplicationSaveTopic(), infoWrapper);
 	}
 
-	public void updateSusvApplication(SusvRenewApplication susvRenewapplication) {
+	public void updateSusvRenewApplication(SusvRenewApplication susvRenewapplication) {
 		NulmSusvRenewRequest infoWrapper = NulmSusvRenewRequest.builder().nulmSusvRenewRequest(susvRenewapplication)
 				.build();
 		producer.push(config.getSusvRenewApplicationUpdateTopic(), infoWrapper);
@@ -88,7 +88,6 @@ public class SusvRenewRepository {
 			return namedParameterJdbcTemplate.query(NULMQueryBuilder.GET_SUSV_RENEW_QUERY, paramValues, susvRenewRowMapper);
 
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new CustomException(CommonConstants.ROLE, e.getMessage());
 		}
 
