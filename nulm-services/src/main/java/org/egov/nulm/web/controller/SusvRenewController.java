@@ -7,7 +7,6 @@ import org.egov.nulm.model.ResponseInfoWrapper;
 import org.egov.nulm.service.SusvRenewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,12 +32,12 @@ public class SusvRenewController {
 	@PostMapping(value = "/_update")
 	public ResponseEntity<ResponseInfoWrapper> updateSuhApplication(
 			@Valid @RequestBody NulmSusvRenewRequest request) {
-		return service.updateSusvApplication(request);
+		return service.updateSusvRenewApplication(request);
 	}
 
 	@PostMapping(value = "/_get")
-	public ResponseEntity<ResponseInfoWrapper> getSuhApplication(@RequestBody NulmSusvRenewRequest request) {
-		return service.getSuhRenewApplication(request);
+	public ResponseEntity<ResponseInfoWrapper> getSusvRenewApplication(@RequestBody NulmSusvRenewRequest request) {
+		return service.getSusvRenewApplication(request);
 	}
 	
     @PostMapping(value = "/_updateAppStatus")

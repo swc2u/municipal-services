@@ -9,6 +9,7 @@ CREATE TABLE public.nulm_susv_renew_application_detail
     residential_address character varying(255) COLLATE pg_catalog."default",
     change_of_location boolean,
     proposed_address character varying(255) COLLATE pg_catalog."default",
+    name_of_proposed_new_street_vendor character varying(255) COLLATE pg_catalog."default",
     tenant_id character varying(256) COLLATE pg_catalog."default",
     is_active boolean,
     created_by character varying(64) COLLATE pg_catalog."default",
