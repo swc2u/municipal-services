@@ -19,7 +19,7 @@ CREATE TABLE public.nulm_susv_renew_application_detail
     CONSTRAINT nulm_susv_renew_application_detail_pkey PRIMARY KEY (application_uuid),
     CONSTRAINT nulm_susv_renew_application_detail_application_id_key UNIQUE (application_id)
 
-)
+);
 
 CREATE TABLE public.nulm_susv_renew_application_document
 (
@@ -38,7 +38,7 @@ CREATE TABLE public.nulm_susv_renew_application_document
         REFERENCES public.nulm_susv_renew_application_detail (application_uuid) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
-)
+);
 
 CREATE TABLE public.nulm_susv_renew_familiy_detail
 (
@@ -58,4 +58,4 @@ CREATE TABLE public.nulm_susv_renew_familiy_detail
         REFERENCES public.nulm_susv_renew_application_detail (application_uuid) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
-)
+);
