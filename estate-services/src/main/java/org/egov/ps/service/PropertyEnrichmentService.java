@@ -19,7 +19,6 @@ import org.egov.ps.model.PropertyPenalty;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.model.calculation.Category;
 import org.egov.ps.model.calculation.TaxHeadEstimate;
-import org.egov.ps.repository.IdGenRepository;
 import org.egov.ps.repository.PropertyRepository;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.util.Util;
@@ -41,9 +40,6 @@ public class PropertyEnrichmentService {
 
 	@Autowired
 	Util util;
-
-	@Autowired
-	IdGenRepository idGenRepository;
 
 	@Autowired
 	private PropertyRepository propertyRepository;

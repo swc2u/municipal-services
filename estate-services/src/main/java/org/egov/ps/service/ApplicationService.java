@@ -59,7 +59,7 @@ public class ApplicationService {
 
 	public List<Application> createApplication(ApplicationRequest request) {
 		validator.validateCreateRequest(request);
-		applicationEnrichmentService.enrichCreateApplication(request);
+		applicationEnrichmentService.enrichCreateApplicationRequest(request);
 		producer.push(config.getSaveApplicationTopic(), request);
 		return request.getApplications();
 	}
