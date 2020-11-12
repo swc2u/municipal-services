@@ -139,6 +139,10 @@ public class Util {
 		return String.format("SITE-%s-%s", fileNumber.trim().toUpperCase(), dateFormat.format(new Date()));
 	}
 
+	public String getPropertyPenaltyConsumerCode(String fileNumber) {
+		return String.format("ES-PN-%s-%s", fileNumber.toUpperCase(), dateFormat.format(new Date()));
+	}
+
 	SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-DD-HH-MM-SS");
 
 	public String getStateLevelTenantId(String tenantId) {
@@ -149,6 +153,14 @@ public class Util {
 		return components[0];
 	}
 
+	/**
+	 * Convert camel case string to snake case string and capitalise string.
+	 */
+	public static String camelToSnake(String str) {
+		String regex = "([a-z])([A-Z]+)";
+		String replacement = "$1_$2";
+		str = str.replaceAll(regex, replacement).toUpperCase();
+		return str;
 	public List<Event> createEvent(String message, String mobileNumber, String uuid, RequestInfo requestInfo, String tenantId,
 			String applicationStatus, String applicationNumber, boolean isPayLink) {
 		List<Event> events = new ArrayList<>();
