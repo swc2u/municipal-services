@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ApplicationEnrichmentService {
 
 	@Autowired
-	Util util;
+	private Util util;
 
 	@Autowired
 	private MDMSService mdmsService;
@@ -121,36 +121,7 @@ public class ApplicationEnrichmentService {
 
 	private void enrichPropertyDetails(Application application) {
 		Property property = propertyRepository.findPropertyById(application.getProperty().getId());
-		Property propertyToEnrich = application.getProperty();
-
-		propertyToEnrich.setFileNumber(property.getFileNumber());
-		propertyToEnrich.setTenantId(property.getTenantId());
-		propertyToEnrich.setCategory(property.getCategory());
-		propertyToEnrich.setSubCategory(property.getSubCategory());
-		propertyToEnrich.setSiteNumber(property.getSiteNumber());
-		propertyToEnrich.setSectorNumber(property.getSectorNumber());
-
-		PropertyDetails propertyDetails = new PropertyDetails();
-		propertyDetails.setBranchType(property.getPropertyDetails().getBranchType());
-		propertyDetails.setPropertyType(property.getPropertyDetails().getPropertyType());
-		propertyDetails.setTypeOfAllocation(property.getPropertyDetails().getTypeOfAllocation());
-		propertyDetails.setEmdAmount(property.getPropertyDetails().getEmdAmount());
-		propertyDetails.setEmdDate(property.getPropertyDetails().getEmdDate());
-		propertyDetails.setModeOfAuction(property.getPropertyDetails().getModeOfAuction());
-		propertyDetails.setSchemeName(property.getPropertyDetails().getSchemeName());
-		propertyDetails.setDateOfAuction(property.getPropertyDetails().getDateOfAuction());
-		propertyDetails.setAreaSqft(property.getPropertyDetails().getAreaSqft());
-		propertyDetails.setRatePerSqft(property.getPropertyDetails().getRatePerSqft());
-		propertyDetails.setLastNocDate(property.getPropertyDetails().getLastNocDate());
-		propertyDetails.setServiceCategory(property.getPropertyDetails().getServiceCategory());
-		propertyDetails.setIsPropertyActive(property.getPropertyDetails().getIsPropertyActive());
-		propertyDetails.setTradeType(property.getPropertyDetails().getTradeType());
-		propertyDetails.setCompanyName(property.getPropertyDetails().getCompanyName());
-		propertyDetails.setCompanyAddress(property.getPropertyDetails().getCompanyAddress());
-		propertyDetails.setCompanyRegistrationNumber(property.getPropertyDetails().getCompanyRegistrationNumber());
-		propertyDetails.setCompanyType(property.getPropertyDetails().getCompanyType());
-
-		propertyToEnrich.setPropertyDetails(propertyDetails);
+		application.setProperty(property);
 	}
 
 	public void enrichUpdateApplication(ApplicationRequest request) {
