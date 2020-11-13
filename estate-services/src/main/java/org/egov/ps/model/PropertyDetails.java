@@ -185,13 +185,13 @@ public class PropertyDetails {
 
 	@JsonProperty("paymentDetails")
 	@Builder.Default
-	private List<Payment> paymentDetails = new ArrayList<Payment>();
+	private List<PaymentConfig> paymentDetails = new ArrayList<PaymentConfig>();
 
-	public PropertyDetails addPaymentItem(Payment paymentItem) {
+	public PropertyDetails addPaymentItem(PaymentConfig paymentItem) {
 		if (this.paymentDetails == null) {
 			this.paymentDetails = new ArrayList<>();
 		}
-		for (Payment paymentDetail : paymentDetails) {
+		for (PaymentConfig paymentDetail : paymentDetails) {
 			if (paymentDetail.getId().equalsIgnoreCase(paymentItem.getId())) {
 				return this;
 			}

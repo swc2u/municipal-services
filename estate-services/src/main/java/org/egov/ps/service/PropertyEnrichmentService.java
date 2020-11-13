@@ -12,7 +12,7 @@ import org.egov.ps.model.AuctionBidder;
 import org.egov.ps.model.Document;
 import org.egov.ps.model.Owner;
 import org.egov.ps.model.OwnerDetails;
-import org.egov.ps.model.Payment;
+import org.egov.ps.model.PaymentConfig;
 import org.egov.ps.model.Property;
 import org.egov.ps.model.PropertyDetails;
 import org.egov.ps.model.PropertyPenalty;
@@ -177,7 +177,7 @@ public class PropertyEnrichmentService {
 		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getOwners())) {
 			property.getPropertyDetails().getOwners().forEach(owner -> {
 
-				List<Payment> payments = property.getPropertyDetails().getPaymentDetails();
+				List<PaymentConfig> payments = property.getPropertyDetails().getPaymentDetails();
 				if (!CollectionUtils.isEmpty(payments)) {
 
 					payments.forEach(payment -> {
