@@ -60,6 +60,12 @@ public class Configuration {
 	@Value("${persister.update.application.topic}")
 	private String updateApplicationTopic;
 
+	@Value("${persister.save.penalty.topic}")
+	private String savePenaltyTopic;
+	
+	@Value("${persister.update.penalty.topic}")
+	private String updatePenaltyTopic;
+	
 	// Workflow
 
 	@Value("${is.workflow.enabled}")
@@ -68,8 +74,14 @@ public class Configuration {
 	@Value("${create.es.eb.aos.workflow.name}")
 	private String aosBusinessServiceValue;
 
+	@Value("${create.es.eb.roe.workflow.name}")
+	private String ebRoeBusinessServiceValue;
+
 	@Value("${create.es.bb.pm.workflow.name}")
 	private String bbPmBusinessServiceValue;
+
+	@Value("${create.es.mm.pm.workflow.name}")
+	private String mmPmBusinessServiceValue;
 
 	@Value("${workflow.context.path}")
 	private String wfHost;
@@ -105,6 +117,9 @@ public class Configuration {
 
 	@Value("${egov.idgen.ps.applicationNum.name}")
 	private String applicationNumberIdgenNamePS;
+	
+	@Value("${egov.idgen.ps.penaltyNum.name}")
+	private String penaltyNumberIdgenNamePS;
 
 	// MDMS Configuration
 
@@ -152,4 +167,26 @@ public class Configuration {
 	
 	@Value("${egov.bill.gen.endpoint}")
 	private String billGenerateEndpoint;
+
+	/**
+	 * Localization Service
+	 */
+	@Value("${egov.localization.host}")
+	private String localizationHost;
+
+	@Value("${egov.localization.endpoint.search.path}")
+	private String localizationEndpoint;
+	
+	//Web notiifcation
+	@Value("${egov.usr.events.create.topic}")
+	private String saveUserEventsTopic;
+
+	@Value("${egov.usr.events.app.pay.link}")
+	private String payLinkForApplication;
+	
+	@Value("${egov.usr.events.pay.code}")
+	private String payCode;
+	
+	@Value("${egov.ui.app.host}")
+	private String uiAppHost;
 }

@@ -2,6 +2,7 @@ package org.egov.ps.service;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -11,14 +12,13 @@ import org.egov.ps.model.AuctionBidder;
 import org.egov.ps.model.Document;
 import org.egov.ps.model.Owner;
 import org.egov.ps.model.OwnerDetails;
-import org.egov.ps.model.Payment;
+import org.egov.ps.model.PaymentConfig;
 import org.egov.ps.model.Property;
 import org.egov.ps.model.PropertyDetails;
-import org.egov.ps.model.RentSummary;
+import org.egov.ps.model.PropertyPenalty;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.model.calculation.Category;
 import org.egov.ps.model.calculation.TaxHeadEstimate;
-import org.egov.ps.repository.IdGenRepository;
 import org.egov.ps.repository.PropertyRepository;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.util.Util;
@@ -28,6 +28,8 @@ import org.egov.ps.web.contracts.EstateAccount;
 import org.egov.ps.web.contracts.EstateDemand;
 import org.egov.ps.web.contracts.EstatePayment;
 import org.egov.ps.web.contracts.EstateRentSummary;
+import org.egov.ps.web.contracts.PaymentStatusEnum;
+import org.egov.ps.web.contracts.PropertyPenaltyRequest;
 import org.egov.ps.web.contracts.PropertyRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,9 +40,6 @@ public class PropertyEnrichmentService {
 
 	@Autowired
 	Util util;
-
-	@Autowired
-	IdGenRepository idGenRepository;
 
 	@Autowired
 	private PropertyRepository propertyRepository;
@@ -57,7 +56,7 @@ public class PropertyEnrichmentService {
 				if (property.getId() == null) {
 					property.setId(UUID.randomUUID().toString());
 					property.setState(PSConstants.PM_DRAFTED);
-					property.setFileNumber(property.getFileNumber().toUpperCase());
+					property.setFileNumber(property.getFileNumber().trim().toUpperCase());
 				}
 
 				property.setAuditDetails(propertyAuditDetails);
@@ -84,7 +83,7 @@ public class PropertyEnrichmentService {
 
 		enrichOwners(property, requestInfo);
 		enrichCourtCases(property, requestInfo);
-		enrichPaymentDetails(property, requestInfo);
+		enrichPaymentConfig(property, requestInfo);
 		enrichBidders(property, requestInfo);
 		enrichEstateDemand(property, requestInfo);
 		enrichEstatePayment(property, requestInfo);
@@ -173,29 +172,32 @@ public class PropertyEnrichmentService {
 		}
 	}
 
-	private void enrichPaymentDetails(Property property, RequestInfo requestInfo) {
+	private void enrichPaymentConfig(Property property, RequestInfo requestInfo) {
 
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getOwners())) {
-			property.getPropertyDetails().getOwners().forEach(owner -> {
+		PaymentConfig paymentConfig = property.getPropertyDetails().getPaymentConfig();
+		if (paymentConfig != null) {
+			AuditDetails paymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
+					paymentConfig.getId() == null);
+			if (paymentConfig.getId() == null || paymentConfig.getId().isEmpty()) {
+				paymentConfig.setId(UUID.randomUUID().toString());
+				paymentConfig.setTenantId(property.getTenantId());
+				paymentConfig.setPropertyDetailsId(property.getPropertyDetails().getId());
+			}
+			paymentConfig.setAuditDetails(paymentAuditDetails);
 
-				List<Payment> payments = property.getPropertyDetails().getPaymentDetails();
-				if (!CollectionUtils.isEmpty(payments)) {
+			paymentConfig.getPaymentConfigItems().forEach(paymentConfigItem -> {
+				if (paymentConfigItem.getId() == null || paymentConfigItem.getId().isEmpty()) {
+					paymentConfigItem.setId(UUID.randomUUID().toString());
+					paymentConfigItem.setTenantId(property.getTenantId());
+					paymentConfigItem.setPaymentConfigId(paymentConfig.getId());
+				}
+			});
 
-					payments.forEach(payment -> {
-						if (payment.getId() == null || payment.getId().isEmpty()) {
-							AuditDetails paymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
-									true);
-							String gen_payment_detail_id = UUID.randomUUID().toString();
-							payment.setId(gen_payment_detail_id);
-							payment.setTenantId(property.getTenantId());
-							payment.setOwnerDetailsId(owner.getOwnerDetails().getId());
-							payment.setAuditDetails(paymentAuditDetails);
-						} else {
-							AuditDetails paymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
-									true);
-							payment.setAuditDetails(paymentAuditDetails);
-						}
-					});
+			paymentConfig.getPremiumAmountConfigItems().forEach(premiumAmountConfigItem -> {
+				if (premiumAmountConfigItem.getId() == null || premiumAmountConfigItem.getId().isEmpty()) {
+					premiumAmountConfigItem.setId(UUID.randomUUID().toString());
+					premiumAmountConfigItem.setTenantId(property.getTenantId());
+					premiumAmountConfigItem.setPaymentConfigId(paymentConfig.getId());
 				}
 			});
 		}
@@ -431,4 +433,43 @@ public class PropertyEnrichmentService {
 			});
 		}
 	}
+
+	public void enrichPenaltyRequest(PropertyPenaltyRequest propertyPenaltyRequest) {
+		propertyPenaltyRequest.getPropertyPenalties().forEach(propertyPenalty -> {
+			enrichPenalty(propertyPenaltyRequest.getRequestInfo(), propertyPenalty);
+		});
+	}
+
+	private void enrichPenalty(RequestInfo requestInfo, PropertyPenalty penalty) {
+		Property property = propertyRepository.findPropertyById(penalty.getProperty().getId());
+		AuditDetails penaltyAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
+				penalty.getId() == null);
+		if (null == penalty.getId()) {
+			penalty.setId(UUID.randomUUID().toString());
+			penalty.setGenerationDate(new Date().getTime());
+			penalty.setStatus(PaymentStatusEnum.UNPAID);
+			penalty.setIsPaid(false);
+			penalty.setRemainingPenaltyDue(penalty.getPenaltyAmount());
+		}
+		penalty.setTenantId(property.getTenantId());
+		penalty.setBranchType(property.getPropertyDetails().getBranchType());
+		penalty.setAuditDetails(penaltyAuditDetails);
+	}
+
+	public Calculation enrichGenerateDemand(RequestInfo requestInfo, double paymentAmount, String consumerCode,
+			Property property) {
+
+		List<TaxHeadEstimate> estimates = new LinkedList<>();
+
+		TaxHeadEstimate estimateDue = new TaxHeadEstimate();
+		estimateDue.setEstimateAmount(new BigDecimal(paymentAmount));
+		estimateDue.setCategory(Category.PENALTY);
+		estimateDue.setTaxHeadCode(getTaxHeadCode(property.getPenaltyBusinessService(), Category.PENALTY));
+		estimates.add(estimateDue);
+
+		Calculation calculation = Calculation.builder().applicationNumber(consumerCode).taxHeadEstimates(estimates)
+				.tenantId(property.getTenantId()).build();
+		return calculation;
+	}
+
 }

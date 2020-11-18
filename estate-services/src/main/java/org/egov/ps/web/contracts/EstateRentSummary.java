@@ -54,16 +54,16 @@ public class EstateRentSummary {
 	private double collectedGST = 0D;
 	
 	@Builder.Default
-	private double rentPanelty = 0D;
+	private double rentPenalty = 0D;
 	
 	@Builder.Default
-	private double collectedRentPanelty = 0D;
+	private double collectedRentPenalty = 0D;
 	
 	@Builder.Default
-	private double GSTPanelty = 0D;
+	private double GSTPenalty = 0D;
 	
 	@Builder.Default
-	private double collectedGSTPanelty = 0D;
+	private double collectedGSTPenalty = 0D;
 
 	public double getBalanceInterest() {
 		if (this.balanceAmount > 0) {
@@ -82,6 +82,9 @@ public class EstateRentSummary {
 		//return Math.max(0, this.balanceAmount - this.balanceInterest);
 	}
 
+	  @Builder.Default
+	  private Boolean isPrevious=false;
+	
 	public String toString() {
 		return String.format("Principal : %.2f, Interest: %.2f, Amount: %.2f", this.getBalanceRent(),
 				this.getBalanceInterest(), this.getBalanceAmount());

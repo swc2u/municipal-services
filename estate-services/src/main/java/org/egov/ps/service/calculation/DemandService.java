@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
@@ -26,6 +29,7 @@ import org.egov.ps.model.OwnerDetails;
 import org.egov.ps.model.Property;
 import org.egov.ps.model.UserResponse;
 import org.egov.ps.model.UserSearchRequestCore;
+import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.model.calculation.Demand;
 import org.egov.ps.model.calculation.Demand.StatusEnum;
 import org.egov.ps.model.calculation.DemandDetail;
@@ -42,9 +46,6 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -505,4 +506,50 @@ public class DemandService {
 				.type(requestInfo.getUserInfo().getType()).mobileNumber(mobileNumber).emailId(requestUser.getEmailId())
 				.roles(requestUser.getRoles()).tenantId(requestUser.getTenantId()).uuid(requestUser.getUuid()).build();
 	}
+
+	public List<Demand> createPenaltyDemand(RequestInfo requestInfo, Property property, String consumerCode,
+			Calculation calculation) {
+		Owner owner = utils.getCurrentOwnerFromProperty(property);
+
+		String url = config.getUserHost().concat(config.getUserSearchEndpoint());
+
+		UserSearchRequestCore userSearchRequest = UserSearchRequestCore.builder().requestInfo(requestInfo)
+				.userName(owner.getOwnerDetails().getMobileNumber()).tenantId("ch").build();
+
+		List<org.egov.ps.model.User> applicationUser = mapper
+				.convertValue(serviceRequestRepository.fetchResult(url, userSearchRequest), UserResponse.class)
+				.getUser();
+
+		log.debug("applicationUser:" + applicationUser);
+
+		User requestUser = applicationUser.get(0).toCommonUser();
+		log.debug("requestUser:" + requestUser);
+
+		if (requestUser.getMobileNumber() == null) {
+			requestUser.setMobileNumber(requestUser.getUserName());
+		}
+		User user = User.builder().id(requestUser.getId()).userName(requestUser.getUserName())
+				.name(requestUser.getName()).type(requestInfo.getUserInfo().getType())
+				.mobileNumber(requestUser.getMobileNumber()).emailId(requestUser.getEmailId())
+				.roles(requestUser.getRoles()).tenantId(requestUser.getTenantId()).uuid(requestUser.getUuid()).build();
+
+		String tenantId = property.getTenantId();
+		List<DemandDetail> demandDetails = calculation.getTaxHeadEstimates().stream()
+				.map(taxHeadEstimate -> DemandDetail.builder().taxAmount(taxHeadEstimate.getEstimateAmount())
+						.taxHeadMasterCode(taxHeadEstimate.getTaxHeadCode()).collectionAmount(BigDecimal.ZERO)
+						.tenantId(tenantId).build())
+				.collect(Collectors.toList());
+
+		Long taxPeriodFrom = System.currentTimeMillis();
+		Long taxPeriodTo = System.currentTimeMillis();
+
+		Demand singleDemand = Demand.builder().status(StatusEnum.ACTIVE).consumerCode(consumerCode)
+				.demandDetails(demandDetails).payer(user).minimumAmountPayable(config.getMinimumPayableAmount())
+				.tenantId(tenantId).taxPeriodFrom(taxPeriodFrom).taxPeriodTo(taxPeriodTo)
+				.consumerType(PSConstants.ESTATE_SERVICE).businessService(property.getPenaltyBusinessService())
+				.additionalDetails(null).build();
+
+		return demandRepository.saveDemand(requestInfo, Collections.singletonList(singleDemand));
+	}
+
 }
