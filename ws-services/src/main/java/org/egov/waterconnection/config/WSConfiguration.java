@@ -190,7 +190,13 @@ public class WSConfiguration {
 
 	@Value("${create.ws.tubewell.workflow.name}")
 	private String businessServiceTubewellValue;
-
+	
 	@Value("${egov.waterservice.savewaterbilling}")
 	private String saveWaterBilling;
+	
+	@Value("${egov.waterservice.addconnectionmapping}")
+	private String addConnectionMapping;
+	
+	@Value("${egov.waterservice.deleteconnectionmapping}")
+	private String deleteConnectionMapping;
 }

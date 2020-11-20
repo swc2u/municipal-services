@@ -303,7 +303,8 @@ public class PropertyUtil extends CommonUtils {
 				propertyRequest.getProperty().setAddress(address);
 
 				owner.setName(propertydetails.get(PTConstants.DepositerName).asText());
-				owner.setMobileNumber(propertydetails.get(PTConstants.MOBILE).asText());
+				//owner.setMobileNumber(propertydetails.get(PTConstants.MOBILE).asText());
+				owner.setMobileNumber(propertyRequest.getRequestInfo().getUserInfo().getMobileNumber());
 				owner.setFatherOrHusbandName(propertydetails.get(PTConstants.FATHERNAME).asText());
 				owner.setStatus(Status.ACTIVE);
 				owner.setCorrespondenceAddress(

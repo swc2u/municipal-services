@@ -1,4 +1,4 @@
-
+DROP TABLE IF EXISTS eg_ws_savebilling;
 CREATE TABLE eg_ws_savebilling
 (
   id character varying(64) not null,
