@@ -26,7 +26,6 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 
 	private List<EstateRentCollection> settlePayment(List<EstateDemand> demandsToBeSettled, final EstatePayment payment,
 			final EstateAccount account, double interestRate, boolean isFixGST) {
-
 		/**
 		 * Each payment will only operate on the demands generated before it is paid.
 		 */
@@ -38,7 +37,6 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 		 * Effective amount to be settled = paidAmount + accountBalance
 		 */
 		double effectiveAmount = payment.getRentReceived() + account.getRemainingAmount();
-
 		calculateInterest(demands, payment.getPaymentDate(), interestRate, isFixGST);
 
 		/**
@@ -126,12 +124,10 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 
 			}
 			RentInterest += demand.getRemainingRentPenalty();
-
 			demand.setPenaltyInterest(RentInterest);
 			demand.setGstInterest(GSTinterest);
 			demand.setRemainingRentPenalty(RentInterest);
 			demand.setRemainingGSTPenalty(GSTinterest);
-
 		}
 	}
 
@@ -145,7 +141,6 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 		double gstPenaltyToBePaid = 0;
 		double GSTinterest = 0;
 		double RentInterest = 0;
-
 		for (EstateDemand demand : filteredDemands) {
 			if (paymentAmount <= 0) {
 				break;
@@ -265,17 +260,14 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 			if (demand.getRemainingRent() + demand.getRemainingGST() <= paymentAmount) {
 				rentTobePaid = demand.getRemainingRent();
 				gstToBePaid = demand.getRemainingGST();
-
 			} else {
 				/**
 				 * If no sufficient amount calculate the amount paid for Rent and GST
 				 */
-
 				rentTobePaid = paymentAmount * 100 / (100 + interestRate);
 				gstToBePaid = paymentAmount - rentTobePaid;
 				if (gstToBePaid > demand.getRemainingGST())
 					rentTobePaid += (gstToBePaid - demand.getRemainingGST());
-
 			}
 			demand.setCollectedRent(rentTobePaid);
 			demand.setCollectedGST(gstToBePaid);
@@ -308,7 +300,6 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 			final EstateAccount account, double interestRate, boolean isFixGST) {
 		if (null == payments)
 			payments = Collections.emptyList();
-
 		Collections.sort(demandsToBeSettled);
 		Collections.sort(payments);
 		/**
@@ -666,6 +657,7 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 	private EstateDemand cloneDemand(EstateDemand rentDemand) {
 
 		return EstateDemand.builder().collectedRent(rentDemand.getCollectedRent())
+
 				// .status(PaymentStatusEnum.UNPAID)
 				.status(rentDemand.getStatus()).generationDate(rentDemand.getGenerationDate())
 				.initialGracePeriod(rentDemand.getInitialGracePeriod()).remainingRent(rentDemand.getRemainingRent())
@@ -677,7 +669,6 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 				.gst(rentDemand.getGst()).gstInterest(rentDemand.getGstInterest())
 				.penaltyInterest(rentDemand.getPenaltyInterest()).interestSince(rentDemand.getInterestSince())
 				.isPrevious(rentDemand.getIsPrevious()).id(rentDemand.getId())
-
 				.build();
 	}
 }

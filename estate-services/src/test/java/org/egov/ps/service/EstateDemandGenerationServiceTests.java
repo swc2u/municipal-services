@@ -41,7 +41,6 @@ public class EstateDemandGenerationServiceTests {
 
 	@InjectMocks
 	private EstateDemandGenerationService estateDemandGenerationService;
-
 	@Mock
 	private PropertyRepository propertyRepository;
 	@Mock
@@ -55,6 +54,7 @@ public class EstateDemandGenerationServiceTests {
 	List<EstateDemand> estateDemandDummyList = new ArrayList<>();
 	List<EstatePayment> estatePaymentDummyList = new ArrayList<>();
 	EstateAccount estateDummyAccount = EstateAccount.builder().build();
+
 
 	/* In Setup Functions */
 	@Before
@@ -120,7 +120,6 @@ public class EstateDemandGenerationServiceTests {
 		paymentConfigItems.setGroundRentAmount(new BigDecimal(1000));
 		paymentConfigItems.setId(UUID.randomUUID().toString());
 		paymentConfigItems.setPaymentConfigId(UUID.randomUUID().toString());
-
 		PaymentConfigItems paymentConfigItems2 = new PaymentConfigItems();
 		paymentConfigItems2.setGroundRentStartMonth(Long.parseLong("21"));
 		paymentConfigItems2.setGroundRentEndMonth(Long.parseLong("40"));

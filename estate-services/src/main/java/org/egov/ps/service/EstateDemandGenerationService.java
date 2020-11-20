@@ -32,7 +32,6 @@ import org.joda.time.DateTimeComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -68,17 +67,14 @@ public class EstateDemandGenerationService {
 		propertyList.forEach(property -> {
 			try {
 				propertyCriteria.setPropertyId(property.getId());
-
 				List<String> propertyDetailsId = Arrays.asList(property.getPropertyDetails().getId());
 				List<EstateDemand> estateDemandList = propertyRepository
 						.getPropertyDetailsEstateDemandDetails(propertyDetailsId);
 				property.getPropertyDetails().setEstateDemands(estateDemandList);
-
 				if (!CollectionUtils.isEmpty(estateDemandList)) {
 					List<EstatePayment> estatePaymentList = propertyRepository
 							.getPropertyDetailsEstatePaymentDetails(propertyDetailsId);
 					property.getPropertyDetails().setEstatePayments(estatePaymentList);
-
 					EstateAccount estateAccount = propertyRepository
 							.getAccountDetailsForPropertyDetailsIds(propertyDetailsId);
 					property.getPropertyDetails().setEstateAccount(estateAccount);
@@ -156,7 +152,6 @@ public class EstateDemandGenerationService {
 		}
 		PropertyRequest propertyRequest = new PropertyRequest();
 		propertyRequest.setProperties(Collections.singletonList(property));
-
 		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstateRentCollections())) {
 			property.getPropertyDetails().getEstateRentCollections().forEach(collection -> {
 				if (collection.getId() == null) {
@@ -166,7 +161,6 @@ public class EstateDemandGenerationService {
 
 			});
 		}
-
 		producer.push(config.getUpdatePropertyTopic(), propertyRequest);
 	}
 
