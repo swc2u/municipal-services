@@ -66,11 +66,15 @@ public class Configuration {
 	@Value("${persister.update.penalty.topic}")
 	private String updatePenaltyTopic;
 	
+	@Value("${persister.save.dueamount.topic}")
+	private String dueAmountTopic;
+	
 	@Value("${persister.save.extensionfee.topic}")
 	private String saveExtensionFeeTopic;
 
 	@Value("${persister.update.extensionfee.topic}")
 	private String updateExtensionFeeTopic;
+
 	
 	// Workflow
 

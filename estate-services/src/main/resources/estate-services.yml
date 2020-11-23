@@ -1027,6 +1027,58 @@ serviceMaps:
 
             - jsonPath: $.PropertyPenalties.*.id
             
+    - version: 1.0
+      description: Rent Due amount details
+      fromTopic: es-save-due-details
+      isTransaction: true
+      queryMaps:
+        - query: INSERT INTO cs_ep_dueamount (property_id,file_number, tenantid,branch_type, property_type,sectorNumber, owner_name, mobile_number, balance_rent,balance_rent_penalty,balance_gst,balance_gst_penalty, balance_interest, balance_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (property_id) DO UPDATE SET owner_name=?, mobile_number=?, balance_rent=?,balance_rent_penalty=?,balance_gst=?,balance_gst_penalty=?, balance_interest=?, balance_amount=?;
+          basePath: PropertyDueAmounts.*
+          jsonMaps:
+
+            - jsonPath: $.PropertyDueAmounts.*.propertyId
+      
+            - jsonPath: $.PropertyDueAmounts.*.fileNumber
+      
+            - jsonPath: $.PropertyDueAmounts.*.tenantId
+            
+            - jsonPath: $.PropertyDueAmounts.*.branchType 
+
+            - jsonPath: $.PropertyDueAmounts.*.propertyType
+      
+            - jsonPath: $.PropertyDueAmounts.*.sectorNumber
+      
+            - jsonPath: $.PropertyDueAmounts.*.ownerName
+
+            - jsonPath: $.PropertyDueAmounts.*.mobileNumber
+      
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceRent
+      
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceRentPenalty
+      
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceGST
+      
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceGSTPenalty
+      
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceInterest
+
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceAmount
+      
+            - jsonPath: $.PropertyDueAmounts.*.ownerName
+
+            - jsonPath: $.PropertyDueAmounts.*.mobileNumber
+      
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceRent
+      
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceRentPenalty
+      
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceGST
+      
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceGSTPenalty
+      
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceInterest
+
+            - jsonPath: $.PropertyDueAmounts.*.estateRentSummary.balanceAmount
             
     - version: 1.0
       description: Persists Extension Fee details in cs_ep_extension_fee_v1 table
@@ -1081,4 +1133,4 @@ serviceMaps:
             - jsonPath: $.ExtensionFees.*.auditDetails.lastModifiedTime
 
             - jsonPath: $.ExtensionFees.*.id
-                        
+
