@@ -90,12 +90,14 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 		
 		double rentPenaltyToBePaid=0;
 		double gstPenaltyToBePaid=0;
+		double GSTinterest=0;
 		
 		for (EstateDemand demand : filteredDemands) {
 			if (paymentAmount <= 0) {
 				break;
 			}
-				
+			GSTinterest=0;	
+			if(! demand.getIsPrevious() ) {
 			LocalDate demandGenerationDate = getLocalDate(demand.getGenerationDate());
 			LocalDate paymentDate = getLocalDate(paymentTimestamp);
 
@@ -111,9 +113,11 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 			if (noOfDaysForInterestCalculation == 0) {
 				continue;
 			}
-			double GSTinterest = demand.getGst()*(interestRate/100)* noOfDaysForInterestCalculation/365;
+			GSTinterest = demand.getGst()*(interestRate/100)* noOfDaysForInterestCalculation/365;
 					
-					
+			}
+			else
+				GSTinterest=demand.getGstInterest();
 
 		if (demand.getPenaltyInterest() + GSTinterest <= paymentAmount) {
 			
@@ -354,13 +358,14 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 		//	statement.setReceiptNo(currentPayment!=null?currentPayment.getReceiptNo():"");
 			statement.setRent(rentSummary.getRent());
 			statement.setCollectedRent(rentSummary.getCollectedRent());
-			statement.setRentPanelty(rentSummary.getRentPanelty());
+			statement.setRentPenalty(rentSummary.getRentPenalty());
 			statement.setGst(rentSummary.getGst());
 			statement.setCollectedGST(rentSummary.getCollectedGST());
-			statement.setRentPanelty(rentSummary.getRentPanelty());
-			statement.setCollectedRentPanelty(rentSummary.getCollectedRentPanelty());
-			statement.setGSTPanelty(rentSummary.getGSTPanelty());
-			statement.setCollectedGSTPanelty(rentSummary.getCollectedGSTPanelty());
+			statement.setRentPenalty(rentSummary.getRentPenalty());
+			statement.setCollectedRentPenalty(rentSummary.getCollectedRentPenalty());
+			statement.setGSTPenalty(rentSummary.getGSTPenalty());
+			statement.setCollectedGSTPenalty(rentSummary.getCollectedGSTPenalty());
+			statement.setIsPrevious(rentSummary.getIsPrevious());
 			accountStatementItems.add(statement);
 			if (reachedLast) {
 				break;
@@ -452,13 +457,15 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 							.gst(demand.getGst())
 							.collectedGST(demand.getCollectedGST()!=null?demand.getCollectedGST():0)
 							.balanceGST(summary.getBalanceGST() + demand.getRemainingGST())
-						     .GSTPanelty( calculatedInterest) 				
-							.collectedGSTPanelty(demand.getCollectedGSTPenalty()!=null?demand.getCollectedGSTPenalty():0)
+						     .GSTPenalty( calculatedInterest) 				
+							.collectedGSTPenalty(demand.getCollectedGSTPenalty()!=null?demand.getCollectedGSTPenalty():0)
 							.balanceGSTPenalty(summary.getBalanceGSTPenalty() + demand.getRemainingGSTPenalty())
 							.balanceRentPenalty(demand.getPenaltyInterest())
-				            .collectedRentPanelty(  demand.getCollectedRentPenalty()!=null?demand.getCollectedRentPenalty():0)
+				            .collectedRentPenalty(  demand.getCollectedRentPenalty()!=null?demand.getCollectedRentPenalty():0)
 							.balanceRentPenalty(summary.getBalanceRentPenalty() + demand.getRemainingRentPenalty())
-							.balanceAmount(rentAccount.getRemainingAmount()).build();
+							.balanceAmount(rentAccount.getRemainingAmount())
+							.isPrevious(demand.getIsPrevious())
+							.build();
 							
 				}, (summary, demand) -> summary);
 	}
@@ -482,6 +489,7 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 				.gstInterest(rentDemand.getGstInterest())
 				.penaltyInterest(rentDemand.getPenaltyInterest())
 				.interestSince(rentDemand.getInterestSince())
+				.isPrevious(rentDemand.getIsPrevious())
 				.build();
 	}
 }

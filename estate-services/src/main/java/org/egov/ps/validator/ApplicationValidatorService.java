@@ -14,9 +14,13 @@ import org.egov.ps.model.Property;
 import org.egov.ps.repository.ApplicationRepository;
 import org.egov.ps.repository.PropertyRepository;
 import org.egov.ps.service.MDMSService;
+import org.egov.ps.service.calculation.IEstateRentCollectionService;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.validator.application.OwnerValidator;
 import org.egov.ps.web.contracts.ApplicationRequest;
+import org.egov.ps.web.contracts.EstateAccount;
+import org.egov.ps.web.contracts.EstateDemand;
+import org.egov.ps.web.contracts.EstateRentSummary;
 import org.egov.tracer.model.CustomException;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +62,10 @@ public class ApplicationValidatorService {
 
 	@Autowired
 	ApplicationRepository applicationRepository;
-	
+
+	@Autowired
+	private IEstateRentCollectionService estateRentCollectionService;
+
 	@Autowired
 	ApplicationValidatorService(ApplicationContext context, MDMSService mdmsService,
 			PropertyRepository propertyRepository, ObjectMapper objectMapper, OwnerValidator ownerValidator) {
@@ -85,43 +92,60 @@ public class ApplicationValidatorService {
 		List<Application> applications = request.getApplications();
 		applications.stream().forEach(application -> {
 			String propertyId = application.getProperty().getId();
-			validatePropertyExists(request.getRequestInfo(), propertyId);
+			validatePropertyExists(request.getRequestInfo(), propertyId, application);
 			JsonNode applicationDetails = application.getApplicationDetails();
 			try {
 				String applicationDetailsString = this.objectMapper.writeValueAsString(applicationDetails);
 				Configuration conf = Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS);
 				DocumentContext applicationObjectContext = JsonPath.using(conf).parse(applicationDetailsString);
 				Map<String, List<String>> errorMap;
-					errorMap = this.performValidationsFromMDMS(application.getMDMSModuleName(),
-							applicationObjectContext, request.getRequestInfo(), application.getTenantId(), propertyId);
-				
+				errorMap = this.performValidationsFromMDMS(application.getMDMSModuleName(), applicationObjectContext,
+						request.getRequestInfo(), application.getTenantId(), propertyId);
 
 				if (!errorMap.isEmpty()) {
 					throw new CustomException("INVALID_FIELDS", "Please enter the valid fields " + errorMap.toString());
 				}
 			} catch (JsonProcessingException e) {
-				log.error("Can not parse Json fie",e);
+				log.error("Can not parse Json fie", e);
 			} catch (Exception e) {
-				log.error("Exception",e);
+				log.error("Exception", e);
 			}
 
 		});
 	}
 
-	private void validatePropertyExists(RequestInfo requestInfo, String propertyId) {
+	private void validatePropertyExists(RequestInfo requestInfo, String propertyId, Application application) {
 		Property property = propertyRepository.findPropertyById(propertyId);
 		if (property == null) {
 			throw new CustomException("INVALID_PROPERTY", "Could not find property with the given id:" + propertyId);
 		}
-		if (!property.getState().contentEquals(PSConstants.PM_APPROVED) && !property.getState().contentEquals(PSConstants.ES_APPROVED) ) {
+		if (!property.getState().contentEquals(PSConstants.PM_APPROVED)
+				&& !property.getState().contentEquals(PSConstants.ES_APPROVED)) {
 			throw new CustomException("INVALID_PROPERTY", "Property with the given " + propertyId + " is not approved");
 		}
+
+		Double rentDue = getRentDue(property);
+		if (rentDue > 0) {
+			throw new CustomException("PROPERTY_PENDING_DUE", String.format(
+					"Property has pending due of Rs: %s, so you can not apply for %s, please clear the due before applying.",
+					rentDue, application.getApplicationType()));
+		}
+	}
+
+	private Double getRentDue(Property property) {
+		List<String> propertyDetailsIds = new ArrayList<String>();
+		propertyDetailsIds.add(property.getPropertyDetails().getId());
+		List<EstateDemand> demands = propertyRepository.getDemandDetailsForPropertyDetailsIds(propertyDetailsIds);
+		EstateAccount estateAccount = propertyRepository.getPropertyEstateAccountDetails(propertyDetailsIds);
+		EstateRentSummary estateRentSummary = estateRentCollectionService.calculateRentSummary(demands, estateAccount,
+				property.getPropertyDetails().getInterestRate());
+		return estateRentSummary.getBalanceRent();
 	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, List<String>> performValidationsFromMDMS(final String applicationType,
-			DocumentContext applicationObject, RequestInfo RequestInfo, final String tenantId,
-			final String propertyId) throws JSONException {
+			DocumentContext applicationObject, RequestInfo RequestInfo, final String tenantId, final String propertyId)
+			throws JSONException {
 		List<Map<String, Object>> fieldConfigurations = this.mdmsService.getApplicationConfig(applicationType,
 				RequestInfo, tenantId);
 		Map<String, List<String>> errorsMap = new HashMap<String, List<String>>();
@@ -232,30 +256,30 @@ public class ApplicationValidatorService {
 				});
 	}
 
-	public List<Application> getApplications(ApplicationRequest applicationRequest) {
-		ApplicationCriteria criteria = getApplicationCriteria(applicationRequest);
+	public void validateUpdateRequest(ApplicationRequest applicationRequest) {
+		applicationRequest.getApplications().forEach(application -> {
+			validateApplicationIdExistsInDB(application.getId());
+
+			if (application.getApplicationType().contains(PSConstants.APPLICATION_TYPE_NDC)
+					&& application.getState().contains(PSConstants.PENDING_SO_APPROVAL)) {
+
+				Property property = propertyRepository.findPropertyById(application.getProperty().getId());
+				Double rentDue = getRentDue(property);
+				if (rentDue > 0) {
+					throw new CustomException("PROPERTY_RENT_DUE",
+							String.format("Property has rent due: %s, so can not approve for NDC", rentDue));
+				}
+			}
+		});
+	}
+
+	private void validateApplicationIdExistsInDB(String applicationId) {
+		ApplicationCriteria criteria = ApplicationCriteria.builder().applicationId(applicationId).build();
 		List<Application> applications = applicationRepository.getApplications(criteria);
-
-		boolean ifApplicationExists = ApplicationExists(applications);
-		if (!ifApplicationExists) {
-			throw new CustomException("APPLICATION NOT FOUND", "The application to be updated does not exist");
-		} else {
-			return null;
+		if (CollectionUtils.isEmpty(applications)) {
+			log.warn("The application id to be updated does not exist {}", applicationId);
+			throw new CustomException("APPLICATION NOT FOUND",
+					"The application id to be updated does not exist " + applicationId);
 		}
-	}
-
-	private boolean ApplicationExists(List<Application> applicationRequest) {
-		return (!CollectionUtils.isEmpty(applicationRequest) && applicationRequest.size() == 1);
-	}
-
-	private ApplicationCriteria getApplicationCriteria(ApplicationRequest request) {
-		ApplicationCriteria applicationCriteria = new ApplicationCriteria();
-		if (!CollectionUtils.isEmpty(request.getApplications())) {
-			request.getApplications().forEach(application -> {
-				if (application.getId() != null)
-					applicationCriteria.setApplicationId(application.getId());
-			});
-		}
-		return applicationCriteria;
 	}
 }

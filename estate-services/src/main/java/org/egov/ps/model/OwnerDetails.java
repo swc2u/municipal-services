@@ -3,11 +3,12 @@ package org.egov.ps.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.egov.ps.web.contracts.AuditDetails;
 import org.springframework.validation.annotation.Validated;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -70,9 +71,12 @@ public class OwnerDetails {
 	@JsonProperty("isMasterEntry")
 	private Boolean isMasterEntry;
 
+	@JsonProperty("isPreviousOwnerRequired")
+	private Boolean isPreviousOwnerRequired;
+
 	@JsonProperty("address")
 	private String address;
-	
+
 	@JsonProperty("isDirector")
 	private Boolean isDirector;
 
@@ -110,4 +114,20 @@ public class OwnerDetails {
 		return this;
 	}
 
+	public ObjectNode copyAsJsonNode() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectNode node = objectMapper.createObjectNode();
+		node.put("ownerName", this.getOwnerName());
+		node.put("guardianName", this.getGuardianName());
+		node.put("guardianRelation", this.getGuardianRelation());
+		node.put("mobileNumber", this.getMobileNumber());
+		node.put("allotmentNumber", this.getAllotmentNumber());
+		node.put("dateOfAllotment", this.getDateOfAllotment());
+		node.put("possesionDate", this.getPossesionDate());
+		node.put("isApproved", this.getIsApproved());
+		node.put("isCurrentOwner", this.getIsCurrentOwner());
+		node.put("isMasterEntry", this.getIsMasterEntry());
+		node.put("address", this.getAddress());
+		return node;
+	}
 }
