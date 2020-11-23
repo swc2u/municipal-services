@@ -1,7 +1,6 @@
 package org.egov.pm.web.controller;
 
 import java.io.IOException;
-
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.pm.model.Errors;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -93,6 +93,7 @@ public class NocController {
 	 */
 	@PostMapping("_create")
 	@ResponseBody
+	@CrossOrigin
 	public ResponseEntity<ResponseData> createNoc(@RequestBody RequestData requestData) {
 		log.debug(String.format("STARTED ADD/CREATE NOC REQUEST : %1s", requestData.toString()));
 		return nocService.saveNoc(requestData);
@@ -122,6 +123,7 @@ public class NocController {
 	 * @return If success then return sucess response
 	 */
 	@PostMapping("_updateappstatus")
+	@CrossOrigin
 	public ResponseEntity<ResponseData> updateApplicationStatus(@RequestBody RequestData requestData) {
 
 		log.debug(String.format("STARTED APPLICATION STATUS UPDATE NOC REQUEST : %1s", requestData.toString()));
@@ -191,5 +193,4 @@ public class NocController {
 		return new ResponseEntity<>(ResponseInfo.builder().status("SUCCESS").build(), HttpStatus.CREATED);
 
 	}
-
 }

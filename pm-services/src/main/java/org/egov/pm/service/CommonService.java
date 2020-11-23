@@ -4,24 +4,34 @@ import static java.util.Objects.isNull;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.pm.model.Errors;
 import org.egov.pm.model.IdGenModel;
 import org.egov.pm.model.IdGenRequestModel;
+import org.egov.pm.model.RequestData;
+import org.egov.pm.util.CommonConstants;
 import org.egov.pm.wf.model.ProcessInstanceRequest;
 import org.egov.tracer.model.CustomException;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,12 +53,20 @@ public class CommonService {
 
 	@Value("${egov.wf.uri}")
 	private String workflowPath;
-	
+
 	@Value("${egov.idgen.ack.name}")
 	private String idName;
 
 
-	public String generateApplicationId(String tenantId) {
+	@Autowired
+	private StringBuilder builder;
+
+	@Bean
+	public StringBuilder builder() {
+		return new StringBuilder();
+	}
+
+	public String generateApplicationId(String idName, String tenantId) {
 
 		String url = host + path;
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -82,7 +100,7 @@ public class CommonService {
 	public ResponseInfo createWorkflowRequest(ProcessInstanceRequest workflowRequest) throws IOException {
 		String url = workflowHost + workflowPath;
 		ResponseInfo responseInfo = null;
-		ObjectMapper objectMapper=new ObjectMapper();
+		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			JsonNode response = restTemplate.postForObject(url, workflowRequest, JsonNode.class);
 
@@ -101,5 +119,4 @@ public class CommonService {
 		}
 		return responseInfo;
 	}
-	
 }
