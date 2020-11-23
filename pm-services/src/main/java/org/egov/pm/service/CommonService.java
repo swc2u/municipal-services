@@ -54,17 +54,6 @@ public class CommonService {
 	@Value("${egov.wf.uri}")
 	private String workflowPath;
 
-	@Value("${egov.idgen.ack.name}")
-	private String idName;
-
-
-	@Autowired
-	private StringBuilder builder;
-
-	@Bean
-	public StringBuilder builder() {
-		return new StringBuilder();
-	}
 
 	public String generateApplicationId(String idName, String tenantId) {
 
