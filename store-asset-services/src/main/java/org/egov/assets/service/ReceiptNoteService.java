@@ -266,7 +266,7 @@ public class ReceiptNoteService extends DomainService {
 				}
 			}
 
-			backUpdatePo(tenantId, materialReceipt);
+			// backUpdatePo(tenantId, materialReceipt);
 		});
 
 		logAwareKafkaTemplate.send(updateTopic, updateTopicKey, materialReceiptRequest);
@@ -420,7 +420,7 @@ public class ReceiptNoteService extends DomainService {
 					throw new InvalidDataException("materialreceipt", ErrorCode.NOT_NULL.getCode(), null);
 				} else {
 					for (MaterialReceipt materialReceipt : materialReceipts) {
-						validateMaterialReceipt(materialReceipt, tenantId, errors, requestInfo);
+						validateMaterialReceipt(materialReceipt, tenantId, errors, requestInfo, method);
 					}
 				}
 			}
@@ -432,7 +432,7 @@ public class ReceiptNoteService extends DomainService {
 					throw new InvalidDataException("materialreceipt", ErrorCode.NOT_NULL.getCode(), null);
 				} else {
 					for (MaterialReceipt materialReceipt : materialReceipts) {
-						validateMaterialReceipt(materialReceipt, tenantId, errors, requestInfo);
+						validateMaterialReceipt(materialReceipt, tenantId, errors, requestInfo, method);
 					}
 				}
 			}
@@ -447,7 +447,7 @@ public class ReceiptNoteService extends DomainService {
 	}
 
 	private void validateMaterialReceipt(MaterialReceipt materialReceipt, String tenantId, InvalidDataException errors,
-			RequestInfo requestInfo) {
+			RequestInfo requestInfo, String method) {
 
 		if (null != materialReceipt.getReceivingStore() && !isEmpty(materialReceipt.getReceivingStore().getCode())) {
 			validateStore(materialReceipt.getReceivingStore().getCode(), tenantId, errors);
@@ -472,7 +472,7 @@ public class ReceiptNoteService extends DomainService {
 			validateSupplier(materialReceipt, tenantId, errors);
 		}
 
-		validateMaterialReceiptDetail(materialReceipt, tenantId, errors, requestInfo);
+		validateMaterialReceiptDetail(materialReceipt, tenantId, errors, requestInfo, method);
 
 	}
 
@@ -481,7 +481,7 @@ public class ReceiptNoteService extends DomainService {
 	}
 
 	private void validateMaterialReceiptDetail(MaterialReceipt materialReceipt, String tenantId,
-			InvalidDataException errors, RequestInfo requestInfo) {
+			InvalidDataException errors, RequestInfo requestInfo, String method) {
 		int i = 0;
 		validateDuplicateMaterialDetails(materialReceipt.getReceiptDetails(), errors);
 		for (MaterialReceiptDetail materialReceiptDetail : materialReceipt.getReceiptDetails()) {
@@ -490,7 +490,8 @@ public class ReceiptNoteService extends DomainService {
 			if (materialReceipt.getReceiptType().toString()
 					.equalsIgnoreCase(MaterialReceipt.ReceiptTypeEnum.PURCHASE_RECEIPT.toString())) {
 				validatePurchaseOrder(materialReceiptDetail, materialReceipt.getReceivingStore().getCode(),
-						materialReceipt.getReceiptDate(), materialReceipt.getSupplier().getCode(), tenantId, i, errors);
+						materialReceipt.getReceiptDate(), materialReceipt.getSupplier().getCode(), tenantId, i, errors,
+						method);
 			}
 			validateMaterial(materialReceiptDetail, tenantId, i, errors);
 			validateUom(materialReceiptDetail, tenantId, i, errors, requestInfo);
@@ -638,7 +639,7 @@ public class ReceiptNoteService extends DomainService {
 	}
 
 	private void validatePurchaseOrder(MaterialReceiptDetail materialReceiptDetail, String store, Long receiptDate,
-			String supplier, String tenantId, int i, InvalidDataException errors) {
+			String supplier, String tenantId, int i, InvalidDataException errors, String method) {
 
 		if (null != materialReceiptDetail.getPurchaseOrderDetail()) {
 			PurchaseOrderDetailSearch purchaseOrderDetailSearch = new PurchaseOrderDetailSearch();
@@ -666,19 +667,19 @@ public class ReceiptNoteService extends DomainService {
 					if (materialReceiptDetail.getReceivedQty().compareTo(purchaseOrderDetail.getOrderQuantity()) > 0) {
 						errors.addDataError(ErrorCode.RCVED_QTY_LS_ODRQTY.getCode(), String.valueOf(i));
 					}
-
-					BigDecimal remainingQuantity = purchaseOrderDetail.getOrderQuantity()
-							.subtract(purchaseOrderDetail.getReceivedQuantity());
-					BigDecimal conversionFactor = materialReceiptDetail.getUom().getConversionFactor();
-					BigDecimal convertedRemainingQuantity = getSearchConvertedQuantity(remainingQuantity,
-							conversionFactor);
-					if (null != purchaseOrderDetail.getReceivedQuantity()
-							&& materialReceiptDetail.getReceivedQty().compareTo(remainingQuantity) > 0) {
-						errors.addDataError(ErrorCode.RCVED_QTY_LS_PORCVEDATY.getCode(),
-								materialReceiptDetail.getUserReceivedQty().toString(),
-								convertedRemainingQuantity.toString(), String.valueOf(i));
+					if (!method.equals(Constants.ACTION_UPDATE)) {
+						BigDecimal remainingQuantity = purchaseOrderDetail.getOrderQuantity()
+								.subtract(purchaseOrderDetail.getReceivedQuantity());
+						BigDecimal conversionFactor = materialReceiptDetail.getUom().getConversionFactor();
+						BigDecimal convertedRemainingQuantity = getSearchConvertedQuantity(remainingQuantity,
+								conversionFactor);
+						if (null != purchaseOrderDetail.getReceivedQuantity()
+								&& materialReceiptDetail.getReceivedQty().compareTo(remainingQuantity) > 0) {
+							errors.addDataError(ErrorCode.RCVED_QTY_LS_PORCVEDATY.getCode(),
+									materialReceiptDetail.getUserReceivedQty().toString(),
+									convertedRemainingQuantity.toString(), String.valueOf(i));
+						}
 					}
-
 					PurchaseOrderEntity po = new PurchaseOrderEntity();
 					po.setPurchaseOrderNumber(purchaseOrderDetail.getPurchaseOrderNumber());
 					po.setTenantId(tenantId);
@@ -706,9 +707,11 @@ public class ReceiptNoteService extends DomainService {
 					PurchaseOrderSearch purchaseOrderSearch = new PurchaseOrderSearch();
 					purchaseOrderSearch.setPurchaseOrderNumber(purchaseOrderDetail.getPurchaseOrderNumber());
 					purchaseOrderSearch.setTenantId(tenantId);
-					if (purchaseOrderService.checkAllItemsSuppliedForPo(purchaseOrderSearch)) {
-						errors.addDataError(ErrorCode.PO_SUPPLIED.getCode(),
-								purchaseOrderDetail.getPurchaseOrderNumber());
+					if (!method.equals(Constants.ACTION_UPDATE)) {
+						if (purchaseOrderService.checkAllItemsSuppliedForPo(purchaseOrderSearch)) {
+							errors.addDataError(ErrorCode.PO_SUPPLIED.getCode(),
+									purchaseOrderDetail.getPurchaseOrderNumber());
+						}
 					}
 				}
 			}
