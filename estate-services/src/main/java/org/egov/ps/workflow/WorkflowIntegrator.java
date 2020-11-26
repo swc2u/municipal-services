@@ -14,7 +14,6 @@ import org.egov.ps.config.Configuration;
 import org.egov.ps.model.Application;
 import org.egov.ps.model.Property;
 import org.egov.ps.util.PSConstants;
-import org.egov.ps.web.contracts.ApplicationRequest;
 import org.egov.ps.web.contracts.PropertyRequest;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +41,7 @@ public class WorkflowIntegrator {
 
 	private static final String MODULENAMEKEY = "moduleName";
 
-	private static final String STATEKEY = "state";
-
 	private static final String COMMENTKEY = "comment";
-
-	private static final String DOCUMENTSKEY = "documents";
-
-	private static final String ASSIGNERKEY = "assigner";
 
 	private static final String ASSIGNEEKEY = "assignee";
 
@@ -117,11 +110,27 @@ public class WorkflowIntegrator {
 				});
 			}
 			obj.put(TENANTIDKEY, wfTenantId);
-			if( property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)){
+			if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)
+					&& !property.getState().contentEquals(PSConstants.PM_APPROVED)) {
 				obj.put(BUSINESSSERVICEKEY, config.getAosBusinessServiceValue());
-			} else obj.put(BUSINESSSERVICEKEY, config.getBbPmBusinessServiceValue());
-			obj.put(BUSINESSIDKEY, property.getFileNumber());
-			obj.put(ACTIONKEY, property.getAction());
+				obj.put(BUSINESSIDKEY, property.getFileNumber());
+				obj.put(ACTIONKEY, property.getAction());
+			} else if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.BUILDING_BRANCH)) {
+				obj.put(BUSINESSSERVICEKEY, config.getBbPmBusinessServiceValue());
+				obj.put(BUSINESSIDKEY, property.getFileNumber());
+				obj.put(ACTIONKEY, property.getAction());
+			} else if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)
+					&& property.getState().contentEquals(PSConstants.PM_APPROVED)
+					&& property.getPropertyDetails().getBidders().get(0).getAuctionId() != null) {
+				obj.put(BUSINESSSERVICEKEY, config.getEbRoeBusinessServiceValue());
+				obj.put(BUSINESSIDKEY, property.getPropertyDetails().getBidders().get(0).getAuctionId());
+				obj.put(ACTIONKEY, property.getPropertyDetails().getBidders().get(0).getAction());
+			} else if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA)
+					&& !property.getState().contentEquals(PSConstants.ES_PM_MM_APPROVED)) {
+				obj.put(BUSINESSSERVICEKEY, config.getMmPmBusinessServiceValue());
+				obj.put(BUSINESSIDKEY, property.getFileNumber());
+				obj.put(ACTIONKEY, property.getAction());
+			}
 			obj.put(MODULENAMEKEY, MODULENAMEVALUE);
 			obj.put(AUDITDETAILSKEY, property.getAuditDetails());
 			obj.put(COMMENTKEY, property.getComments());
@@ -139,50 +148,52 @@ public class WorkflowIntegrator {
 
 		// setting the status back to Property object from wf response
 		request.getProperties().forEach(property -> {
-			property.setState(idStatusMap.get(property.getFileNumber()));
+			if (!property.getState().contentEquals(PSConstants.PM_APPROVED)) {
+				property.setState(idStatusMap.get(property.getFileNumber()));
+			} else {
+				property.getPropertyDetails().getBidders().forEach(bidder -> {
+					bidder.setState(idStatusMap.get(property.getPropertyDetails().getBidders().get(0).getAuctionId()));
+				});
+			}
 		});
 	}
 
-	public void callApplicationWorkFlow(ApplicationRequest request) {
+	public void callApplicationWorkFlow(RequestInfo requestInfo, Application application) {
 
-		String wfTenantId = request.getApplications().get(0).getTenantId();
+		String wfTenantId = application.getTenantId();
 		JSONArray array = new JSONArray();
-		for (Application application : request.getApplications()) {
-			JSONObject obj = new JSONObject();
-			List<Map<String, String>> uuidmaps = new LinkedList<>();
-			List<Map<String, String>> assigneeUuidmaps = new LinkedList<>();
-			if (!CollectionUtils.isEmpty(application.getAssignee())) {
-				application.getAssignee().forEach(assignee -> {
-					Map<String, String> uuidMap = new HashMap<>();
-					uuidMap.put(UUIDKEY, assignee);
-					assigneeUuidmaps.add(uuidMap);
-				});
-			}
-
-			obj.put(TENANTIDKEY, wfTenantId);
-			obj.put(BUSINESSSERVICEKEY, application.getWorkFlowBusinessService());
-			obj.put(BUSINESSIDKEY, application.getApplicationNumber());
-			obj.put(ACTIONKEY, application.getAction());
-			obj.put(MODULENAMEKEY, MODULENAMEVALUE);
-			obj.put(AUDITDETAILSKEY, application.getAuditDetails());
-			obj.put(COMMENTKEY, application.getComments());
-
-			if (!CollectionUtils.isEmpty(application.getAssignee())) {
-				if (uuidmaps.size() == 1) {
-					obj.put(ASSIGNEEKEY, assigneeUuidmaps.get(0));
-				} else {
-					obj.put(ASSIGNEEKEY, assigneeUuidmaps.get(0));
-				}
-			}
-
-			array.add(obj);
+		JSONObject obj = new JSONObject();
+		List<Map<String, String>> uuidmaps = new LinkedList<>();
+		List<Map<String, String>> assigneeUuidmaps = new LinkedList<>();
+		if (!CollectionUtils.isEmpty(application.getAssignee())) {
+			application.getAssignee().forEach(assignee -> {
+				Map<String, String> uuidMap = new HashMap<>();
+				uuidMap.put(UUIDKEY, assignee);
+				assigneeUuidmaps.add(uuidMap);
+			});
 		}
-		Map<String, String> idStatusMap = callCommonWorkflow(array, request.getRequestInfo());
+
+		obj.put(TENANTIDKEY, wfTenantId);
+		obj.put(BUSINESSSERVICEKEY, application.getWorkFlowBusinessService());
+		obj.put(BUSINESSIDKEY, application.getApplicationNumber());
+		obj.put(ACTIONKEY, application.getAction());
+		obj.put(MODULENAMEKEY, MODULENAMEVALUE);
+		obj.put(AUDITDETAILSKEY, application.getAuditDetails());
+		obj.put(COMMENTKEY, application.getComments());
+
+		if (!CollectionUtils.isEmpty(application.getAssignee())) {
+			if (uuidmaps.size() == 1) {
+				obj.put(ASSIGNEEKEY, assigneeUuidmaps.get(0));
+			} else {
+				obj.put(ASSIGNEEKEY, assigneeUuidmaps.get(0));
+			}
+		}
+
+		array.add(obj);
+		Map<String, String> idStatusMap = callCommonWorkflow(array, requestInfo);
 
 		// setting the status back to Property object from wf response
-		request.getApplications().forEach(application -> {
-			application.setState(idStatusMap.get(application.getApplicationNumber()));
-		});
+		application.setState(idStatusMap.get(application.getApplicationNumber()));
 	}
 
 	private Map<String, String> callCommonWorkflow(JSONArray array, RequestInfo requestInfo) {

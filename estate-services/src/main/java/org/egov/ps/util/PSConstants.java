@@ -10,13 +10,15 @@ public class PSConstants {
 
 	public static final String ES_APPROVED = "ES_PM_APPROVED";
 
+	public static final String ES_PM_MM_APPROVED = "ES_PM_MM_APPROVED";
+
 	public static final String ES_WF_DOCS = "WF_DOCS";
 
 	public static final String ESTATE_BRANCH = "ESTATE_BRANCH";
 
 	public static final String BUILDING_BRANCH = "BUILDING_BRANCH";
 
-	public static final String MANIMAJRA_BRANCH = "MANIMAJRA_BRANCH";
+	public static final String MANI_MAJRA = "MANI_MAJRA";
 
 	public static final String JSONPATH_PROPERTY_SERVICE = "$.MdmsRes.OwnershipTransferSaleDeed";
 
@@ -71,5 +73,22 @@ public class PSConstants {
 	public static final String BUSINESS_SERVICE_EB_RENT = "ESTATE_SERVICE_ESTATE_BRANCH.PROPERTY_MASTER";
 	public static final String BUSINESS_SERVICE_BB_RENT = "ESTATE_SERVICE_BUILDING_BRANCH.PROPERTY_MASTER";
 	public static final String BUSINESS_SERVICE_MB_RENT = "ESTATE_SERVICE_MANIMAJRA_BRANCH.PROPERTY_MASTER";
+	public static final String BUSINESS_SERVICE_EB_PENALTY = "ESTATE_SERVICE_ESTATE_BRANCH.PROPERTY_VIOLATION";
+	public static final String BUSINESS_SERVICE_BB_PENALTY = "ESTATE_SERVICE_BUILDING_BRANCH.PROPERTY_VIOLATION";
+	public static final String BUSINESS_SERVICE_MB_PENALTY = "ESTATE_SERVICE_MANIMAJRA_BRANCH.PROPERTY_VIOLATION";
+
+	public static final String LOCALIZATION_MSGS_JSONPATH = "$.messages";
+	public static final String LOCALIZATION_MODULE = "rainmaker-es";
+	public static final String LOCALIZATION_LOCALE = "en_IN";
+
+	public static final String PROPERTY_VIOLATION = "PROPERTY_VIOLATION";
+	
+	//User event
+	public static final String  USREVENTS_EVENT_TYPE = "SYSTEMGENERATED";
+	public static final String  USREVENTS_EVENT_NAME = "Estate Module";
+	public static final String  USREVENTS_EVENT_POSTEDBY = "SYSTEM-EST";
+	
+	public static final String  APPLICATION_TYPE_NDC = "NDC";
+	public static final String  PENDING_SO_APPROVAL = "PENDING_SO_APPROVAL";
 
 }

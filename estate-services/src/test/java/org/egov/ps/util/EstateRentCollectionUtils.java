@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-
 import org.egov.ps.web.contracts.EstateAccountStatement;
 import org.egov.ps.web.contracts.EstateAccountStatement.Type;
 
@@ -29,7 +28,7 @@ public class EstateRentCollectionUtils {
 		// accountStatementItems.forEach(statementItem -> {
 		// System.out.println(statementItem);
 		// });
-		System.out.println(String.format("%10s |%10s |%10s |"
+		System.out.println(String.format("%20s |%10s |%10s |"
 				+ "%14s"
 				+ "| %12s"
 				+ "| %14s"
@@ -38,25 +37,25 @@ public class EstateRentCollectionUtils {
 				"Date", "Amount", "Type",
 				"Principal Due", 
 				"GST Due",
-				"Interest Panelty Due",
-				"GST Panelty Due",
+				"Interest Penalty Due",
+				"GST Penalty Due",
 				 "Total Due", "Account Balance","Receipt No"));
 		System.out.println(
 				"===============================================================================================================================================================================================================================================================================================================================================================================================================");
 		accountStatementItems.forEach(item -> {
-			System.out.println(String.format("%10s |%10.2f |%10s|"
+			System.out.println(String.format("%20s |%10.2f |%10s|"
 					+ "%14.2f "
 					+ "|%12.2f  "
 					+ "|%18.2f  "
 					+ "|%14.2f  "
-					+ "|%13.2f |%15.2f |%5s",
-					dateFormat.format(new Date(item.getDate())), item.getAmount(),
+					+ "|%13.2f |%15.2f |%5s |%5s",
+					item.getIsPrevious() ?"Previous Balance":dateFormat.format(new Date(item.getDate())), item.getAmount(),
 					item.getType() == EstateAccountStatement.Type.C ? "Payment" : "Rent", 
 							item.getRemainingPrincipal(),
 							item.getRemainingGST(),
 							item.getRemainingRentPenalty(),
 							item.getRemainingGSTPenalty(),
-					 item.getDueAmount(), item.getRemainingBalance(),item.getReceiptNo()));
+					 item.getDueAmount(), item.getRemainingBalance(),item.getReceiptNo(),String.valueOf(item.getIsPrevious())));
 		});
 	}
 
