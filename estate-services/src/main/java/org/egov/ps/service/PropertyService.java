@@ -29,6 +29,7 @@ import org.egov.ps.util.PSConstants;
 import org.egov.ps.util.Util;
 import org.egov.ps.validator.PropertyValidator;
 import org.egov.ps.web.contracts.AccountStatementResponse;
+import org.egov.ps.web.contracts.AuditDetails;
 import org.egov.ps.web.contracts.BusinessService;
 import org.egov.ps.web.contracts.EstateAccount;
 import org.egov.ps.web.contracts.EstateDemand;
@@ -85,9 +86,9 @@ public class PropertyService {
 
 	@Autowired
 	private MDMSService mdmsservice;
-
+	
 	@Autowired
-	private EstateDemandGenerationService estateDemandGenerationService;
+	private EstateDemandGenerationService estateDemandGenerationService;	
 
 	public List<Property> createProperty(PropertyRequest request) {
 		propertyValidator.validateCreateRequest(request);
