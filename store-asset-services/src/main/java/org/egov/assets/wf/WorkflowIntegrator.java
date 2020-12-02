@@ -55,7 +55,6 @@ public class WorkflowIntegrator {
 
 	private static final String MODULENAMEVALUE = "StoreManagement";
 
-
 	private static final String WORKFLOWREQUESTARRAYKEY = "ProcessInstances";
 
 	private static final String REQUESTINFOKEY = "RequestInfo";
@@ -111,9 +110,9 @@ public class WorkflowIntegrator {
 	 * and sets the resultant status from wf-response back to trade-license object
 	 *
 	 * @param tradeLicenseRequest
-	 * @return 
+	 * @return
 	 */
-	public WorkFlowDetails callWorkFlow(RequestInfo requestInfo,WorkFlowDetails workFlowDetails,String tenantId) {
+	public WorkFlowDetails callWorkFlow(RequestInfo requestInfo, WorkFlowDetails workFlowDetails, String tenantId) {
 
 		JSONArray array = new JSONArray();
 		JSONObject obj = new JSONObject();
@@ -129,18 +128,17 @@ public class WorkflowIntegrator {
 		obj.put(ACTIONKEY, workFlowDetails.getAction());
 		obj.put(COMMENTKEY, workFlowDetails.getComments());
 		obj.put(DOCUMENTSKEY, workFlowDetails.getWfDocuments());
-		
+
 		List<Map<String, String>> uuidmaps = new LinkedList<>();
 
-		if(!CollectionUtils.isEmpty(workFlowDetails.getAssignee())){
+		if (!CollectionUtils.isEmpty(workFlowDetails.getAssignee())) {
 			// Adding assignes to processInstance
-			User user=new User();
+			User user = new User();
 			workFlowDetails.getAssignee().forEach(assignee -> {
 				user.setUuid(assignee);
 			});
 			obj.put(ASSIGNEEKEY, user);
 		}
-
 
 		array.add(obj);
 		if (!array.isEmpty()) {
@@ -186,9 +184,10 @@ public class WorkflowIntegrator {
 			System.out.println(idStatusMap);
 			workFlowDetails.setStatus(idStatusMap.get(workFlowDetails.getBusinessId()));
 		}
-		
+
 		return workFlowDetails;
 	}
+
 	public ProcessInstanceResponse getWorkflowDataByID(RequestInfo requestInfo, String businessId, String tenantId) {
 		StringBuilder builder = new StringBuilder();
 		String searchCriteria = "?businessIds=" + businessId + "&tenantId=" + tenantId + "&history=true";
