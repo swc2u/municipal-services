@@ -117,7 +117,9 @@ public class WorkflowIntegrator {
 
 		JSONArray array = new JSONArray();
 		JSONObject obj = new JSONObject();
-
+		workFlowDetails.getWfDocuments().forEach(document->{
+			document.setDocumentType("Document");
+		});
 		obj.put(BUSINESSIDKEY, workFlowDetails.getBusinessId());
 		obj.put(TENANTIDKEY, tenantId);
 		obj.put(BUSINESSSERVICEKEY, workFlowDetails.getBusinessService());
