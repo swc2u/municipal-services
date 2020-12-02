@@ -39,7 +39,6 @@ public class OpeningbalanceApiController {
 	@Autowired
 	private OpeningBalanceService openingBalanceService;
 
-	@CrossOrigin
 	@PostMapping(value = "/_create", produces = { "application/json" }, consumes = { "application/json" })
 	public ResponseEntity<OpeningBalanceResponse> openingbalanceCreatePost(
 			@Valid @RequestParam(value = "tenantId", required = true) String tenantId,
