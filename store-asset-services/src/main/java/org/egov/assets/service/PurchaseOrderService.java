@@ -4,7 +4,6 @@ import static org.springframework.util.StringUtils.isEmpty;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -17,7 +16,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
@@ -805,26 +803,16 @@ public class PurchaseOrderService extends DomainService {
 									IndentSearch is = IndentSearch.builder().tenantId(tenantId)
 											.indentNumber(indentList.get(i)).build();
 									IndentResponse isr = indentService.search(is, new RequestInfo());
-									SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-									String poDate = convertEpochtoDate(eachPurchaseOrder.getPurchaseOrderDate());
 
-									try {
-										for (Indent in : isr.getIndents()) {
-											/*
-											 * if (in.getIndentDate()
-											 * .compareTo(eachPurchaseOrder.getPurchaseOrderDate()) > 0) {
-											 */
-											String indentDate = convertEpochtoDate(in.getIndentDate());
-											LOG.info("Indent Date Greater Than PO Date : ",
-													sdf.parse(indentDate).after(sdf.parse(poDate)));
-											if (sdf.parse(indentDate).after(sdf.parse(poDate))) {
-												errors.addDataError(ErrorCode.DATE1_LE_DATE2.getCode(),
-														poDate + " at serial no." + pos.indexOf(eachPurchaseOrder));
-											}
+									for (Indent in : isr.getIndents()) {
+										LOG.info(" PO Date : {}", eachPurchaseOrder.getPurchaseOrderDate());
+										LOG.info(" IndentDate : {}", in.getIndentDate());
+										if (in.getIndentDate()
+												.compareTo(eachPurchaseOrder.getPurchaseOrderDate()) > 0) {
+											String date = convertEpochtoDate(eachPurchaseOrder.getPurchaseOrderDate());
+											errors.addDataError(ErrorCode.DATE1_LE_DATE2.getCode(),
+													date + " at serial no." + pos.indexOf(eachPurchaseOrder));
 										}
-									} catch (ParseException e) {
-										LOG.info(" Date Parsing Error in Purchase Order Create Validation");
-
 									}
 								}
 							}
@@ -1331,7 +1319,7 @@ public class PurchaseOrderService extends DomainService {
 				purchaseOrder.put("storeName", po.getStore().getName());
 				purchaseOrder.put("poStatus", po.getStatus());
 				purchaseOrder.put("rateType", po.getRateType());
-				if (po.getRateType().equals(RateTypeEnum.GEM.toString())) {
+				if (po.getRateType().equals(RateTypeEnum.GEM)) {
 					purchaseOrder.put("supplierName", po.getSupplier().getCode());
 				} else {
 					purchaseOrder.put("supplierName", po.getSupplier().getName());
@@ -1373,8 +1361,10 @@ public class PurchaseOrderService extends DomainService {
 					poDets.put("totalValue", poDetails.getOrderQuantity().multiply(poDetails.getUnitPrice()));
 					poDets.put("workDetailsRemark", poDetails.getWorkDetailRemarks());
 
-					for (PurchaseIndentDetail indentDetails : poDetails.getPurchaseIndentDetails()) {
-						poDets.put("indentQuantity", indentDetails.getIndentDetail().getIndentQuantity());
+					if (poDetails.getPurchaseIndentDetails() != null) {
+						for (PurchaseIndentDetail indentDetails : poDetails.getPurchaseIndentDetails()) {
+							poDets.put("indentQuantity", indentDetails.getIndentDetail().getIndentQuantity());
+						}
 					}
 
 					purchaseOrder.put("rateContractNumber", poDetails.getPriceList().getRateContractNumber());
