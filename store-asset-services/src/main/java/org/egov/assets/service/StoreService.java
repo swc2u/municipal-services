@@ -88,12 +88,12 @@ import net.minidev.json.JSONArray;
 
 @Service
 public class StoreService extends DomainService {
-	
-	@Autowired
-    private ObjectMapper objectMapper;
 
-    @Autowired
-    private RestTemplate restTemplate;
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	@Autowired
+	private RestTemplate restTemplate;
 
 	@Autowired
 	private StoreJdbcRepository storeJdbcRepository;
@@ -164,16 +164,16 @@ public class StoreService extends DomainService {
 			for (Store store : storeRequest.getStores()) {
 				boolean storeUsed = checkStoreUsedInTransaction(store.getCode(), store.getTenantId());
 				if (storeUsed) {
-					Boolean active = store.getActive();
-					StoreEntity storeEntity = new StoreEntity();
-					storeEntity.setId(store.getId());
-					storeEntity.setTenantId(tenantId);
-					StoreEntity storeResult = (StoreEntity) storeJdbcRepository.findById(storeEntity,
-							StoreEntity.class.getSimpleName());
-
-					store = storeResult.toDomain();
-					store.setActive(active);
-					storeList.add(store);
+					throw new CustomException("Invalid Action", "Can't Update Store Used in Transaction");
+					/*
+					 * Boolean active = store.getActive(); StoreEntity storeEntity = new
+					 * StoreEntity(); storeEntity.setId(store.getId());
+					 * storeEntity.setTenantId(tenantId); StoreEntity storeResult = (StoreEntity)
+					 * storeJdbcRepository.findById(storeEntity, StoreEntity.class.getSimpleName());
+					 * 
+					 * store = storeResult.toDomain(); store.setActive(active);
+					 * storeList.add(store);
+					 */
 				} else {
 					if (isEmpty(store.getTenantId())) {
 						store.setTenantId(tenantId);
@@ -390,5 +390,5 @@ public class StoreService extends DomainService {
 		}
 		return locationMap;
 	}
-	
+
 }
