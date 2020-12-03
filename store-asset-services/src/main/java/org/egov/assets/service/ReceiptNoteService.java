@@ -43,6 +43,7 @@ import org.egov.assets.model.PurchaseOrder.PurchaseTypeEnum;
 import org.egov.assets.model.PurchaseOrder.StatusEnum;
 import org.egov.assets.model.PurchaseOrderDetail;
 import org.egov.assets.model.PurchaseOrderDetailSearch;
+import org.egov.assets.model.PurchaseOrderResponse;
 import org.egov.assets.model.PurchaseOrderSearch;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
@@ -200,7 +201,6 @@ public class ReceiptNoteService extends DomainService {
 
 	public MaterialReceiptResponse update(MaterialReceiptRequest materialReceiptRequest, String tenantId) {
 		List<MaterialReceipt> materialReceipts = materialReceiptRequest.getMaterialReceipt();
-
 
 		for (MaterialReceipt m : materialReceipts) {
 			for (MaterialReceiptDetail receiptDetails : m.getReceiptDetails()) {
@@ -468,13 +468,23 @@ public class ReceiptNoteService extends DomainService {
 			String date = convertEpochtoDate(materialReceipt.getReceiptDate());
 			errors.addDataError(ErrorCode.DATE_LE_CURRENTDATE.getCode(), "Receipt date ", date);
 		}
-
-		if (null != materialReceipt.getSupplier() && !isEmpty(materialReceipt.getSupplier().getCode())) {
-			validateSupplier(materialReceipt, tenantId, errors);
+		if (!checkPurchaseOrderRateTypeForGem(materialReceipt) && null != materialReceipt.getSupplier() && !isEmpty(materialReceipt.getSupplier().getCode())) {
+				validateSupplier(materialReceipt, tenantId, errors);
 		}
-
 		validateMaterialReceiptDetail(materialReceipt, tenantId, errors, requestInfo, method);
 
+	}
+
+	private boolean checkPurchaseOrderRateTypeForGem(MaterialReceipt materialReceipt) {
+		PurchaseOrderSearch poSearch = new PurchaseOrderSearch();
+		for (MaterialReceiptDetail materialReceiptDetail : materialReceipt.getReceiptDetails()) {
+			poSearch.setPurchaseOrderNumber(materialReceiptDetail.getPurchaseOrderDetail().getPurchaseOrderNumber());
+			PurchaseOrderResponse poSearchResults = purchaseOrderService.search(poSearch);
+			if (!poSearchResults.getPurchaseOrders().isEmpty() && poSearchResults.getPurchaseOrders().get(0)
+					.getRateType().equals(org.egov.assets.model.PurchaseOrder.RateTypeEnum.GEM))
+				return true;
+		}
+		return false;
 	}
 
 	private Long getCurrentDate() {
@@ -734,7 +744,7 @@ public class ReceiptNoteService extends DomainService {
 		for (MaterialReceipt materialReceipt : receiptResponse.getMaterialReceipt()) {
 			for (MaterialReceiptDetail materialReceiptDetail : materialReceipt.getReceiptDetails()) {
 				BigDecimal receivedQuantityToAdjust = new BigDecimal(0);
-				String operationToPerform="+";
+				String operationToPerform = "+";
 				if (materialReceiptDetail.getReceivedQty().compareTo(receivedQuantityFromRequest) < 0) {
 					// if receieved quantity from request is greater than quantty in update request
 					BigDecimal remainingQuantity = purchaseOrderDetail.getOrderQuantity()
@@ -753,13 +763,14 @@ public class ReceiptNoteService extends DomainService {
 				} else if (materialReceiptDetail.getReceivedQty().compareTo(receivedQuantityFromRequest) > 0) {
 					receivedQuantityToAdjust = materialReceiptDetail.getReceivedQty()
 							.subtract(receivedQuantityFromRequest);
-					operationToPerform="-";
+					operationToPerform = "-";
 				}
 				if (materialReceiptDetail.getReceivedQty().compareTo(receivedQuantityFromRequest) != 0
 						&& MaterialReceipt.ReceiptTypeEnum.PURCHASE_RECEIPT.toString()
 								.equalsIgnoreCase(materialReceipt.getReceiptType().toString())) {
 					HashMap<String, String> hashMap = new HashMap<>();
-					hashMap.put("receivedquantity", "receivedquantity "+operationToPerform+" "+ receivedQuantityToAdjust);
+					hashMap.put("receivedquantity",
+							"receivedquantity " + operationToPerform + " " + receivedQuantityToAdjust);
 					materialReceiptDetail.getPurchaseOrderDetail().setTenantId(tenantId);
 					receiptNoteRepository.updateColumn(
 							new PurchaseOrderDetailEntity().toEntity(materialReceiptDetail.getPurchaseOrderDetail()),
