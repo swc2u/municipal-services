@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.egov.assets.common.Pagination;
+import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.model.IndentSearch;
 import org.egov.assets.model.PriceList;
 import org.egov.assets.model.PriceListDetails;
@@ -146,7 +147,7 @@ public class PurchaseOrderJdbcRepository extends org.egov.assets.common.JdbcRepo
 	}
 
 	public boolean getIsIndentValidForPOCreate(String indentNumber, String code) {
-		String validityQuery = "select count(*) from indentdetail where indentquantity=poorderedquantity and material=:code and indentNumber=:indentNumber";
+		String validityQuery = "select count(*) from indentdetail where indentquantity=poorderedquantity+indentissuedquantity and material=:code and indentNumber=:indentNumber";
 		Map params = new HashMap<String, Object>();
 		params.put("indentNumber", indentNumber);
 		params.put("code", code);
@@ -277,12 +278,10 @@ public class PurchaseOrderJdbcRepository extends org.egov.assets.common.JdbcRepo
 		if (purchaseOrderSearch.getStatus() != null) {
 			if (params.length() > 0)
 				params.append(" and ");
-//			params.append("status =:status");
-			List<String> list =
-					  Stream.of(purchaseOrderSearch.getStatus().split(","))
-					  .collect(Collectors.toList());
+			// params.append("status =:status");
+			List<String> list = Stream.of(purchaseOrderSearch.getStatus().split(",")).collect(Collectors.toList());
 			params.append("status in(:status)");
-			paramValues.put("status",list );
+			paramValues.put("status", list);
 		}
 
 		if (purchaseOrderSearch.getStateId() != null) {
@@ -332,7 +331,6 @@ public class PurchaseOrderJdbcRepository extends org.egov.assets.common.JdbcRepo
 
 		return page;
 	}
-
 
 	public Pagination<PurchaseOrder> searchPOsForAdvanceRequisition(String tenantId) {
 		Pagination<PurchaseOrder> page = new Pagination<>();
@@ -397,18 +395,21 @@ public class PurchaseOrderJdbcRepository extends org.egov.assets.common.JdbcRepo
 
 	public void markIndentUsedForPo(PurchaseOrderRequest purchaseOrderRequest, String tenantId) {
 		for (PurchaseOrder purchaseOrder : purchaseOrderRequest.getPurchaseOrders()) {
-			if (purchaseOrder.getStatus().equals(PurchaseOrder.StatusEnum.fromValue("Approved")))
-				for (PurchaseOrderDetail purchaseOrderDetail : purchaseOrder.getPurchaseOrderDetails()) {
-					for (PurchaseIndentDetail purchaseIndentDetail : purchaseOrderDetail.getPurchaseIndentDetails()) {
-						Map<String, Object> paramValues = new HashMap<>();
+			// if
+			// (purchaseOrder.getStatus().equals(PurchaseOrder.StatusEnum.fromValue("Approved")))
 
-						String query = "update indentdetail set poorderedquantity = poorderedquantity + :indentquantity where id = :id and tenantid = :tenantId and (deleted is not true or deleted is null)";
-						paramValues.put("id", purchaseIndentDetail.getIndentDetail().getId());
-						paramValues.put("tenantId", tenantId);
-						paramValues.put("indentquantity", purchaseIndentDetail.getIndentDetail().getIndentQuantity());
-						namedParameterJdbcTemplate.update(query.toString(), paramValues);
-					}
+			for (PurchaseOrderDetail purchaseOrderDetail : purchaseOrder.getPurchaseOrderDetails()) {
+				for (PurchaseIndentDetail purchaseIndentDetail : purchaseOrderDetail.getPurchaseIndentDetails()) {
+					Map<String, Object> paramValues = new HashMap<>();
+					String query = "update indentdetail set poorderedquantity = poorderedquantity + :indentquantity where id = :id and tenantid = :tenantId and (deleted is not true or deleted is null)";
+					paramValues.put("id", purchaseIndentDetail.getIndentDetail().getId());
+					paramValues.put("tenantId", tenantId);
+//					paramValues.put("indentquantity", purchaseIndentDetail.getIndentDetail().getIndentQuantity());
+					paramValues.put("indentquantity", purchaseOrderDetail.getOrderQuantity());
+					
+					namedParameterJdbcTemplate.update(query.toString(), paramValues);
 				}
+			}
 		}
 	}
 

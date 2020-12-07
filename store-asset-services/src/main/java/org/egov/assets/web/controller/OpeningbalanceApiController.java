@@ -7,10 +7,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
-import org.egov.assets.model.IndentRequest;
-import org.egov.assets.model.IndentResponse;
 import org.egov.assets.model.MaterialReceipt;
 import org.egov.assets.model.MaterialReceiptSearch;
 import org.egov.assets.model.OpeningBalanceRequest;
@@ -26,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +48,7 @@ public class OpeningbalanceApiController {
 		return new ResponseEntity<>(materialResponse, HttpStatus.OK);
 	}
 
+	@CrossOrigin
 	@PostMapping(value = "/_update", produces = { "application/json" }, consumes = { "application/json" })
 	public ResponseEntity<OpeningBalanceResponse> openingbalanceUpdatePost(
 			@Valid @RequestParam(value = "tenantId", required = true) String tenantId,

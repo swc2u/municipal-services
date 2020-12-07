@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.model.AuctionBidder;
 import org.egov.ps.model.Document;
+import org.egov.ps.model.ExtensionFee;
 import org.egov.ps.model.Owner;
 import org.egov.ps.model.OwnerDetails;
 import org.egov.ps.model.PaymentConfig;
@@ -28,6 +29,7 @@ import org.egov.ps.web.contracts.EstateAccount;
 import org.egov.ps.web.contracts.EstateDemand;
 import org.egov.ps.web.contracts.EstatePayment;
 import org.egov.ps.web.contracts.EstateRentSummary;
+import org.egov.ps.web.contracts.ExtensionFeeRequest;
 import org.egov.ps.web.contracts.PaymentStatusEnum;
 import org.egov.ps.web.contracts.PropertyPenaltyRequest;
 import org.egov.ps.web.contracts.PropertyRequest;
@@ -88,7 +90,26 @@ public class PropertyEnrichmentService {
 		enrichEstateDemand(property, requestInfo);
 		enrichEstatePayment(property, requestInfo);
 		enrichEstateAccount(property, requestInfo);
+		enrichAccountStatementDoc(property,requestInfo);
 
+	}
+
+	private void enrichAccountStatementDoc(Property property, RequestInfo requestInfo) {
+		if(property.getPropertyDetails().getAccountStatementDocument()!=null){
+			List<Document> accountStatementDoc = property.getPropertyDetails().getAccountStatementDocument();
+			if (!CollectionUtils.isEmpty(accountStatementDoc)) {
+				accountStatementDoc.forEach(document -> {
+					if (document.getId() == null || document.getId().isEmpty()) {
+						document.setId(UUID.randomUUID().toString());
+					}
+					document.setTenantId(property.getTenantId());
+					document.setReferenceId(property.getPropertyDetails().getId());
+					document.setPropertyId(property.getId());
+					AuditDetails docAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+					document.setAuditDetails(docAuditDetails);
+				});
+			}
+		}
 	}
 
 	private void enrichOwners(Property property, RequestInfo requestInfo) {
@@ -176,8 +197,7 @@ public class PropertyEnrichmentService {
 
 		PaymentConfig paymentConfig = property.getPropertyDetails().getPaymentConfig();
 		if (paymentConfig != null) {
-			AuditDetails paymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
-					paymentConfig.getId() == null);
+			AuditDetails paymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 			if (paymentConfig.getId() == null || paymentConfig.getId().isEmpty()) {
 				paymentConfig.setId(UUID.randomUUID().toString());
 				paymentConfig.setTenantId(property.getTenantId());
@@ -185,21 +205,26 @@ public class PropertyEnrichmentService {
 			}
 			paymentConfig.setAuditDetails(paymentAuditDetails);
 
-			paymentConfig.getPaymentConfigItems().forEach(paymentConfigItem -> {
-				if (paymentConfigItem.getId() == null || paymentConfigItem.getId().isEmpty()) {
-					paymentConfigItem.setId(UUID.randomUUID().toString());
-					paymentConfigItem.setTenantId(property.getTenantId());
-					paymentConfigItem.setPaymentConfigId(paymentConfig.getId());
-				}
-			});
+			if (!CollectionUtils.isEmpty(paymentConfig.getPaymentConfigItems())) {
+				paymentConfig.getPaymentConfigItems().forEach(paymentConfigItem -> {
+					if (paymentConfigItem.getId() == null || paymentConfigItem.getId().isEmpty()) {
+						paymentConfigItem.setId(UUID.randomUUID().toString());
+						paymentConfigItem.setTenantId(property.getTenantId());
+						paymentConfigItem.setPaymentConfigId(paymentConfig.getId());
+					}
+				});
+			}
 
-			paymentConfig.getPremiumAmountConfigItems().forEach(premiumAmountConfigItem -> {
-				if (premiumAmountConfigItem.getId() == null || premiumAmountConfigItem.getId().isEmpty()) {
-					premiumAmountConfigItem.setId(UUID.randomUUID().toString());
-					premiumAmountConfigItem.setTenantId(property.getTenantId());
-					premiumAmountConfigItem.setPaymentConfigId(paymentConfig.getId());
-				}
-			});
+			if (!CollectionUtils.isEmpty(paymentConfig.getPremiumAmountConfigItems())) {
+				paymentConfig.getPremiumAmountConfigItems().forEach(premiumAmountConfigItem -> {
+					if (premiumAmountConfigItem.getId() == null || premiumAmountConfigItem.getId().isEmpty()) {
+						premiumAmountConfigItem.setId(UUID.randomUUID().toString());
+						premiumAmountConfigItem.setTenantId(property.getTenantId());
+						premiumAmountConfigItem.setPaymentConfigId(paymentConfig.getId());
+					}
+				});
+			}
+
 		}
 	}
 
@@ -290,10 +315,11 @@ public class PropertyEnrichmentService {
 
 				}
 				estateDemand.setRemainingRentPenalty(estateDemand.getPenaltyInterest());
-				estateDemand.setRemainingGST(estateDemand.getGstInterest());
+				estateDemand.setRemainingGST(estateDemand.getGst());
+				estateDemand.setRemainingGSTPenalty(estateDemand.getGstInterest());
 				estateDemand.setRemainingRent(estateDemand.getRent());
 				estateDemand.setInterestSince(estateDemand.getGenerationDate());
-				estateDemand.setIsPrevious(false);
+				estateDemand.setIsPrevious(estateDemand.getIsPrevious());
 				AuditDetails estateDemandAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 				estateDemand.setAuditDetails(estateDemandAuditDetails);
 
@@ -457,19 +483,49 @@ public class PropertyEnrichmentService {
 	}
 
 	public Calculation enrichGenerateDemand(RequestInfo requestInfo, double paymentAmount, String consumerCode,
-			Property property) {
+			Property property, String demandFor) {
 
 		List<TaxHeadEstimate> estimates = new LinkedList<>();
 
 		TaxHeadEstimate estimateDue = new TaxHeadEstimate();
 		estimateDue.setEstimateAmount(new BigDecimal(paymentAmount));
-		estimateDue.setCategory(Category.PENALTY);
-		estimateDue.setTaxHeadCode(getTaxHeadCode(property.getPenaltyBusinessService(), Category.PENALTY));
+		if (demandFor.equals(PSConstants.EXTENSION_FEE)) {
+			estimateDue.setCategory(Category.FEE);
+			estimateDue.setTaxHeadCode(getTaxHeadCode(property.getExtensionFeeBusinessService(), Category.FEE));
+		} else if (demandFor.equals(PSConstants.PROPERTY_VIOLATION)) {
+			estimateDue.setCategory(Category.PENALTY);
+			estimateDue.setTaxHeadCode(getTaxHeadCode(property.getPenaltyBusinessService(), Category.PENALTY));
+		} else if (demandFor.equals(PSConstants.SECURITY_DEPOSIT)) {
+			estimateDue.setCategory(Category.FEE);
+			estimateDue.setTaxHeadCode(getTaxHeadCode(property.getSecurityDepositBusinessService(), Category.FEE));
+		}
 		estimates.add(estimateDue);
 
 		Calculation calculation = Calculation.builder().applicationNumber(consumerCode).taxHeadEstimates(estimates)
 				.tenantId(property.getTenantId()).build();
 		return calculation;
+	}
+
+	public void enrichExtensionFeeRequest(ExtensionFeeRequest extensionFeeRequest) {
+		extensionFeeRequest.getExtensionFees().forEach(extensionFee -> {
+			enrichExtensionFee(extensionFeeRequest.getRequestInfo(), extensionFee);
+		});
+	}
+
+	private void enrichExtensionFee(RequestInfo requestInfo, ExtensionFee extensionFee) {
+		Property property = propertyRepository.findPropertyById(extensionFee.getProperty().getId());
+		AuditDetails extensionFeeAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
+				extensionFee.getId() == null);
+		if (null == extensionFee.getId()) {
+			extensionFee.setId(UUID.randomUUID().toString());
+			extensionFee.setRemainingDue(extensionFee.getAmount());
+			extensionFee.setIsPaid(false);
+			extensionFee.setStatus(PaymentStatusEnum.UNPAID);
+			extensionFee.setGenerationDate(new Date().getTime());
+		}
+		extensionFee.setTenantId(property.getTenantId());
+		extensionFee.setBranchType(property.getPropertyDetails().getBranchType());
+		extensionFee.setAuditDetails(extensionFeeAuditDetails);
 	}
 
 }

@@ -20,6 +20,7 @@ import org.egov.ps.validator.application.OwnerValidator;
 import org.egov.ps.web.contracts.ApplicationRequest;
 import org.egov.ps.web.contracts.EstateAccount;
 import org.egov.ps.web.contracts.EstateDemand;
+import org.egov.ps.web.contracts.EstatePayment;
 import org.egov.ps.web.contracts.EstateRentSummary;
 import org.egov.tracer.model.CustomException;
 import org.json.JSONException;
@@ -120,14 +121,20 @@ public class ApplicationValidatorService {
 			throw new CustomException("INVALID_PROPERTY", "Could not find property with the given id:" + propertyId);
 		}
 		if (!property.getState().contentEquals(PSConstants.PM_APPROVED)
-				&& !property.getState().contentEquals(PSConstants.ES_APPROVED)) {
+				&& !property.getState().contentEquals(PSConstants.ES_APPROVED)
+				&& !property.getState().contentEquals(PSConstants.ES_PM_MM_APPROVED)) {
 			throw new CustomException("INVALID_PROPERTY", "Property with the given " + propertyId + " is not approved");
 		}
-
-		Double rentDue = getRentDue(property);
+		Double rentDue = 0.0;
+		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())
+				&& property.getPropertyDetails().getEstateAccount() != null
+				&& property.getPropertyDetails().getPaymentConfig() != null
+				&& property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
+			rentDue = getRentDue(property);
+		}
 		if (rentDue > 0) {
 			throw new CustomException("PROPERTY_PENDING_DUE", String.format(
-					"Property has pending due of Rs: %s, so you can not apply for %s, please clear the due before applying.",
+					"Property has pending due of Rs: %8.2f, so you can not apply for %s, please clear the due before applying.",
 					rentDue, application.getApplicationType()));
 		}
 	}
@@ -137,9 +144,18 @@ public class ApplicationValidatorService {
 		propertyDetailsIds.add(property.getPropertyDetails().getId());
 		List<EstateDemand> demands = propertyRepository.getDemandDetailsForPropertyDetailsIds(propertyDetailsIds);
 		EstateAccount estateAccount = propertyRepository.getPropertyEstateAccountDetails(propertyDetailsIds);
+		List<EstatePayment> payments = propertyRepository.getEstatePaymentsForPropertyDetailsIds(propertyDetailsIds);
+		estateRentCollectionService.settle(demands, payments, estateAccount, 18,
+				property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
+				property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue());
 		EstateRentSummary estateRentSummary = estateRentCollectionService.calculateRentSummary(demands, estateAccount,
-				property.getPropertyDetails().getInterestRate());
-		return estateRentSummary.getBalanceRent();
+				property.getPropertyDetails().getInterestRate(),
+				property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
+				property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue());
+		Double rentDue = estateRentSummary.getBalanceRent() + estateRentSummary.getBalanceGST()
+				+ estateRentSummary.getBalanceGSTPenalty() + estateRentSummary.getBalanceRentPenalty()
+				+ estateRentSummary.getBalanceAmount();
+		return rentDue;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -264,7 +280,14 @@ public class ApplicationValidatorService {
 					&& application.getState().contains(PSConstants.PENDING_SO_APPROVAL)) {
 
 				Property property = propertyRepository.findPropertyById(application.getProperty().getId());
-				Double rentDue = getRentDue(property);
+				Double rentDue = 0.0;
+				if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())
+						&& property.getPropertyDetails().getEstateAccount() != null
+						&& property.getPropertyDetails().getPaymentConfig() != null && property.getPropertyDetails()
+								.getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
+					rentDue = getRentDue(property);
+				}
+
 				if (rentDue > 0) {
 					throw new CustomException("PROPERTY_RENT_DUE",
 							String.format("Property has rent due: %s, so can not approve for NDC", rentDue));

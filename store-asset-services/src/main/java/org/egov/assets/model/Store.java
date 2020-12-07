@@ -162,8 +162,6 @@ public class Store {
 	 **/
 
 	@NotNull
-
-	@Pattern(regexp = "^[a-zA-Z0-9]*$")
 	@Size(max = 50)
 	public String getCode() {
 		return code;
@@ -206,8 +204,6 @@ public class Store {
 	 **/
 
 	@NotNull
-
-	@Pattern(regexp = "^[,.a-zA-Z 0-9]*$")
 	@Size(max = 1000)
 	public String getDescription() {
 		return description;
@@ -252,9 +248,7 @@ public class Store {
 	 **/
 
 	@Valid
-
 	@NotNull
-
 	public Location getOfficeLocation() {
 		return officeLocation;
 	}
@@ -275,8 +269,6 @@ public class Store {
 	 **/
 
 	@NotNull
-
-	@Pattern(regexp = "^[#.0-9a-zA-Z, -]*$")
 	@Size(max = 1000)
 	public String getBillingAddress() {
 		return billingAddress;
@@ -298,8 +290,6 @@ public class Store {
 	 **/
 
 	@NotNull
-
-	@Pattern(regexp = "^[#.0-9a-zA-Z, -]*$")
 	@Size(max = 1000)
 	public String getDeliveryAddress() {
 		return deliveryAddress;
@@ -320,7 +310,6 @@ public class Store {
 	 * @return contactNo1
 	 **/
 
-	@Pattern(regexp = "^[0-9]*$")
 	@Size(max = 10)
 	public String getContactNo1() {
 		return contactNo1;
@@ -341,7 +330,6 @@ public class Store {
 	 * @return contactNo2
 	 **/
 
-	@Pattern(regexp = "^[0-9]*$")
 	public String getContactNo2() {
 		return contactNo2;
 	}
@@ -361,7 +349,6 @@ public class Store {
 	 * @return email
 	 **/
 
-	@Pattern(regexp = "^$|([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$")
 	@Size(max = 100)
 	public String getEmail() {
 		return email;
