@@ -15,7 +15,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.egov.ps.config.Configuration;
-import org.egov.ps.model.EstateDemandCriteria;
 import org.egov.ps.model.ModeEnum;
 import org.egov.ps.model.PaymentConfig;
 import org.egov.ps.model.PaymentConfigItems;
@@ -70,13 +69,6 @@ public class EstateDemandGenerationServiceTests {
 		when(propertyRepository.getPropertyDetailsEstatePaymentDetails(anyList())).thenReturn(estatePaymentDummyList);
 		when(propertyRepository.getAccountDetailsForPropertyDetailsIds(anyList())).thenReturn(estateDummyAccount);
 	}
-
-//	@Test
-//	public void createDemandTest() {
-//
-//		AtomicInteger dummyResult = estateDemandGenerationService.createDemand(EstateDemandCriteria.builder().build());
-//		assertTrue("Error, can't update more than one record", 1 >= dummyResult.get());
-//	}
 
 	@Test
 	public void createMissingDemandTest() {
