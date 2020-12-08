@@ -90,7 +90,7 @@ public class OpeningBalanceService extends DomainService {
 
 	@Value("${inv.openbalance.updatestatus.topic}")
 	private String updatestatusTopic;
-	
+
 	public List<MaterialReceipt> create(OpeningBalanceRequest openBalReq, String tenantId) {
 		try {
 			validate(openBalReq.getMaterialReceipt(), Constants.ACTION_CREATE, tenantId, openBalReq.getRequestInfo());
@@ -134,8 +134,9 @@ public class OpeningBalanceService extends DomainService {
 				}
 				WorkFlowDetails workFlowDetails = openBalReq.getWorkFlowDetails();
 				workFlowDetails.setBusinessId(materialReceipt.getMrnNumber());
-				workflowIntegrator.callWorkFlow(openBalReq.getRequestInfo(), workFlowDetails, materialReceipt.getTenantId());
-				
+				workflowIntegrator.callWorkFlow(openBalReq.getRequestInfo(), workFlowDetails,
+						materialReceipt.getTenantId());
+
 			});
 
 			for (MaterialReceipt material : openBalReq.getMaterialReceipt()) {
@@ -191,13 +192,11 @@ public class OpeningBalanceService extends DomainService {
 					} else {
 						detail.setReceiptDetailsAddnInfo(Collections.EMPTY_LIST);
 					}
-					jdbcRepository.markDeleted(materialReceiptDetailAddlnInfoIds, tenantId,
-							"materialreceiptdetailaddnlinfo", "receiptdetailid", detail.getId());
-
-					jdbcRepository.markDeleted(materialReceiptDetailIds, tenantId, "materialreceiptdetail", "mrnNumber",
-							materialReceipt.getMrnNumber());
-
 				});
+				jdbcRepository.markDeletedPKeyIn(materialReceiptDetailAddlnInfoIds, tenantId,
+						"materialreceiptdetailaddnlinfo", "receiptdetailid", materialReceiptDetailIds);
+				jdbcRepository.markDeleted(materialReceiptDetailIds, tenantId, "materialreceiptdetail", "mrnNumber",
+						materialReceipt.getMrnNumber());
 			});
 
 			for (MaterialReceipt material : openBalReq.getMaterialReceipt()) {
@@ -354,12 +353,12 @@ public class OpeningBalanceService extends DomainService {
 						if (null != detail.getReceiptDetailsAddnInfo()) {
 							for (MaterialReceiptDetailAddnlinfo addInfo : detail.getReceiptDetailsAddnInfo()) {
 
-/*								if (null != material && material.getLotControl() == true
-										&& isEmpty(addInfo.getLotNo())) {
-									errors.addDataError(ErrorCode.LOT_NO_NOT_EXIST.getCode(),
-											addInfo.getLotNo() + " at serial no." + detailIndex);
-								}
-*/
+								/*
+								 * if (null != material && material.getLotControl() == true &&
+								 * isEmpty(addInfo.getLotNo())) {
+								 * errors.addDataError(ErrorCode.LOT_NO_NOT_EXIST.getCode(), addInfo.getLotNo()
+								 * + " at serial no." + detailIndex); }
+								 */
 								if (null != material && material.getShelfLifeControl() == true
 										&& isEmpty(addInfo.getExpiryDate())
 										|| (!isEmpty(addInfo.getExpiryDate())
@@ -530,8 +529,8 @@ public class OpeningBalanceService extends DomainService {
 	public OpeningBalanceResponse updateStatus(OpeningBalanceRequest openingBalance) {
 
 		try {
-			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(openingBalance.getRequestInfo(), openingBalance.getWorkFlowDetails(),
-					openingBalance.getWorkFlowDetails().getTenantId());
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(openingBalance.getRequestInfo(),
+					openingBalance.getWorkFlowDetails(), openingBalance.getWorkFlowDetails().getTenantId());
 			openingBalance.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updatestatusTopic, openingBalance);
 			OpeningBalanceResponse response = new OpeningBalanceResponse();
