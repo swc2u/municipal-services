@@ -13,7 +13,7 @@ public class ReceiptConsumer {
 
 	@Autowired
 	private PaymentUpdateService paymentUpdateService;
-	
+
 	@Autowired
 	private PaymentNotificationService paymentNotificationService;
 
