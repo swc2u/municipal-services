@@ -1,6 +1,5 @@
 package org.egov.ps.controller;
 
-
 import javax.validation.Valid;
 
 import org.egov.common.contract.response.ResponseInfo;
@@ -39,16 +38,20 @@ public class EstateCalculationController {
 	private FileStoreUtils fileStoreUtils;
 
 	@PostMapping("/_calculation")
-	public ResponseEntity<EstateCalculationResponse> estateCalculation(@Valid @ModelAttribute ExcelSearchCriteria searchCriteria,
+	public ResponseEntity<EstateCalculationResponse> estateCalculation(
+			@Valid @ModelAttribute ExcelSearchCriteria searchCriteria,
 			@Valid @RequestBody RequestInfoMapper requestInfoWrapper) {
 		EstateModuleResponse estateCalculations = new EstateModuleResponse();
 		try {
 			String filePath = fileStoreUtils.fetchFileStoreUrl(searchCriteria);
 			if (!filePath.isEmpty()) {
-				estateCalculations = estateCalculationExcelReadService.getDatafromExcel(new UrlResource(filePath).getInputStream(), 0);
+				estateCalculations = estateCalculationExcelReadService
+						.getDatafromExcel(new UrlResource(filePath).getInputStream(), 0);
 			}
-			ResponseInfo resInfo = responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true);
-			EstateCalculationResponse response = EstateCalculationResponse.builder().estateModuleResponse(estateCalculations).responseInfo(resInfo).build();
+			ResponseInfo resInfo = responseInfoFactory
+					.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true);
+			EstateCalculationResponse response = EstateCalculationResponse.builder()
+					.estateModuleResponse(estateCalculations).responseInfo(resInfo).build();
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			log.error("Error occur during runnig controller method estateCalculation():" + e.getMessage());
