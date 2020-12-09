@@ -87,6 +87,22 @@ config:
         dockerfile: "build/maven/Dockerfile"
       - work-dir: "tl-services/src/main/resources/db"
         image-name: "tl-services-db"
+          
+  - name: "builds/municipal-services/rp-services"
+    build:
+      - work-dir: "rp-services"
+        image-name: "rp-services"
+        dockerfile: "build/maven/Dockerfile"
+      - work-dir: "rp-services/src/main/resources/db"
+        image-name: "rp-services-db"
+        
+  - name: "builds/municipal-services/est-services"
+    build:
+      - work-dir: "est-services"
+        image-name: "est-services"
+        dockerfile: "build/maven/Dockerfile"
+      - work-dir: "est-services/src/main/resources/db"
+        image-name: "est-services-db"
 
   - name: "builds/municipal-services/firenoc-services"
     build:
