@@ -139,7 +139,18 @@ public class EstateDemand implements Comparable<EstateDemand> {
    */
   @JsonProperty("adjustmentDate")
   private long adjustmentDate;   
+  
 
+  /**
+   * For comment demand
+   */
+  @JsonProperty("comment")
+  private String comment;
+
+  @Builder.Default
+  @JsonProperty("isBifurcate")
+  private boolean isBifurcate=false;
+  
   /**
    * paid of demand.
    */
@@ -203,6 +214,8 @@ public class EstateDemand implements Comparable<EstateDemand> {
   @Builder.Default
   @JsonProperty("remainingGSTPenalty")
   private Double remainingGSTPenalty = 0.0;
+  
+  
 
   @Override
   public int compareTo(EstateDemand other) {

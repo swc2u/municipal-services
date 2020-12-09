@@ -16,6 +16,7 @@ import org.egov.ps.model.OfflinePaymentDetails;
 import org.egov.ps.model.OfflinePaymentDetails.OfflinePaymentType;
 import org.egov.ps.model.Owner;
 import org.egov.ps.model.Property;
+import org.egov.ps.model.PropertyCriteria;
 import org.egov.ps.model.PropertyPenalty;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.producer.Producer;
@@ -26,6 +27,7 @@ import org.egov.ps.service.calculation.PenaltyCollectionService;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.util.Util;
 import org.egov.ps.web.contracts.AccountStatementRequest;
+import org.egov.ps.web.contracts.AuditDetails;
 import org.egov.ps.web.contracts.PenaltyStatementResponse;
 import org.egov.ps.web.contracts.PenaltyStatementSummary;
 import org.egov.ps.web.contracts.PropertyPenaltyRequest;
@@ -164,6 +166,8 @@ public class PropertyViolationService {
 		demandService.createCashPaymentProperty(requestInfo, new BigDecimal(paymentAmount), bills.get(0).getId(), owner,
 				propertyDb.getPenaltyBusinessService());
 
+		AuditDetails auditDetails = utils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+
 		offlinePaymentDetails.forEach(ofpd -> {
 			ofpd.setId(UUID.randomUUID().toString());
 			ofpd.setDemandId(bills.get(0).getBillDetails().get(0).getDemandId());
@@ -173,6 +177,7 @@ public class PropertyViolationService {
 			ofpd.setFileNumber(propertyDb.getFileNumber());
 			ofpd.setConsumerCode(consumerCode);
 			ofpd.setBillingBusinessService(propertyDb.getPenaltyBusinessService());
+			ofpd.setAuditDetails(auditDetails);
 		});
 
 		List<PropertyPenalty> updatedPenalties = penaltyCollectionService.settle(penalties, paymentAmount);
@@ -216,8 +221,11 @@ public class PropertyViolationService {
 
 		List<String> propertyDetailsIds = new ArrayList<String>();
 		propertyDetailsIds.add(property.getPropertyDetails().getId());
+		List<String> relations = new ArrayList<String>();
+		relations.add(PSConstants.RELATION_OPD);
+		PropertyCriteria criteria = PropertyCriteria.builder().relations(relations).build();
 		List<OfflinePaymentDetails> offlinePaymentDetails = repository
-				.getOfflinePaymentsForPropertyDetailsIds(propertyDetailsIds);
+				.getOfflinePaymentsForPropertyDetailsIds(propertyDetailsIds, criteria);
 		List<OfflinePaymentDetails> filteredOfflinePaymentDetails = offlinePaymentDetails.stream()
 				.filter(offlinePaymentDetail -> null != offlinePaymentDetail.getType()
 						&& offlinePaymentDetail.getType().equals(OfflinePaymentType.PENALTY))

@@ -115,7 +115,7 @@ public class PropertyController {
 				.generateAccountStatementExcel(accountStatementCriteria, request.getRequestInfo());
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
-	
+
 	@PostMapping("/_update_dues")
 	public ResponseEntity<DueAmountResponse> dueamount(@Valid @RequestBody RequestInfoMapper requestInfoWrapper) {
 		propertyService.getDueAmount(requestInfoWrapper.getRequestInfo());

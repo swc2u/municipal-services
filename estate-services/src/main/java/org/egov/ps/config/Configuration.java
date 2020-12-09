@@ -62,20 +62,19 @@ public class Configuration {
 
 	@Value("${persister.save.penalty.topic}")
 	private String savePenaltyTopic;
-	
+
 	@Value("${persister.update.penalty.topic}")
 	private String updatePenaltyTopic;
-	
+
 	@Value("${persister.save.dueamount.topic}")
 	private String dueAmountTopic;
-	
+
 	@Value("${persister.save.extensionfee.topic}")
 	private String saveExtensionFeeTopic;
 
 	@Value("${persister.update.extensionfee.topic}")
 	private String updateExtensionFeeTopic;
 
-	
 	// Workflow
 
 	@Value("${is.workflow.enabled}")
@@ -127,7 +126,7 @@ public class Configuration {
 
 	@Value("${egov.idgen.ps.applicationNum.name}")
 	private String applicationNumberIdgenNamePS;
-	
+
 	@Value("${egov.idgen.ps.penaltyNum.name}")
 	private String penaltyNumberIdgenNamePS;
 
@@ -174,7 +173,7 @@ public class Configuration {
 
 	@Value("${egov.collectionservice.payment.create.path}")
 	private String collectionPaymentEndPoint;
-	
+
 	@Value("${egov.bill.gen.endpoint}")
 	private String billGenerateEndpoint;
 
@@ -186,17 +185,17 @@ public class Configuration {
 
 	@Value("${egov.localization.endpoint.search.path}")
 	private String localizationEndpoint;
-	
-	//Web notiifcation
+
+	// Web notiifcation
 	@Value("${egov.usr.events.create.topic}")
 	private String saveUserEventsTopic;
 
 	@Value("${egov.usr.events.app.pay.link}")
 	private String payLinkForApplication;
-	
+
 	@Value("${egov.usr.events.pay.code}")
 	private String payCode;
-	
+
 	@Value("${egov.ui.app.host}")
 	private String uiAppHost;
 }

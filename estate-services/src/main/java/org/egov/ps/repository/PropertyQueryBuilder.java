@@ -37,8 +37,7 @@ public class PropertyQueryBuilder {
 			+ " ptdl.company_type, ptdl.emd_amount, ptdl.emd_date , ptdl.property_registered_to, ptdl.entity_type, "
 			+ " ptdl.house_number, ptdl.mohalla, ptdl.village, ptdl.interest_rate, "
 
-			+ " pc.id as pc_id, "
-			+ " pc.tenant_id as pc_tenant_id, pc.property_details_id as pc_property_details_id, "
+			+ " pc.id as pc_id, " + " pc.tenant_id as pc_tenant_id, pc.property_details_id as pc_property_details_id, "
 			+ " pc.is_intrest_applicable as pc_is_intrest_applicable, pc.due_date_of_payment as pc_due_date_of_payment, "
 			+ " pc.no_of_months as pc_no_of_months, pc.rate_of_interest as pc_rate_of_interest, "
 			+ " pc.security_amount as pc_security_amount, pc.total_amount as pc_total_amount, "
@@ -93,7 +92,8 @@ public class PropertyQueryBuilder {
 			+ " estd.collected_rent_penalty as estdcollected_rent_penalty,estd.interest_since as estdinterest_since, estd.remaining_gst as estdremaining_gst,"
 			+ " estd.created_by as estdcreated_by, estd.last_modified_by as estdlast_modified_by, "
 			+ " estd.created_time as estdcreated_time, estd.last_modified_time as estdlast_modified_time, "
-			+ " estd.is_adjustment as is_adjustment, estd.adjustment_date as adjustment_date ";
+			+ " estd.is_adjustment as is_adjustment, estd.adjustment_date as adjustment_date, estd.comment as comment, "
+			+ " estd.is_bifurcate as is_bifurcate ";
 
 	private static final String ESTATE_PAYMENT_COLUMNS = " estp.id as estpid, estp.property_details_id as estpproperty_details_id, "
 			+ " estp.receipt_date as estpreceipt_date, estp.rent_received as estprent_received, estp.receipt_no as estpreceipt_no, "
@@ -117,10 +117,12 @@ public class PropertyQueryBuilder {
 			+ " doc.is_active as docis_active, doc.document_type, doc.file_store_id, doc.property_id as docproperty_id,"
 			+ " doc.created_by as dcreated_by, doc.created_time as dcreated_time, doc.last_modified_by as dmodified_by, doc.last_modified_time as dmodified_time ";
 
-	private static final String OFFLINE_PAYMENT_COLUMN = " offline.id as offlineid, "
+	private static final String OFFLINE_PAYMENT_COLUMN = " offline.id as offlineid, offline.comments as offline_comments, "
 			+ " offline.property_details_id as offlineproperty_details_id, offline.demand_id as offlinedemand_id, "
 			+ " offline.amount as offlineamount, offline.bank_name as offlinebank_name, offline.type as offline_type, "
-			+ " offline.transaction_number as offlinetransaction_number, offline.date_of_payment as offlinedate_of_payment ";
+			+ " offline.transaction_number as offlinetransaction_number, offline.date_of_payment as offlinedate_of_payment, "
+			+ " offline.created_by as offline_created_by, offline.last_modified_by as offline_last_modified_by, "
+			+ " offline.created_time as offline_created_time, offline.last_modified_time as offline_last_modified_time ";
 
 	private static final String PROPERTY_PENALTY_COLUMN = " penalty.id as penalty_id, penalty.tenantid as penalty_tenantid, "
 			+ " penalty.property_id as penalty_property_id, penalty.branch_type as penalty_branch_type, "
@@ -163,6 +165,7 @@ public class PropertyQueryBuilder {
 	public static final String RELATION_BIDDER = "bidder";
 	public static final String RELATION_ESTATE_FINANCE = "finance";
 	public static final String RELATION_OFFLINE_PAYMENT = "offline";
+	public static final String RELATION_ACC_STATEMENT_DOCUMENT = "accstmtdoc";
 
 	private String addPaginationWrapper(String query, Map<String, Object> preparedStmtList, PropertyCriteria criteria) {
 
@@ -331,12 +334,18 @@ public class PropertyQueryBuilder {
 		return builder.toString();
 	}
 
-	public String getOfflinePaymentsQuery(List<String> propertyDetailIds, Map<String, Object> params) {
+	public String getOfflinePaymentsQuery(List<String> propertyDetailIds, Map<String, Object> params,
+			PropertyCriteria criteria) {
 		StringBuilder sb = new StringBuilder(SELECT);
 		sb.append(OFFLINE_PAYMENT_COLUMN);
 		sb.append(" FROM " + OFFLINE_PAYMENT_TABLE);
 		sb.append(" where offline.property_details_id IN (:propertyDetailIds)");
 		params.put("propertyDetailIds", propertyDetailIds);
+
+		List<String> relations = criteria.getRelations();
+		if (relations == null || relations.contains(PSConstants.RELATION_OPD)) {
+			sb.append(" ORDER BY offline.last_modified_time desc ");
+		}
 		return sb.toString();
 	}
 
@@ -384,6 +393,15 @@ public class PropertyQueryBuilder {
 		sb.append(" where estp.property_details_id IN (:propertyDetailIds)");
 		sb.append(" order by payment_date asc ");
 		params.put("propertyDetailIds", propertyDetailIds);
+		return sb.toString();
+	}
+	
+	public String getAccStatementDocQuery(List<String> propertyDetailIds, Map<String, Object> params) {
+		StringBuilder sb = new StringBuilder(SELECT);
+		sb.append(OWNER_DOCS_COLUMNS);
+		sb.append(" FROM cs_ep_documents_v1 doc ");
+		sb.append(" where doc.reference_id IN (:references)");
+		params.put("references", propertyDetailIds);
 		return sb.toString();
 	}
 }

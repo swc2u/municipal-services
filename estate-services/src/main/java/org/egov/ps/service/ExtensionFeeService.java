@@ -17,6 +17,7 @@ import org.egov.ps.model.OfflinePaymentDetails;
 import org.egov.ps.model.OfflinePaymentDetails.OfflinePaymentType;
 import org.egov.ps.model.Owner;
 import org.egov.ps.model.Property;
+import org.egov.ps.model.PropertyCriteria;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.producer.Producer;
 import org.egov.ps.repository.PropertyRepository;
@@ -26,6 +27,7 @@ import org.egov.ps.service.calculation.ExtensionFeeCollectionService;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.util.Util;
 import org.egov.ps.web.contracts.AccountStatementRequest;
+import org.egov.ps.web.contracts.AuditDetails;
 import org.egov.ps.web.contracts.ExtensionFeeRequest;
 import org.egov.ps.web.contracts.ExtensionFeeStatementResponse;
 import org.egov.ps.web.contracts.ExtensionFeeStatementSummary;
@@ -103,8 +105,11 @@ public class ExtensionFeeService {
 
 		List<String> propertyDetailsIds = new ArrayList<String>();
 		propertyDetailsIds.add(property.getPropertyDetails().getId());
+		List<String> relations = new ArrayList<String>();
+		relations.add(PSConstants.RELATION_OPD);
+		PropertyCriteria criteria = PropertyCriteria.builder().relations(relations).build();
 		List<OfflinePaymentDetails> offlinePaymentDetails = repository
-				.getOfflinePaymentsForPropertyDetailsIds(propertyDetailsIds);
+				.getOfflinePaymentsForPropertyDetailsIds(propertyDetailsIds, criteria);
 		List<OfflinePaymentDetails> filteredOfflinePaymentDetails = offlinePaymentDetails.stream()
 				.filter(offlinePaymentDetail -> null != offlinePaymentDetail.getType()
 						&& offlinePaymentDetail.getType().equals(OfflinePaymentType.EXTENSIONFEE))
@@ -219,6 +224,8 @@ public class ExtensionFeeService {
 		demandService.createCashPaymentProperty(requestInfo, new BigDecimal(paymentAmount), bills.get(0).getId(), owner,
 				propertyDb.getExtensionFeeBusinessService());
 
+		AuditDetails auditDetails = utils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+
 		offlinePaymentDetails.forEach(ofpd -> {
 			ofpd.setId(UUID.randomUUID().toString());
 			ofpd.setDemandId(bills.get(0).getBillDetails().get(0).getDemandId());
@@ -228,6 +235,7 @@ public class ExtensionFeeService {
 			ofpd.setFileNumber(propertyDb.getFileNumber());
 			ofpd.setConsumerCode(consumerCode);
 			ofpd.setBillingBusinessService(propertyDb.getExtensionFeeBusinessService());
+			ofpd.setAuditDetails(auditDetails);
 		});
 
 		List<ExtensionFee> unpaidExtensionFees = extensionFeeCollectionService.settle(extensionFees, paymentAmount);

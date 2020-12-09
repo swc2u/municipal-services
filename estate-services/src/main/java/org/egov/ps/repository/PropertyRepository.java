@@ -93,6 +93,7 @@ public class PropertyRepository {
 				relations.add(PropertyQueryBuilder.RELATION_BIDDER);
 				relations.add(PropertyQueryBuilder.RELATION_ESTATE_FINANCE);
 				relations.add(PropertyQueryBuilder.RELATION_OFFLINE_PAYMENT);
+				relations.add(PropertyQueryBuilder.RELATION_ACC_STATEMENT_DOCUMENT);
 			}
 		}
 		if (relations.contains(PropertyQueryBuilder.RELATION_OWNER)) {
@@ -112,12 +113,42 @@ public class PropertyRepository {
 			this.addEstatePaymentToProperties(properties);
 		}
 		if (relations.contains(PropertyQueryBuilder.RELATION_OFFLINE_PAYMENT)) {
-			this.addOfflinePaymentToProperties(properties);
+			this.addOfflinePaymentToProperties(properties, criteria);
+		}
+		if (relations.contains(PropertyQueryBuilder.RELATION_ACC_STATEMENT_DOCUMENT)) {
+			this.addAccStatemetDocToProperties(properties);
 		}
 
 		return properties;
 	}
+	
+	private void addAccStatemetDocToProperties(List<Property> properties) {
+		if (CollectionUtils.isEmpty(properties)) {
+			return;
+		}
+		/**
+		 * Extract property detail ids.
+		 */
+		List<String> propertyDetailsIds = properties.stream().map(property -> property.getPropertyDetails().getId())
+				.collect(Collectors.toList());
 
+		/**
+		 * Fetch owners from database
+		 */
+		Map<String, Object> params = new HashMap<String, Object>(1);
+		String accountStatementDocQuery = propertyQueryBuilder.getAccStatementDocQuery(propertyDetailsIds, params);
+		List<Document> accStatementDoc = namedParameterJdbcTemplate.query(accountStatementDocQuery, params, documentRowMapper);
+
+		/**
+		 * Assign owners to corresponding properties
+		 */
+		properties.stream().forEach(property -> {
+			property.getPropertyDetails().setAccountStatementDocument(accStatementDoc.stream().filter(
+					docuement -> docuement.getReferenceId().equalsIgnoreCase(property.getPropertyDetails().getId()))
+					.collect(Collectors.toList()));
+		});
+	}
+	
 	private void addOwnersToProperties(List<Property> properties) {
 		if (CollectionUtils.isEmpty(properties)) {
 			return;
@@ -273,7 +304,7 @@ public class PropertyRepository {
 		});
 	}
 
-	private void addOfflinePaymentToProperties(List<Property> properties) {
+	private void addOfflinePaymentToProperties(List<Property> properties, PropertyCriteria criteria) {
 		/**
 		 * Extract property detail ids.
 		 */
@@ -283,7 +314,8 @@ public class PropertyRepository {
 		/**
 		 * Fetch bidders from database
 		 */
-		List<OfflinePaymentDetails> offlinePayments = this.getOfflinePaymentsForPropertyDetailsIds(propertyDetailsIds);
+		List<OfflinePaymentDetails> offlinePayments = this.getOfflinePaymentsForPropertyDetailsIds(propertyDetailsIds,
+				criteria);
 
 		/**
 		 * Assign court cases to corresponding properties
@@ -332,9 +364,11 @@ public class PropertyRepository {
 		return namedParameterJdbcTemplate.query(query, preparedStmtList, estateAccountrowMapper);
 	}
 
-	public List<OfflinePaymentDetails> getOfflinePaymentsForPropertyDetailsIds(List<String> propertyDetailsIds) {
+	public List<OfflinePaymentDetails> getOfflinePaymentsForPropertyDetailsIds(List<String> propertyDetailsIds,
+			PropertyCriteria criteria) {
 		Map<String, Object> params = new HashMap<String, Object>(1);
-		String offlinePaymentsQuery = propertyQueryBuilder.getOfflinePaymentsQuery(propertyDetailsIds, params);
+		String offlinePaymentsQuery = propertyQueryBuilder.getOfflinePaymentsQuery(propertyDetailsIds, params,
+				criteria);
 		return namedParameterJdbcTemplate.query(offlinePaymentsQuery, params, offlinePaymentRowMapper);
 	}
 
