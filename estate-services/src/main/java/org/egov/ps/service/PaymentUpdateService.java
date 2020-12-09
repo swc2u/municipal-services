@@ -8,6 +8,8 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
 import org.egov.ps.model.Application;
 import org.egov.ps.model.ApplicationCriteria;
+import org.egov.ps.model.Property;
+import org.egov.ps.model.PropertyCriteria;
 import org.egov.ps.model.calculation.PaymentDetail;
 import org.egov.ps.model.calculation.PaymentRequest;
 import org.egov.ps.util.PSConstants;
@@ -38,6 +40,12 @@ public class PaymentUpdateService {
 	private WorkflowService workflowService;
 
 	@Autowired
+	private PropertyService propertyService;
+
+	@Autowired
+	private RentEnrichmentService rentEnrichmentService;
+
+	@Autowired
 	private Util util;
 
 	/**
@@ -55,20 +63,53 @@ public class PaymentUpdateService {
 				switch (paymentDetail.getBusinessService()) {
 				case PSConstants.BUSINESS_SERVICE_EB_RENT:
 				case PSConstants.BUSINESS_SERVICE_BB_RENT:
-				case PSConstants.BUSINESS_SERVICE_MB_RENT:
-					log.info("Post enrichment need to do");
+				case PSConstants.BUSINESS_SERVICE_MB_RENT: {
+					String consumerCode = paymentDetail.getBill().getConsumerCode();
+
+					PropertyCriteria searchCriteria = new PropertyCriteria();
+					searchCriteria.setFileNumber(util.getFileNumberFromConsumerCode(consumerCode));
+
+					List<Property> properties = propertyService.searchProperty(searchCriteria, requestInfo);
+
+					if (CollectionUtils.isEmpty(properties))
+						throw new CustomException("INVALID RECEIPT",
+								"No Property found for the comsumerCode " + consumerCode);
+
+					rentEnrichmentService.postEnrichmentForRentPayment(requestInfo, properties.get(0), paymentDetail);
+
 					break;
+				}
 				case PSConstants.BUSINESS_SERVICE_EB_PENALTY:
 				case PSConstants.BUSINESS_SERVICE_BB_PENALTY:
 				case PSConstants.BUSINESS_SERVICE_MB_PENALTY:
 					log.info("Post enrichment need to do");
 					break;
+
+				case PSConstants.BUSINESS_SERVICE_EB_EXTENSION_FEE:
+				case PSConstants.BUSINESS_SERVICE_BB_EXTENSION_FEE:
+				case PSConstants.BUSINESS_SERVICE_MB_EXTENSION_FEE:
+					log.info("Post enrichment need to do");
+					break;
+
+				case PSConstants.BUSINESS_SERVICE_EB_SECURITY_DEPOSIT:
+				case PSConstants.BUSINESS_SERVICE_BB_SECURITY_DEPOSIT:
+				case PSConstants.BUSINESS_SERVICE_MB_SECURITY_DEPOSIT:
+					log.info("Post enrichment need to do");
+					break;
+
 				default: {
 					if (paymentDetail.getBusinessService().startsWith(PSConstants.ESTATE_SERVICE)) {
 
 						ApplicationCriteria searchCriteria = new ApplicationCriteria();
 						searchCriteria.setApplicationNumber(paymentDetail.getBill().getConsumerCode());
-
+						
+						if(paymentDetail.getBusinessService().contains(PSConstants.ESTATE_BRANCH)){
+							searchCriteria.setBranchType(PSConstants.APPLICATION_ESTATE_BRANCH);
+						}else if(paymentDetail.getBusinessService().contains(PSConstants.BUILDING_BRANCH)){
+							searchCriteria.setBranchType(PSConstants.APPLICATION_BUILDING_BRANCH);
+						}else{
+							searchCriteria.setBranchType(PSConstants.APPLICATION_MANI_MAJRA);
+						}
 						List<Application> applications = applicationService.searchApplication(searchCriteria,
 								requestInfo);
 
