@@ -90,18 +90,18 @@ config:
           
   - name: "builds/municipal-services/rp-services"
     build:
-      - work-dir: "rp-services"
+      - work-dir: "rented-properties"
         image-name: "rp-services"
         dockerfile: "build/maven/Dockerfile"
-      - work-dir: "rp-services/src/main/resources/db"
+      - work-dir: "rented-properties/src/main/resources/db"
         image-name: "rp-services-db"
         
   - name: "builds/municipal-services/est-services"
     build:
-      - work-dir: "est-services"
+      - work-dir: "estate-services"
         image-name: "est-services"
         dockerfile: "build/maven/Dockerfile"
-      - work-dir: "est-services/src/main/resources/db"
+      - work-dir: "estate-services/src/main/resources/db"
         image-name: "est-services-db"
 
   - name: "builds/municipal-services/firenoc-services"
