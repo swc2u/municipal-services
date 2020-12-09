@@ -48,6 +48,10 @@ public class SuhCitizenNGOService {
 			suhapplication.setIsActive(true);
 			suhapplication.setAuditDetails(
 					auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_CREATE));
+
+			if (suhapplication.getDob().isEmpty())
+				suhapplication.setDob(null);
+
 			repository.createSuhApplication(suhapplication);
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
 					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
@@ -65,6 +69,10 @@ public class SuhCitizenNGOService {
 			suhapplication.setIsActive(true);
 			suhapplication.setAuditDetails(
 					auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_UPDATE));
+
+			if (suhapplication.getDob().isEmpty())
+				suhapplication.setDob(null);
+
 			repository.updateSuhApplication(suhapplication);
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
 					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())

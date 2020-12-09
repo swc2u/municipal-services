@@ -48,7 +48,7 @@ public class SmidShgGroup {
 	private StatusEnum status ;
 
 	public enum StatusEnum {
-		DRAFTED("Drafted"),
+		 DRAFTED("Drafted"),
 	    CREATED("Created"),
 	    APPROVED("Approved"),
 	    REJECTED("Rejected"),
