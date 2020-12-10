@@ -28,12 +28,12 @@ public class EstateDemandGenerationController {
 	public EstateDemandGenerationController(EstateDemandGenerationService demandGenerationService) {
 		this.demandGenerationService = demandGenerationService;
 	}
-	
+
 	@PostMapping("/_create")
 	public ResponseEntity<?> create(@Valid @ModelAttribute EstateDemandCriteria demandCriteria) {
-		AtomicInteger count=demandGenerationService.createDemand(demandCriteria);
-		log.info(String.format("%s demands generated",count));
+		AtomicInteger count = demandGenerationService.createDemand(demandCriteria);
+		log.info(String.format("%s demands generated", count));
 		DemandGenerationResponse response = DemandGenerationResponse.builder().generatedCount(count).build();
-		return new ResponseEntity<>(response,HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

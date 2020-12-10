@@ -70,12 +70,13 @@ public class EstateDemandGenerationServiceTests {
 		when(propertyRepository.getPropertyDetailsEstatePaymentDetails(anyList())).thenReturn(estatePaymentDummyList);
 		when(propertyRepository.getAccountDetailsForPropertyDetailsIds(anyList())).thenReturn(estateDummyAccount);
 	}
-
+	
 	@Test
 	public void createDemandTest() {
-
-		AtomicInteger dummyResult = estateDemandGenerationService.createDemand(EstateDemandCriteria.builder().build());
-		assertTrue("Error, can't update more than one record", 1 >= dummyResult.get());
+		EstateDemandCriteria demandCriteria =EstateDemandCriteria.builder().build();
+		AtomicInteger dummyResult = estateDemandGenerationService.createDemand(demandCriteria);
+		assertTrue("Error, can't update more than one record",
+				getAllRemainingDates(propertyDummyList.get(0)) == dummyResult.get());
 	}
 
 	@Test
@@ -155,15 +156,16 @@ public class EstateDemandGenerationServiceTests {
 		paymentConfigItems2.setPaymentConfigId(UUID.randomUUID().toString());
 
 		/* Set Dummy data for PaymentConfig */
-		PaymentConfig paymentConfig = PaymentConfig.builder().groundRentBillStartDate(Long.parseLong("1566671400000"))
+		PaymentConfig paymentConfig = PaymentConfig.builder().groundRentBillStartDate(Long.parseLong("1607498896336"))
 				.id(UUID.randomUUID().toString()).propertyDetailsId(UUID.randomUUID().toString())
 				.paymentConfigItems(Arrays.asList(paymentConfigItems, paymentConfigItems2)).isGroundRent(true)
-				.isIntrestApplicable(true).rateOfInterest(new BigDecimal(5356))
-				.groundRentGenerateDemand(Long.parseLong("19")).groundRentGenerationType(PSConstants.MONTHLY).build();
+				.isIntrestApplicable(true).rateOfInterest(new BigDecimal(5356)).noOfMonths(Long.parseLong("8"))
+				.groundRentGenerateDemand(Long.parseLong("21")).groundRentGenerationType(PSConstants.MONTHLY).build();
 
 		/* Set Dummy data for PropertyDetails */
 		PropertyDetails propertyDetails = PropertyDetails.builder().estateDemands(estateDemandDummyList)
 				.estatePayments(estatePaymentDummyList).estateAccount(estateDummyAccount).paymentConfig(paymentConfig)
+				.propertyType(PSConstants.ES_PM_LEASEHOLD)
 				.id(UUID.randomUUID().toString()).build();
 
 		/* Set Dummy data for EstateDemand */

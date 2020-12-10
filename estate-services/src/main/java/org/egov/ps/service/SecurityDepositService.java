@@ -14,6 +14,7 @@ import org.egov.ps.model.OfflinePaymentDetails;
 import org.egov.ps.model.OfflinePaymentDetails.OfflinePaymentType;
 import org.egov.ps.model.Owner;
 import org.egov.ps.model.Property;
+import org.egov.ps.model.PropertyCriteria;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.producer.Producer;
 import org.egov.ps.repository.PropertyRepository;
@@ -21,6 +22,7 @@ import org.egov.ps.service.calculation.DemandRepository;
 import org.egov.ps.service.calculation.DemandService;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.util.Util;
+import org.egov.ps.web.contracts.AuditDetails;
 import org.egov.ps.web.contracts.PropertyRequest;
 import org.egov.ps.web.contracts.SecurityDepositStatementResponse;
 import org.egov.ps.web.contracts.SecurityDepositStatementSummary;
@@ -148,6 +150,8 @@ public class SecurityDepositService {
 		demandService.createCashPaymentProperty(requestInfo, paymentAmount, bills.get(0).getId(), owner,
 				propertyDb.getSecurityDepositBusinessService());
 
+		AuditDetails auditDetails = utils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+
 		offlinePaymentDetails.forEach(ofpd -> {
 			ofpd.setId(UUID.randomUUID().toString());
 			ofpd.setDemandId(bills.get(0).getBillDetails().get(0).getDemandId());
@@ -157,6 +161,7 @@ public class SecurityDepositService {
 			ofpd.setFileNumber(propertyDb.getFileNumber());
 			ofpd.setConsumerCode(consumerCode);
 			ofpd.setBillingBusinessService(propertyDb.getSecurityDepositBusinessService());
+			ofpd.setAuditDetails(auditDetails);
 		});
 
 //		propertyDb.getPropertyDetails().getPaymentConfig().setSecurityAmount(totalDue.subtract(paymentAmount));
@@ -177,8 +182,11 @@ public class SecurityDepositService {
 
 		List<String> propertyDetailsIds = new ArrayList<String>();
 		propertyDetailsIds.add(property.getPropertyDetails().getId());
+		List<String> relations = new ArrayList<String>();
+		relations.add(PSConstants.RELATION_OPD);
+		PropertyCriteria criteria = PropertyCriteria.builder().relations(relations).build();
 		List<OfflinePaymentDetails> offlinePaymentDetails = repository
-				.getOfflinePaymentsForPropertyDetailsIds(propertyDetailsIds);
+				.getOfflinePaymentsForPropertyDetailsIds(propertyDetailsIds, criteria);
 		List<OfflinePaymentDetails> filteredOfflinePaymentDetails = offlinePaymentDetails.stream()
 				.filter(offlinePaymentDetail -> null != offlinePaymentDetail.getType()
 						&& offlinePaymentDetail.getType().equals(OfflinePaymentType.SECURITY))
