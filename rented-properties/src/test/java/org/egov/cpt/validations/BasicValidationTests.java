@@ -12,11 +12,6 @@ public class BasicValidationTests {
     boolean validateTransitNumber(String transitNumber) {
         String regex = "\\d{1,4}";
         return transitNumber.matches(regex);
-        // if (!transitNumber.matches(regex)) {
-        // return false;
-        // }
-        // int intTransitNo = Integer.parseInt(transitNumber);
-        // return intTransitNo > 0 && intTransitNo <= 10000;
     }
 
     @Test
