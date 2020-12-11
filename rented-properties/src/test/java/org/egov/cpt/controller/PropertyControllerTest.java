@@ -81,7 +81,6 @@ public class PropertyControllerTest {
 		assertEquals("colony", response.getBody().getProperties().get(0).getColony());
 		assertEquals("masterDataState", response.getBody().getProperties().get(0).getMasterDataState());
 		assertEquals("masterDataAction", response.getBody().getProperties().get(0).getMasterDataAction());
-		assertEquals("Rainmaker", response.getBody().getResponseInfo().getApiId());
 	}
 
 	@Test
