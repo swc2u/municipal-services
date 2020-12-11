@@ -2,10 +2,8 @@ name: Rented Properties Build
 
 on: 
   push:
-    branches:
-      - 'feature/rp'
-      - 'feature/rp-*'
-      - 'bugfix/rp-*'
+    paths:
+    - 'rented-properties/**'
 
 jobs:
   build:
