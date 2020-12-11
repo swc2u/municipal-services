@@ -43,13 +43,13 @@ public class ExcelStatementTests {
     @Test
     public void test501Statement() {
         List<RentAccountStatement> accountStatementItems = _testSheetWithIndex(CALCULATIONS_501_TO_520_XLSX, 0);
-        assertEquals(206, accountStatementItems.size());
+        assertEquals(209, accountStatementItems.size());
     }
 
     @Test
     public void test502Statement() {
         List<RentAccountStatement> accountStatementItems = _testSheetWithIndex(CALCULATIONS_501_TO_520_XLSX, 1);
-        assertEquals(208, accountStatementItems.size());
+        assertEquals(211, accountStatementItems.size());
     }
 
     @Test
