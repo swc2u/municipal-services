@@ -561,4 +561,5 @@ public class EstateDemandGenerationService {
 					.setRemainingSince(property.getPropertyDetails().getPaymentConfig().getGroundRentAdvanceRentDate());
 		}
 	}
+
 }
