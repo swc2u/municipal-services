@@ -1,9 +1,12 @@
 package org.egov.ps.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
@@ -66,19 +69,49 @@ public class ApplicationService {
 		if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PSConstants.ROLE_CITIZEN)) {
 			criteria.setCreatedBy(requestInfo.getUserInfo().getUuid());
 		}
-		if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PSConstants.ROLE_EMPLOYEE)
-				&& CollectionUtils.isEmpty(criteria.getState())) {
-			RequestInfoMapper requestInfoMapper = RequestInfoMapper.builder().requestInfo(requestInfo).build();
-			criteria.setBusinessName(criteria.getBranchType());
-			criteria.setTenantId(PSConstants.TENANT_ID);
-			List<String> states = getStates(requestInfoMapper, criteria);
-			criteria.setState(states);
+		if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PSConstants.ROLE_EMPLOYEE))
+		{
+			if(	CollectionUtils.isEmpty(criteria.getState())){
+				RequestInfoMapper requestInfoMapper = RequestInfoMapper.builder().requestInfo(requestInfo).build();
+				criteria.setBusinessName(criteria.getBranchType().get(0));
+				criteria.setTenantId(PSConstants.TENANT_ID);
+				List<String> states = getStates(requestInfoMapper, criteria);
+				criteria.setState(states);
+			}
+			Set<String> employeeBranches = new HashSet<>();
+			requestInfo.getUserInfo().getRoles().stream().filter(role->role.getCode()!=PSConstants.ROLE_EMPLOYEE)
+			.map(role->role.getCode())
+			.forEach(rolecode->{
+				if(rolecode.startsWith("ES_EB")) {
+					employeeBranches.add(PSConstants.APPLICATION_ESTATE_BRANCH);
+				}
+				if(rolecode.startsWith("ES_BB")) {
+					employeeBranches.add(PSConstants.APPLICATION_BUILDING_BRANCH);
+				}
+				if(rolecode.startsWith("ES_MM")) {
+					employeeBranches.add(PSConstants.APPLICATION_MANI_MAJRA);
+				}
+				if(rolecode.equalsIgnoreCase("ES_ADDITIONAL_COMMISSIONER")){
+					employeeBranches.add(PSConstants.APPLICATION_ESTATE_BRANCH);
+					employeeBranches.add(PSConstants.APPLICATION_BUILDING_BRANCH);
+					employeeBranches.add(PSConstants.APPLICATION_MANI_MAJRA);
+				}
+			});
+			if((criteria.getBranchType()!=null && !criteria.getBranchType().isEmpty()) ) {
+				if(!criteria.getBranchType().stream().filter(branch->employeeBranches.contains(branch)).findAny().isPresent()) 
+					throw new CustomException("INVALID ACCESS", "You are not authorised to access this resource.");
+			}else {
+				criteria.setBranchType(new ArrayList<>(employeeBranches));
+			}
 		}
 		List<Application> applications = applicationRepository.getApplications(criteria);
 		if (CollectionUtils.isEmpty(applications)) {
 			if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PSConstants.ROLE_CITIZEN)
 					&& criteria.getApplicationNumber() != null)
 				throw new CustomException("INVALID ACCESS", "You can not access this application.");
+			else if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PSConstants.ROLE_EMPLOYEE)
+					&& criteria.getApplicationNumber() != null)
+				throw new CustomException("INVALID ACCESS", "You are not authorised to access this resource.");
 			else
 				return Collections.emptyList();
 		}
@@ -89,7 +122,7 @@ public class ApplicationService {
 		validator.validateUpdateRequest(applicationRequest);
 		applicationEnrichmentService.enrichUpdateApplication(applicationRequest);
 		applicationRequest.getApplications().stream()
-				.forEach(application -> updateApplication(applicationRequest.getRequestInfo(), application));
+		.forEach(application -> updateApplication(applicationRequest.getRequestInfo(), application));
 		producer.push(config.getUpdateApplicationTopic(), applicationRequest);
 
 		applicationNotificationService.processNotifications(applicationRequest);
