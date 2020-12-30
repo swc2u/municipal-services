@@ -48,16 +48,18 @@ public class EstateDemandGenerationService {
 	private IEstateRentCollectionService estateRentCollectionService;
 	private Configuration config;
 	private Producer producer;
+	private PropertyNotificationService propertyNotificationService;
 
 	private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("dd/MM/yyyy");
 
 	@Autowired
 	public EstateDemandGenerationService(PropertyRepository propertyRepository, Producer producer, Configuration config,
-			IEstateRentCollectionService estateRentCollectionService) {
+			IEstateRentCollectionService estateRentCollectionService,PropertyNotificationService propertyNotificationService) {
 		this.propertyRepository = propertyRepository;
 		this.estateRentCollectionService = estateRentCollectionService;
 		this.producer = producer;
 		this.config = config;
+		this.propertyNotificationService = propertyNotificationService;
 	}
 
 	public boolean checkSameDay(Date date1, Date date2) {
@@ -267,6 +269,7 @@ public class EstateDemandGenerationService {
 			});
 		}
 		producer.push(config.getUpdatePropertyTopic(), propertyRequest);
+		propertyNotificationService.processDemandNotification(propertyRequest,estateDemand);
 	}
 
 	private Double calculateRentAccordingtoMonth(Property property, Date requestedDate) {
@@ -446,7 +449,7 @@ public class EstateDemandGenerationService {
 								prevDemand.setGstInterest(GSTinterest);
 							}
 							prevDemand.setInterestSince(estateDemand.getGenerationDate());
-
+							prevDemand.setAdjustmentDate(estateDemand.getGenerationDate());
 							estateDemand.setRent(estateDemand.getRent() - prevDemand.getRent());
 							estateDemand.setGst(estateDemand.getGst() - prevDemand.getGst());
 							estateDemand.setPenaltyInterest(
@@ -461,7 +464,7 @@ public class EstateDemandGenerationService {
 							estateDemand.setGenerationDate(prevDemandDate.getTime());
 							estateDemand.setBifurcate(true);
 							estateDemand.setInterestSince(estateDemand.getGenerationDate());
-
+							estateDemand.setAdjustmentDate(estateDemand.getGenerationDate());
 						}
 
 					}
@@ -517,7 +520,7 @@ public class EstateDemandGenerationService {
 								prevDemand.setGstInterest(GSTinterest);
 							}
 							prevDemand.setInterestSince(estateDemand.getGenerationDate());
-
+							prevDemand.setAdjustmentDate(estateDemand.getGenerationDate());
 							estateDemand.setRent(estateDemand.getRent() - prevDemand.getRent());
 							estateDemand.setGst(estateDemand.getGst() - prevDemand.getGst());
 							estateDemand.setPenaltyInterest(
@@ -531,7 +534,7 @@ public class EstateDemandGenerationService {
 							estateDemand.setGenerationDate(prevDemandDate.getTime());
 							estateDemand.setBifurcate(true);
 							estateDemand.setInterestSince(estateDemand.getGenerationDate());
-
+							estateDemand.setAdjustmentDate(estateDemand.getGenerationDate());
 						}
 					}
 
@@ -558,4 +561,5 @@ public class EstateDemandGenerationService {
 					.setRemainingSince(property.getPropertyDetails().getPaymentConfig().getGroundRentAdvanceRentDate());
 		}
 	}
+
 }
