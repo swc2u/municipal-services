@@ -259,6 +259,7 @@ public class ManiMajraRentCollectionService implements IManiMajraRentCollectionS
 		statement.setType(Type.D);
 		statement.setComment(currentDemand.getComment());
 		statement.setStatus(currentDemand.getStatus());
+		statement.setTypeOfDemand(currentDemand.getTypeOfDemand());
 		return rentSummary;
 	}
 
@@ -273,8 +274,6 @@ public class ManiMajraRentCollectionService implements IManiMajraRentCollectionS
 				ManiMajraRentSummary.builder().balanceAmount(rentAccount.getRemainingAmount()).build(),
 				(summary, demand) -> {
 
-					// final LocalDate demandGenerationDate = getLocalDate(demand.getGenerationDate());
-
 					return ManiMajraRentSummary.builder().rent(demand.getRent())
 							.collectedRent(demand.getCollectedRent() != null ? demand.getCollectedRent() : 0)
 							.gst(demand.getGst())
@@ -282,9 +281,4 @@ public class ManiMajraRentCollectionService implements IManiMajraRentCollectionS
 
 				}, (summary, demand) -> summary);
 	}
-
-	private LocalDate getLocalDate(Long atTimestamp) {
-		return Instant.ofEpochMilli(atTimestamp).atZone(ZoneId.systemDefault()).toLocalDate();
-	}
-
 }
