@@ -6,10 +6,11 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
+import com.jayway.jsonpath.JsonPath;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.ps.config.Configuration;
-import org.egov.ps.model.Application;
 import org.egov.ps.repository.ServiceRequestRepository;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.util.Util;
@@ -17,8 +18,6 @@ import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
-import com.jayway.jsonpath.JsonPath;
 
 @Service
 public class MDMSService {
@@ -69,6 +68,20 @@ public class MDMSService {
 		Object response = serviceRequestRepository.fetchResult(url, mdmsCriteriaReq);
 
 		String MDMSResponsePath = "$.MdmsRes." + PSConstants.MDMS_PS_MODULE_NAME + "." + applicationType;
+
+		List<Map<String, Object>> feesConfigurations = JsonPath.read(response, MDMSResponsePath);
+		return feesConfigurations;
+	}
+
+	public List<Map<String, Object>> getManimajraPropertyRent(String masterName, RequestInfo requestInfo,
+			String tenantId, String filter) throws JSONException {
+		tenantId = tenantId.split("\\.")[0];
+		MdmsCriteriaReq mdmsCriteriaReq = util.prepareMdMsRequest(tenantId, PSConstants.MDMS_PS_MODULE_NAME,
+				Arrays.asList(masterName), filter, requestInfo);
+		StringBuilder url = getMdmsSearchUrl(tenantId, masterName, PSConstants.MDMS_PS_MODULE_NAME);
+		Object response = serviceRequestRepository.fetchResult(url, mdmsCriteriaReq);
+
+		String MDMSResponsePath = "$.MdmsRes." + PSConstants.MDMS_PS_MODULE_NAME + "." + masterName;
 
 		List<Map<String, Object>> feesConfigurations = JsonPath.read(response, MDMSResponsePath);
 		return feesConfigurations;
@@ -148,7 +161,7 @@ public class MDMSService {
 	}
 
 	public List<Map<String, Object>> getNotificationConfig(String applicationType, RequestInfo requestInfo,
-			String tenantId, Application application) {
+			String tenantId) {
 		tenantId = tenantId.split("\\.")[0];
 		MdmsCriteriaReq mdmsCriteriaReq = new MdmsCriteriaReq();
 		mdmsCriteriaReq = util.prepareMdMsRequest(tenantId, PSConstants.MDMS_PS_MODULE_NAME,

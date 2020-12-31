@@ -120,21 +120,27 @@ public class ApplicationValidatorService {
 		if (property == null) {
 			throw new CustomException("INVALID_PROPERTY", "Could not find property with the given id:" + propertyId);
 		}
+
+		List<String> propertyDetailsIds = new ArrayList<>();
+		propertyDetailsIds.add(property.getPropertyDetails().getId());
+		property.getPropertyDetails()
+				.setEstateAccount(propertyRepository.getPropertyEstateAccountDetails(propertyDetailsIds));
+
 		if (!property.getState().contentEquals(PSConstants.PM_APPROVED)
 				&& !property.getState().contentEquals(PSConstants.ES_APPROVED)
 				&& !property.getState().contentEquals(PSConstants.ES_PM_MM_APPROVED)) {
 			throw new CustomException("INVALID_PROPERTY", "Property with the given " + propertyId + " is not approved");
 		}
 		Double rentDue = 0.0;
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())
-				&& property.getPropertyDetails().getEstateAccount() != null
+		if (property.getPropertyDetails().getEstateAccount() != null
 				&& property.getPropertyDetails().getPaymentConfig() != null
+				&& property.getPropertyDetails().getEstateDemands() != null
 				&& property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
 			rentDue = getRentDue(property);
 		}
 		if (rentDue > 0) {
 			throw new CustomException("PROPERTY_PENDING_DUE", String.format(
-					"Property has pending due of Rs: %8.2f, so you can not apply for %s, please clear the due before applying.",
+					"Property has pending due of Rs:%.2f, so you can not apply for %s, please clear the due before applying.",
 					rentDue, application.getApplicationType()));
 		}
 	}
@@ -153,8 +159,7 @@ public class ApplicationValidatorService {
 				property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
 				property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue());
 		Double rentDue = estateRentSummary.getBalanceRent() + estateRentSummary.getBalanceGST()
-				+ estateRentSummary.getBalanceGSTPenalty() + estateRentSummary.getBalanceRentPenalty()
-				+ estateRentSummary.getBalanceAmount();
+				+ estateRentSummary.getBalanceGSTPenalty() + estateRentSummary.getBalanceRentPenalty();
 		return rentDue;
 	}
 
