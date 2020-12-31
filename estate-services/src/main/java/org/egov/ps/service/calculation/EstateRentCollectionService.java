@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -129,29 +130,33 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 			if (noOfDaysForInterestCalculation == 0) {
 				continue;
 			}
-//			if(demand.isBifurcate()) {				
-//				/*
-//				 * When demand bifurcated , it is within the grace period hence no GSt penalty applicable 
-//				 */
-//				if(demand.getGstInterest()==0 && demand.getPenaltyInterest()==0) {
-//					demandInterestSinceDate = getLocalDate(demand.getGenerationDate());
-//					noOfDaysForInterestCalculation = ChronoUnit.DAYS.between(demandInterestSinceDate, paymentDate);
-//
-//				}
-//			}
+			// if(demand.isBifurcate()) {
+			// /*
+			// * When demand bifurcated , it is within the grace period hence no GSt penalty
+			// applicable
+			// */
+			// if(demand.getGstInterest()==0 && demand.getPenaltyInterest()==0) {
+			// demandInterestSinceDate = getLocalDate(demand.getGenerationDate());
+			// noOfDaysForInterestCalculation =
+			// ChronoUnit.DAYS.between(demandInterestSinceDate, paymentDate);
+			//
+			// }
+			// }
 
 			/**
 			 * no payment made or payment date is same as demand generation date
 			 */
-//			if(!demand.getIsPrevious() && isInGracePeriod(demand,demandInterestSinceDate,noOfDaysForInterestCalculation) )
-//				continue;
+			// if(!demand.getIsPrevious() &&
+			// isInGracePeriod(demand,demandInterestSinceDate,noOfDaysForInterestCalculation)
+			// )
+			// continue;
 
 			/**
 			 * Add if any previous unpaid GST penalty or Rent penalty is there No need to
 			 * add the penalties if the demand is fully unpaid
 			 */
-			if (demand.isBifurcate() || demand.getIsPrevious()
-					|| (demand.getCollectedGSTPenalty() > 0 && demand.getCollectedRentPenalty() > 0)) {
+			if (demand.isBifurcate() || demand.getIsPrevious() || demand.isAdjustment()
+					|| (demand.getRent() != demand.getRemainingRent())) {
 				GSTinterest = demand.getRemainingGSTPenalty();
 				rentPenaltyInterest = demand.getRemainingRentPenalty();
 			}
@@ -498,7 +503,30 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 				break;
 			}
 		}
-		return accountStatementItems;
+		if (fromDateTimestamp == null) {
+			return accountStatementItems;
+		} else {
+			List<LocalDate> dates = accountStatementItems.stream()
+					.map(stmt -> Instant.ofEpochMilli(stmt.getDate()).atZone(ZoneId.systemDefault()).toLocalDate())
+					.collect(Collectors.toList());
+
+			if (!dates.contains(Instant.ofEpochMilli(fromDateTimestamp).atZone(ZoneId.systemDefault()).toLocalDate())) {
+				Optional<Long> afterDate = accountStatementItems.stream().map(stmt -> stmt.getDate())
+						.filter(stmt -> fromDateTimestamp < stmt).findFirst();
+				return accountStatementItems.stream()
+						.filter(statementItem -> statementItem.getDate() >= afterDate.get().longValue())
+						.collect(Collectors.toList());
+			}
+
+			Long fromDate = accountStatementItems.stream().map(stmt -> stmt.getDate())
+					.filter(date -> Instant.ofEpochMilli(date).atZone(ZoneId.systemDefault()).toLocalDate().equals(
+							Instant.ofEpochMilli(fromDateTimestamp).atZone(ZoneId.systemDefault()).toLocalDate()))
+					.findFirst().get();
+			return accountStatementItems.stream()
+					.filter(statementItem -> statementItem.getDate() >= fromDate.longValue())
+					.collect(Collectors.toList());
+		}
+//		return accountStatementItems;
 	}
 
 	private EstateRentSummary calculateSummaryForPayment(double interestRate, EstateAccount rentAccount,
@@ -523,12 +551,12 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 		this.settle(demandsToBeSettled, Collections.emptyList(), rentAccount, interestRate, isFixRentPenalty,
 				rentInterest);
 		rentSummary = calculateRentSummaryAt(demandsToBeSettled, rentAccount, interestRate,
-				currentDemand.isBifurcate() ? currentDemand.getInterestSince() : currentDemand.getGenerationDate(),
+				currentDemand.isBifurcate() ? currentDemand.getAdjustmentDate() : currentDemand.getGenerationDate(),
 				isFixRentPenalty, rentInterest);
 		statement.setDate(currentDemand.getGenerationDate());
 		// statement.setAmount(currentDemand.getCollectedRent());
 		statement.setType(Type.D);
-		// statement.setComment(currentDemand.getComment);
+		statement.setComment(currentDemand.getComment());
 		statement.setAdjustmentDate(currentDemand.getAdjustmentDate());
 		return rentSummary;
 	}
@@ -586,7 +614,13 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 					if (demand.getIsPrevious()
 							|| noOfDaysBetweenGenerationAndCurrent > demand.getInitialGracePeriod()) {
 
-						LocalDate demandInterestSinceDate = getLocalDate(demand.getInterestSince());
+						/*
+						 * if no payment made consider consolidated date as since date for bifurcate
+						 * demand
+						 */
+						LocalDate demandInterestSinceDate = getLocalDate(
+								demand.isBifurcate() && demand.getCollectedRent() <= 0 ? demand.getAdjustmentDate()
+										: demand.getInterestSince());
 						long noOfDaysForInterestCalculation = ChronoUnit.DAYS.between(demandInterestSinceDate, atDate);
 
 						if (noOfDaysForInterestCalculation < 0)
@@ -596,8 +630,8 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 						 * Add if any previous unpaid GST penalty or Rent penalty is there No need to
 						 * add the penalties if the demand is fully unpaid
 						 */
-						if (demand.isBifurcate() || demand.getIsPrevious()
-								|| (demand.getCollectedGSTPenalty() > 0 && demand.getCollectedRentPenalty() > 0)) {
+						if (demand.isBifurcate() || demand.getIsPrevious() || demand.isAdjustment()
+								|| (demand.getRent() != demand.getRemainingRent())) {
 							GSTinterest = demand.getRemainingGSTPenalty();
 							rentPenaltyInterest = demand.getRemainingRentPenalty();
 						}
@@ -617,14 +651,16 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 							rentPenaltyInterest = calculateRentInterest(demand, rentPenaltyInterest, rentInterest,
 									noOfDaysForInterestCalculation, isFixRentPenalty);
 
-						} else {
-							GSTinterest = demand.getRemainingGSTPenalty();
-							if (isFixRentPenalty)
-								rentPenaltyInterest = demand.getRemainingRentPenalty();
-							else
-								rentPenaltyInterest = demand.getRemainingRentPenalty();
-
 						}
+						// else if(!demand.isBifurcate() && !demand.getIsPrevious() ){
+						// GSTinterest=demand.getRemainingGSTPenalty();
+						//
+						// if(isFixRentPenalty)
+						// rentPenaltyInterest=demand.getRemainingRentPenalty();
+						// else
+						// rentPenaltyInterest=demand.getRemainingRentPenalty();
+						//
+						// }
 					}
 
 					return EstateRentSummary.builder().rent(demand.getRent())
@@ -633,12 +669,14 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 
 							.collectedGST(demand.getCollectedGST() != null ? demand.getCollectedGST() : 0)
 							.balanceGST(summary.getBalanceGST() + demand.getRemainingGST())
-// .GSTPenalty( calculatedInterest)
-							.GSTPenalty(summary.getBalanceGSTPenalty() + GSTinterest).collectedGSTPenalty(
+							// .GSTPenalty( calculatedInterest)
+							.GSTPenalty(summary.getBalanceGSTPenalty() + GSTinterest)
+							.collectedGSTPenalty(
 									demand.getCollectedGSTPenalty() != null ? demand.getCollectedGSTPenalty() : 0)
-//.balanceGSTPenalty(summary.getBalanceGSTPenalty() + demand.getRemainingGSTPenalty())
+							// .balanceGSTPenalty(summary.getBalanceGSTPenalty() +
+							// demand.getRemainingGSTPenalty())
 							.balanceGSTPenalty(summary.getBalanceGSTPenalty() + GSTinterest)
-//.balanceRentPenalty(summary.getBalanceGSTPenalty()+demand.getPenaltyInterest())
+							// .balanceRentPenalty(summary.getBalanceGSTPenalty()+demand.getPenaltyInterest())
 							.balanceRentPenalty(summary.getBalanceRentPenalty() + rentPenaltyInterest)
 							.collectedRentPenalty(
 									demand.getCollectedRentPenalty() != null ? demand.getCollectedRentPenalty() : 0)
@@ -695,7 +733,8 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 	private EstateDemand cloneDemand(EstateDemand rentDemand) {
 
 		if (rentDemand.getIsPrevious()) {
-			return EstateDemand.builder().collectedRent(rentDemand.getCollectedRent()).status(PaymentStatusEnum.UNPAID)
+			return EstateDemand.builder().collectedRent(rentDemand.getCollectedRent())
+					.collectedGST(rentDemand.getCollectedGST()).status(PaymentStatusEnum.UNPAID)
 					.generationDate(rentDemand.getGenerationDate()).rent(rentDemand.getRent()).gst(rentDemand.getGst())
 					.interestSince(rentDemand.getGenerationDate())
 					.initialGracePeriod(rentDemand.getInitialGracePeriod()).remainingRent(rentDemand.getRent())
@@ -705,20 +744,19 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 					.penaltyInterest(rentDemand.getPenaltyInterest()).build();
 
 		} else {
-			return EstateDemand.builder().collectedRent(rentDemand.getCollectedRent()).status(PaymentStatusEnum.UNPAID)
+			return EstateDemand.builder().collectedRent(rentDemand.getCollectedRent())
+					.collectedGST(rentDemand.getCollectedGST()).status(PaymentStatusEnum.UNPAID)
 					// .status(rentDemand.getStatus())
 					.generationDate(rentDemand.getGenerationDate()).rent(rentDemand.getRent()).gst(rentDemand.getGst())
-					.interestSince(rentDemand.getInterestSince()).initialGracePeriod(rentDemand.getInitialGracePeriod())
-					.remainingRent(rentDemand.getRent()).remainingGST(rentDemand.getGst())
-					.isPrevious(rentDemand.getIsPrevious()).id(rentDemand.getId())
+					// .interestSince(rentDemand.getInterestSince())
+					.interestSince(rentDemand.getGenerationDate())
+					.initialGracePeriod(rentDemand.getInitialGracePeriod()).remainingRent(rentDemand.getRent())
+					.remainingGST(rentDemand.getGst()).isPrevious(rentDemand.getIsPrevious()).id(rentDemand.getId())
 					.gstInterest(rentDemand.getGstInterest()).penaltyInterest(rentDemand.getPenaltyInterest())
 					.remainingGSTPenalty(rentDemand.getGstInterest())
 					.remainingRentPenalty(rentDemand.getPenaltyInterest()).isAdjustment(rentDemand.isAdjustment())
 					.adjustmentDate(rentDemand.getAdjustmentDate()).isBifurcate(rentDemand.isBifurcate())
-
 					.build();
-
 		}
-
 	}
 }

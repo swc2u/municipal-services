@@ -1,11 +1,13 @@
 package org.egov.ps.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.model.AuctionBidder;
@@ -26,10 +28,9 @@ import org.egov.ps.util.Util;
 import org.egov.ps.web.contracts.AuctionSaveRequest;
 import org.egov.ps.web.contracts.AuditDetails;
 import org.egov.ps.web.contracts.EstateAccount;
-import org.egov.ps.web.contracts.EstateDemand;
-import org.egov.ps.web.contracts.EstatePayment;
 import org.egov.ps.web.contracts.EstateRentSummary;
 import org.egov.ps.web.contracts.ExtensionFeeRequest;
+import org.egov.ps.web.contracts.ManiMajraDemand;
 import org.egov.ps.web.contracts.PaymentStatusEnum;
 import org.egov.ps.web.contracts.PropertyPenaltyRequest;
 import org.egov.ps.web.contracts.PropertyRequest;
@@ -90,12 +91,14 @@ public class PropertyEnrichmentService {
 		enrichEstateDemand(property, requestInfo);
 		enrichEstatePayment(property, requestInfo);
 		enrichEstateAccount(property, requestInfo);
-		enrichAccountStatementDoc(property,requestInfo);
+		enrichAccountStatementDoc(property, requestInfo);
 
+		enrichManiMajraDemand(property, requestInfo);
+		enrichManiMajraPayment(property, requestInfo);
 	}
 
 	private void enrichAccountStatementDoc(Property property, RequestInfo requestInfo) {
-		if(property.getPropertyDetails().getAccountStatementDocument()!=null){
+		if (property.getPropertyDetails().getAccountStatementDocument() != null) {
 			List<Document> accountStatementDoc = property.getPropertyDetails().getAccountStatementDocument();
 			if (!CollectionUtils.isEmpty(accountStatementDoc)) {
 				accountStatementDoc.forEach(document -> {
@@ -286,24 +289,6 @@ public class PropertyEnrichmentService {
 
 	private void enrichEstateDemand(Property property, RequestInfo requestInfo) {
 
-		/**
-		 * Delete existing data as new data is coming in.
-		 */
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstateDemands())) {
-
-			boolean hasAnyNewEstateDemands = property.getPropertyDetails().getEstateDemands().stream()
-					.filter(estateDemand -> estateDemand.getId() == null || estateDemand.getId().isEmpty()).findAny()
-					.isPresent();
-
-			if (hasAnyNewEstateDemands) {
-				List<EstateDemand> existingEstateDemands = propertyRepository.getDemandDetailsForPropertyDetailsIds(
-						Collections.singletonList(property.getPropertyDetails().getId()));
-				property.getPropertyDetails().setInActiveEstateDemands(existingEstateDemands);
-			} else {
-				property.getPropertyDetails().setInActiveEstateDemands(Collections.emptyList());
-			}
-		}
-
 		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstateDemands())) {
 
 			property.getPropertyDetails().getEstateDemands().forEach(estateDemand -> {
@@ -318,38 +303,20 @@ public class PropertyEnrichmentService {
 				estateDemand.setRemainingGST(estateDemand.getGst());
 				estateDemand.setRemainingGSTPenalty(estateDemand.getGstInterest());
 				estateDemand.setRemainingRent(estateDemand.getRent());
-				if(estateDemand.getInterestSince() != null && estateDemand.getInterestSince() != 0.0)
+				if (estateDemand.getInterestSince() != null && estateDemand.getInterestSince() != 0.0)
 					estateDemand.setInterestSince(estateDemand.getInterestSince());
 				else
 					estateDemand.setInterestSince(estateDemand.getGenerationDate());
 				estateDemand.setIsPrevious(estateDemand.getIsPrevious());
 				AuditDetails estateDemandAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 				estateDemand.setAuditDetails(estateDemandAuditDetails);
-
+				estateDemand.setAdjustmentDate(estateDemand.getAdjustmentDate());
 			});
 		}
 
 	}
 
 	private void enrichEstatePayment(Property property, RequestInfo requestInfo) {
-
-		/**
-		 * Delete existing data as new data is coming in.
-		 */
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())) {
-
-			boolean hasAnyNewEstatePayments = property.getPropertyDetails().getEstatePayments().stream()
-					.filter(estatePayment -> estatePayment.getId() == null || estatePayment.getId().isEmpty()).findAny()
-					.isPresent();
-
-			if (hasAnyNewEstatePayments) {
-				List<EstatePayment> existingEstatePayments = propertyRepository.getEstatePaymentsForPropertyDetailsIds(
-						Collections.singletonList(property.getPropertyDetails().getId()));
-				property.getPropertyDetails().setInActiveEstatePayments(existingEstatePayments);
-			} else {
-				property.getPropertyDetails().setInActiveEstatePayments(Collections.emptyList());
-			}
-		}
 
 		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())) {
 
@@ -529,6 +496,105 @@ public class PropertyEnrichmentService {
 		extensionFee.setTenantId(property.getTenantId());
 		extensionFee.setBranchType(property.getPropertyDetails().getBranchType());
 		extensionFee.setAuditDetails(extensionFeeAuditDetails);
+	}
+
+	private void enrichManiMajraDemand(Property property, RequestInfo requestInfo) {
+
+		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getManiMajraDemands())) {
+			AuditDetails auditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+
+			property.getPropertyDetails().getManiMajraDemands().forEach(mmDemand -> {
+				if (null != mmDemand.getId()) {
+					mmDemand.setId(UUID.randomUUID().toString());
+					mmDemand.setPropertyDetailsId(property.getPropertyDetails().getId());
+					mmDemand.setStatus(PaymentStatusEnum.UNPAID);
+				}
+				mmDemand.setAuditDetails(auditDetails);
+			});
+		}
+
+	}
+
+	private void enrichManiMajraPayment(Property property, RequestInfo requestInfo) {
+
+		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getManiMajraPayments())) {
+			AuditDetails auditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+
+			property.getPropertyDetails().getManiMajraPayments().forEach(mmPayments -> {
+				if (null != mmPayments.getId()) {
+					mmPayments.setId(UUID.randomUUID().toString());
+					mmPayments.setPropertyDetailsId(property.getPropertyDetails().getId());
+				}
+				mmPayments.setAuditDetails(auditDetails);
+			});
+		}
+	}
+
+	public void enrichMmRentDemand(Property property) {
+
+		List<TaxHeadEstimate> estimates = new LinkedList<>();
+		double amount = property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount().doubleValue();
+
+		/**
+		 * rent due from mar 2018
+		 * 
+		 * 1st payment apr 2018
+		 * 
+		 * unpaid is starting from may 2018
+		 * 
+		 * 2nd payment jun 2018
+		 * 
+		 * selected demands data mar 2018 rent = 1200, gst = 216, and apr 2018 rent =
+		 * 1200, gst = 216
+		 * 
+		 * collection amount 1200+216+1200+216=2832
+		 * 
+		 * divide 2832 into principal=2400 and gst=432
+		 */
+
+		List<String> propertyDetailsIds = new ArrayList<String>();
+		propertyDetailsIds.add(property.getPropertyDetails().getId());
+
+		/**
+		 * unpaid & oldest first demands
+		 */
+		List<ManiMajraDemand> demands = propertyRepository.getManiMajraDemandDetails(propertyDetailsIds);
+		Collections.sort(demands);
+		List<ManiMajraDemand> demandsToBeSettled = demands.stream().filter(demand -> demand.isUnPaid())
+				.collect(Collectors.toList());
+		Collections.sort(demandsToBeSettled);
+
+		Double gstAmount = 0D;
+		Double rentAmount = 0D;
+
+		for (ManiMajraDemand demand : demandsToBeSettled) {
+			Double currentDue = demand.getRent() + demand.getGst();
+			if (amount >= currentDue) {
+				gstAmount = gstAmount + demand.getGst();
+				rentAmount = rentAmount + demand.getRent();
+				amount = amount - currentDue;
+			}
+		}
+
+		TaxHeadEstimate estimate1 = new TaxHeadEstimate();
+		estimate1.setEstimateAmount(new BigDecimal(rentAmount));
+		estimate1.setCategory(Category.PRINCIPAL);
+		estimate1.setTaxHeadCode(
+				getTaxHeadCode(property.getPropertyDetails().getBillingBusinessService(), Category.PRINCIPAL));
+		estimates.add(estimate1);
+
+		TaxHeadEstimate estimate2 = new TaxHeadEstimate();
+		estimate2.setEstimateAmount(new BigDecimal(gstAmount));
+		estimate2.setCategory(Category.TAX);
+		estimate2.setTaxHeadCode(
+				getTaxHeadCode(property.getPropertyDetails().getBillingBusinessService(), Category.TAX));
+		estimates.add(estimate2);
+
+		Calculation calculation = Calculation.builder()
+				.applicationNumber(util.getPropertyRentConsumerCode(property.getFileNumber()))
+				.taxHeadEstimates(estimates).tenantId(property.getTenantId()).build();
+		property.setCalculation(calculation);
+
 	}
 
 }
