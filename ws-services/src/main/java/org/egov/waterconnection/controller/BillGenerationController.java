@@ -46,8 +46,8 @@ public class BillGenerationController {
 	@RequestMapping(value = "/_generateBillFile", method = RequestMethod.POST, produces = "application/json")
 	public ResponseEntity<BillGenerationResponse> generateBillFile(
 			@Valid @RequestBody BillGenerationRequest billGenerationRequest) {
-		List<BillGeneration> billGeneration = billingService.generateBillFile(billGenerationRequest);
-		BillGenerationResponse response = BillGenerationResponse.builder().billGeneration(billGeneration)
+		List<BillGenerationFile> billGeneration = billingService.generateBillFile(billGenerationRequest);
+		BillGenerationResponse response = BillGenerationResponse.builder().billGenerationFile(billGeneration)
 				.responseInfo(responseInfoFactory
 						.createResponseInfoFromRequestInfo(billGenerationRequest.getRequestInfo(), true))
 				.build();

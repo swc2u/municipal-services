@@ -160,8 +160,9 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 	}
 
 	@Override
-	public List<BillGeneration> generateBillFile(BillGenerationRequest billGenerationRequest) {
+	public List<BillGenerationFile> generateBillFile(BillGenerationRequest billGenerationRequest) {
 		PrintWriter writer;
+		List<BillGenerationFile> billFileList = null ;
 		try {
 			String timeStamp = new SimpleDateFormat("hh:mm:ss a").format(new Date());
 
@@ -178,12 +179,12 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 			BillGenerationFile billFile =	billRepository.getFilesStoreUrl();
 		
 			billRepository.savefileHistory(billFile,bill);
-			
+			billFileList.add(billFile);
 			
 		} catch (Exception e) {
 			throw new CustomException();
 		} 
-		return null;
+		return billFileList;
 	}
 
 	@Override

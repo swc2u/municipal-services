@@ -12,7 +12,7 @@ public interface BillGenerationService {
 
 	public List<BillGeneration> saveBillingData(BillGenerationRequest billGenerationRequest);
 
-	public List<BillGeneration> generateBillFile(BillGenerationRequest billGenerationRequest);
+	public List<BillGenerationFile> generateBillFile(BillGenerationRequest billGenerationRequest);
 
 	public List<BillGenerationFile> getBillingFiles();
 
