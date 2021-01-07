@@ -164,7 +164,14 @@ public class HCQueryBuilder {
 		
 					preparedStmtList.add(criteria.getServiceRequestSubtype().trim());
 				}
+
+				if (criteria.getDataPayload()!=null && criteria.getDataPayload().get("assignedTo")!= null) {
+					addClauseIfRequired(preparedStmtList, builder);
+					builder.append(" hc.current_assignee= ?");
 		
+					preparedStmtList.add(criteria.getDataPayload().get("assignedTo").toString().trim());
+				}
+
 				// this is for citizen
 				if (criteria.getRequestInfo().getUserInfo().getType().equals("CITIZEN")) {
 					
