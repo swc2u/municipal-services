@@ -188,6 +188,10 @@ public class PropertyService {
 	public List<Property> updateProperty(PropertyRequest request) {
 		propertyValidator.validateUpdateRequest(request);
 		Property property = request.getProperties().get(0);
+
+		String action = property.getAction();
+		String state = property.getState();
+
 		// bifurcate demand
 		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstateDemands())
 				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)
@@ -199,6 +203,7 @@ public class PropertyService {
 		if (null != request.getProperties().get(0).getState()
 				&& PSConstants.PENDING_SO_APPROVAL.equalsIgnoreCase(property.getState())
 				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)
+				&& !action.contentEquals("")
 				&& property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
 			estateDemandGenerationService.createMissingDemands(property);
 			estateDemandGenerationService.addCredit(property);
@@ -207,7 +212,8 @@ public class PropertyService {
 		/* ManiMajra Demands */
 		if (null != request.getProperties().get(0).getState()
 				&& PSConstants.PENDING_PM_MM_APPROVAL.equalsIgnoreCase(property.getState())
-				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA)) {
+				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA)
+				&& !action.contentEquals("")) {
 			maniMajraDemandGenerationService.createMissingDemandsForMM(property, request.getRequestInfo());
 		}
 
@@ -217,16 +223,17 @@ public class PropertyService {
 		} else {
 			processRentHistory(request);
 		}
-		String action = property.getAction();
-		String state = property.getState();
+
 		if (config.getIsWorkflowEnabled() && !action.contentEquals("") && !action.contentEquals(PSConstants.ES_DRAFT)
 				&& !state.contentEquals(PSConstants.PM_APPROVED)) {
 			wfIntegrator.callWorkFlow(request);
 		}
 		if (!CollectionUtils.isEmpty(request.getProperties().get(0).getPropertyDetails().getBidders())) {
 			String roeAction = request.getProperties().get(0).getPropertyDetails().getBidders().get(0).getAction();
+			String addCourtCases = request.getProperties().get(0).getPropertyDetails().getAddCourtCases();
 			if (config.getIsWorkflowEnabled() && !roeAction.contentEquals("")
-					&& state.contentEquals(PSConstants.PM_APPROVED)) {
+					&& state.contentEquals(PSConstants.PM_APPROVED)
+					&& !addCourtCases.contentEquals(PSConstants.EB_ADD_COURT_CASES)) {
 				wfIntegrator.callWorkFlow(request);
 			}
 		}
