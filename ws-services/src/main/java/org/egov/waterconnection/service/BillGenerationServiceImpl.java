@@ -133,7 +133,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 
 					cellIndex = rowIndex.getCell(numCol++);
 					uploadFileData.setDueDateCheque(dateFormatter.format(cellIndex.getDateCellValue()));
-					
+
 					listOfBills.add(uploadFileData);
 					numRow++;
 				} else {
@@ -162,43 +162,46 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 	@Override
 	public List<BillGenerationFile> generateBillFile(BillGenerationRequest billGenerationRequest) {
 		PrintWriter writer;
-		List<BillGenerationFile> billFileList = null ;
+		List<BillGenerationFile> billFileList = new ArrayList<BillGenerationFile>();
 		try {
 			String timeStamp = new SimpleDateFormat("hh:mm:ss a").format(new Date());
 
 			List<BillGeneration> bill = billRepository.getBillingEstimation();
-			if(bill.isEmpty()) {
-				throw new CustomException("DATANOTPRESENT","Data may not present or may have downloaded earlier please check history");
+
+			if (bill.isEmpty()) {
+				throw new CustomException("FILE_GENERATION_FAILED",
+						"Data may not present or may have downloaded earlier please check history");
 			}
+
 			writer = new PrintWriter(WCConstants.WS_BILLING_FILENAME, "UTF-8");
 			for (BillGeneration billGeneration : bill) {
-				writer.println(billGeneration.getCcCode() + " "  +timeStamp + " " +billGeneration.getDivSdiv()+billGeneration.getConsumerCode() +" " +billGeneration.getTotalNetAmount()+" " + billGeneration.getBillId());
+				writer.println(billGeneration.getCcCode() + " " + timeStamp + " " + billGeneration.getDivSdiv()
+						+ billGeneration.getConsumerCode() + " " + billGeneration.getTotalNetAmount() + " "
+						+ billGeneration.getBillId());
 			}
 
 			writer.close();
-			BillGenerationFile billFile =	billRepository.getFilesStoreUrl();
-		
-			billRepository.savefileHistory(billFile,bill);
+			BillGenerationFile billFile = billRepository.getFilesStoreUrl();
+
+			billRepository.savefileHistory(billFile, bill);
 			billFileList.add(billFile);
-			
+
 		} catch (Exception e) {
-			throw new CustomException();
-		} 
+			throw new CustomException("FILE_GENERATION_FAILED", e.getMessage());
+		}
 		return billFileList;
 	}
 
 	@Override
 	public List<BillGenerationFile> getBillingFiles() {
-		 List<BillGenerationFile>  billFile =	billRepository.getBillingFiles();
-		 return billFile;
+		List<BillGenerationFile> billFile = billRepository.getBillingFiles();
+		return billFile;
 	}
 
 	@Override
 	public List<BillGeneration> getBillData(BillGenerationRequest billGenerationRequest) {
-		 List<BillGeneration>  billData =	billRepository.getBillData(billGenerationRequest.getBillGeneration());
-		 return billData;
+		List<BillGeneration> billData = billRepository.getBillData(billGenerationRequest.getBillGeneration());
+		return billData;
 	}
-	
-	
 
 }
