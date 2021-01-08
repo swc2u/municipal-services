@@ -68,12 +68,6 @@ add column isFileGenerated boolean;
 create table eg_ws_savebilling_audit as (select * from eg_ws_savebilling where 1=2);
 
 ----------------
-CREATE TRIGGER update_bill_trigger 
-BEFORE UPDATE OF consumercode ON eg_ws_savebilling
-FOR EACH ROW 
-EXECUTE PROCEDURE insert_billing_audit_data();
-
-----------------
 
 
 CREATE OR REPLACE FUNCTION insert_billing_audit_data()
@@ -91,3 +85,10 @@ END;
 $$
 
 LANGUAGE 'plpgsql';
+
+----------------
+CREATE TRIGGER update_bill_trigger 
+BEFORE UPDATE OF consumercode ON eg_ws_savebilling
+FOR EACH ROW 
+EXECUTE PROCEDURE insert_billing_audit_data();
+-----------------------------
