@@ -34,15 +34,4 @@ public class PropertyUtilTests {
         String consumerCode = "SITE-378-2020-09-248-03-09-614";
         assertEquals("378", utils.getTransitNumberFromConsumerCode(consumerCode));
     }
-
-    @Test(expected = CustomException.class)
-    public void testInvalidConsumerCodes() {
-        String[] transitSiteNumbers = { "", "10000", "A-9999", "234a2" };
-        for (String transitSiteNumber : transitSiteNumbers) {
-            ExpectedException exception = ExpectedException.none();
-            String consumerCode = utils.getPropertyRentConsumerCode(transitSiteNumber);
-            exception.expect(CustomException.class);
-            utils.getTransitNumberFromConsumerCode(consumerCode);
-        }
-    }
 }
