@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,7 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-
+@ActiveProfiles("test")
 public class PropertyViolationTests {
 
 	@Autowired
@@ -35,9 +36,8 @@ public class PropertyViolationTests {
 	public void shouldReturnDefaultMessage() throws Exception {
 		Property property = Property.builder().id("some-property-id").build();
 		PropertyPenaltyRequest request = PropertyPenaltyRequest.builder().requestInfo(TestUtils.getRequestInfo())
-				.propertyPenalties(Collections
-						.singletonList(PropertyPenalty.builder().property(property).branchType("estateBranch")
-								.penaltyAmount(500.0).violationType("check bounce").build()))
+				.propertyPenalties(Collections.singletonList(PropertyPenalty.builder().property(property)
+						.branchType("estateBranch").penaltyAmount(500.0).violationType("check bounce").build()))
 				.build();
 		String requestAsString = new ObjectMapper().writeValueAsString(request);
 		// requestAsString =
