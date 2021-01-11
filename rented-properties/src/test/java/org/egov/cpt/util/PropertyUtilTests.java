@@ -3,9 +3,7 @@ package org.egov.cpt.util;
 import static org.junit.Assert.assertEquals;
 
 import org.egov.cpt.CSPropertyApplication;
-import org.egov.tracer.model.CustomException;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
