@@ -21,7 +21,7 @@ public class HCQueryBuilder {
 		
 	}
 
-	private static final String QUERY = "select service_request_id,service_type,owner_name,service_request_status,tenant_id,current_assignee,to_char(to_timestamp(cast(createdtime/1000 as bigint))::date ,'DD/MM/YYYY')as createdtime,lastmodifiedtime,servicerequestsubtype from eg_hc_service_request hc ";
+	private static final String QUERY = "select service_request_id,service_type,owner_name,service_request_status,tenant_id,current_assignee,to_char(to_timestamp(cast(createdtime/1000 as bigint))::date ,'DD/MM/YYYY')as createdtime,lastmodifiedtime,servicerequestsubtype,locality from eg_hc_service_request hc ";
 
 	public static final String SELECT_SERVICE_DETAIL_FOR_CITIZEN = "SELECT service_request_uuid, owner_name, tenant_id, location, latitude, longitude, locality, street_name, landmark, contact_number, email_id, tree_count, service_request_document, service_request_status, service_request_id, service_type, description,current_assignee, createdby, to_char(to_timestamp(cast(createdtime/1000 as bigint))::date,'DD/MM/YYYY') as createdtimes,servicerequest_lang ,lastmodifiedby,to_char(to_timestamp(cast(lastmodifiedtime/1000 as bigint))::date,'DD/MM/YYYY') as lastmodifiedtime,servicerequestsubtype from eg_hc_service_request WHERE service_request_id =? and createdby = ?";
 	
@@ -164,7 +164,14 @@ public class HCQueryBuilder {
 		
 					preparedStmtList.add(criteria.getServiceRequestSubtype().trim());
 				}
+
+				if (criteria.getDataPayload()!=null && criteria.getDataPayload().get("assignedTo")!= null) {
+					addClauseIfRequired(preparedStmtList, builder);
+					builder.append(" hc.current_assignee= ?");
 		
+					preparedStmtList.add(criteria.getDataPayload().get("assignedTo").toString().trim());
+				}
+
 				// this is for citizen
 				if (criteria.getRequestInfo().getUserInfo().getType().equals("CITIZEN")) {
 					
