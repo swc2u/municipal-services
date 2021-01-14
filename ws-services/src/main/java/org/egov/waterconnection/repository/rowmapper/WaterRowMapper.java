@@ -67,7 +67,15 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
                 currentWaterConnection.setDiv(rs.getString("div"));
                 currentWaterConnection.setSubdiv(rs.getString("subdiv"));
                 currentWaterConnection.setCcCode(rs.getString("cccode"));
-				
+
+                currentWaterConnection.setLedgerGroup(rs.getString("ledgerGroup"));
+                currentWaterConnection.setMeterCount(rs.getString("meterCount"));
+                currentWaterConnection.setMeterRentCode(rs.getString("meterRentCode"));
+                currentWaterConnection.setMfrCode(rs.getString("mfrCode"));
+                currentWaterConnection.setMeterDigits(rs.getString("meterDigits"));
+                currentWaterConnection.setMeterUnit(rs.getString("meterUnit"));
+                currentWaterConnection.setSanctionedCapacity(rs.getString("sanctionedCapacity"));
+                
 				HashMap<String, Object> additionalDetails = new HashMap<>();
 				additionalDetails.put(WCConstants.ADHOC_PENALTY, rs.getBigDecimal("adhocpenalty"));
 				additionalDetails.put(WCConstants.ADHOC_REBATE, rs.getBigDecimal("adhocrebate"));
