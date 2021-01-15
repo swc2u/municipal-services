@@ -330,5 +330,11 @@ public class ServiceRequestData {
   	@Size(max=255)
   	@JsonProperty("servicerequest_lang")
   	private String servicerequest_lang = null;
-  	
+
+  	@JsonProperty("sla")
+  	private int sla;
+
+  	@JsonProperty("slaModifiedDate")
+  	private String slaModifiedDate = null;
+
 }

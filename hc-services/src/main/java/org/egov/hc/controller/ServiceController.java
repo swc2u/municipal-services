@@ -9,7 +9,6 @@ import org.egov.hc.model.ServiceRequestData;
 import org.egov.hc.service.ServiceRequestService;
 import org.egov.hc.utils.HCConstants;
 import org.egov.hc.utils.HCUtils;
-
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

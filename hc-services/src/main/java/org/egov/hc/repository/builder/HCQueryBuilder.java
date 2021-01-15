@@ -23,16 +23,20 @@ public class HCQueryBuilder {
 
 	private static final String QUERY = "select service_request_id,service_type,owner_name,service_request_status,tenant_id,current_assignee,to_char(to_timestamp(cast(createdtime/1000 as bigint))::date ,'DD/MM/YYYY')as createdtime,lastmodifiedtime,servicerequestsubtype,locality from eg_hc_service_request hc ";
 
-	public static final String SELECT_SERVICE_DETAIL_FOR_CITIZEN = "SELECT service_request_uuid, owner_name, tenant_id, location, latitude, longitude, locality, street_name, landmark, contact_number, email_id, tree_count, service_request_document, service_request_status, service_request_id, service_type, description,current_assignee, createdby, to_char(to_timestamp(cast(createdtime/1000 as bigint))::date,'DD/MM/YYYY') as createdtimes,servicerequest_lang ,lastmodifiedby,to_char(to_timestamp(cast(lastmodifiedtime/1000 as bigint))::date,'DD/MM/YYYY') as lastmodifiedtime,servicerequestsubtype from eg_hc_service_request WHERE service_request_id =? and createdby = ?";
+	public static final String SELECT_SERVICE_DETAIL_FOR_CITIZEN = "SELECT service_request_uuid, owner_name, tenant_id, location, latitude, longitude, locality, street_name, landmark, contact_number, email_id, tree_count, service_request_document, service_request_status, service_request_id, service_type, description,current_assignee, createdby, to_char(to_timestamp(cast(createdtime/1000 as bigint))::date,'DD/MM/YYYY') as createdtimes,servicerequest_lang ,lastmodifiedby,to_char(to_timestamp(cast(lastmodifiedtime/1000 as bigint))::date,'DD/MM/YYYY') as lastmodifiedtime,servicerequestsubtype,sla,sla_modified_date from eg_hc_service_request WHERE service_request_id =? and createdby = ?";
 	
-	public static final String SELECT_SERVICE_DETAIL = "SELECT service_request_uuid, owner_name, tenant_id, location, latitude, longitude, locality, street_name, landmark, contact_number, email_id, tree_count, service_request_document, service_request_status, service_request_id, service_type, description,current_assignee, createdby, to_char(to_timestamp(cast(createdtime/1000 as bigint))::date,'DD/MM/YYYY') as createdtimes,servicerequest_lang ,lastmodifiedby,to_char(to_timestamp(cast(lastmodifiedtime/1000 as bigint))::date,'DD/MM/YYYY') as lastmodifiedtime,servicerequestsubtype from eg_hc_service_request WHERE service_request_id =?";
+	public static final String SELECT_SERVICE_DETAIL = "SELECT service_request_uuid, owner_name, tenant_id, location, latitude, longitude, locality, street_name, landmark, contact_number, email_id, tree_count, service_request_document, service_request_status, service_request_id, service_type, description,current_assignee, createdby, to_char(to_timestamp(cast(createdtime/1000 as bigint))::date,'DD/MM/YYYY') as createdtimes,servicerequest_lang ,lastmodifiedby,to_char(to_timestamp(cast(lastmodifiedtime/1000 as bigint))::date,'DD/MM/YYYY') as lastmodifiedtime,servicerequestsubtype,sla,sla_modified_date from eg_hc_service_request WHERE service_request_id =?";
 	
 	public static final String GET_CREATED_TIME = "SELECT service_type,createdtime,service_request_id,current_assignee,to_char(to_timestamp(cast(createdtime/1000 as bigint))::date ,'DD-MM-YYYY')as serviceRequestDate \r\n" + 
 			"from eg_hc_service_request WHERE \r\n" + 
 			" service_request_status != '"+HCConstants.REJECTED_STATUS+"' AND\r\n" + 
 			" service_request_status != '"+HCConstants.COMPLETED_STATUS+"' AND \r\n" +
 			"current_assignee != ''";
-		
+
+	public static final String UPDATE_SERVICE_REQUEST_SLA = "UPDATE eg_hc_service_request SET sla=CASE WHEN sla IS NULL THEN NULL ELSE sla-1 END , sla_modified_date=Date(now()) \r\n" + 
+			" WHERE service_request_status NOT IN('"+HCConstants.REJECTED_STATUS+"','"+HCConstants.COMPLETED_STATUS+"') AND \r\n" +
+			" EXTRACT(DOW FROM Date(now())) NOT IN (6,0)";
+
 	
 	private final String paginationWrapper = "SELECT * FROM "
 			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY lastmodifiedtime DESC) offset_ FROM " + "({})"
