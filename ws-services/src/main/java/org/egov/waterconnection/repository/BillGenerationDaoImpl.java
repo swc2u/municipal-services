@@ -11,6 +11,7 @@ import org.egov.waterconnection.config.WSConfiguration;
 import org.egov.waterconnection.constants.WCConstants;
 import org.egov.waterconnection.model.BillGeneration;
 import org.egov.waterconnection.model.BillGenerationFile;
+import org.egov.waterconnection.model.BillingPersister;
 import org.egov.waterconnection.model.FileStore;
 import org.egov.waterconnection.producer.WaterConnectionProducer;
 import org.egov.waterconnection.repository.builder.WsQueryBuilder;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import com.google.gson.JsonObject;
 
 @Repository
 public class BillGenerationDaoImpl implements BillGenerationDao {
@@ -51,13 +54,13 @@ public class BillGenerationDaoImpl implements BillGenerationDao {
 
 	@Override
 	public List<BillGeneration> saveBillingData(List<BillGeneration> listOfBills) {
-
-		waterConnectionProducer.push(wsConfiguration.getSaveWaterBilling(), listOfBills);
+		BillingPersister listBill = BillingPersister.builder().billGeneration(listOfBills).build();
+		waterConnectionProducer.push(wsConfiguration.getSaveWaterBilling(), listBill);
 
 		return listOfBills;
 	}
 
-	@Override
+	@Override 
 	public List<BillGeneration> getBillingEstimation() {
 
 		List<BillGeneration> billingDetails;
@@ -87,7 +90,7 @@ public class BillGenerationDaoImpl implements BillGenerationDao {
 				FileStore.class);
 
 	String fileStroreUrl =	workflowNotificationService.getApplicationDownloadLink(response.getFiles().get(0).getTenantId(), response.getFiles().get(0).getFileStoreId());
-	BillGenerationFile billFile	= BillGenerationFile.builder().billFileStoreId(UUID.randomUUID().toString()).billFileStoreUrl(fileStroreUrl).billFileStoreId( response.getFiles().get(0).getFileStoreId()).fileGenerationTime(System.currentTimeMillis()).build();
+	BillGenerationFile billFile	= BillGenerationFile.builder().billGenerationFileId(UUID.randomUUID().toString()).billFileStoreUrl(fileStroreUrl).billFileStoreId( response.getFiles().get(0).getFileStoreId()).fileGenerationTime(System.currentTimeMillis()).build();
 	return billFile;
 	}
 	
@@ -100,9 +103,11 @@ public class BillGenerationDaoImpl implements BillGenerationDao {
 
 	@Override
 	public void savefileHistory(BillGenerationFile billFile, List<BillGeneration> bill) {
-		waterConnectionProducer.push(wsConfiguration.getSavewaterbillingfile(), billFile);
+		BillingPersister listBill = BillingPersister.builder().billGeneration(bill).build();
+		BillingPersister billFileList = BillingPersister.builder().billGenerationFile(billFile).build();
+		waterConnectionProducer.push(wsConfiguration.getSavewaterbillingfile(), billFileList);
 		
-		waterConnectionProducer.push(wsConfiguration.getUpdateBillfileflag(), bill);
+		waterConnectionProducer.push(wsConfiguration.getUpdateBillfileflag(),listBill);
 		
 	}
 

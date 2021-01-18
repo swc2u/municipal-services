@@ -1,26 +1,25 @@
 package org.egov.waterconnection.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.egov.tracer.model.CustomException;
 import org.egov.waterconnection.constants.WCConstants;
 import org.egov.waterconnection.model.AuditDetails;
 import org.egov.waterconnection.model.BillGeneration;
 import org.egov.waterconnection.model.BillGenerationFile;
 import org.egov.waterconnection.model.BillGenerationRequest;
-import org.egov.waterconnection.model.WaterConnection;
 import org.egov.waterconnection.repository.BillGenerationDao;
 import org.egov.waterconnection.util.WaterServicesUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,113 +36,41 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 
 	@Override
 	public List<BillGeneration> saveBillingData(BillGenerationRequest billGenerationRequest) {
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
+		DateFormat dateParser = new SimpleDateFormat("dd/MMM/yy");
+		DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+		//System.out.println(dateFormatter.format("20/OCT/20"));
+
+	     
 		InputStream input = null;
 		List<BillGeneration> listOfBills = new ArrayList<BillGeneration>();
 		try {
-
+ 
 			input = new URL(billGenerationRequest.getBillGeneration().getDocument().getFileStroreUrl()).openStream();
-			XSSFWorkbook workbook = new XSSFWorkbook(input);
-			int numRow = 1;
-			XSSFSheet sheet = workbook.getSheetAt(0);
-			XSSFRow rowIndex;
-			int rows = sheet.getPhysicalNumberOfRows();
+
 			AuditDetails auditDetails = waterServicesUtil
 					.getAuditDetails(billGenerationRequest.getRequestInfo().getUserInfo().getUuid(), true);
-			while (numRow <= rows) {
-				rowIndex = sheet.getRow(numRow);
-				if (rowIndex != null) {
-					BillGeneration uploadFileData = new BillGeneration();
-					int numCol = 0;
-					uploadFileData.setBillGenerationId(UUID.randomUUID().toString());
-					uploadFileData.setAuditDetails(auditDetails);
-					uploadFileData.setStatus(WCConstants.STATUS_INITIATED);
-					uploadFileData.setIsFileGenerated(false);
-					XSSFCell cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setCcCode(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setDivSdiv(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setConsumerCode(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setBillCycle(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setBillGroup(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setSubGroup(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setBillType(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setName(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setAddress(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setAdd1(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setAdd2(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setAdd3(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setAdd4(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setAdd5(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setCessCharge(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setNetAmount(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setSurcharge(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setGrossAmount(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setTotalNetAmount(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setTotalSurcharge(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setTotalGrossAmount(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setFixChargeCode(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setFixCharge(cellIndex.getRawValue());
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setDueDateCash(dateFormatter.format(cellIndex.getDateCellValue()));
-
-					cellIndex = rowIndex.getCell(numCol++);
-					uploadFileData.setDueDateCheque(dateFormatter.format(cellIndex.getDateCellValue()));
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
+				String line;
+				
+				while ((line = br.readLine()) != null) {
+					String[] values = line.split(",");
+					List<String> bill = Arrays.asList(values);
+					
+					BillGeneration uploadFileData = BillGeneration.builder()
+							.billGenerationId(UUID.randomUUID().toString()).auditDetails(auditDetails).isFileGenerated(false).status(WCConstants.STATUS_INITIATED).
+							ccCode(bill.get(0).trim()).divSdiv(bill.get(1).trim()).consumerCode(bill.get(2).trim()).billCycle(bill.get(3).trim()).billGroup(bill.get(4).trim()).subGroup(bill.get(5).trim())
+							.billType(bill.get(6).trim()).name(bill.get(7).trim()).address(bill.get(8).trim()).cessCharge(bill.get(14).trim()).netAmount(bill.get(15).trim()).surcharge(bill.get(16).trim())
+							.grossAmount(bill.get(17).trim()).totalNetAmount(bill.get(18).trim()).totalSurcharge(bill.get(19).trim()).totalSurcharge(bill.get(20).trim())
+							.dueDateCash(dateFormatter.format(dateParser.parse(bill.get(23).trim()))).dueDateCheque(dateFormatter.format(dateParser.parse(bill.get(24).trim()))).build();
 
 					listOfBills.add(uploadFileData);
-					numRow++;
-				} else {
-					numRow++;
 				}
-
 			}
+			
 
 			billRepository.saveBillingData(listOfBills);
 			return listOfBills;
+
 
 		} catch (Exception e) {
 			throw new CustomException("EXCELREADERROR", e.getMessage());
@@ -152,8 +79,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 			try {
 				input.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new CustomException("EXCELREADERROR", e.getMessage());
 			}
 		}
 
@@ -201,6 +127,9 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 	@Override
 	public List<BillGeneration> getBillData(BillGenerationRequest billGenerationRequest) {
 		List<BillGeneration> billData = billRepository.getBillData(billGenerationRequest.getBillGeneration());
+		if (billData.isEmpty()) {
+			throw new CustomException("BILL_DATA_NOT_FOUND", "Bill data not available for given consumer code");
+		}
 		return billData;
 	}
 
