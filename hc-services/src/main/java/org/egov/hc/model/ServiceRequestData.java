@@ -337,4 +337,7 @@ public class ServiceRequestData {
   	@JsonProperty("slaModifiedDate")
   	private String slaModifiedDate = null;
 
+  	@JsonProperty("remainingSla")
+  	private int remainingSla;
+
 }
