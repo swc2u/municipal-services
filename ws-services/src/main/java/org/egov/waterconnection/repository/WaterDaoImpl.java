@@ -8,6 +8,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.waterconnection.config.WSConfiguration;
 import org.egov.waterconnection.constants.WCConstants;
 import org.egov.waterconnection.model.BillGeneration;
+import org.egov.waterconnection.model.BillGenerationRequest;
 import org.egov.waterconnection.model.SearchCriteria;
 import org.egov.waterconnection.model.WaterConnection;
 import org.egov.waterconnection.model.WaterConnectionRequest;
@@ -142,8 +143,8 @@ public class WaterDaoImpl implements WaterDao {
 
 	@Override
 	public void updatebillingstatus(BillGeneration billingData) {
-
-		waterConnectionProducer.push(wsConfiguration.getUpdateBillPayment(), billingData);
+		BillGenerationRequest billReq = BillGenerationRequest.builder().billGeneration(billingData).build();
+		waterConnectionProducer.push(wsConfiguration.getUpdateBillPayment(), billReq);
 		
 	}
 }

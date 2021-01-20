@@ -9,13 +9,11 @@ import org.egov.hc.model.ServiceRequestData;
 import org.egov.hc.service.ServiceRequestService;
 import org.egov.hc.utils.HCConstants;
 import org.egov.hc.utils.HCUtils;
-
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -46,7 +44,6 @@ public class ServiceController {
 	 * 
 	 * @author Dhanaji Patil
 	 */
-
 	@RequestMapping(value = "/_create", method = RequestMethod.POST)
 	public ResponseEntity<?> create(@RequestBody ServiceRequest serviceRequest,
 			@RequestHeader("User-Agent") String request) throws JSONException, InterruptedException {
