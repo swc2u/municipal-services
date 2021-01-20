@@ -60,6 +60,8 @@ public class WorkflowCreationService {
 				ApplicationType.builder().name("ES-EB-OCS-DuplicateCopy").prefix("ES_EB_DC_").build(),
 				ApplicationType.builder().name("ES-EB-OCS-ScfToSco").prefix("ES_EB_RTC_").build(),
 				ApplicationType.builder().name("ES-EB-OCS-ChangeInTrade").prefix("ES_EB_CIT_").build()));
+		templateMapping.put("template-mortgage_intimation-estate",
+		Arrays.asList(ApplicationType.builder().name("ES-EB-OCS-MortgageIntimation").prefix("ES_EB_MI_").build()));
 		templateMapping.put("template-lease_deed-estate",
 				Arrays.asList(ApplicationType.builder().name("ES-EB-OCS-LeaseDeed").prefix("ES_EB_LD_").build()));
 		templateMapping.put("template-show_cause_notice-estate", Arrays
@@ -69,7 +71,7 @@ public class WorkflowCreationService {
 		templateMapping.put("template-refund_of_emd-estate",
 				Arrays.asList(ApplicationType.builder().name("ES-EB-IS-RefundOfEmd").prefix("ES_EB_ROE_").build()));
 		templateMapping.put("template-allotment_of_site-estate",
-				Arrays.asList(ApplicationType.builder().name("ES-EB-AllotmentOfSite").prefix("ES_EB_AOS_").build()));
+				Arrays.asList(ApplicationType.builder().name("ES-EB-AllotmentOfSite").prefix("ES_").build()));
 		// Building Branch
 		templateMapping.put("template-bb-property_master",
 				Arrays.asList(ApplicationType.builder().name("ES-BB-PropertyMaster").prefix("ES_BB_PM_").build()));
