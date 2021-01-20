@@ -55,12 +55,12 @@ public class WsQueryBuilder {
 	
 	private static final String WATER_SEARCH_QUERY = "SELECT "
 			/* + " conn.*, wc.*, document.*, plumber.*, application.*, property.*, " */
-			+ " wc.connectionCategory, wc.connectionType, wc.waterSource,"
+			+ " wc.connectionCategory, wc.connectionType, wc.waterSource, wc.meterCount, wc.meterRentCode, wc.mfrCode, wc.meterDigits, wc.meterUnit, wc.sanctionedCapacity,"
 			+ " wc.meterId, wc.meterInstallationDate, wc.pipeSize, wc.noOfTaps, wc.proposedPipeSize, wc.proposedTaps, wc.connection_id as connection_Id, wc.connectionExecutionDate, wc.initialmeterreading, wc.appCreatedDate,"
 			+ " wc.detailsprovidedby, wc.estimationfileStoreId , wc.sanctionfileStoreId , wc.estimationLetterDate, "
 			+ " conn.id as conn_id, conn.tenantid, conn.applicationNo, conn.applicationStatus, conn.status, conn.connectionNo, conn.oldConnectionNo, conn.property_id, conn.roadcuttingarea,"
 			+ " conn.action, conn.adhocpenalty, conn.adhocrebate, conn.adhocpenaltyreason, conn.applicationType, conn.dateEffectiveFrom,"
-			+ " conn.adhocpenaltycomment, conn.adhocrebatereason, conn.adhocrebatecomment, conn.cccode, conn.div, conn.subdiv, conn.ledger_no, conn.createdBy as ws_createdBy, conn.lastModifiedBy as ws_lastModifiedBy,"
+			+ " conn.adhocpenaltycomment, conn.adhocrebatereason, conn.adhocrebatecomment, conn.cccode, conn.div, conn.subdiv, conn.ledger_no,conn.ledgergroup, conn.createdBy as ws_createdBy, conn.lastModifiedBy as ws_lastModifiedBy,"
 			+ " conn.createdTime as ws_createdTime, conn.lastModifiedTime as ws_lastModifiedTime, "
 			+ " conn.roadtype, conn.waterApplicationType, conn.securityCharge, conn.connectionusagestype, conn.inworkflow, "
 			+ " document.id as doc_Id, document.documenttype, document.filestoreid, document.active as doc_active, plumber.id as plumber_id,"
@@ -82,7 +82,9 @@ public class WsQueryBuilder {
 			+  LEFT_OUTER_JOIN_STRING
 			+ "eg_ws_plumberinfo plumber ON plumber.wsid = conn.id"
 			+ LEFT_OUTER_JOIN_STRING
-		    + "eg_ws_connectionholder connectionholder ON connectionholder.connectionid = conn.id";
+		    + "eg_ws_connectionholder connectionholder ON connectionholder.connectionid = conn.id"
+					+ LEFT_OUTER_JOIN_STRING
+				    + "eg_ws_connection_mapping cm ON cm.wsid = conn.id";
 	
 	private static final String NO_OF_CONNECTION_SEARCH_QUERY = "SELECT count(*) FROM eg_ws_connection WHERE";
 	
@@ -190,6 +192,11 @@ public class WsQueryBuilder {
 			addClauseIfRequired(preparedStatement, query);
 			query.append(" conn.applicationType = ? ");
 			preparedStatement.add(criteria.getApplicationType());
+		}
+		if (!StringUtils.isEmpty(criteria.getConnectionUserId())) {
+		addORClauseIfRequired(preparedStatement, query);
+			query.append(" cm.user_id = ? ");
+			preparedStatement.add(criteria.getConnectionUserId());
 		}
 		query.append(ORDER_BY_CLAUSE);
 		return addPaginationWrapper(query.toString(), preparedStatement, criteria);

@@ -68,6 +68,9 @@ public class SearchCriteria {
 	
 	@JsonProperty("applicationType")
 	private String applicationType;
+	
+	@JsonProperty("connectionUserId")
+	private String connectionUserId;
 
 	@JsonIgnore
 	private List<String> ownerIds;
