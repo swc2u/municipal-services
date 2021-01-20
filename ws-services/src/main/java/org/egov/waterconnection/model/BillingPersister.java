@@ -1,6 +1,6 @@
 package org.egov.waterconnection.model;
 
-import org.egov.common.contract.request.RequestInfo;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -9,17 +9,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
 @Builder
-public class BillGenerationRequest {
-
-	@JsonProperty("RequestInfo")
-	private RequestInfo requestInfo = null;
+public class BillingPersister {
 
 	@JsonProperty("billGeneration")
-	private BillGeneration billGeneration = null;
+	private List<BillGeneration> billGeneration ;
 	
+	@JsonProperty("billGenerationFile")
+	private BillGenerationFile billGenerationFile ;
 }

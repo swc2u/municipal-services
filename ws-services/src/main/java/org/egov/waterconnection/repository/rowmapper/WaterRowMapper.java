@@ -17,16 +17,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 @Component
 public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>> {
 
 	@Override
 	public List<WaterConnection> extractData(ResultSet rs) throws SQLException, DataAccessException {
-		//Map<String, WaterConnection> connectionListMap = new HashMap<>();
-		SortedMap<String, WaterConnection> connectionListMap = new TreeMap<>();
+		Map<String, WaterConnection> connectionListMap = new HashMap<>();
 		WaterConnection currentWaterConnection = new WaterConnection();
 		while (rs.next()) {
 			String applicationNo = rs.getString("app_applicationno");
@@ -66,8 +63,19 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 				currentWaterConnection.setConnectionExecutionDate(rs.getLong("connectionExecutionDate"));
 				currentWaterConnection.setApplicationType(rs.getString("applicationType"));
                 currentWaterConnection.setDateEffectiveFrom(rs.getLong("dateEffectiveFrom"));
+                currentWaterConnection.setLedgerNo(rs.getString("ledger_no"));
+                currentWaterConnection.setDiv(rs.getString("div"));
+                currentWaterConnection.setSubdiv(rs.getString("subdiv"));
+                currentWaterConnection.setCcCode(rs.getString("cccode"));
 
-				
+                currentWaterConnection.setLedgerGroup(rs.getString("ledgerGroup"));
+                currentWaterConnection.setMeterCount(rs.getString("meterCount"));
+                currentWaterConnection.setMeterRentCode(rs.getString("meterRentCode"));
+                currentWaterConnection.setMfrCode(rs.getString("mfrCode"));
+                currentWaterConnection.setMeterDigits(rs.getString("meterDigits"));
+                currentWaterConnection.setMeterUnit(rs.getString("meterUnit"));
+                currentWaterConnection.setSanctionedCapacity(rs.getString("sanctionedCapacity"));
+                
 				HashMap<String, Object> additionalDetails = new HashMap<>();
 				additionalDetails.put(WCConstants.ADHOC_PENALTY, rs.getBigDecimal("adhocpenalty"));
 				additionalDetails.put(WCConstants.ADHOC_REBATE, rs.getBigDecimal("adhocrebate"));
@@ -192,10 +200,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
                     .relationship(Relationship.fromValue(rs.getString("holderrelationship")))
                     .status(org.egov.waterconnection.model.Status.fromValue(rs.getString("holderstatus")))
                     .tenantId(rs.getString("holdertenantid")).ownerType(rs.getString("connectionholdertype"))
-                    .isPrimaryOwner(isPrimaryOwner).uuid(uuid)
-                    .name(rs.getString("holdername")).mobileNumber(rs.getString("holdermobile"))
-                    .gender(rs.getString("holdergender")).fatherOrHusbandName(rs.getString("holderguardianname"))
-                    .correspondenceAddress(rs.getString("holderaddress")).build();
+                    .isPrimaryOwner(isPrimaryOwner).uuid(uuid).build();
             waterConnection.addConnectionHolderInfo(connectionHolderInfo);
         }
     }

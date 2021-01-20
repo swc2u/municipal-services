@@ -2238,6 +2238,10 @@ public class ServiceRequestService {
 
 	public ServiceResponse scheduler(ServiceRequest requestInfo, String tenantId) {
 		
+		log.info("SLA Scheduler Started ......");
+		boolean updateServiceRequestSLA = serviceRepository.updateServiceRequestSLA();
+		log.info("SLA Scheduler Completed with Response : {}",updateServiceRequestSLA);
+		
 		log.info("Scheduler started ......");
 	
 		String serviceRequestId = null;
