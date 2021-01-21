@@ -103,8 +103,8 @@ ColumnMaps:
      status: [APPROVED]
      roles: [CITIZEN]
      emailSubject: Application Approved
-     template: Dear Applicant,<br/><p>Your application id - [:applicationId:]  for Permission for Advertisement has been approved. Kindly visit the MMC Chandigarh portal for details.</p><br/>Regards,<br/>Portal Administrator (MCC Chandigarh)
-     smsTemplate: Dear Applicant, Your application id [:applicationId:] for Permission for Advertisement has been approved. Kindly visit the MMC Chandigarh portal for details.
+     template: Dear Applicant,<br/><p>Your application id - [:applicationId:]  for Permission for Advertisement has been approved. Kindly pay the requisite charges by visiting MMC Chandigarh portal.</p><br/>Regards,<br/>Portal Administrator (MCC Chandigarh)
+     smsTemplate: Dear Applicant, Your application id [:applicationId:] for Permission for Advertisement has been approved. Kindly pay the requisite charges by visiting MMC Chandigarh portal.
    
    - applicationType: ADVERTISEMENTNOC
      status: [REJECTED]
@@ -114,7 +114,7 @@ ColumnMaps:
      smsTemplate: Dear Applicant, Your application id [:applicationId:] for Permission for Advertisement has been rejected. Kindly visit the MMC Chandigarh portal for details. 
 
    - applicationType: ADVERTISEMENTNOC
-     status: [PAID,INITIATEDEXC]
+     status: [INITIATED,INITIATEDEXC]
      roles: [CITIZEN]
      emailSubject: Application Submitted
      template: Dear Applicant,<br/><p>Thank you for submitting online application for Permission for Advertisement at Chandigarh Municipal Corporation portal. Your Application id - [:applicationId:] .You can log on to the MCC Chandigarh portal for further details.</p><br/>Regards,<br/>Portal Administrator (MCC Chandigarh)
