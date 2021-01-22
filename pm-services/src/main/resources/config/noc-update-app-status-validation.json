@@ -261,7 +261,7 @@
 					"mandatory": "false",
 					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
 				},
-				"isAnyChangeInRoadCutEstimation":{
+				"isAnyChangeInRoadCutEstimation": {
 					"fieldName": "isAnyChangeInRoadCutEstimation",
 					"mandatory": "false",
 					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
@@ -811,7 +811,7 @@
 					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
 				}
 			},
-			"REJECT": {
+			"REJECTED": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1033,7 +1033,14 @@
 				
 			}
 		},
-		"CITIZEN-INITIATED": {
+		"CITIZEN-APPROVED": {
+			"WITHDRAWAFTERAPRROVAL": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				}
+			},
 			"PAID": {
 				"amount": {
 					"fieldName": "amount",
@@ -1044,15 +1051,6 @@
 					"fieldName": "gstAmount",
 					"mandatory": "true",
 					"validateRegularExp": "^[0-9 ]+$"
-				}
-			}
-		},
-		"CITIZEN-APPROVED": {
-			"WITHDRAWAFTERAPRROVAL": {
-				"remarks": {
-					"fieldName": "remarks",
-					"mandatory": "true",
-					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
 				}
 			}
 		},
