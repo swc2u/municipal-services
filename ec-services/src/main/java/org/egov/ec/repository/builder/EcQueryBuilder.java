@@ -54,7 +54,7 @@ public class EcQueryBuilder {
 			+ "    		or violation.sector ilike ? or violation.encroachment_type ilike ? and violation.tenant_id=? order by violation.last_modified_time desc";
 
 
-	public static final String GET_PENALTY_VIOLATIONS = "select vm.violation_uuid as violationUuid,cm.challan_Uuid as challanUuid,((current_date - vs.item_store_deposit_date)-6) * coalesce(fm.storage_charges,0) as storageCharges from egec_store_item_register  vs inner join egec_violation_master vm on vm.violation_uuid = vs.violation_uuid inner join egec_violation_detail vd on vm.violation_uuid = vd.violation_uuid inner join egec_fine_master fm on vd.item_type = fm.number_of_violation  inner join egec_payment ep on ep.violation_uuid = vm.violation_uuid and vd.violation_uuid = ep.violation_uuid  inner join egec_challan_master cm on cm.violation_uuid = vm.violation_uuid where vs.item_store_deposit_date < now()- interval '7 days' and vm.encroachment_type = 'Seizure of Vehicles' and ep.payment_status = 'PENDING'  and cm.challan_status !='CLOSED' and now()::date between fm.effective_start_date and fm.effective_end_date and vm.tenant_id = ?";
+	public static final String GET_PENALTY_VIOLATIONS = "select vm.violation_uuid as violationUuid,cm.challan_Uuid as challanUuid,((current_date - vs.item_store_deposit_date)-6) * coalesce(fm.storage_charges,0) as storageCharges from egec_store_item_register  vs inner join egec_violation_master vm on vm.violation_uuid = vs.violation_uuid inner join egec_violation_detail vd on vm.violation_uuid = vd.violation_uuid inner join egec_fine_master fm on vd.item_type = fm.number_of_violation  inner join egec_payment ep on ep.violation_uuid = vm.violation_uuid and vd.violation_uuid = ep.violation_uuid  inner join egec_challan_master cm on cm.violation_uuid = vm.violation_uuid where vm.violation_date < now()- interval '7 days' and vm.encroachment_type = 'Seizure of Vehicles' and ep.payment_status = 'PENDING'  and cm.challan_status !='CLOSED' and now()::date between fm.effective_start_date and fm.effective_end_date and vm.tenant_id = ?";
 
 	public static final String GET_STORE_ITEM_REGISTER = "select * from public.egec_store_item_register item \n" + 
 			//"join  public.egec_document doc on doc.violation_uuid = item.violation_uuid\n" + 
@@ -206,8 +206,7 @@ public class EcQueryBuilder {
 	public static final String GET_CHALLAN_PENDING_AUCTION ="select challan.challan_uuid,challan.challan_id from egec_challan_master challan JOIN egec_violation_master violation on challan.violation_uuid=violation.violation_uuid JOIN egec_payment payment ON challan.challan_uuid=payment.challan_uuid\n" + 
 			"	where challan.tenant_id=? and challan.challan_uuid in \n" + 
 			"	(select store.challan_uuid from egec_store_item_register store where (select store.item_store_deposit_date from egec_store_item_register store where store.challan_uuid=challan.challan_uuid limit 1)\n" + 
-			"	< now()- interval '30 days' and challan.challan_status <> 'CLOSED' and violation.encroachment_type <> 'Seizure of Vehicles' OR\n" + 
-			"  (select store.item_store_deposit_date from egec_store_item_register store where store.challan_uuid=challan.challan_uuid limit 1) < now()- interval '365 days' and challan.challan_status <> 'CLOSED' and violation.encroachment_type = 'Seizure of Vehicles')\n"+
+			"	< now()- interval '30 days' and challan.challan_status <> 'CLOSED' and violation.encroachment_type <> 'Seizure of Vehicles')\n"+
 			"   and ((payment.payment_status = 'PENDING' and violation.encroachment_type <> 'Unauthorized/Unregistered Vendor') OR (violation.encroachment_type = 'Unauthorized/Unregistered Vendor')) and challan.challan_status <> 'CLOSED'";
 }
 
