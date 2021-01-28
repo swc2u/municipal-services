@@ -275,15 +275,18 @@ public class EnrichmentService {
 		
 		WaterConnection connection = request.getWaterConnection();
 		String connectionId = connection.getDiv().concat(connection.getSubdiv()).concat(property.getAddress().getLocality().getCode()).concat(connection.getLedgerNo()).concat(property.getAddress().getDoorNo()).concat(property.getAddress().getFloorNo()).concat("0");
-		
-		Pattern p = Pattern.compile("-?\\d+");
-		Matcher m = p.matcher(connectionId);
 		int n = 0;
-		while (m.find()) {
-			  n += Integer.parseInt(m.group());
-		}
+		int sum = 0;
+		char ch;
+		for(int i=0; i<connectionId.length(); i++) {
+	         ch = connectionId.charAt(i);
+	         if(Character.isDigit(ch)) {
+	             n = Character.getNumericValue(ch);
+	             sum += n;
+	          }
+	         }
 		
-		request.getWaterConnection().setConnectionNo(connectionId.concat(((char)(n%26 + 'A'))+""));
+		request.getWaterConnection().setConnectionNo(connectionId.concat(((char)(sum%26 + 'A'))+""));
 	}
 	/**
 	 * Enrich fileStoreIds
