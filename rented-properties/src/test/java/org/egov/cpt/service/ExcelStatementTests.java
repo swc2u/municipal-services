@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.egov.cpt.models.RentAccountStatement;
 import org.egov.cpt.models.RentDemandResponse;
+import org.egov.cpt.service.xlsxparsing.ReadExcelService;
 import org.egov.cpt.util.RentCollectionUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,12 +28,13 @@ public class ExcelStatementTests {
         this.utils = new RentCollectionUtils();
     }
 
+    @SuppressWarnings("deprecation")
     private List<RentAccountStatement> _testSheetWithIndex(String excelFileToParse, int index) {
         InputStream inputStream = ReadExcelServiceTests.class.getClassLoader().getResourceAsStream(excelFileToParse);
         RentDemandResponse rentDemandResponse = this.readExcelService.getDatafromExcel(inputStream, index);
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(
                 rentDemandResponse.getDemand(), rentDemandResponse.getPayment(),
-                RentCollectionServiceTests.DEFAULT_INTEREST_RATE, null, System.currentTimeMillis());
+                RentCollectionServiceTests.DEFAULT_INTEREST_RATE, null, System.currentTimeMillis(), 0L);
         utils.printStatement(accountStatementItems);
         utils.reconcileStatement(accountStatementItems, RentCollectionServiceTests.DEFAULT_INTEREST_RATE);
         return accountStatementItems;
@@ -41,13 +43,13 @@ public class ExcelStatementTests {
     @Test
     public void test501Statement() {
         List<RentAccountStatement> accountStatementItems = _testSheetWithIndex(CALCULATIONS_501_TO_520_XLSX, 0);
-        assertEquals(206, accountStatementItems.size());
+        assertEquals(209, accountStatementItems.size());
     }
 
     @Test
     public void test502Statement() {
         List<RentAccountStatement> accountStatementItems = _testSheetWithIndex(CALCULATIONS_501_TO_520_XLSX, 1);
-        assertEquals(208, accountStatementItems.size());
+        assertEquals(211, accountStatementItems.size());
     }
 
     @Test

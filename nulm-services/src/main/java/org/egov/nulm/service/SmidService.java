@@ -36,17 +36,17 @@ public class SmidService {
 	private SmidRepository repository;
 
 	private IdGenRepository idgenrepository;
-	
+
 	private AuditDetailsUtil auditDetailsUtil;
-	
+
 	@Autowired
 	public SmidService(SmidRepository repository, ObjectMapper objectMapper, IdGenRepository idgenrepository,
-			NULMConfiguration config,AuditDetailsUtil auditDetailsUtil) {
+			NULMConfiguration config, AuditDetailsUtil auditDetailsUtil) {
 		this.objectMapper = objectMapper;
 		this.repository = repository;
 		this.idgenrepository = idgenrepository;
 		this.config = config;
-		this.auditDetailsUtil=auditDetailsUtil;
+		this.auditDetailsUtil = auditDetailsUtil;
 
 	}
 
@@ -54,18 +54,22 @@ public class SmidService {
 		try {
 			SmidApplication smidapplication = objectMapper.convertValue(smidrequest.getNulmSmidRequest(),
 					SmidApplication.class);
-		   checkValidation(smidapplication);
+			checkValidation(smidapplication);
 			String smidid = UUID.randomUUID().toString();
 			smidapplication.setApplicationUuid(smidid);
 			smidapplication.setIsActive(true);
-			smidapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(smidrequest.getRequestInfo(), CommonConstants.ACTION_CREATE));
-		   // idgen service call to genrate event id
+			smidapplication.setAuditDetails(
+					auditDetailsUtil.getAuditDetails(smidrequest.getRequestInfo(), CommonConstants.ACTION_CREATE));
+			// idgen service call to genrate event id
 			IdGenerationResponse id = idgenrepository.getId(smidrequest.getRequestInfo(), smidapplication.getTenantId(),
 					config.getSmidapplicationNumberIdgenName(), config.getSmidapplicationNumberIdgenFormat(), 1);
 			if (id.getIdResponses() != null && id.getIdResponses().get(0) != null)
 				smidapplication.setApplicationId(id.getIdResponses().get(0).getId());
 			else
 				throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR.toString(), CommonConstants.ID_GENERATION);
+
+			if (smidapplication.getDob().isEmpty())
+				smidapplication.setDob(null);
 
 			repository.createSMIDApplication(smidapplication);
 
@@ -74,18 +78,23 @@ public class SmidService {
 					.responseBody(smidapplication).build(), HttpStatus.CREATED);
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new CustomException(CommonConstants.SMID_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
-	
+
 	public ResponseEntity<ResponseInfoWrapper> updateSMIDApplication(NulmSmidRequest smidrequest) {
 		try {
 			SmidApplication smidapplication = objectMapper.convertValue(smidrequest.getNulmSmidRequest(),
 					SmidApplication.class);
 			checkValidation(smidapplication);
 			smidapplication.setIsActive(true);
-			smidapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(smidrequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
-		 	repository.updateSMIDApplication(smidapplication);
+			smidapplication.setAuditDetails(
+					auditDetailsUtil.getAuditDetails(smidrequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
+			if (smidapplication.getDob().isEmpty())
+				smidapplication.setDob(null);
+
+			repository.updateSMIDApplication(smidapplication);
 
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
 					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
@@ -95,28 +104,33 @@ public class SmidService {
 			throw new CustomException(CommonConstants.SMID_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
+
 	public ResponseEntity<ResponseInfoWrapper> updateSMIDApplicationStatus(NulmSmidRequest seprequest) {
 		try {
 			SmidApplication smidapplication = objectMapper.convertValue(seprequest.getNulmSmidRequest(),
 					SmidApplication.class);
-			
-		 if(smidapplication.getApplicationStatus() != null  && smidapplication.getApplicationStatus().toString().equalsIgnoreCase(config.getApproved()))
-		 {
-			 smidapplication.setApplicationStatus(SmidApplication.StatusEnum.fromValue(smidapplication.getApplicationStatus().toString()));
-			 smidapplication.setNulmApplicationId(UUID.randomUUID().toString());
-			 smidapplication.setIsActive(true);
-			 smidapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(seprequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
-		 }
-		 else if(smidapplication.getApplicationStatus() != null  && smidapplication.getApplicationStatus().toString().equalsIgnoreCase(config.getRejected()))
-			 
-		 {
-			 smidapplication.setApplicationStatus(SmidApplication.StatusEnum.fromValue(smidapplication.getApplicationStatus().toString()));
-			 smidapplication.setIsActive(true);
-			 smidapplication.setAuditDetails(auditDetailsUtil.getAuditDetails(seprequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
-			
-		 }
-		 repository.updateSMIDApplicationStatus(smidapplication);
-		 return new ResponseEntity<>(ResponseInfoWrapper.builder()
+
+			if (smidapplication.getApplicationStatus() != null
+					&& smidapplication.getApplicationStatus().toString().equalsIgnoreCase(config.getApproved())) {
+				smidapplication.setApplicationStatus(
+						SmidApplication.StatusEnum.fromValue(smidapplication.getApplicationStatus().toString()));
+				smidapplication.setNulmApplicationId(UUID.randomUUID().toString());
+				smidapplication.setIsActive(true);
+				smidapplication.setAuditDetails(
+						auditDetailsUtil.getAuditDetails(seprequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
+			} else if (smidapplication.getApplicationStatus() != null
+					&& smidapplication.getApplicationStatus().toString().equalsIgnoreCase(config.getRejected()))
+
+			{
+				smidapplication.setApplicationStatus(
+						SmidApplication.StatusEnum.fromValue(smidapplication.getApplicationStatus().toString()));
+				smidapplication.setIsActive(true);
+				smidapplication.setAuditDetails(
+						auditDetailsUtil.getAuditDetails(seprequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
+
+			}
+			repository.updateSMIDApplicationStatus(smidapplication);
+			return new ResponseEntity<>(ResponseInfoWrapper.builder()
 					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
 					.responseBody(smidapplication).build(), HttpStatus.OK);
 
@@ -130,17 +144,17 @@ public class SmidService {
 
 			SmidApplication SmidApplication = objectMapper.convertValue(smidrequest.getNulmSmidRequest(),
 					SmidApplication.class);
-			List<Role> role=smidrequest.getRequestInfo().getUserInfo().getRoles();
-			List<SmidApplication> SmidApplicationresult = repository.getSMIDApplication(SmidApplication,role,smidrequest.getRequestInfo().getUserInfo().getId());
+			List<Role> role = smidrequest.getRequestInfo().getUserInfo().getRoles();
+			List<SmidApplication> SmidApplicationresult = repository.getSMIDApplication(SmidApplication, role,
+					smidrequest.getRequestInfo().getUserInfo().getId());
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
 					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
 					.responseBody(SmidApplicationresult).build(), HttpStatus.OK);
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new CustomException(CommonConstants.SMID_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
-	
+
 	private void checkValidation(SmidApplication smidapplication) {
 		Map<String, String> errorMap = new HashMap<>();
 		if (smidapplication != null) {

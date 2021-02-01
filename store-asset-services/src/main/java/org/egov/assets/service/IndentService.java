@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
@@ -23,6 +22,7 @@ import org.egov.assets.common.exception.CustomBindException;
 import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
 import org.egov.assets.model.FinancialYear;
+import org.egov.assets.model.IndenUserListResponse;
 import org.egov.assets.model.Indent;
 import org.egov.assets.model.Indent.IndentStatusEnum;
 import org.egov.assets.model.Indent.IndentTypeEnum;
@@ -46,7 +46,6 @@ import org.egov.assets.repository.entity.IndentEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.assets.web.controller.AssetRepository;
 import org.egov.assets.wf.WorkflowIntegrator;
-import org.egov.assets.wf.model.Action;
 import org.egov.assets.wf.model.ProcessInstance;
 import org.egov.assets.wf.model.ProcessInstanceResponse;
 import org.egov.common.contract.request.RequestInfo;
@@ -618,7 +617,12 @@ public class IndentService extends DomainService {
 				indent.put("indentPurpose", in.getIndentPurpose());
 				indent.put("narration", in.getNarration());
 				indent.put("inventoryType", in.getInventoryType());
-				indent.put("deliveryDate", in.getExpectedDeliveryDate());
+				if (in.getExpectedDeliveryDate() != null) {
+					Instant expectedDeliveryDate = Instant.ofEpochMilli(in.getExpectedDeliveryDate());
+					indent.put("deliveryDate", fmt.format(expectedDeliveryDate.atZone(ZoneId.systemDefault())));
+				} else {
+					indent.put("deliveryDate", "NA");
+				}
 				indent.put("createdBy", in.getIndentCreatedBy());
 				indent.put("designation", in.getDesignation());
 
@@ -641,12 +645,14 @@ public class IndentService extends DomainService {
 				ProcessInstanceResponse workflowData = workflowIntegrator.getWorkflowDataByID(requestInfo,
 						in.getIndentNumber(), in.getTenantId());
 				JSONArray workflows = new JSONArray();
+				int wfSrNo = 1;
 				for (int j = 0; j < workflowData.getProcessInstances().size(); j++) {
 					ProcessInstance processData = workflowData.getProcessInstances().get(j);
 					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
 					// Need to integrate Workflow
 					JSONObject jsonWork = new JSONObject();
 					// fmt.format()
+					jsonWork.put("srNo", wfSrNo);
 					jsonWork.put("date", wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())));
 					jsonWork.put("updatedBy", processData.getAssigner().getName());
 					jsonWork.put("comments", processData.getComment());
@@ -661,6 +667,7 @@ public class IndentService extends DomainService {
 
 					jsonWork.put("status", processData.getState().getApplicationStatus());
 					workflows.add(jsonWork);
+					wfSrNo++;
 				}
 				indent.put("workflowDetails", workflows);
 				indents.add(indent);
@@ -683,8 +690,8 @@ public class IndentService extends DomainService {
 	public IndentResponse updateStatus(IndentRequest indentRequest) {
 
 		try {
-			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(indentRequest.getRequestInfo(), indentRequest.getWorkFlowDetails(),
-					indentRequest.getWorkFlowDetails().getTenantId());
+			WorkFlowDetails workFlowDetails = workflowIntegrator.callWorkFlow(indentRequest.getRequestInfo(),
+					indentRequest.getWorkFlowDetails(), indentRequest.getWorkFlowDetails().getTenantId());
 			indentRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updatestatusTopic, updatestatusKey, indentRequest);
 			IndentResponse response = new IndentResponse();
@@ -692,6 +699,21 @@ public class IndentService extends DomainService {
 			response.setResponseInfo(getResponseInfo(indentRequest.getRequestInfo()));
 			return response;
 		} catch (CustomBindException e) {
+			throw e;
+		}
+
+	}
+
+	@Transactional
+	public IndenUserListResponse getCreatorList(RequestInfo requestInfo, String tenantId) {
+
+		try {
+			IndenUserListResponse response = new IndenUserListResponse();
+			List<String> usernameList = indentRepository.searchcreatorlist(tenantId);
+			response.setUsers(usernameList);
+			response.setResponseInfo(getResponseInfo(requestInfo));
+			return response;
+		} catch (Exception e) {
 			throw e;
 		}
 

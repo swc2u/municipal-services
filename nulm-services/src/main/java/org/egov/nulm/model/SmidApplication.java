@@ -2,6 +2,8 @@ package org.egov.nulm.model;
 
 import javax.validation.constraints.NotNull;
 
+import org.json.simple.JSONArray;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -33,10 +35,10 @@ public class SmidApplication {
 	private StatusEnum applicationStatus ;
 
 	public enum StatusEnum {
-	    DRAFTED("DRAFTED"),
-	    CREATED("CREATED"),
-	    APPROVED("APPROVED"),
-		REJECTED("REJECTED");
+	    DRAFTED("Drafted"),
+	    CREATED("Created"),
+	    APPROVED("Approved"),
+		REJECTED("Rejected");
 
 	    private String value;
 
@@ -53,7 +55,7 @@ public class SmidApplication {
 	    @JsonCreator
 	    public static StatusEnum fromValue(String text) {
 	      for (StatusEnum b : StatusEnum.values()) {
-	        if (String.valueOf(b.value).equals(text)) {
+	        if (String.valueOf(b.value).equalsIgnoreCase(text)) {
 	          return b;
 	        }
 	      }
@@ -88,6 +90,9 @@ public class SmidApplication {
 	@JsonProperty("dob")
 	private String dob ;
 	
+	@JsonProperty("age")
+	private Integer age ;
+
 	@JsonProperty("emailId")
 	private String emailId ;
 	
@@ -137,7 +142,7 @@ public class SmidApplication {
 	private Boolean isHomeless ;
 	
 	@JsonProperty("documentAttachemnt")
-	private String documentAttachemnt ;
+	private JSONArray documentAttachemnt ;
 	
 	@JsonProperty("accountNo")
 	private String accountNo ;
@@ -166,5 +171,11 @@ public class SmidApplication {
 	
 	@JsonProperty("remark")
 	private String remark ;
+
+	@JsonProperty("isRegistered")
+	private Boolean isRegistered ;
+
+	@JsonProperty("cobNumber")
+	private String cobNumber ;
 
 }

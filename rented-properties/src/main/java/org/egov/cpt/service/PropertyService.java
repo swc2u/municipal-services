@@ -4,14 +4,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.cpt.config.PropertyConfiguration;
 import org.egov.cpt.models.AccountStatementCriteria;
+import org.egov.cpt.models.AuditDetails;
 import org.egov.cpt.models.BillV2;
+import org.egov.cpt.models.OfflinePaymentDetails;
 import org.egov.cpt.models.Owner;
 import org.egov.cpt.models.Property;
 import org.egov.cpt.models.PropertyCriteria;
+import org.egov.cpt.models.PropertyDueAmount;
 import org.egov.cpt.models.RentAccount;
 import org.egov.cpt.models.RentDemand;
 import org.egov.cpt.models.RentPayment;
@@ -22,10 +26,12 @@ import org.egov.cpt.producer.Producer;
 import org.egov.cpt.repository.PropertyRepository;
 import org.egov.cpt.service.calculation.DemandRepository;
 import org.egov.cpt.service.calculation.DemandService;
+import org.egov.cpt.util.NotificationUtil;
 import org.egov.cpt.util.PTConstants;
 import org.egov.cpt.util.PropertyUtil;
 import org.egov.cpt.validator.PropertyValidator;
 import org.egov.cpt.web.contracts.AccountStatementResponse;
+import org.egov.cpt.web.contracts.PropertyDueRequest;
 import org.egov.cpt.web.contracts.PropertyRequest;
 import org.egov.cpt.workflow.WorkflowIntegrator;
 import org.egov.cpt.workflow.WorkflowService;
@@ -79,6 +85,15 @@ public class PropertyService {
 	@Autowired
 	private DemandRepository demandRepository;
 
+	@Autowired
+	private NotificationUtil notificationUtil;
+
+	@Autowired
+	private RentDemandGenerationService rentDemandGenerationService;
+
+	@Autowired
+	private PropertyUtil propertyUtil;
+
 	public List<Property> createProperty(PropertyRequest request) {
 
 		propertyValidator.validateCreateRequest(request);
@@ -95,8 +110,10 @@ public class PropertyService {
 	private void processRentSummary(PropertyRequest request) {
 		request.getProperties().stream().filter(property -> property.getDemands() != null
 				&& property.getPayments() != null && property.getRentAccount() != null).forEach(property -> {
-					property.setRentSummary(rentCollectionService.calculateRentSummary(property.getDemands(),
-							property.getRentAccount(), property.getPropertyDetails().getInterestRate()));
+					long interestStartDate = propertyUtil.getInterstStartFromMDMS(property.getColony(),property.getTenantId());
+					property.setRentSummary(
+							rentCollectionService.calculateRentSummary(property.getDemands(), property.getRentAccount(),
+									property.getPropertyDetails().getInterestRate(), interestStartDate));
 				});
 	}
 
@@ -113,6 +130,12 @@ public class PropertyService {
 		// userService.createUser(request);
 		String action = request.getProperties().get(0).getMasterDataAction();
 		String state = request.getProperties().get(0).getMasterDataState();
+
+		/* Approved Property Missing Demands */
+		if (action.equalsIgnoreCase(PTConstants.ACTION_APPROVE) && state.equalsIgnoreCase("PM_PENDINGAPPROVAL")) {
+			rentDemandGenerationService.createMissingDemands(request.getProperties().get(0));
+		}
+
 		if ((config.getIsWorkflowEnabled() && !action.equalsIgnoreCase(""))
 				&& (!state.equalsIgnoreCase(PTConstants.PM_STATUS_APPROVED))) {
 			wfIntegrator.callWorkFlow(request);
@@ -126,11 +149,13 @@ public class PropertyService {
 	private void processRentHistory(PropertyRequest request) {
 		rentEnrichmentService.enrichRentdata(request);
 		if (!CollectionUtils.isEmpty(request.getProperties())) {
+
 			request.getProperties().stream().filter(property -> property.getDemands() != null
 					&& property.getPayments() != null && property.getRentAccount() != null).forEach(property -> {
-						property.setRentCollections(
-								rentCollectionService.settle(property.getDemands(), property.getPayments(),
-										property.getRentAccount(), property.getPropertyDetails().getInterestRate()));
+						long interestStartDate = propertyUtil.getInterstStartFromMDMS(property.getColony(),property.getTenantId());
+						property.setRentCollections(rentCollectionService.settle(property.getDemands(),
+								property.getPayments(), property.getRentAccount(),
+								property.getPropertyDetails().getInterestRate(), interestStartDate));
 					});
 		}
 		rentEnrichmentService.enrichCollection(request);
@@ -138,7 +163,10 @@ public class PropertyService {
 
 	public AccountStatementResponse searchPayments(AccountStatementCriteria accountStatementCriteria,
 			RequestInfo requestInfo) {
-
+		if (accountStatementCriteria.getFromDate() != null
+				&& accountStatementCriteria.getFromDate() > accountStatementCriteria.getToDate()) {
+			throw new CustomException("DATE_VALIDATION", "From date cannot be greater than to date");
+		}
 		List<Property> properties = repository
 				.getProperties(PropertyCriteria.builder().propertyId(accountStatementCriteria.getPropertyid())
 						.relations(Collections.singletonList("finance")).build());
@@ -147,16 +175,18 @@ public class PropertyService {
 		}
 
 		Property property = properties.get(0);
+
 		List<RentDemand> demands = repository
 				.getPropertyRentDemandDetails(PropertyCriteria.builder().propertyId(property.getId()).build());
 
 		List<RentPayment> payments = repository
 				.getPropertyRentPaymentDetails(PropertyCriteria.builder().propertyId(property.getId()).build());
 
+		long interestStartDate = propertyUtil.getInterstStartFromMDMS(property.getColony(),property.getTenantId());
 		return AccountStatementResponse.builder()
 				.rentAccountStatements(rentCollectionService.getAccountStatement(demands, payments,
 						property.getPropertyDetails().getInterestRate(), accountStatementCriteria.getFromDate(),
-						accountStatementCriteria.getToDate()))
+						accountStatementCriteria.getToDate(), interestStartDate))
 				.build();
 	}
 
@@ -194,15 +224,27 @@ public class PropertyService {
 				RentAccount rentAccount = repository
 						.getPropertyRentAccountDetails(PropertyCriteria.builder().propertyId(property.getId()).build());
 				if (!CollectionUtils.isEmpty(demands) && null != rentAccount) {
+					long interestStartDate = propertyUtil.getInterstStartFromMDMS(property.getColony(),property.getTenantId());
 					property.setRentSummary(rentCollectionService.calculateRentSummary(demands, rentAccount,
-							property.getPropertyDetails().getInterestRate()));
+							property.getPropertyDetails().getInterestRate(), interestStartDate));
 					property.setDemands(demands);
 					property.setPayments(payments);
 					property.setRentAccount(rentAccount);
-				}
+				} else
+					property.setRentSummary(new RentSummary());
 			});
 		}
 
+		if (properties.size() <= 1 && !CollectionUtils.isEmpty(criteria.getRelations())
+				&& criteria.getRelations().contains(PTConstants.RELATION_OPD)) {
+			properties.stream().forEach(property -> {
+				List<OfflinePaymentDetails> offlinePaymentDetails = repository.getPropertyOfflinePaymentDetails(
+						PropertyCriteria.builder().propertyId(property.getId()).build());
+				if (!CollectionUtils.isEmpty(offlinePaymentDetails)) {
+					property.setOfflinePaymentDetails(offlinePaymentDetails);
+				}
+			});
+		}
 		return properties;
 	}
 
@@ -246,8 +288,8 @@ public class PropertyService {
 		/**
 		 * Create egov user if not already present.
 		 */
-		userService.createUser(propertyRequest.getRequestInfo(), owner.getOwnerDetails().getPhone()
-				,owner.getOwnerDetails().getName(),property.getTenantId());
+		userService.createUser(propertyRequest.getRequestInfo(), owner.getOwnerDetails().getPhone(),
+				owner.getOwnerDetails().getName(), property.getTenantId());
 
 		/**
 		 * Generate Calculations for the property.
@@ -255,8 +297,9 @@ public class PropertyService {
 		List<RentDemand> demands = repository.getPropertyRentDemandDetails(propertyCriteria);
 		RentAccount account = repository.getPropertyRentAccountDetails(propertyCriteria);
 		if (!CollectionUtils.isEmpty(demands) && null != account) {
+			long interestStartDate = propertyUtil.getInterstStartFromMDMS(property.getColony(),property.getTenantId());
 			RentSummary rentSummary = rentCollectionService.calculateRentSummary(demands, account,
-					property.getPropertyDetails().getInterestRate());
+					property.getPropertyDetails().getInterestRate(), interestStartDate);
 			enrichmentService.enrichRentDemand(property, rentSummary);
 		}
 
@@ -269,7 +312,7 @@ public class PropertyService {
 		 * Get the bill generated.
 		 */
 		List<BillV2> bills = demandRepository.fetchBill(propertyRequest.getRequestInfo(), property.getTenantId(),
-				property.getRentPaymentConsumerCode());
+				property.getRentPaymentConsumerCode(), property.getBillingBusinessService());
 		if (CollectionUtils.isEmpty(bills)) {
 			throw new CustomException("BILL_NOT_GENERATED",
 					"No bills were found for the consumer code " + property.getRentPaymentConsumerCode());
@@ -280,7 +323,19 @@ public class PropertyService {
 			 * if offline, create a payment.
 			 */
 			demandService.createCashPayment(propertyRequest.getRequestInfo(), property.getPaymentAmount(),
-					bills.get(0).getId(), owner);
+					bills.get(0).getId(), owner, property.getBillingBusinessService());
+
+			AuditDetails auditDetails = utils.getAuditDetails(propertyRequest.getRequestInfo().getUserInfo().getUuid(),
+					true);
+			OfflinePaymentDetails offlinePaymentDetails = OfflinePaymentDetails.builder()
+					.id(UUID.randomUUID().toString()).propertyId(property.getId())
+					.demandId(bills.get(0).getBillDetails().get(0).getDemandId()).amount(property.getPaymentAmount())
+					.bankName(property.getBankName()).transactionNumber(property.getTransactionId())
+					.auditDetails(auditDetails).build();
+			property.setOfflinePaymentDetails(Collections.singletonList(offlinePaymentDetails));
+			propertyRequest.setProperties(Collections.singletonList(property));
+			producer.push(config.getUpdatePropertyTopic(), propertyRequest);
+
 		} else {
 			/**
 			 * We return the property along with the consumerCode that we set earlier. Also
@@ -292,4 +347,41 @@ public class PropertyService {
 		return Collections.singletonList(property);
 	}
 
+	public void getDueAmount(RequestInfo requestInfo) {
+		PropertyCriteria criteria = PropertyCriteria.builder().state(Arrays.asList(PTConstants.PM_STATUS_APPROVED))
+				.relations(Arrays.asList(PTConstants.RELATION_OWNER)).build();
+		List<String> propertyIds = repository.getPropertyIds(criteria);
+		if (CollectionUtils.isEmpty(propertyIds))
+			throw new CustomException("NO_PROPERTY_FOUND", "No approved property found");
+
+		List<PropertyDueAmount> PropertyDueAmounts = new ArrayList<>();
+		String localizationMessages = notificationUtil.getLocalizationMessages("ch.chandigarh", requestInfo);
+
+		propertyIds.stream().forEach(property -> {
+			criteria.setPropertyId(property);
+			criteria.setLimit(1L);
+			List<Property> singleProperty = repository.getPropertyOwner(criteria);
+			PropertyDueAmount propertyDueAmount = PropertyDueAmount.builder().propertyId(singleProperty.get(0).getId())
+					.transitNumber(singleProperty.get(0).getTransitNumber())
+					.tenantId(singleProperty.get(0).getTenantId())
+					.colony(notificationUtil.getMessageTemplate(singleProperty.get(0).getColony(),
+							localizationMessages))
+					.ownerName(singleProperty.get(0).getOwners().get(0).getOwnerDetails().getName())
+					.mobileNumber(singleProperty.get(0).getOwners().get(0).getOwnerDetails().getPhone()).build();
+			List<RentDemand> demands = repository
+					.getPropertyRentDemandDetails(PropertyCriteria.builder().propertyId(property).build());
+			RentAccount rentAccount = repository
+					.getPropertyRentAccountDetails(PropertyCriteria.builder().propertyId(property).build());
+			if (!CollectionUtils.isEmpty(demands) && null != rentAccount) {
+				long interestStartDate = propertyUtil.getInterstStartFromMDMS(singleProperty.get(0).getColony(),singleProperty.get(0).getTenantId());
+				propertyDueAmount.setRentSummary(rentCollectionService.calculateRentSummary(demands, rentAccount,
+						singleProperty.get(0).getPropertyDetails().getInterestRate(), interestStartDate));
+			}
+			PropertyDueAmounts.add(propertyDueAmount);
+		});
+
+		PropertyDueRequest propertyDueRequest = PropertyDueRequest.builder().requestInfo(requestInfo)
+				.propertyDueAmounts(PropertyDueAmounts).build();
+		producer.push(config.getDueAmountTopic(), propertyDueRequest);
+	}
 }

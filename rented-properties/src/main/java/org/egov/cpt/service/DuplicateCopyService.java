@@ -13,6 +13,7 @@ import org.egov.cpt.models.Property;
 import org.egov.cpt.models.PropertyCriteria;
 import org.egov.cpt.models.RentAccount;
 import org.egov.cpt.models.RentDemand;
+import org.egov.cpt.models.RentSummary;
 import org.egov.cpt.models.calculation.BusinessService;
 import org.egov.cpt.models.calculation.State;
 import org.egov.cpt.producer.Producer;
@@ -20,10 +21,12 @@ import org.egov.cpt.repository.PropertyRepository;
 import org.egov.cpt.service.calculation.DemandService;
 import org.egov.cpt.service.notification.DuplicateCopyNotificationService;
 import org.egov.cpt.util.PTConstants;
+import org.egov.cpt.util.PropertyUtil;
 import org.egov.cpt.validator.PropertyValidator;
 import org.egov.cpt.web.contracts.DuplicateCopyRequest;
 import org.egov.cpt.workflow.WorkflowIntegrator;
 import org.egov.cpt.workflow.WorkflowService;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -62,6 +65,9 @@ public class DuplicateCopyService {
 	
 	@Autowired
 	private IRentCollectionService rentCollectionService;
+	
+	@Autowired
+	private PropertyUtil propertyUtil;
 
 	public List<DuplicateCopy> createApplication(DuplicateCopyRequest duplicateCopyRequest) {
 		propertyValidator.isPropertyExist(duplicateCopyRequest);
@@ -109,8 +115,12 @@ public class DuplicateCopyService {
 
 	private List<DuplicateCopy> getApplication(DuplicateCopySearchCriteria criteria, RequestInfo requestInfo) {
 		List<DuplicateCopy> applications = repository.getDuplicateCopyProperties(criteria);
-		if (applications.isEmpty())
-			return Collections.emptyList();
+		if (applications.isEmpty()){
+			if(requestInfo.getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_CITIZEN)&& criteria.getApplicationNumber()!=null)
+				throw new CustomException("INVALID ACCESS", "You can not access this application.");
+			else
+				return Collections.emptyList();
+		}
 		
 		addRentSummary(applications);
 		
@@ -161,10 +171,13 @@ public class DuplicateCopyService {
 			
 			RentAccount rentAccount = repository
 					.getPropertyRentAccountDetails(propertyCriteria);
-			if (!CollectionUtils.isEmpty(demands) && null != rentAccount) {
+			if (!CollectionUtils.isEmpty(demands) && null != rentAccount && !CollectionUtils.isEmpty(propertiesFromDB)) {
+				long interestStartDate = propertyUtil.getInterstStartFromMDMS(propertiesFromDB.get(0).getColony(),propertiesFromDB.get(0).getTenantId());
 				application.getProperty().setRentSummary(rentCollectionService.calculateRentSummary(demands, rentAccount,
-						propertiesFromDB.get(0).getPropertyDetails().getInterestRate()));
+						propertiesFromDB.get(0).getPropertyDetails().getInterestRate(),interestStartDate));
 			}
+			else 
+				application.getProperty().setRentSummary(new RentSummary());
 		});
 	}
 

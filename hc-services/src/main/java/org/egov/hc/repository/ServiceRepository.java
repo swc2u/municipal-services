@@ -193,7 +193,16 @@ public class ServiceRepository {
 	  			return null;
 	  		}
 	  	}
-	 
+
+	 public boolean updateServiceRequestSLA() {
+	  		try {
+	  			jdbcTemplate.update(HCQueryBuilder.UPDATE_SERVICE_REQUEST_SLA);
+	  			return true;
+	  		} catch (Exception e) {
+	  			return false;
+	  		}
+	  	}
+
 	 public Object fetchResult(StringBuilder uri, Object request) {
 			ObjectMapper mapper = new ObjectMapper();
 	        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

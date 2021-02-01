@@ -29,10 +29,10 @@ import org.egov.cpt.models.UserResponse;
 import org.egov.cpt.models.UserSearchRequestCore;
 import org.egov.cpt.models.calculation.Demand;
 import org.egov.cpt.models.calculation.Demand.StatusEnum;
-import org.egov.cpt.models.enums.CollectionPaymentModeEnum;
 import org.egov.cpt.models.calculation.DemandDetail;
 import org.egov.cpt.models.calculation.DemandResponse;
 import org.egov.cpt.models.calculation.TaxHeadEstimate;
+import org.egov.cpt.models.enums.CollectionPaymentModeEnum;
 import org.egov.cpt.repository.ServiceRequestRepository;
 import org.egov.cpt.util.PTConstants;
 import org.egov.cpt.util.PropertyUtil;
@@ -128,7 +128,7 @@ public class DemandService {
 			Demand singleDemand = Demand.builder().status(StatusEnum.ACTIVE).consumerCode(consumerCode)
 					.demandDetails(demandDetails).payer(user).minimumAmountPayable(config.getMinimumPayableAmount())
 					.tenantId(tenantId).taxPeriodFrom(taxPeriodFrom).taxPeriodTo(taxPeriodTo)
-					.consumerType("rentedproperties").businessService(PTConstants.BILLING_BUSINESS_SERVICE_OT)
+					.consumerType("rentedproperties").businessService(owner.getBillingBusinessService())
 					.additionalDetails(null).build();
 
 			demands.add(singleDemand);
@@ -149,7 +149,7 @@ public class DemandService {
 
 			List<Demand> searchResult = searchDemand(owner.getTenantId(),
 					Collections.singleton(owner.getOwnerDetails().getApplicationNumber()), requestInfo,
-					PTConstants.BILLING_BUSINESS_SERVICE_OT);
+					owner.getBillingBusinessService());
 
 			if (CollectionUtils.isEmpty(searchResult)) {
 				demands = createDemand(requestInfo, owners);
@@ -283,7 +283,7 @@ public class DemandService {
 			String mobileNumber = requestUser.getMobileNumber() != null ? requestUser.getMobileNumber()
 					: requestUser.getUserName();
 			User user = User.builder().id(requestUser.getId()).userName(requestUser.getUserName())
-					.name(requestUser.getName()).type(requestInfo.getUserInfo().getType()).mobileNumber(mobileNumber)
+					.name(requestUser.getName()).type(requestUser.getType()).mobileNumber(mobileNumber)
 					.emailId(requestUser.getEmailId()).roles(requestUser.getRoles()).tenantId(requestUser.getTenantId())
 					.uuid(requestUser.getUuid()).build();
 
@@ -302,7 +302,7 @@ public class DemandService {
 			Demand singleDemand = Demand.builder().status(StatusEnum.ACTIVE).consumerCode(consumerCode)
 					.demandDetails(demandDetails).payer(user).minimumAmountPayable(config.getMinimumPayableAmount())
 					.tenantId(tenantId).taxPeriodFrom(taxPeriodFrom).taxPeriodTo(taxPeriodTo)
-					.consumerType("rentedproperties").businessService(PTConstants.BILLING_BUSINESS_SERVICE_DC)
+					.consumerType("rentedproperties").businessService(application.getBillingBusinessService())
 					.additionalDetails(null).build();
 
 			demands.add(singleDemand);
@@ -319,7 +319,7 @@ public class DemandService {
 
 			List<Demand> searchResult = searchDemand(application.getTenantId(),
 					Collections.singleton(application.getApplicationNumber()), requestInfo,
-					PTConstants.BILLING_BUSINESS_SERVICE_DC);
+					application.getBillingBusinessService());
 			if (CollectionUtils.isEmpty(searchResult)) {
 				demands = createDuplicateCopyDemand(requestInfo, duplicateCopyApplications);
 				/*
@@ -389,7 +389,7 @@ public class DemandService {
 		if (existingConsumerCode != null) {
 			List<Demand> searchResult = searchDemand(property.getTenantId(),
 					Collections.singleton(property.getRentPaymentConsumerCode()), requestInfo,
-					PTConstants.BILLING_BUSINESS_SERVICE_RENT);
+					property.getBillingBusinessService());
 
 			if (!CollectionUtils.isEmpty(searchResult)) {
 				Demand demand = searchResult.get(0);
@@ -447,8 +447,12 @@ public class DemandService {
 	}
 
 	private List<Demand> createRentDemand(RequestInfo requestInfo, Property property) {
-		User user = getEgovUser(property, requestInfo);
-
+		User user=null;
+		if(requestInfo.getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_EMPLOYEE)){
+			 user = getEgovUser(property, requestInfo);
+		}else{
+			 user = requestInfo.getUserInfo();
+		}
 		List<DemandDetail> demandDetails = new LinkedList<>();
 		if (!CollectionUtils.isEmpty(property.getCalculation().getTaxHeadEstimates())) {
 			property.getCalculation().getTaxHeadEstimates().forEach(taxHeadEstimate -> {
@@ -465,7 +469,7 @@ public class DemandService {
 				.consumerCode(property.getRentPaymentConsumerCode()).demandDetails(demandDetails).payer(user)
 				.minimumAmountPayable(config.getMinimumPayableAmount()).tenantId(property.getTenantId())
 				.taxPeriodFrom(taxPeriodFrom).taxPeriodTo(taxPeriodTo).consumerType("rentedproperties")
-				.businessService(PTConstants.BILLING_BUSINESS_SERVICE_RENT).additionalDetails(null).build());
+				.businessService(property.getBillingBusinessService()).additionalDetails(null).build());
 		return demandRepository.saveDemand(requestInfo, demands);
 	}
 
@@ -508,12 +512,13 @@ public class DemandService {
 	 *                      bill.
 	 * @return
 	 */
-	public Object createCashPayment(RequestInfo requestInfo, Double paymentAmount, String billId, Owner owner) {
+	public Object createCashPayment(RequestInfo requestInfo, Double paymentAmount, String billId, Owner owner,
+			String billingBusinessService) {
 		String tenantId = owner.getTenantId();
 		OwnerDetails ownerDetails = owner.getOwnerDetails();
 		CollectionPaymentDetail paymentDetail = CollectionPaymentDetail.builder().tenantId(tenantId)
 				.totalAmountPaid(BigDecimal.valueOf(paymentAmount)).receiptDate(System.currentTimeMillis())
-				.businessService(PTConstants.BILLING_BUSINESS_SERVICE_RENT).billId(billId).build();
+				.businessService(billingBusinessService).billId(billId).build();
 		CollectionPayment payment = CollectionPayment.builder().paymentMode(CollectionPaymentModeEnum.CASH)
 				.tenantId(tenantId).totalAmountPaid(BigDecimal.valueOf(paymentAmount)).payerName(ownerDetails.getName())
 				.paidBy("COUNTER").mobileNumber(ownerDetails.getPhone())

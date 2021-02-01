@@ -11,7 +11,6 @@ import org.egov.nulm.config.NULMConfiguration;
 import org.egov.nulm.idgen.model.IdGenerationResponse;
 import org.egov.nulm.model.NulmSuhRequest;
 import org.egov.nulm.model.ResponseInfoWrapper;
-import org.egov.nulm.model.SepApplication;
 import org.egov.nulm.model.SuhApplication;
 import org.egov.nulm.repository.SuhRepository;
 import org.egov.nulm.util.AuditDetailsUtil;
@@ -136,7 +135,6 @@ public class SuhService {
 	}
 	public ResponseEntity<ResponseInfoWrapper> getSuhApplication(NulmSuhRequest request) {
 		try {
-
 			SuhApplication suhapplication = objectMapper.convertValue(request.getNulmSuhRequest(),
 					SuhApplication.class);
 			List<Role> role=request.getRequestInfo().getUserInfo().getRoles();
@@ -151,7 +149,6 @@ public class SuhService {
 	}
 	public ResponseEntity<ResponseInfoWrapper> getShelterName(NulmSuhRequest request) {
 		try {
-
 			SuhApplication suhapplication = objectMapper.convertValue(request.getNulmSuhRequest(),
 					SuhApplication.class);
 			List<Role> role=request.getRequestInfo().getUserInfo().getRoles();

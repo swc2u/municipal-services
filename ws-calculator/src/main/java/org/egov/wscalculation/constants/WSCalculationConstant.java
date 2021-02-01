@@ -314,5 +314,25 @@ public class WSCalculationConstant {
 	public static final String WS_COMMERCIAL = "COMMERCIAL";
 
 	public static final String	WS_SECURITY_CHARGE_STATUS = "PENDING_FOR_SECURITY_DEPOSIT";
+
+	public static final String	WS_WATER_ACTIVITY = "WaterActivity";
+	
+	public static final String WS_PERMANENT_DISCONNECTION = "PERMANENT_DISCONNECTION";
+	
+	public static final String WS_TEMPORARY_DISCONNECTION = "TEMPORARY_DISCONNECTION";
+	
+	public static final String WS_REACTIVATE = "REACTIVATE_CONNECTION";
+
+	public static final String WS_CHANGE_OWNER_INFO = "UPDATE_CONNECTION_HOLDER_INFO";
+
+	public static final String WS_CONVERSION = "CONNECTION_CONVERSION";
+
+	public static final String WS_APPLY_FOR_REGULAR_CON = "APPLY_FOR_REGULAR_INFO";
+
+	public static final String WS_ADDON_PENDING_STATUS = "PENDING_FOR_ADDON_PAYMENT";
+	
+	public static final String WS_STATUS_PENDING_FOR_CMR = "PENDING_METER_READING_CAPTURE";
+
+	public static final String payment_cheque = "CHEQUE";
 	
 }

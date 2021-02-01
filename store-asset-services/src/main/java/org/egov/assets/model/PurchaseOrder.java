@@ -137,15 +137,19 @@ public class PurchaseOrder {
 	public enum StatusEnum {
 		CREATED("CREATED"),
 
-		REVIEWOFSDO("Review Of SDO"), REVIEWOFEE("Review Of EE"), REVIEWOFSE("Review Of SE"), REVIEWOFCE(
-				"Review Of CE"), SENDTOCREATOR("Send To Creator"), COMMISSIONERAPPROVAL("Commissioner Approval"), APPROVED(
+		REVIEWOFSDO("Review Of SDO"), REVIEWOFEE("Review/Approval Of EE"), REVIEWOFSE("Review/Approval Of SE"), REVIEWOFCE(
+				"Review/Approval Of CE"), SENDTOCREATOR("Send To Creator"), COMMISSIONERAPPROVAL("Commissioner Approval"), APPROVED(
 						"Approved"), REASSIGNTOJE(
-								"REASSIGNTOJE"), REVIEWOFCAO("Review Of CAO"), REVIEWOFACMC("Review Of ACMC"),
+								"REASSIGNTOJE"), REVIEWOFCAO("Review/Approval Of CAO"), REVIEWOFACMC("Review/Approval Of ACMC"),
 
 		REVIEWOFSO("Review Of SO"), REVIEWOFSA("Review Of SA"), REVIEWOFSP("Review Of SP"), REVIEWOFJC(
-				"Review Of JC"), REVIEWOFMOH("Review Of MOH"),
+				"Review/Approval Of Jt Comm"), REVIEWOFMOH("Review/Approval Of MOH"),
 
 		REJECTED("Rejected"),
+
+		RECEIPTED("Receipted"),
+
+		PARTIALLYRECEIPTED("Partially Receipted"),
 
 		FULFILLED_AND_PAID("Fulfilled and Paid"),
 
@@ -200,6 +204,9 @@ public class PurchaseOrder {
 
 	@JsonProperty("indentNumbers")
 	private List<String> indentNumbers = null;
+
+	@JsonProperty("externalPoNumber")
+	private String externalPoNumber = null;
 
 	public PurchaseOrder id(String id) {
 		this.id = id;
@@ -345,7 +352,7 @@ public class PurchaseOrder {
 	 * 
 	 * @return supplier
 	 **/
-	@NotNull
+//	@NotNull
 	public Supplier getSupplier() {
 		return supplier;
 	}
@@ -676,6 +683,25 @@ public class PurchaseOrder {
 		this.indentNumbers = indents;
 	}
 
+	public PurchaseOrder externalPoNumber(String externalPoNumber) {
+		this.externalPoNumber = externalPoNumber;
+		return this;
+	}
+
+	/**
+	 * purchaseOrderNumber Auto generated number, read only
+	 * 
+	 * @return purchaseOrderNumber
+	 **/
+	public String getExternalPoNumber() {
+		return externalPoNumber;
+	}
+
+	public void setExternalPoNumber(String externalPoNumber) {
+		this.externalPoNumber = externalPoNumber;
+	}
+
+	
 	@Override
 	public boolean equals(java.lang.Object o) {
 		if (this == o) {

@@ -36,38 +36,44 @@ import lombok.ToString;
 @Builder
 public class DuplicateCopy {
 
+    @Size(max = 256, message = "Id must be between 0 and 256 characters in length")
 	@JsonProperty("id")
 	private String id;
 
 	@JsonSerialize(using = PropertySerializer.class)
 	private Property property;
 
+	@Size(max = 256, message = "Tenant id must be between 0 and 256 characters in length")
 	@JsonProperty("tenantId")
 	private String tenantId;
 
+	@Size(max = 256, message = "State must be between 0 and 256 characters in length")
 	@JsonProperty("state")
 	private String state;
 
+	@Size(max = 256, message = "Action must be between 0 and 256 characters in length")
 	@JsonProperty("action")
 	private String action;
 
+	@Size(max = 64, message = "Application number must be between 0 and 64 characters in length")
 	@JsonProperty("applicationNumber")
 	private String applicationNumber;
 
+	@Size(max = 256, message = "Allotment number must be between 0 and 256 characters in length")
 	@JsonProperty("allotmentNumber")
 	private String allotmentNumber;
 	
 	@JsonProperty("allotmentStartDate")
-	private String allotmentStartDate;
-	
+	private Long allotmentStartDate;
+
 	@JsonProperty("allotmentEndDate")
-	private String allotmentEndDate;
+	private Long allotmentEndDate;
 
 	@JsonProperty("assignee")
 	@Builder.Default
 	private List<String> assignee = null;
 
-	@Size(max = 128)
+	@Size(max = 128, message = "Comment must be between 0 and 128 characters in length")
 	@JsonProperty("comment")
 	private String comment;
 
@@ -88,6 +94,21 @@ public class DuplicateCopy {
 
 	@JsonProperty("calculation")
 	Calculation calculation;
+
+	@Size(max = 256, message = "Billing business service must be between 0 and 256 characters in length")
+	@JsonProperty("billingBusinessService")
+	private String billingBusinessService;
+
+	/**
+	 * RENTED_PROPERTIES_COLONY_MILK.DUPLICATE_ALLOTMENT_LETTER
+	 * @return
+	 */
+	public String getBillingBusinessService() {
+		if (this.property == null) {
+			return "";
+		}
+		return String.format("RENTED_PROPERTIES_%s.DUPLICATE_ALLOTMENT_LETTER", this.property.getColony());
+	}
 
 	public DuplicateCopy addApplicationDocumentsItem(Document newApplicationDocumentsItem) {
 		if (this.applicationDocuments == null) {

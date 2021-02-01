@@ -29,9 +29,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Getter
+@Slf4j
 public class CalculatorUtil {
 
 	@Autowired
@@ -118,6 +120,7 @@ public class CalculatorUtil {
                 response = mapper.convertValue(result, WaterConnectionResponse.class);
         }
         catch (IllegalArgumentException e){
+        	log.error("Error while parsing response of Water Connection Search:",result);
             throw new CustomException("PARSING ERROR","Error while parsing response of Water Connection Search");
         }
 
@@ -236,6 +239,7 @@ public class CalculatorUtil {
 		details.add(MasterDetail.builder().name(WSCalculationConstant.WS_TEMP_BILLING_CHARGES).build());
 		details.add(MasterDetail.builder().name(WSCalculationConstant.WS_REGULAR_CHARGES).build());
 		details.add(MasterDetail.builder().name(WSCalculationConstant.WS_ROAD_CUT_TAX_CHARGES).build());
+		details.add(MasterDetail.builder().name(WSCalculationConstant.WS_WATER_ACTIVITY).build());
 
 		ModuleDetail mdDtl = ModuleDetail.builder().masterDetails(details)
 				.moduleName(WSCalculationConstant.WS_TAX_MODULE).build();

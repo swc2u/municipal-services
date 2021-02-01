@@ -49,7 +49,12 @@ public class WCConstants {
     public static final String ACTION_CANCEL  = "CANCEL";
 
     public static final String ACTION_PAY  = "PAY";
+    
+    public static final String ACTION_PAY_FOR_REGULAR_CONNECTION  = "PAY_FOR_REGULAR_CONNECTION";
+    
+    public static final String ACTION_PAY_FOR_TEMPORARY_CONNECTION  = "PAY_FOR_TEMPORARY_CONNECTION";
 
+    public static final String ACTION_ACTIVATE_TEMP_CONNECTION  = "ACTIVATE_TEMP_CONNECTION";
 
 
     public static final String STATUS_INITIATED = "INITIATED";
@@ -65,6 +70,8 @@ public class WCConstants {
     public static final String STATUS_CANCELLED  = "CANCELLED";
 
     public static final String STATUS_PAID  = "PAID";
+    
+    public static final String STATUS_PENDING_FOR_PAYMENT = "PENDING_FOR_PAYMENT";
     
     public static final String NOTIFICATION_LOCALE = "en_IN";
 
@@ -102,12 +109,21 @@ public class WCConstants {
 	
 	public static final String EDIT_PENDING_FOR_FIELD_INSPECTION = "EDIT_PENDING_FOR_FIELD_INSPECTION";
 	
-	public static final String APPROVE_CONNECTION_CONST = "APPROVE_FOR_CONNECTION";
+	public static final String ACTION_APPROVE_CONNECTION_CONST = "APPROVE_FOR_CONNECTION";
 	
 	public static final String ACTIVATE_CONNECTION_CONST = "ACTIVATE_CONNECTION";
 	
-	public static final String APPLY_SECURITY_DEPOSIT = "METER_INSTALLED";
+	public static final String ACTION_APPLY_SECURITY_DEPOSIT = "APPLY_SECURITY_DEPOSIT";
 	
+	public static final String ACTION_APPROVE_FOR_CONNECTION_CONVERSION = "APPROVE_FOR_CONNECTION_CONVERSION";
+	
+	public static final String ACTION_APPROVE_FOR_CONNECTION_RENAME = "APPROVE_FOR_CONNECTION_RENAME";
+	
+	public static final String ACTION_APPROVE_FOR_CONNECTION_DISCONNECTION = "APPROVE_FOR_CONNECTION_DISCONNECTION";
+	
+	public static final String ACTION_SEND_BACK_FOR_ADDON_PAYMENT = "SEND_BACK_FOR_ADDON_PAYMENT";
+	
+	public static final String ACTION_APPROVE_ACTIVATE_CONNECTION = "APPROVE_ACTIVATE_CONNECTION";
 	
 	
 	public static final List<String> NOTIFICATION_ENABLE_FOR_STATUS = Collections
@@ -205,4 +221,52 @@ public class WCConstants {
 
 	public static final String BILLING_CYCLE_STRING = "billingCycle";
 	
+	public static final String APPROVE_CONNECTION = "APPROVE_CONNECTION";
+	
+	// Used to differentiate the type of request which is processing
+	public static final int CREATE_APPLICATION = 0;
+	public static final int UPDATE_APPLICATION = 1;
+	public static final int MODIFY_CONNECTION =  2;
+
+	public static final String WATER_SERVICE_BUSINESS_ID = "WS";
+
+	public static final String NEW_WATER_CONNECTION ="NEW_WATER_CONNECTION";
+	
+	public static final String MODIFY_WATER_CONNECTION = "MODIFY_WATER_CONNECTION";
+
+	public static final String PAYMENT_NOTIFICATION_APP = "WS_PAYMENT_NOTIFICATION_APP";
+
+	public static final String PAYMENT_NOTIFICATION_SMS = "WS_PAYMENT_NOTIFICATION_SMS";
+	
+	public static final String APPLICATION_TYPE_TEMPORARY = "TEMPORARY";
+	
+	public static final String APPLICATION_TYPE_REGULAR = "REGULAR";
+	
+	public static final String APPLICATION_PROPERTY_TYPE_DOMESTIC = "DOMESTIC";
+	public static final String APPLICATION_PROPERTY_TYPE_COMMERCIAL = "COMMERCIAL";
+
+	//Activity TYpe
+	public static final String WS_NEWCONNECTION = "NEW_WS_CONNECTION";
+
+	public static final String WS_PERMANENT_DISCONNECTION = "PERMANENT_DISCONNECTION";
+	
+	public static final String WS_TEMPORARY_DISCONNECTION = "TEMPORARY_DISCONNECTION";
+	
+	public static final String WS_REACTIVATE = "REACTIVATE_CONNECTION";
+
+	public static final String WS_CHANGE_OWNER_INFO = "UPDATE_CONNECTION_HOLDER_INFO";
+
+	public static final String WS_CONVERSION = "CONNECTION_CONVERSION";
+
+	public static final String WS_APPLY_FOR_REGULAR_CON = "APPLY_FOR_REGULAR_INFO";
+	
+	public static final String WS_NEW_TUBEWELL_CONNECTION = "NEW_TUBEWELL_CONNECTION";
+
+	public static final String STATUS_PENDING_FOR_REGULAR = "PENDING_FOR_REGULAR_CONNECTION";
+	
+	public static final String WS_ACTION_REACTIVATION = "APPLY_CONNECTION_REACTIVATION";
+
+	public static final String ACTION_APPLY_FOR_REGULAR_CONNECTION = "APPLY_FOR_REGULAR_CONNECTION";
+
+	public static final String WS_BILLING_FILENAME = "billingData.txt";
 }

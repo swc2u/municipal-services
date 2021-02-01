@@ -25,6 +25,7 @@ import org.egov.cpt.repository.OwnershipTransferRepository;
 import org.egov.cpt.repository.PropertyRepository;
 import org.egov.cpt.service.MDMSService;
 import org.egov.cpt.util.DuplicateCopyConstants;
+import org.egov.cpt.util.NotificationUtil;
 import org.egov.cpt.util.PTConstants;
 import org.egov.cpt.web.contracts.DuplicateCopyRequest;
 import org.egov.cpt.web.contracts.MortgageRequest;
@@ -56,6 +57,9 @@ public class PropertyValidator {
 
 	@Autowired
 	private MDMSService mdmsService;
+	
+	@Autowired
+	private NotificationUtil notificationUtil;
 
 	@Value("${egov.mdms.host}")
 	private String mdmsHost;
@@ -76,7 +80,7 @@ public class PropertyValidator {
 		validateColony(request, errorMap);
 		validateArea(request, errorMap);
 		validateRentDetails(request, errorMap);
-
+		validateNumericValueForProperty(request, errorMap);
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
 	}
@@ -237,6 +241,7 @@ public class PropertyValidator {
 		validateColony(request, errorMap);
 		validateArea(request, errorMap);
 		validateRentDetails(request, errorMap);
+		validateNumericValueForProperty(request, errorMap);
 		/**
 		 * TO validate Documents
 		 */
@@ -426,7 +431,7 @@ public class PropertyValidator {
 
 		if (email == "" || email == null)
 			return true;
-		else if (email.length() < 2 || email.length() > 25)
+		else if (email.length() < 2)
 			return false;
 		else if (!email.matches(regex))
 			return false;
@@ -954,11 +959,12 @@ public class PropertyValidator {
 							.filter(type -> type.equalsIgnoreCase(String.valueOf(documentCode))).count();
 					if (count == 0) {
 						errorMap.put("REQUIRED DOCUMENT NOT FOUND",
-								"The document type '" + documentCode + "' is required but it is not present");
+								String.format("The document '%s' is required but it is not present",
+										notificationUtil.getMessageTemplate("RP_"+documentCode, notificationUtil.getLocalizationMessages("ch.chandigarh", requestInfo))));
 					}
 					if (count >= 2) {
-						errorMap.put("DUPLICATE DOCUMENT",
-								"The document type '" + documentCode + "' is found more than once.");
+						errorMap.put("DUPLICATE DOCUMENT",String.format("The document '%s' is found more than once.",
+								notificationUtil.getMessageTemplate("RP_"+documentCode, notificationUtil.getLocalizationMessages("ch.chandigarh", requestInfo))));
 					}
 				});
 	}
@@ -984,4 +990,133 @@ public class PropertyValidator {
 					PTConstants.BUSINESS_SERVICE_FL_RP);
 		});
 	}
+
+	@SuppressWarnings("unchecked")
+	public void validatePropertyImagesUpdateLimit(PropertyImagesRequest propertyImagesRequest) {
+		String tenantId = propertyImagesRequest.getPropertyImagesApplications().get(0).getTenantId().split("\\.")[0];
+		String filter = "[?(@.code=='" + PTConstants.BUSINESS_SERVICE_PM + "')].documentList";
+
+		/**
+		 * Get list of application documents from MDMS
+		 */
+		List<Map<String, Object>> data = (List<Map<String, Object>>) mdmsService.getMDMSResponse(
+				propertyImagesRequest.getRequestInfo(), tenantId, PTConstants.MDMS_PT_MOD_NAME, "applications", filter,
+				PTConstants.JSONPATH_CODES + ".applications");
+		List<Map<String, Object>> mdmsDocuments = (List<Map<String, Object>>) (data.get(0));
+
+		Integer maxValue = (Integer) mdmsDocuments.stream()
+				.filter(document -> document.get("code").equals("TRANSIT_SITE_IMAGES"))
+				.map(document -> document.get("maxCount")).findFirst().get();
+		Integer minValue = (Integer) mdmsDocuments.stream()
+				.filter(document -> document.get("code").equals("TRANSIT_SITE_IMAGES"))
+				.map(document -> document.get("minCount")).findFirst().get();
+
+		Map<String, String> errorMap = new HashMap<>();
+		propertyImagesRequest.getPropertyImagesApplications().forEach(application -> {
+			if (CollectionUtils.isEmpty(application.getApplicationDocuments())) {
+				errorMap.put("PROPERTY_IMAGES_NOT_FOUND", "Atleast 1 image should be uploaded");
+			} else if (application.getApplicationDocuments().size() > maxValue.intValue()) {
+				errorMap.put("PROPERTY_IMAGES_LIMIT_EXCEEDS",
+						"Property images upload limit exceeds max limit " + maxValue);
+			} else if (application.getApplicationDocuments().size() < minValue.intValue()) {
+				errorMap.put("PROPERTY_IMAGES_LIMIT_NOT_REACHED",
+						"Property images uploaded should be minimum of " + minValue);
+			}
+		});
+
+		if (!errorMap.isEmpty()) {
+			throw new CustomException(errorMap);
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public void validateNoticeGenerationDocumentUploadLimit(NoticeGenerationRequest noticeGenerationRequest) {
+		String tenantId = noticeGenerationRequest.getNoticeApplications().get(0).getTenantId().split("\\.")[0];
+		String filter = "[?(@.code=='" + PTConstants.BUSINESS_SERVICE_PM + "')].documentList";
+
+		/**
+		 * Get list of application documents from MDMS
+		 */
+		List<Map<String, Object>> data = (List<Map<String, Object>>) mdmsService.getMDMSResponse(
+				noticeGenerationRequest.getRequestInfo(), tenantId, PTConstants.MDMS_PT_MOD_NAME, "applications", filter,
+				PTConstants.JSONPATH_CODES + ".applications");
+		List<Map<String, Object>> mdmsDocuments = (List<Map<String, Object>>) (data.get(0));
+
+		Integer maxValue = (Integer) mdmsDocuments.stream()
+				.filter(document -> document.get("code").equals("TRANSIT_SITE_IMAGES"))
+				.map(document -> document.get("maxCount")).findFirst().get();
+		Integer minValue = (Integer) mdmsDocuments.stream()
+				.filter(document -> document.get("code").equals("TRANSIT_SITE_IMAGES"))
+				.map(document -> document.get("minCount")).findFirst().get();
+
+		Map<String, String> errorMap = new HashMap<>();
+		noticeGenerationRequest.getNoticeApplications().forEach(application -> {
+			if (CollectionUtils.isEmpty(application.getApplicationDocuments())) {
+				errorMap.put("PROPERTY_IMAGES_NOT_FOUND", "Atleast 1 image should be uploaded");
+			} else if (application.getApplicationDocuments().size() > maxValue.intValue()) {
+				errorMap.put("PROPERTY_IMAGES_LIMIT_EXCEEDS",
+						"Property images upload limit exceeds max limit " + maxValue);
+			} else if (application.getApplicationDocuments().size() < minValue.intValue()) {
+				errorMap.put("PROPERTY_IMAGES_LIMIT_NOT_REACHED",
+						"Property images uploaded should be minimum of " + minValue);
+			}
+		});
+		if (!errorMap.isEmpty()) {
+			throw new CustomException(errorMap);
+		}
+	}
+
+	private void validateNumericValueForProperty(PropertyRequest request, Map<String, String> errorMap) {
+		List<Property> properties = request.getProperties();
+		properties.forEach(property -> {
+			if (!isNumeric(property.getPropertyDetails().getFloors())) {
+				errorMap.put("INVALID FLOORS", "Invalid floors");
+			}
+			if (!isNumeric(property.getPropertyDetails().getRentPerSqyd())) {
+				errorMap.put("INVALID RENT PER SQYD", "Invalid rent per sqyd");
+			}
+			if (!isNumeric(property.getPropertyDetails().getArea())) {
+				errorMap.put("INVALID AREA", "Invalid AREA");
+			}
+			property.getOwners().forEach(owner -> {
+				if (!isNumeric(owner.getOwnerDetails().getMonthlyRent())) {
+					errorMap.put("INVALID MONTHLY RENT", "Invalid monthly rent");
+				}
+				if (!isNumeric(owner.getOwnerDetails().getRevisionPeriod())) {
+					errorMap.put("INVALID REVISION PERIOD", "Invalid revision period");
+				}
+				if (!isNumeric(owner.getOwnerDetails().getRevisionPercentage())) {
+					errorMap.put("INVALID REVISION PERCENTAGE", "Invalid revision percentage");
+				}
+			});
+		});
+	}
+
+	public void validatePropertyRentDetails(OwnershipTransferRequest request) {
+		Map<String, String> errorMap = new HashMap<>();
+		List<Owner> owners = request.getOwners();
+		owners.forEach(owner -> {
+			if (!isNumeric(owner.getOwnerDetails().getMonthlyRent())) {
+				errorMap.put("INVALID MONTHLY RENT", "Invalid monthly rent");
+			}
+			if (!isNumeric(owner.getOwnerDetails().getRevisionPeriod())) {
+				errorMap.put("INVALID REVISION PERIOD", "Invalid revision period");
+			}
+			if (!isNumeric(owner.getOwnerDetails().getRevisionPercentage())) {
+				errorMap.put("INVALID REVISION PERCENTAGE", "Invalid revision percentage");
+			}
+		});
+		if (!errorMap.isEmpty()) {
+			throw new CustomException(errorMap);
+		}
+	}
+
+	private Boolean isNumeric(String value) {
+		if (value != null && !value.matches("(\\d+)?(\\.\\d+)?")) {
+			return false;
+		}
+		return true;
+	}
+
 }

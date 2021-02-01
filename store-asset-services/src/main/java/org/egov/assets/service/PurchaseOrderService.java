@@ -49,9 +49,9 @@ import org.egov.assets.model.PurchaseOrderSearch;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
 import org.egov.assets.model.Supplier;
-import org.egov.assets.model.SupplierGetRequest;
 import org.egov.assets.model.Uom;
 import org.egov.assets.model.WorkFlowDetails;
+import org.egov.assets.model.MaterialIssue.MaterialIssueStatusEnum;
 import org.egov.assets.repository.IndentJdbcRepository;
 import org.egov.assets.repository.MaterialReceiptJdbcRepository;
 import org.egov.assets.repository.PDFServiceReposistory;
@@ -73,6 +73,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -115,6 +118,9 @@ public class PurchaseOrderService extends DomainService {
 
 	@Autowired
 	private UomService uomService;
+
+	@Autowired
+	private IndentJdbcRepository indentRepository;
 
 	@Autowired
 	SupplierRepository supplierRepository;
@@ -165,6 +171,9 @@ public class PurchaseOrderService extends DomainService {
 	WorkflowIntegrator workflowIntegrator;
 
 	private String INDENT_MULTIPLE = "Multiple";
+
+	@Autowired
+	public NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 	/**
 	 * @param purchaseOrderRequest
@@ -241,7 +250,12 @@ public class PurchaseOrderService extends DomainService {
 
 				}
 
-				purchaseOrder.setStatus(StatusEnum.CREATED);
+				if (purchaseOrder.getRateType() != null
+						&& purchaseOrder.getRateType().toString().equalsIgnoreCase(RateTypeEnum.GEM.toString()))
+					purchaseOrder.setStatus(StatusEnum.APPROVED);
+				else
+					purchaseOrder.setStatus(StatusEnum.CREATED);
+
 				String purchaseOrderNumber = appendString(purchaseOrder);
 				purchaseOrder.setId(sequenceNos.get(i));
 
@@ -345,27 +359,29 @@ public class PurchaseOrderService extends DomainService {
 
 			}
 
-			// TODO: ITERATE MULTIPLE PURCHASE ORDERS, BASED ON PURCHASE TYPE,
-			// PUSH DATA TO KAFKA.
-
 			if (errors.getValidationErrors().size() > 0)
 				throw errors;
 
-			for (PurchaseOrder po : purchaseOrderRequest.getPurchaseOrders()) {
-				if (po.getRateType() != null
-						&& po.getRateType().toString().equalsIgnoreCase(RateTypeEnum.GEM.toString())) {
-					saveRateContractForGem(purchaseOrderRequest, tenantId);
+			// for (PurchaseOrder po : purchaseOrderRequest.getPurchaseOrders()) {
+			// if (po.getRateType() != null
+			// && po.getRateType().toString().equalsIgnoreCase(RateTypeEnum.GEM.toString()))
+			// {
+			// saveRateContractForGem(purchaseOrderRequest, tenantId);
+			// }
+			// }
+			if (purchaseOrders.size() > 0 && purchaseOrders.get(0).getRateType() != null) {
+				if (!purchaseOrders.get(0).getRateType().toString().equalsIgnoreCase(RateTypeEnum.GEM.toString())) {
+
+					WorkFlowDetails workFlowDetails = purchaseOrderRequest.getWorkFlowDetails();
+					workFlowDetails
+							.setBusinessId(purchaseOrderRequest.getPurchaseOrders().get(0).getPurchaseOrderNumber());
+					workflowIntegrator.callWorkFlow(purchaseOrderRequest.getRequestInfo(), workFlowDetails,
+							purchaseOrderRequest.getPurchaseOrders().get(0).getTenantId());
 				}
 			}
-			WorkFlowDetails workFlowDetails = purchaseOrderRequest.getWorkFlowDetails();
-			workFlowDetails.setBusinessId(purchaseOrderRequest.getPurchaseOrders().get(0).getPurchaseOrderNumber());
-			workflowIntegrator.callWorkFlow(purchaseOrderRequest.getRequestInfo(), workFlowDetails,
-					purchaseOrderRequest.getPurchaseOrders().get(0).getTenantId());
-
 			if (purchaseOrders.size() > 0 && purchaseOrders.get(0).getPurchaseType() != null) {
 				if (purchaseOrders.get(0).getPurchaseType().toString()
 						.equalsIgnoreCase(PurchaseTypeEnum.INDENT.toString())) {
-
 					kafkaQue.send(saveTopic, saveKey, purchaseOrderRequest);
 					purchaseOrderRepository.markIndentUsedForPo(purchaseOrderRequest, tenantId);
 				} else {
@@ -611,8 +627,11 @@ public class PurchaseOrderService extends DomainService {
 	}
 
 	public PurchaseOrderResponse search(PurchaseOrderSearch is) {
+
 		PurchaseOrderResponse response = new PurchaseOrderResponse();
-		Pagination<PurchaseOrder> search = purchaseOrderRepository.search(is);
+		Pagination<PurchaseOrder> search = null;
+
+		search = purchaseOrderRepository.search(is);
 
 		if (!search.getPagedData().isEmpty()) {
 			for (PurchaseOrder purchaseOrder : search.getPagedData()) {
@@ -773,13 +792,13 @@ public class PurchaseOrderService extends DomainService {
 									}
 								}
 
-							if (!eachPurchaseOrder.getRateType().toString()
-									.equalsIgnoreCase(RateTypeEnum.GEM.toString())
-									&& (purchaseOrderDetail.getPriceList() == null
-											|| purchaseOrderDetail.getPriceList().getId() == null)) {
-								errors.addDataError(ErrorCode.NOT_NULL.getCode(), "rateContract", "null");
-							}
-
+							/*
+							 * if (!eachPurchaseOrder.getRateType().toString()
+							 * .equalsIgnoreCase(RateTypeEnum.GEM.toString()) &&
+							 * (purchaseOrderDetail.getPriceList() == null ||
+							 * purchaseOrderDetail.getPriceList().getId() == null)) {
+							 * errors.addDataError(ErrorCode.NOT_NULL.getCode(), "rateContract", "null"); }
+							 */
 						}
 					indentNumbers.replaceAll(",$", "");
 
@@ -791,7 +810,10 @@ public class PurchaseOrderService extends DomainService {
 									IndentSearch is = IndentSearch.builder().tenantId(tenantId)
 											.indentNumber(indentList.get(i)).build();
 									IndentResponse isr = indentService.search(is, new RequestInfo());
+
 									for (Indent in : isr.getIndents()) {
+										LOG.info(" PO Date : {}", eachPurchaseOrder.getPurchaseOrderDate());
+										LOG.info(" IndentDate : {}", in.getIndentDate());
 										if (in.getIndentDate()
 												.compareTo(eachPurchaseOrder.getPurchaseOrderDate()) > 0) {
 											String date = convertEpochtoDate(eachPurchaseOrder.getPurchaseOrderDate());
@@ -1117,6 +1139,7 @@ public class PurchaseOrderService extends DomainService {
 		Boolean flag = true;
 
 		PurchaseOrderResponse search = search(purchaseOrderSearch);
+		BigDecimal balanceOrderQuantity = new BigDecimal(0);
 
 		if (search.getPurchaseOrders().size() > 0) {
 			List<PurchaseOrder> purchaseOrders = search.getPurchaseOrders();
@@ -1132,7 +1155,30 @@ public class PurchaseOrderService extends DomainService {
 		} else
 			throw new CustomException("po", "Purchase order not found");
 
-		return flag;
+		return true;
+	}
+
+	public String checkReceiptedStatusForPo(PurchaseOrderSearch purchaseOrderSearch) {
+		PurchaseOrderResponse search = search(purchaseOrderSearch);
+		if (!search.getPurchaseOrders().isEmpty()) {
+			List<PurchaseOrder> purchaseOrders = search.getPurchaseOrders();
+			for (PurchaseOrder purchaseOrder : purchaseOrders) {
+				for (PurchaseOrderDetail purchaseOrderDetail : purchaseOrder.getPurchaseOrderDetails()) {
+					if (null != purchaseOrderDetail.getReceivedQuantity()) {
+						if (purchaseOrderDetail.getOrderQuantity()
+								.compareTo(purchaseOrderDetail.getReceivedQuantity()) == 0) {
+							return PurchaseOrder.StatusEnum.RECEIPTED.toString();
+						} else if (purchaseOrderDetail.getOrderQuantity()
+								.compareTo(purchaseOrderDetail.getReceivedQuantity()) == 1) {
+							return PurchaseOrder.StatusEnum.PARTIALLYRECEIPTED.toString();
+						}
+					}
+				}
+			}
+		} else {
+			throw new CustomException("po", "Purchase order not found");
+		}
+		return null;
 	}
 
 	public PurchaseOrderResponse getPOPendingToDeliver(PurchaseOrderSearch purchaseOrderSearch) {
@@ -1280,7 +1326,7 @@ public class PurchaseOrderService extends DomainService {
 				purchaseOrder.put("storeName", po.getStore().getName());
 				purchaseOrder.put("poStatus", po.getStatus());
 				purchaseOrder.put("rateType", po.getRateType());
-				if (po.getRateType().equals(RateTypeEnum.GEM.toString())) {
+				if (po.getRateType().equals(RateTypeEnum.GEM)) {
 					purchaseOrder.put("supplierName", po.getSupplier().getCode());
 				} else {
 					purchaseOrder.put("supplierName", po.getSupplier().getName());
@@ -1322,8 +1368,10 @@ public class PurchaseOrderService extends DomainService {
 					poDets.put("totalValue", poDetails.getOrderQuantity().multiply(poDetails.getUnitPrice()));
 					poDets.put("workDetailsRemark", poDetails.getWorkDetailRemarks());
 
-					for (PurchaseIndentDetail indentDetails : poDetails.getPurchaseIndentDetails()) {
-						poDets.put("indentQuantity", indentDetails.getIndentDetail().getIndentQuantity());
+					if (poDetails.getPurchaseIndentDetails() != null) {
+						for (PurchaseIndentDetail indentDetails : poDetails.getPurchaseIndentDetails()) {
+							poDets.put("indentQuantity", indentDetails.getIndentDetail().getIndentQuantity());
+						}
 					}
 
 					purchaseOrder.put("rateContractNumber", poDetails.getPriceList().getRateContractNumber());
@@ -1349,6 +1397,7 @@ public class PurchaseOrderService extends DomainService {
 					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
 					// Need to integrate Workflow
 					JSONObject jsonWork = new JSONObject();
+					jsonWork.put("srNo", j + 1);
 					jsonWork.put("date", wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())));
 					jsonWork.put("updatedBy", processData.getAssigner().getName());
 					jsonWork.put("comments", processData.getComment());
@@ -1387,6 +1436,31 @@ public class PurchaseOrderService extends DomainService {
 					purchaseOrderRequest.getWorkFlowDetails(), purchaseOrderRequest.getWorkFlowDetails().getTenantId());
 			purchaseOrderRequest.setWorkFlowDetails(workFlowDetails);
 			kafkaQue.send(updatestatusTopic, updatestatusKey, purchaseOrderRequest);
+			
+			
+			if (purchaseOrderRequest.getWorkFlowDetails().getStatus()
+					.equals(StatusEnum.REJECTED.toString())) {
+				
+				PurchaseOrderSearch purchaseOrderSearch = new PurchaseOrderSearch();
+				purchaseOrderSearch.setTenantId(tenantId);
+				purchaseOrderSearch.setPurchaseOrderNumber(purchaseOrderRequest.getWorkFlowDetails().getBusinessId());
+
+				PurchaseOrderResponse poSearchData = search(purchaseOrderSearch);
+				poSearchData.getPurchaseOrders().forEach(purchaseOrder->{
+					purchaseOrder.getPurchaseOrderDetails().forEach(poDetail->{
+						poDetail.getPurchaseIndentDetails().forEach(poIndentDetail->{
+							Map<String, Object> paramValues = new HashMap<>();
+							String query = "update indentdetail set poorderedquantity = poorderedquantity - :poquantity where id = :id and tenantid = :tenantId and (deleted is not true or deleted is null)";
+							paramValues.put("id", poIndentDetail.getIndentDetail().getId());
+							paramValues.put("tenantId", tenantId);
+							paramValues.put("poquantity", poDetail.getOrderQuantity());
+//							paramValues.put("material", poIndentDetail.getIndentDetail().getMaterial().getCode());
+							namedParameterJdbcTemplate.update(query.toString(), paramValues);
+						});
+					});
+				});
+			}
+			
 			PurchaseOrderResponse response = new PurchaseOrderResponse();
 			response.setPurchaseOrders(purchaseOrderRequest.getPurchaseOrders());
 			response.setResponseInfo(getResponseInfo(purchaseOrderRequest.getRequestInfo()));

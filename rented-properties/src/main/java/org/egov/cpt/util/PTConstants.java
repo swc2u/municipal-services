@@ -60,15 +60,9 @@ public class PTConstants {
 
 	public static final String BUSINESS_SERVICE_OT = "OwnershipTransferRP";
 
-	public static final String BILLING_BUSINESS_SERVICE_OT = "RentedProperties.OwnershipTransfer";
-
-	public static final String BILLING_BUSINESS_SERVICE_DC = "RentedProperties.DuplicateAllotmentLetter";
-
 	public static final String TAX_HEAD_CODE_APPLICATION_CHARGE = "APPLICATION";
 
 	public static final String TAX_HEAD_CODE_PUBLICATION_CHARGE = "PUBLICATION";
-
-	public static final String BILLING_BUSINESS_SERVICE_RENT = "RentedProperties.Rent";
 
 	public static final String BUSINESS_SERVICE_DC = "DuplicateCopyOfAllotmentLetterRP";
 
@@ -128,10 +122,6 @@ public class PTConstants {
 
 	public static final String ACTION_PAY = "PAY";
 
-	public static final String USREVENTS_EVENT_TYPE = "SYSTEMGENERATED";
-	public static final String USREVENTS_EVENT_NAME = "Property Tax";
-	public static final String USREVENTS_EVENT_POSTEDBY = "SYSTEM-PT";
-
 	public static final String BUSINESS_SERVICE_MG_RP = "MortgageRP";
 
 	public static final String BUSINESS_SERVICE_DC_RP = "DuplicateCopyOfAllotmentLetterRP";
@@ -187,9 +177,12 @@ public class PTConstants {
 	public static final String NOTIFICATION_OT_PAYMENT = "rp.en.counter.payment";
 	public static final String NOTIFICATION_OT_PAYMENT_SUCCESS = "rp.en.counter.paymentsuccess";
 	public static final String NOTIFICATION_OT_PAYMENT_SUCCESS_PAYER = "rp.en.counter.paymentsuccesspayer";
+	public static final String NOTIFICATION_OT_CA_APPROVED = "rp.en.counter.caapproved";
 	public static final String NOTIFICATION_OT_APPROVED = "rp.en.counter.approved";
-	public static final String OWNERSHIP_TRANSFER_APPLICATION = "Ownership Transfer request";
-	public static final String DUPLICATE_COPY_APPLICATION = "Duplicate Copy request";
+	public static final String NOTIFICATION_MG_APPROVED = "rp.en.counter.mortgage.approved";
+	public static final String NOTIFICATION_MG_GRANTDETAIL = "rp.en.counter.mortgage.grantdetail";
+	public static final String OWNERSHIP_TRANSFER_APPLICATION = "Ownership transfer request";
+	public static final String DUPLICATE_COPY_APPLICATION = "Duplicate copy of allotment letter";
 	public static final String MORTGAGE_APPLICATION = "Mortgage request";
 	public static final String NOTIFICATION_NG_VIOLATION = "rp.en.counter.violationnoticegenerated";
 	public static final String NOTIFICATION_NG_RECOVERY = "rp.en.counter.recoverynoticegenerated";
@@ -199,10 +192,11 @@ public class PTConstants {
 	public static final String OT_ACTION_STATUS_INITIATED = "INITIATE_OT_DRAFTED";
 	public static final String OT_ACTION_STATUS_SUBMIT = "SUBMIT_OT_PENDINGCLVERIFICATION";
 	public static final String OT_ACTION_STATUS_REJECTED = "REJECT_OT_REJECTED";
-	public static final String OT_ACTION_STATUS_SENDBACK = "SENDBACK_OT_PENDINGCLARIFICATION";
+	public static final String OT_ACTION_STATUS_SENDBACK = "SENDBACK_TO_CITIZEN_OT_PENDINGCLARIFICATION";
 	public static final String OT_ACTION_STATUS_PAYMENT = "SENDFORPAYMENT_OT_PENDINGPAYMENT";
 	public static final String OT_ACTION_STATUS_PAYMENT_SUCCESS = "PAY_OT_APPROVED";
-	public static final String OT_ACTION_STATUS_APPROVED = "APPROVE_OT_APPROVED";
+	public static final String OT_ACTION_STATUS_CA_APPROVED = "APPROVE_OT_PENDINGAPRO";
+	public static final String OT_ACTION_STATUS_APPROVED = "COMPLETE_OT_APPROVED";
 	public static final String OT_ACTION_STATUS_REJECTED_AFTER_PAYMENT = "REJECT_OT_REJECTEDPAID";
 
 	// Duplicate Copy ACTION_STATUS combinations for notification
@@ -210,10 +204,11 @@ public class PTConstants {
 	public static final String DC_ACTION_STATUS_INITIATED = "INITIATE_DC_DRAFTED";
 	public static final String DC_ACTION_STATUS_SUBMIT = "SUBMIT_DC_PENDINGCLVERIFICATION";
 	public static final String DC_ACTION_STATUS_REJECTED = "REJECT_DC_REJECTED";
-	public static final String DC_ACTION_STATUS_SENDBACK = "SENDBACK_DC_PENDINGCLARIFICATION";
+	public static final String DC_ACTION_STATUS_SENDBACK = "SENDBACK_TO_CITIZEN_DC_PENDINGCLARIFICATION";
 	public static final String DC_ACTION_STATUS_PAYMENT = "SENDFORPAYMENT_DC_PENDINGPAYMENT";
 	public static final String DC_ACTION_STATUS_PAYMENT_SUCCESS = "PAY_DC_APPROVED";
-	public static final String DC_ACTION_STATUS_APPROVED = "APPROVE_DC_APPROVED";
+	public static final String DC_ACTION_STATUS_CA_APPROVED = "APPROVE_DC_PENDINGAPRO";
+	public static final String DC_ACTION_STATUS_APPROVED = "COMPLETE_DC_APPROVED";
 	public static final String DC_ACTION_STATUS_REJECTED_AFTER_PAYMENT = "REJECT_DC_REJECTEDPAID";
 
 	// Mortgage ACTION_STATUS combinations for notification
@@ -221,8 +216,9 @@ public class PTConstants {
 	public static final String MG_ACTION_STATUS_INITIATED = "INITIATE_MG_DRAFTED";
 	public static final String MG_ACTION_STATUS_SUBMIT = "SUBMIT_MG_PENDINGCLVERIFICATION";
 	public static final String MG_ACTION_STATUS_REJECTED = "REJECT_MG_REJECTED";
-	public static final String MG_ACTION_STATUS_SENDBACK = "SENDBACK_MG_PENDINGCLARIFICATION";
-	public static final String MG_ACTION_STATUS_MORTGAGE_APPROVED = "APPROVE_MG_APPROVED";
+	public static final String MG_ACTION_STATUS_SENDBACK = "SENDBACK_TO_CITIZEN_MG_PENDINGCLARIFICATION";
+	public static final String MG_ACTION_STATUS_MORTGAGE_APPROVED = "APPROVE_MG_PENDINGGRANTDETAIL";
+	public static final String MG_ACTION_STATUS_MORTGAGE_ADDGRNATDETAIL = "GRANTINFO_MG_APPROVED";
 
 	// demand generation
 	public static final String OT_STATE_PENDING_SA_VERIFICATION = "OT_PENDINGSAVERIFICATION";
@@ -257,11 +253,44 @@ public class PTConstants {
 	public static final String RELATION_GD = "GrantDetail";
 	public static final String RELATION_NOTICE = "notice";
 	public static final String RELATION_FINANCE = "finance";
-
+	public static final String RELATION_OPD = "offlinepayment";
 	public static final String OT_STATUS_APPROVED = "OT_APPROVED";
 	public static final String PM_STATUS_APPROVED = "PM_APPROVED";
 
 	public static final String false_value = "false";
 	public static final String true_value = "true";
 
+	//Demand Generation Notifications
+	public static final String NOTIFICATION_DEMAND_GENERATION = "rp.en.counter.demand";
+	
+	//Email Signature
+	public static final String EMAIL_SIGNATURE = "rp.email.signature";
+
+	//Current Owner Payment Notification
+	public static final String  NOTIFICATION_PAYMENT_RECIEVED = "rp.en.counter.rent.payment";
+	
+	public static final String BUSINESS_SERVICE_CM_OT="RENTED_PROPERTIES_COLONY_MILK.OWNERSHIP_TRANSFER";
+	public static final String BUSINESS_SERVICE_CK_OT="RENTED_PROPERTIES_COLONY_KUMHAR.OWNERSHIP_TRANSFER";
+	public static final String BUSINESS_SERVICE_CS_OT="RENTED_PROPERTIES_COLONY_SECTOR_52_53.OWNERSHIP_TRANSFER";
+	public static final String BUSINESS_SERVICE_VN_OT="RENTED_PROPERTIES_COLONY_VIKAS_NAGAR.OWNERSHIP_TRANSFER";
+	
+	public static final String BUSINESS_SERVICE_CM_DC="RENTED_PROPERTIES_COLONY_MILK.DUPLICATE_ALLOTMENT_LETTER";
+	public static final String BUSINESS_SERVICE_CK_DC="RENTED_PROPERTIES_COLONY_KUMHAR.DUPLICATE_ALLOTMENT_LETTER";
+	public static final String BUSINESS_SERVICE_CS_DC="RENTED_PROPERTIES_COLONY_SECTOR_52_53.DUPLICATE_ALLOTMENT_LETTER";
+	public static final String BUSINESS_SERVICE_VN_DC="RENTED_PROPERTIES_COLONY_VIKAS_NAGAR.DUPLICATE_ALLOTMENT_LETTER";
+	
+	public static final String BUSINESS_SERVICE_CM_RENT="RENTED_PROPERTIES_COLONY_MILK.RENT";
+	public static final String BUSINESS_SERVICE_CK_RENT="RENTED_PROPERTIES_COLONY_KUMHAR.RENT";
+	public static final String BUSINESS_SERVICE_CS_RENT="RENTED_PROPERTIES_COLONY_SECTOR_52_53.RENT";
+	public static final String BUSINESS_SERVICE_VN_RENT="RENTED_PROPERTIES_COLONY_VIKAS_NAGAR.RENT";
+	
+	//User event
+	public static final String  USREVENTS_EVENT_TYPE = "SYSTEMGENERATED";
+	public static final String  USREVENTS_EVENT_NAME = "Rented Properties";
+	public static final String  USREVENTS_EVENT_POSTEDBY = "SYSTEM-RP";
+	
+	//Paylink constant
+	public static final String OT_PENDINGPAYMENT ="OT_PENDINGPAYMENT";
+	public static final String DC_PENDINGPAYMENT ="DC_PENDINGPAYMENT";
+	public static final String PAYRENT ="PAYRENT";
 }

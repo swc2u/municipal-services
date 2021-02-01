@@ -22,7 +22,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mockito;
 
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @RunWith(JUnit4.class)
 @SuppressWarnings("unused")
 public class RentCollectionServiceTests {
@@ -80,7 +83,7 @@ public class RentCollectionServiceTests {
 
         // Test
         List<RentCollection> collections = this.rentCollectionService.settle(demands, payments, account,
-                ZERO_INTEREST_RATE);
+                ZERO_INTEREST_RATE,new Long(0));
 
         // Verify
         reconcileDemands(demands, collections);
@@ -97,7 +100,7 @@ public class RentCollectionServiceTests {
 
         // Test
         List<RentCollection> collections = this.rentCollectionService.settle(demands, payments, account,
-                ZERO_INTEREST_RATE);
+                ZERO_INTEREST_RATE,new Long(0));
 
         // Verify
         reconcileDemands(demands, collections);
@@ -114,7 +117,7 @@ public class RentCollectionServiceTests {
 
         // Test
         List<RentCollection> collections = this.rentCollectionService.settle(demands, payments, account,
-                ZERO_INTEREST_RATE);
+                ZERO_INTEREST_RATE,new Long(0));
 
         // Verify
         reconcileDemands(demands, collections);
@@ -131,7 +134,7 @@ public class RentCollectionServiceTests {
 
         // Test
         List<RentCollection> collections = this.rentCollectionService.settle(demands, payments, account,
-                ZERO_INTEREST_RATE);
+                ZERO_INTEREST_RATE,0L);
 
         // Verify
         reconcileDemands(demands, collections);
@@ -148,7 +151,7 @@ public class RentCollectionServiceTests {
 
         // Test
         List<RentCollection> collections = this.rentCollectionService.settle(demands, payments, account,
-                ZERO_INTEREST_RATE);
+                ZERO_INTEREST_RATE,0L);
 
         // Verify
         reconcileDemands(demands, collections);
@@ -170,9 +173,9 @@ public class RentCollectionServiceTests {
         List<RentPayment> payments = Arrays.asList(getPayment(200, FEB_16_1999));
         RentAccount account = getAccount(0);
         List<RentCollection> collections = this.rentCollectionService.settle(demands, payments, account,
-                DEFAULT_INTEREST_RATE);
+                DEFAULT_INTEREST_RATE,0L);
         RentSummary summary = this.rentCollectionService.calculateRentSummaryAt(demands, account, DEFAULT_INTEREST_RATE,
-                getEpochFromDateString(FEB_16_1999));
+                getEpochFromDateString(FEB_16_1999),0L);
         // this.rentCollectionService.accountStatement(demands, payments, collections,
         // null, null);
         assertEquals(0, summary.getBalanceAmount(), 0.1);
@@ -184,7 +187,7 @@ public class RentCollectionServiceTests {
                 getDemand(100, FEB_1_1999));
         List<RentPayment> payments = Arrays.asList(getPayment(200, FEB_16_1999));
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(demands,
-                payments, DEFAULT_INTEREST_RATE, null, null);
+                payments, DEFAULT_INTEREST_RATE, null, null,0L);
         utils.printStatement(accountStatementItems);
         utils.reconcileStatement(accountStatementItems, DEFAULT_INTEREST_RATE);
     }
@@ -194,11 +197,11 @@ public class RentCollectionServiceTests {
         List<RentDemand> demands = Arrays.asList(getDemand(500, JAN_1_2000));
         List<RentPayment> payments = Arrays.asList(getPayment(400, MAY_1_2000));
         RentAccount rentAccount = getAccount(0);
-        this.rentCollectionService.settle(demands, payments, rentAccount, DEFAULT_INTEREST_RATE);
+        this.rentCollectionService.settle(demands, payments, rentAccount, DEFAULT_INTEREST_RATE,new Long(0));
         RentSummary summary = this.rentCollectionService.calculateRentSummary(demands, rentAccount,
-                DEFAULT_INTEREST_RATE);
+                DEFAULT_INTEREST_RATE,0L);
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(demands,
-                payments, DEFAULT_INTEREST_RATE, null, null);
+                payments, DEFAULT_INTEREST_RATE, null, null,0L);
         utils.printStatement(accountStatementItems);
         utils.reconcileStatement(accountStatementItems, DEFAULT_INTEREST_RATE);
     }
@@ -209,7 +212,7 @@ public class RentCollectionServiceTests {
                 getDemand(100, MAR_1_1999), getDemand(100, APR_1_1999));
         List<RentPayment> payments = Arrays.asList(getPayment(400, FEB_16_1999), getPayment(20, APR_1_1999));
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(demands,
-                payments, DEFAULT_INTEREST_RATE, null, null);
+                payments, DEFAULT_INTEREST_RATE, null, null,0L);
         utils.printStatement(accountStatementItems);
         utils.reconcileStatement(accountStatementItems, DEFAULT_INTEREST_RATE);
     }
@@ -220,9 +223,9 @@ public class RentCollectionServiceTests {
         List<RentPayment> payments = Arrays.asList(getPayment(200, FEB_16_1999), getPayment(200, APR_1_1999));
         RentAccount account = getAccount(0);
         List<RentCollection> collections = this.rentCollectionService.settle(demands, payments, account,
-                DEFAULT_INTEREST_RATE);
+                DEFAULT_INTEREST_RATE,0L);
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(demands,
-                payments, DEFAULT_INTEREST_RATE, null, null);
+                payments, DEFAULT_INTEREST_RATE, null, null,0L);
         utils.printStatement(accountStatementItems);
         utils.reconcileStatement(accountStatementItems, DEFAULT_INTEREST_RATE);
     }
@@ -232,7 +235,7 @@ public class RentCollectionServiceTests {
         List<RentDemand> demands = Arrays.asList();
         List<RentPayment> payments = Arrays.asList();
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(demands,
-                payments, DEFAULT_INTEREST_RATE, null, null);
+                payments, DEFAULT_INTEREST_RATE, null, null,0L);
         assertEquals(accountStatementItems.size(), 1);
     }
 
@@ -241,7 +244,7 @@ public class RentCollectionServiceTests {
         List<RentDemand> demands = Arrays.asList(getDemand(100, DEC_1_1998));
         RentAccount rentAccount = getAccount(0);
         RentSummary summary = this.rentCollectionService.calculateRentSummaryAt(demands, rentAccount,
-                DEFAULT_INTEREST_RATE, getEpochFromDateString(DEC_1_1998));
+                DEFAULT_INTEREST_RATE, getEpochFromDateString(DEC_1_1998),0L);
         System.out.println(summary);
     }
 
@@ -250,7 +253,7 @@ public class RentCollectionServiceTests {
         List<RentDemand> demands = Arrays.asList(getDemand(100, DEC_1_1998), getDemand(100, JAN_1_1999));
         RentAccount rentAccount = getAccount(0);
         RentSummary summary = this.rentCollectionService.calculateRentSummaryAt(demands, rentAccount,
-                DEFAULT_INTEREST_RATE, getEpochFromDateString(JAN_1_1999));
+                DEFAULT_INTEREST_RATE, getEpochFromDateString(JAN_1_1999),0L);
         System.out.println(summary);
     }
 
@@ -260,9 +263,9 @@ public class RentCollectionServiceTests {
         List<RentPayment> payments = getPayments(500, MAY_1_2020, 10);
         RentAccount account = getAccount(0);
         List<RentCollection> collections = this.rentCollectionService.settle(demands, payments, account,
-                DEFAULT_INTEREST_RATE);
+                DEFAULT_INTEREST_RATE,0L);
         assertEquals(29, collections.size());
-        RentSummary summary = this.rentCollectionService.calculateRentSummary(demands, account, DEFAULT_INTEREST_RATE);
+        RentSummary summary = this.rentCollectionService.calculateRentSummary(demands, account, DEFAULT_INTEREST_RATE,0L);
         assertEquals(0, summary.getBalanceAmount(), 0.1);
     }
 
@@ -275,7 +278,7 @@ public class RentCollectionServiceTests {
                 getDemand(100, NOV_1_1999), getDemand(100, DEC_1_1999));
         List<RentPayment> payments = Collections.emptyList();
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(demands,
-                payments, DEFAULT_INTEREST_RATE, null, null);
+                payments, DEFAULT_INTEREST_RATE, null, null,0L);
         utils.printStatement(accountStatementItems);
     }
 
@@ -285,7 +288,7 @@ public class RentCollectionServiceTests {
         List<RentPayment> payments = Collections.emptyList();
         RentAccount rentAccount = getAccount(200);
         List<RentCollection> collections = this.rentCollectionService.settle(demands, payments, rentAccount,
-                DEFAULT_INTEREST_RATE);
+                DEFAULT_INTEREST_RATE,0L);
         assertEquals(1, collections.size());
     }
 
@@ -295,7 +298,7 @@ public class RentCollectionServiceTests {
         List<RentPayment> payments = Arrays.asList(getPayment(400, MAY_1_2020));
         RentAccount rentAccount = getAccount(200);
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(demands,
-                payments, DEFAULT_INTEREST_RATE, null, null);
+                payments, DEFAULT_INTEREST_RATE, null, null,0L);
         utils.printStatement(accountStatementItems);
         utils.reconcileStatement(accountStatementItems, DEFAULT_INTEREST_RATE);
     }
@@ -306,7 +309,7 @@ public class RentCollectionServiceTests {
         List<RentPayment> payments = Arrays.asList(getPayment(400, MAY_1_2020));
         RentAccount rentAccount = getAccount(200);
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(demands,
-                payments, DEFAULT_INTEREST_RATE, null, getEpochFromDateString(APR_1_2020));
+                payments, DEFAULT_INTEREST_RATE, null, getEpochFromDateString(APR_1_2020),0L);
         utils.printStatement(accountStatementItems);
         utils.reconcileStatement(accountStatementItems, DEFAULT_INTEREST_RATE);
     }
@@ -317,7 +320,7 @@ public class RentCollectionServiceTests {
                 getDemand(1000, JUN_1_2000));
         List<RentPayment> payments = Arrays.asList(getPayment(100, MAY_1_2000));
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(demands,
-                payments, RentCollectionServiceTests.DEFAULT_INTEREST_RATE, null, getEpochFromDateString(JUN_1_2000));
+                payments, RentCollectionServiceTests.DEFAULT_INTEREST_RATE, null, getEpochFromDateString(JUN_1_2000),0L);
         utils.printStatement(accountStatementItems);
         utils.reconcileStatement(accountStatementItems, RentCollectionServiceTests.DEFAULT_INTEREST_RATE);
     }
@@ -327,7 +330,7 @@ public class RentCollectionServiceTests {
         List<RentDemand> demands = Arrays.asList(getDemand(1000, DEC_1_1999));
         List<RentPayment> payments = Arrays.asList(getPayment(50, MAY_1_2000));
         List<RentAccountStatement> accountStatementItems = this.rentCollectionService.getAccountStatement(demands,
-                payments, RentCollectionServiceTests.DEFAULT_INTEREST_RATE, null, getEpochFromDateString(JUN_1_2000));
+                payments, RentCollectionServiceTests.DEFAULT_INTEREST_RATE, null, getEpochFromDateString(JUN_1_2000),0L);
         utils.printStatement(accountStatementItems);
         utils.reconcileStatement(accountStatementItems, RentCollectionServiceTests.DEFAULT_INTEREST_RATE);
     }
@@ -338,7 +341,7 @@ public class RentCollectionServiceTests {
         demands.get(0).setInterestSince(getEpochFromDateString(MAY_1_2000));
         RentAccount rentAccount = getAccount(40.03);
         RentSummary rentSummary = this.rentCollectionService.calculateRentSummaryAt(demands, rentAccount,
-                RentCollectionServiceTests.DEFAULT_INTEREST_RATE, getEpochFromDateString(JUN_1_2000));
+                RentCollectionServiceTests.DEFAULT_INTEREST_RATE, getEpochFromDateString(JUN_1_2000),0L);
         assertEquals(0D, rentSummary.getBalanceAmount(), 0.0001);
     }
 
@@ -358,7 +361,7 @@ public class RentCollectionServiceTests {
             try {
                 return getPayment(amount, date);
             } catch (ParseException e) {
-                e.printStackTrace();
+            	log.error("Error while parsing date ",e);
                 return null;
             }
         }).collect(Collectors.toList());// ;);
@@ -369,14 +372,14 @@ public class RentCollectionServiceTests {
             try {
                 return getDemand(amount, date, "Demand-" + index);
             } catch (ParseException e) {
-                e.printStackTrace();
+            	log.error("Error while parsing date ",e);
                 return null;
             }
         }).collect(Collectors.toList());
     }
 
     private RentPayment getPayment(double amount, String date) throws ParseException {
-        return RentPayment.builder().amountPaid(amount).dateOfPayment(getEpochFromDateString(date)).build();
+        return RentPayment.builder().amountPaid(amount).receiptNo("X-1212").dateOfPayment(getEpochFromDateString(date)).build();
     }
 
     private RentDemand getDemand(double amount, String date) throws ParseException {

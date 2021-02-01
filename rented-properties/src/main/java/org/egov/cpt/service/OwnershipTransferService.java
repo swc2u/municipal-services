@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.cpt.config.PropertyConfiguration;
 import org.egov.cpt.models.DuplicateCopySearchCriteria;
@@ -13,6 +12,7 @@ import org.egov.cpt.models.Property;
 import org.egov.cpt.models.PropertyCriteria;
 import org.egov.cpt.models.RentAccount;
 import org.egov.cpt.models.RentDemand;
+import org.egov.cpt.models.RentSummary;
 import org.egov.cpt.models.calculation.BusinessService;
 import org.egov.cpt.models.calculation.State;
 import org.egov.cpt.producer.Producer;
@@ -21,10 +21,12 @@ import org.egov.cpt.repository.PropertyRepository;
 import org.egov.cpt.service.calculation.DemandService;
 import org.egov.cpt.service.notification.PropertyNotificationService;
 import org.egov.cpt.util.PTConstants;
+import org.egov.cpt.util.PropertyUtil;
 import org.egov.cpt.validator.PropertyValidator;
 import org.egov.cpt.web.contracts.OwnershipTransferRequest;
 import org.egov.cpt.workflow.WorkflowIntegrator;
 import org.egov.cpt.workflow.WorkflowService;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -67,29 +69,32 @@ public class OwnershipTransferService {
 
 	@Autowired
 	private IRentCollectionService rentCollectionService;
+	
+	@Autowired
+	private PropertyUtil propertyUtil;
 
 	public List<Owner> createOwnershipTransfer(OwnershipTransferRequest request) {
-		// TODO add validations as per requirement
 		// propertyValidator.validateCreateRequest(request);
+		propertyValidator.validatePropertyRentDetails(request);
 		List<Property> propertyFromSearch = propertyValidator.getPropertyForOT(request);
 		enrichmentService.enrichCreateOwnershipTransfer(request, propertyFromSearch);
 		if (config.getIsWorkflowEnabled()) {
 			wfIntegrator.callOwnershipTransferWorkFlow(request);
 		}
 		producer.push(config.getOwnershipTransferSaveTopic(), request);
-		
+
 		/**
 		 * calling rent Summary
 		 */
-		
+
 		addRentSummary(request.getOwners());
-		
+
 		return request.getOwners();
 	}
 
 	public List<Owner> searchOwnershipTransfer(DuplicateCopySearchCriteria criteria, RequestInfo requestInfo) {
-		if (criteria.isEmpty() && requestInfo.getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_CITIZEN)) {
-			criteria.setApplicantMobNo(requestInfo.getUserInfo().getUserName());
+		if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_CITIZEN)) {
+			criteria.setCreatedBy(requestInfo.getUserInfo().getUuid());
 		}
 		if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_EMPLOYEE)
 				&& CollectionUtils.isEmpty(criteria.getStatus())) {
@@ -109,9 +114,13 @@ public class OwnershipTransferService {
 		}
 		List<Owner> owners = repository.searchOwnershipTransfer(criteria);
 
-		if (CollectionUtils.isEmpty(owners))
-			return Collections.emptyList();
-		
+		if (CollectionUtils.isEmpty(owners)){
+			if(requestInfo.getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_CITIZEN)&& criteria.getApplicationNumber()!=null)
+				throw new CustomException("INVALID ACCESS", "You can not access this application.");
+			else
+				return Collections.emptyList();
+		}
+
 		/**
 		 * calling rent Summary
 		 */
@@ -121,6 +130,7 @@ public class OwnershipTransferService {
 	}
 
 	public List<Owner> updateOwnershipTransfer(OwnershipTransferRequest request) {
+		propertyValidator.validatePropertyRentDetails(request);
 		List<Owner> ownersFromSearch = propertyValidator.validateUpdateRequest(request);
 		enrichmentService.enrichUpdateOwnershipTransfer(request, ownersFromSearch);
 		String applicationState = request.getOwners().get(0).getApplicationState(); // demand generation
@@ -140,17 +150,16 @@ public class OwnershipTransferService {
 		if (request.getOwners().get(0).getApplicationState().equalsIgnoreCase(PTConstants.OT_STATUS_APPROVED)) {
 			enrichmentService.postStatusEnrichment(request);
 		}
+//		notificationService.process(request);
 
-		notificationService.process(request);
-		
 		/**
 		 * calling rent Summary
 		 */
 		addRentSummary(request.getOwners());
-		
+
 		return request.getOwners();
 	}
-	
+
 	private void addRentSummary(List<Owner> owners) {
 		owners.stream().filter(owner -> owner.getProperty().getId() != null).forEach(owner -> {
 
@@ -161,12 +170,15 @@ public class OwnershipTransferService {
 			List<RentDemand> demands = propertyRepository.getPropertyRentDemandDetails(propertyCriteria);
 
 			RentAccount rentAccount = propertyRepository.getPropertyRentAccountDetails(propertyCriteria);
-			if (!CollectionUtils.isEmpty(demands) && null != rentAccount) {
+			if (!CollectionUtils.isEmpty(demands) && null != rentAccount && !CollectionUtils.isEmpty(propertiesFromDB)) {
+				long interestStartDate = propertyUtil.getInterstStartFromMDMS(propertiesFromDB.get(0).getColony(),propertiesFromDB.get(0).getTenantId());
 				owner.getProperty().setRentSummary(rentCollectionService.calculateRentSummary(demands, rentAccount,
-						propertiesFromDB.get(0).getPropertyDetails().getInterestRate()));
+						propertiesFromDB.get(0).getPropertyDetails().getInterestRate(),interestStartDate));
 			}
+			else 
+				owner.getProperty().setRentSummary(new RentSummary());
 		});
-		
+
 	}
 
 }

@@ -40,12 +40,14 @@ public class SepApplication {
 	private StatusEnum applicationStatus ;
 
 	public enum StatusEnum {
-	    DRAFTED("DRAFTED"),
-	    CREATED("CREATED"),
-	    APPROVED("APPROVED"),
-		REJECTED("REJECTED"),
-	    FORWARDEDTOTASKFORCECOMMITTEE("Forwarded to Task force Committee"),
-		SENDTOBANKFORPROCESSING("Send to bank for processing"),
+	    DRAFTED("Drafted"),
+	    CREATED("Created"),
+	    APPROVED("Approved"),
+		REJECTED("Rejected"),
+	    FORWARDEDTOTASKFORCECOMMITTEE("Forwarded to Task Force Committee"),
+	    APPROVEDBYTASKFORCECOMMITTEE("Approved by Task Force Committee"),
+	    REJECTEDBYTASKFORCECOMMITTEE("Rejected by Task Force Committee"),
+		SENDTOBANKFORPROCESSING("Sent to Bank for Processing"),
 		SANCTIONEDBYBANKBank("Sanctioned by Bank");
 	    private String value;
 
@@ -62,7 +64,7 @@ public class SepApplication {
 	    @JsonCreator
 	    public static StatusEnum fromValue(String text) {
 	      for (StatusEnum b : StatusEnum.values()) {
-	        if (String.valueOf(b.value).equals(text)) {
+	        if (String.valueOf(b.value).equalsIgnoreCase(text)) {
 	          return b;
 	        }
 	      }

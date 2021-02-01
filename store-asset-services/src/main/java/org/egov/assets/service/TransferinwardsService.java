@@ -409,7 +409,7 @@ public class TransferinwardsService extends DomainService {
 				JSONObject indent = new JSONObject();
 
 				MaterialIssueSearchContract searchContract = new MaterialIssueSearchContract(tenantId, null, null, null,
-						in.getIssueNumber(), null, null, null, null, null, null, null, null, null, null, null);
+						in.getIssueNumber(), null, null, null, null, null, null, null, null, null, null, null, null, null);
 				MaterialIssueResponse materialIssueResponse = materialIssuesService.search(searchContract,
 						IssueTypeEnum.MATERIALOUTWARD.toString());
 				List<MaterialIssueDetail> materialIssueDetail = null;
@@ -492,6 +492,7 @@ public class TransferinwardsService extends DomainService {
 					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
 					// Need to integrate Workflow
 					JSONObject jsonWork = new JSONObject();
+					jsonWork.put("srNo", j+1);
 					jsonWork.put("date", wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())));
 					jsonWork.put("updatedBy", processData.getAssigner().getName());
 					jsonWork.put("comments", processData.getComment());

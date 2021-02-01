@@ -2,11 +2,18 @@ package org.egov.cpt.util;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
@@ -16,10 +23,21 @@ import org.egov.cpt.models.EmailRequest;
 import org.egov.cpt.models.Mortgage;
 import org.egov.cpt.models.NoticeGeneration;
 import org.egov.cpt.models.Owner;
+import org.egov.cpt.models.Property;
+import org.egov.cpt.models.RentDemand;
 import org.egov.cpt.models.SMSRequest;
+import org.egov.cpt.models.calculation.PaymentDetail;
+import org.egov.cpt.models.calculation.PaymentRequest;
+import org.egov.cpt.models.web.Action;
+import org.egov.cpt.models.web.ActionItem;
+import org.egov.cpt.models.web.Event;
+import org.egov.cpt.models.web.EventRequest;
+import org.egov.cpt.models.web.Recepient;
+import org.egov.cpt.models.web.Source;
 import org.egov.cpt.producer.Producer;
 import org.egov.cpt.repository.ServiceRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -39,6 +57,8 @@ public class NotificationUtil {
 	private Producer producer;
 
 	private static DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+	private final static String CASH = "cash";
 
 	@Autowired
 	public NotificationUtil(PropertyConfiguration config, ServiceRequestRepository serviceRequestRepository,
@@ -84,6 +104,11 @@ public class NotificationUtil {
 				message = getInitiatedOtMsg(owner, messageTemplate);
 				break;
 
+			case PTConstants.OT_ACTION_STATUS_CA_APPROVED:
+				messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_OT_CA_APPROVED, localizationMessage);
+				message = getInitiatedOtMsg(owner, messageTemplate);
+				break;
+
 			case PTConstants.OT_ACTION_STATUS_APPROVED:
 				messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_OT_APPROVED, localizationMessage);
 				message = getInitiatedOtMsg(owner, messageTemplate);
@@ -114,7 +139,7 @@ public class NotificationUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	private String getMessageTemplate(String notificationCode, String localizationMessage) {
+	public String getMessageTemplate(String notificationCode, String localizationMessage) {
 		String path = "$..messages[?(@.code==\"{}\")].message";
 		path = path.replace("{}", notificationCode);
 		String message = null;
@@ -149,7 +174,7 @@ public class NotificationUtil {
 		for (Map.Entry<String, String> entryset : emailIdToApplicant.entrySet()) {
 			String customizedMsg = message.replace("<1>", entryset.getValue());
 			emailRequest.add(EmailRequest.builder().email(entryset.getKey()).subject(PTConstants.EMAIL_SUBJECT)
-					.body(customizedMsg).isHTML(false).build());
+					.body(customizedMsg).isHTML(true).build());
 		}
 		return emailRequest;
 	}
@@ -180,8 +205,19 @@ public class NotificationUtil {
 		}
 	}
 
+	/**
+	 * User event
+	 * 
+	 * @param request
+	 */
+	public void sendEventNotification(EventRequest request) {
+		producer.push(config.getSaveUserEventsTopic(), request);
+	}
+
 	@SuppressWarnings("unchecked")
+	@Cacheable(value = "messages", key = "#tenantId")
 	public String getLocalizationMessages(String tenantId, RequestInfo requestInfo) {
+		log.info("Fetching localization messages for {}", tenantId);
 		LinkedHashMap<String, Object> responseMap = (LinkedHashMap<String, Object>) serviceRequestRepository
 				.fetchResult(getUri(tenantId, requestInfo), requestInfo);
 		String jsonString = new JSONObject(responseMap).toString();
@@ -226,6 +262,11 @@ public class NotificationUtil {
 
 			case PTConstants.DC_ACTION_STATUS_SENDBACK:
 				messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_OT_SENDBACK, localizationMessage);
+				message = getInitiatedDcMsg(copy, messageTemplate);
+				break;
+
+			case PTConstants.DC_ACTION_STATUS_CA_APPROVED:
+				messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_OT_CA_APPROVED, localizationMessage);
 				message = getInitiatedDcMsg(copy, messageTemplate);
 				break;
 
@@ -299,8 +340,13 @@ public class NotificationUtil {
 				message = getInitiatedMGMsg(mortgage, messageTemplate);
 				break;
 
+			case PTConstants.MG_ACTION_STATUS_MORTGAGE_ADDGRNATDETAIL:
+				messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_MG_GRANTDETAIL, localizationMessage);
+				message = getInitiatedMGMsg(mortgage, messageTemplate);
+				break;
+
 			case PTConstants.MG_ACTION_STATUS_MORTGAGE_APPROVED:
-				messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_OT_APPROVED, localizationMessage);
+				messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_MG_APPROVED, localizationMessage);
 				message = getInitiatedMGMsg(mortgage, messageTemplate);
 				break;
 
@@ -363,4 +409,167 @@ public class NotificationUtil {
 		return messageTemplate;
 	}
 
+	public String getDemandGenerationMsg(RentDemand rentDemand, Property property, String localizationMessages) {
+		String messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_DEMAND_GENERATION, localizationMessages);
+		messageTemplate = messageTemplate.replace("<1>", property.getOwners().get(0).getOwnerDetails().getName());
+		messageTemplate = messageTemplate.replace("<2>",
+				decimalFormat.format(rentDemand.getCollectionPrincipal()).toString());
+		messageTemplate = messageTemplate.replace("<3>", property.getTransitNumber());
+		LocalDate localDate = new Date(rentDemand.getGenerationDate()).toInstant().atZone(ZoneId.systemDefault())
+				.toLocalDate();
+		messageTemplate = messageTemplate.replace("<4>", localDate.getMonth().toString().substring(0, 3));
+		messageTemplate = messageTemplate.replace("<5>", String.valueOf(localDate.getYear()).substring(2, 4));
+		return messageTemplate;
+	}
+
+	public String getRPOwnerPaymentMsg(Owner owner, PaymentDetail paymentDetail, String localizationMessages,
+			String transitNumber, PaymentRequest paymentRequest) {
+		String messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_PAYMENT_RECIEVED, localizationMessages);
+		if (paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase(CASH)) {
+			messageTemplate = messageTemplate.replace("<1>", owner.getOwnerDetails().getName());
+			messageTemplate = messageTemplate.replace("<4>", owner.getProperty().getOfflinePaymentDetails().get(0).getTransactionNumber());
+		} else {
+			messageTemplate = messageTemplate.replace("<1>", paymentDetail.getBill().getPayerName());
+			messageTemplate = messageTemplate.replace("<4>", paymentRequest.getPayment().getTransactionNumber());
+		}
+		messageTemplate = messageTemplate.replace("<2>", paymentDetail.getTotalAmountPaid().toString());
+		messageTemplate = messageTemplate.replace("<3>", transitNumber);
+		messageTemplate = messageTemplate.replace("<5>", paymentDetail.getReceiptNumber());
+		return messageTemplate;
+	}
+
+	public List<Event> createEvent(String message, Map<String, String> mobileNumberToOwner, RequestInfo requestInfo,
+			String tenantId, String applicationStatus, String applicationNumber) {
+		List<Event> events = new ArrayList<>();
+		List<SMSRequest> smsRequests = createSMSRequest(message, mobileNumberToOwner);
+		Set<String> mobileNumbers = smsRequests.stream().map(SMSRequest::getMobileNumber).collect(Collectors.toSet());
+		Map<String, String> mapOfPhnoAndUUIDs = fetchUserUUIDs(mobileNumbers, requestInfo, tenantId);
+		if (CollectionUtils.isEmpty(mapOfPhnoAndUUIDs.keySet())) {
+			log.info("UUID search failed!");
+			return events;
+		}
+		Map<String, String> mobileNumberToMsg = smsRequests.stream()
+				.collect(Collectors.toMap(SMSRequest::getMobileNumber, SMSRequest::getMessage));
+		for (String mobile : mobileNumbers) {
+			if (null == mapOfPhnoAndUUIDs.get(mobile) || null == mobileNumberToMsg.get(mobile)) {
+				log.error("No UUID/SMS for mobile {} skipping event", mobile);
+				continue;
+			}
+			List<String> toUsers = new ArrayList<>();
+			toUsers.add(mapOfPhnoAndUUIDs.get(mobile));
+			Recepient recepient = Recepient.builder().toUsers(toUsers).toRoles(null).build();
+			List<String> payTriggerList = Arrays.asList(config.getPayTriggers().split("[,]"));
+			log.info("applicationStatus : "+applicationStatus);
+			log.info("payTriggerList : "+payTriggerList);
+			Action action = null;
+			if (payTriggerList.contains(applicationStatus)) {
+				action = generateAction(applicationStatus, mobile, applicationNumber, tenantId);
+				log.info("Action generated with action item : "+action.getActionUrls());
+			}
+			events.add(Event.builder().tenantId(tenantId).description(mobileNumberToMsg.get(mobile))
+					.eventType(PTConstants.USREVENTS_EVENT_TYPE).name(PTConstants.USREVENTS_EVENT_NAME)
+					.postedBy(PTConstants.USREVENTS_EVENT_POSTEDBY).source(Source.WEBAPP).recepient(recepient)
+					.eventDetails(null).actions(action).build());
+
+		}
+		return events;
+	}
+
+	private Action generateAction(String applicationStatus, String mobile, String applicationNumber, String tenantId) {
+		List<ActionItem> items = new ArrayList<>();
+		String actionLink = null;
+		switch (applicationStatus) {
+			case PTConstants.OT_PENDINGPAYMENT:
+				actionLink = config.getPayLinkForOT().replace("$mobile", mobile)
+						.replace("$applicationNo", applicationNumber).replace("$tenantId", tenantId);
+				break;
+			case PTConstants.DC_PENDINGPAYMENT:
+				actionLink = config.getPayLinkForDC().replace("$mobile", mobile)
+						.replace("$applicationNo", applicationNumber).replace("$tenantId", tenantId);
+				break;
+		}
+		actionLink = config.getUiAppHost() + actionLink;
+		ActionItem item = ActionItem.builder().actionUrl(actionLink).code(config.getPayCode()).build();
+		items.add(item);
+		return Action.builder().actionUrls(items).build();
+	}
+
+	/**
+	 * Fetches UUIDs of CITIZENs based on the phone number.
+	 * 
+	 * @param mobileNumbers
+	 * @param requestInfo
+	 * @param tenantId
+	 * @return
+	 */
+	private Map<String, String> fetchUserUUIDs(Set<String> mobileNumbers, RequestInfo requestInfo, String tenantId) {
+		Map<String, String> mapOfPhnoAndUUIDs = new HashMap<>();
+		for (String mobileNo : mobileNumbers) {
+			try {
+				Object user = userDetails(requestInfo, tenantId, mobileNo);
+				if (null != user) {
+					String uuid = JsonPath.read(user, "$.user[0].uuid");
+					mapOfPhnoAndUUIDs.put(mobileNo, uuid);
+				} else {
+					log.error("Service returned null while fetching user for username - " + mobileNo);
+				}
+			} catch (Exception e) {
+				log.error("Exception while fetching user for username - " + mobileNo);
+				log.error("Exception trace: ", e);
+				continue;
+			}
+		}
+		return mapOfPhnoAndUUIDs;
+	}
+
+	public Object userDetails(RequestInfo requestInfo, String tenantId, String mobileNumber) {
+		Object user = null;
+		StringBuilder uri = new StringBuilder();
+		uri.append(config.getUserHost()).append(config.getUserSearchEndpoint());
+		Map<String, Object> userSearchRequest = new HashMap<>();
+		userSearchRequest.put("RequestInfo", requestInfo);
+		userSearchRequest.put("tenantId", tenantId);
+		userSearchRequest.put("userType", "CITIZEN");
+		userSearchRequest.put("userName", mobileNumber);
+
+		try {
+			user = serviceRequestRepository.fetchResult(uri, userSearchRequest);
+		} catch (Exception e) {
+			log.error("Exception while fetching user for username - " + mobileNumber);
+		}
+		return user;
+	}
+
+	/**
+	 * Creates and registers an event at the egov-user-event service at defined
+	 * trigger points as that of sms notifs.
+	 * 
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public EventRequest getEventsForRent(Owner owner, PaymentDetail paymentDetail, String transitNumber,
+			PaymentRequest paymentRequest) {
+		List<Event> events = new ArrayList<>();
+		String tenantId = paymentRequest.getPayment().getTenantId();
+		String localizationMessages = getLocalizationMessages(tenantId, paymentRequest.getRequestInfo());
+
+		String message = getRPOwnerPaymentMsg(owner, paymentDetail, localizationMessages, transitNumber,
+				paymentRequest);
+		message = message.replaceAll("<br/>", "");
+		Map<String, String> mobileNumberToOwner = new HashMap<>();
+		if (paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase(CASH)) {
+			mobileNumberToOwner.put(owner.getOwnerDetails().getPhone(), owner.getOwnerDetails().getName());
+		} else {
+			mobileNumberToOwner.put(paymentRequest.getRequestInfo().getUserInfo().getMobileNumber(),
+					paymentRequest.getRequestInfo().getUserInfo().getName());
+		}
+
+		events = createEvent(message, mobileNumberToOwner, paymentRequest.getRequestInfo(), tenantId, null, null);
+		if (!CollectionUtils.isEmpty(events)) {
+			return EventRequest.builder().requestInfo(paymentRequest.getRequestInfo()).events(events).build();
+		} else {
+			return null;
+		}
+	}
 }
