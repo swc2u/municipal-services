@@ -125,9 +125,14 @@ public class EmailSmsNotificationListener {
 		if (userInfo != null && userInfo.get("user") != null)
 			user = objectMapper.readValue(objectMapper.writeValueAsString(userInfo.get("user").get(0)), User.class);
 
-		log.info("UserInfo {}", user);
-		String queryString = map.get(role).getTemplate().replace(CommonConstants.EMAILAPPID, application.getNocNumber())
-				.replace("[:fees:]", application.getTotalamount().toString());
+		log.info("Role IS {}", role);
+		log.info("Is Role Present in Map {}", map);
+		log.info("Is Role Present in Map {}", map.get(role));
+		log.info("Template Got {}", map.get(role).getTemplate());
+		String queryString = map.get(role).getTemplate().replace(CommonConstants.EMAILAPPID,
+				application.getNocNumber());
+		if (application.getTotalamount() != null)
+			queryString = queryString.replace("[:fees:]", application.getTotalamount().toString());
 		log.info("emailTemplate is {}", queryString);
 		if (user != null && user.getEmailId() != null && !user.getEmailId().isEmpty()) {
 			log.info("emailId is {}", user.getEmailId());
@@ -139,7 +144,11 @@ public class EmailSmsNotificationListener {
 		}
 		if (user != null && user.getMobileNumber() != null && !user.getMobileNumber().isEmpty()) {
 			String smsTemplate = map.get(role).getSmsTemplate().replace(CommonConstants.EMAILAPPID,
-					application.getNocNumber()).replace("[:fees:]", application.getTotalamount().toString());
+					application.getNocNumber());
+
+			if (application.getTotalamount() != null)
+				smsTemplate = smsTemplate.replace("[:fees:]", application.getTotalamount().toString());
+
 			log.info(smsTemplate);
 			SMSRequest smsRequest = new SMSRequest(user.getMobileNumber(), smsTemplate);
 			producer.push(smstopic, smsRequest);

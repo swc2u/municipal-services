@@ -243,6 +243,7 @@ public class WaterServiceImpl implements WaterService {
 	public List<WaterConnection> addConnectionMapping(WaterConnectionRequest waterConnectionRequest) {
 		AuditDetails auditDetails = wsUtil
 				.getAuditDetails(waterConnectionRequest.getRequestInfo().getUserInfo().getUuid(), true);
+		waterConnectionRequest.getWaterConnection().setAuditDetails(auditDetails);
 		waterDao.addConnectionMapping(waterConnectionRequest);
 		
 		return  Arrays.asList(waterConnectionRequest.getWaterConnection());
