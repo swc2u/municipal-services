@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.gson.Gson;
@@ -30,6 +31,7 @@ import com.google.gson.reflect.TypeToken;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
+@ActiveProfiles("test")
 public class PostMortgageEnrichmentServiceTest {
 
 	@InjectMocks

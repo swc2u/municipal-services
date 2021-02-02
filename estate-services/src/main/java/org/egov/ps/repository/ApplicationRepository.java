@@ -48,7 +48,8 @@ public class ApplicationRepository {
 	public List<Application> getApplications(ApplicationCriteria criteria) {
 		Map<String, Object> preparedStmtList = new HashMap<>();
 		String query = applicationQueryBuilder.getApplicationSearchQuery(criteria, preparedStmtList);
-
+		log.debug("Application Query: " + query);
+		log.debug("Params: " + preparedStmtList);
 		// Search for application based on criteria
 		List<Application> applications = namedParameterJdbcTemplate.query(query, preparedStmtList,
 				applicationRowMapper);
@@ -72,7 +73,7 @@ public class ApplicationRepository {
 
 		}
 
-		if (relations.contains(ApplicationQueryBuilder.RELATION_OWNER)) {
+		if (relations.contains(ApplicationQueryBuilder.RELATION_OWNER) || null != criteria.getOwnerId()) {
 			this.addOwnersToApplication(applications);
 		}
 
@@ -110,7 +111,8 @@ public class ApplicationRepository {
 		/**
 		 * Extract applications property detail ids.
 		 */
-		List<String> applicationDetailsIds = applications.stream().map(application -> application.getProperty().getId())
+		List<String> applicationDetailsIds = applications.stream()
+				.map(application -> application.getProperty().getPropertyDetails().getId())
 				.collect(Collectors.toList());
 
 		/**

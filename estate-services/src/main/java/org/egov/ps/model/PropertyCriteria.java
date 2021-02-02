@@ -30,6 +30,14 @@ public class PropertyCriteria {
 	
 	private String siteNumber;
 
+	private String mohalla;
+
+	private String street;
+
+	private String houseNumber;
+
+	private String sector;
+
 	private List<String> state;
 
 	private Long offset;
@@ -57,10 +65,21 @@ public class PropertyCriteria {
 	 * Created by
 	 */
 	private String userId;
+	
+	private String auctionId;
 
 	public boolean isEmpty() {
 		return (this.fileNumber == null && this.category == null && this.state == null && this.offset == null
 				&& this.limit == null && this.propertyId == null && this.relations.size() == 0 && this.tenantId == null
 				&& this.userId == null && this.propertyIds.size() == 0 && this.branchType == null);
 	}
+	
+	public boolean branchTypeOnly() {
+        return (this.branchType!=null && this.tenantId == null && this.fileNumber==null && this.category == null && this.subCategory == null && this.siteNumber == null
+                && this.mohalla == null && this.street == null && this.houseNumber == null &&
+                this.sector == null && this.state==null && this.offset == null 
+                && this.limit == null && this.propertyIds.size() == 0 && this.relations.size() == 0 && auctionId==null
+        );
+    }
+
 }

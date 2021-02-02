@@ -176,6 +176,11 @@ public class PropertyValidator {
 		Optional<Property> property_Optional = request.getProperties().stream()
 				.filter(p -> !CollectionUtils.isEmpty(p.getPropertyDetails().getOwners())).findAny();
 		if (property_Optional.isPresent()) {
+			double ownerTotalShare = (request.getProperties().get(0).getPropertyDetails().getOwners().stream().filter(owner -> owner.getOwnerDetails().getIsCurrentOwner())
+					.mapToDouble(Owner::getShare)).sum();
+			if (ownerTotalShare != 100) {
+				errorMap.put("INVALID_OWNER_SHARE", "Owner(s) Share can't be less than or greater than 100%");
+			}
 			property_Optional.get().getPropertyDetails().getOwners().stream().forEach(o -> {
 				if (!isMobileNumberValid(o.getOwnerDetails().getMobileNumber())) {
 					throw new CustomException(Collections.singletonMap("INVALID MOBILE NUMBER",
@@ -192,9 +197,6 @@ public class PropertyValidator {
 				if (o.getOwnerDetails().getAddress() == null || o.getOwnerDetails().getAddress().trim().isEmpty()) {
 					errorMap.put("INVALID_ADDRESS", "Address can not be empty");
 				}
-				if (o.getOwnerDetails().getPossesionDate() == null) {
-					errorMap.put("INVALID_POSSESSION_DATE", "Possesion date can not be empty");
-				}
 				if (property_Optional.get().getPropertyDetails().getBranchType() == PSConstants.ESTATE_BRANCH) {
 
 					if (o.getShare() < 1) {
@@ -205,7 +207,9 @@ public class PropertyValidator {
 						errorMap.put("INVALID_GUARDIAN_RELATION", "Owner relation with guardian can not be empty");
 					}
 				}
-
+				if (!errorMap.isEmpty()) {
+					throw new CustomException(errorMap);
+				}
 				// Document Validation
 				if (null != o.getOwnerDetails() && null != o.getOwnerDetails().getOwnerDocuments()) {
 					try {

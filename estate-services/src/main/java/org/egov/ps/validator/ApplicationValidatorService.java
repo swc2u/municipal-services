@@ -132,7 +132,7 @@ public class ApplicationValidatorService {
 			throw new CustomException("INVALID_PROPERTY", "Property with the given " + propertyId + " is not approved");
 		}
 		Double rentDue = 0.0;
-		if (property.getPropertyDetails().getEstateAccount() != null
+		if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PSConstants.ROLE_CITIZEN) && property.getPropertyDetails().getEstateAccount() != null
 				&& property.getPropertyDetails().getPaymentConfig() != null
 				&& property.getPropertyDetails().getEstateDemands() != null
 				&& property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
@@ -151,11 +151,11 @@ public class ApplicationValidatorService {
 		List<EstateDemand> demands = propertyRepository.getDemandDetailsForPropertyDetailsIds(propertyDetailsIds);
 		EstateAccount estateAccount = propertyRepository.getPropertyEstateAccountDetails(propertyDetailsIds);
 		List<EstatePayment> payments = propertyRepository.getEstatePaymentsForPropertyDetailsIds(propertyDetailsIds);
-		estateRentCollectionService.settle(demands, payments, estateAccount, 18,
+		estateRentCollectionService.settle(demands, payments, estateAccount, PSConstants.GST_INTEREST_RATE,
 				property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
 				property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue());
 		EstateRentSummary estateRentSummary = estateRentCollectionService.calculateRentSummary(demands, estateAccount,
-				property.getPropertyDetails().getInterestRate(),
+				PSConstants.GST_INTEREST_RATE,
 				property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
 				property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue());
 		Double rentDue = estateRentSummary.getBalanceRent() + estateRentSummary.getBalanceGST()
