@@ -20,6 +20,7 @@ public class CommonConstants {
 	public static final String RTI_CONFIM_TRANSACTION_EXCEPTION_CODE = "RTI_CONFIM_TRANSACTION_EXCEPTION_CODE";
 	public static final String PT_EXCEPTION_CODE= "PT_EXCEPTION_CODE";
 	public static final String PT_MAPPING_EXCEPTION_CODE= "PT_MAPPING_EXCEPTION_CODE";
+	public static final String FIR_NOC_EXCEPTION_CODE="FIR_NOC_EXCEPTION_CODE";
 	public static final String PT_PARAM_MOBILE_NUMBER = "MobileNo";
 	public static final String PT_PARAM_UID = "UID";
 	public static final String PT_PARAM_OTP = "OTP";
