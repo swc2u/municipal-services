@@ -249,7 +249,6 @@ public class NocService {
 				if (role.getCode() != null && role.getCode().isEmpty()) {
 					return "Invalid Role";
 				}
-				System.out.println(jsonValidator);
 				if (jsonValidator.get(role.getCode() + "-" + requestData.getCurrentState()) != null) {
 					jsonValidator = (JSONObject) jsonValidator
 							.get(role.getCode() + "-" + requestData.getCurrentState());
