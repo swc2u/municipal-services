@@ -31,7 +31,7 @@ public class PropertyQueryBuilder {
 
 			+ " ptdl.id as ptdlid, ptdl.property_id as pdproperty_id, ptdl.branch_type as branch_type, ptdl.property_type as pdproperty_type, "
 			+ " ptdl.tenantid as pdtenantid, ptdl.type_of_allocation, ptdl.mode_of_auction, ptdl.scheme_name,ptdl.date_of_auction, "
-			+ " ptdl.area_sqft, ptdl.rate_per_sqft, ptdl.last_noc_date, ptdl.service_category, "
+			+ " ptdl.area_sqft, ptdl.rate_per_sqft, ptdl.last_noc_date, ptdl.service_category, ptdl.street, "
 			+ " ptdl.is_property_active, ptdl.trade_type, ptdl.company_name, ptdl.company_address, ptdl.company_registration_number, "
 			+ " ptdl.company_registration_date, ptdl.decree_date, ptdl.court_details, ptdl.civil_titled_as, ptdl.company_or_firm, "
 			+ " ptdl.company_type, ptdl.emd_amount, ptdl.emd_date , ptdl.property_registered_to, ptdl.entity_type, "
@@ -116,7 +116,8 @@ public class PropertyQueryBuilder {
 			+ " cs_ep_property_details_v1 ptdl  ON pt.id = ptdl.property_id " + LEFT_JOIN
 			+ " cs_ep_payment_config_v1 pc ON pc.property_details_id = ptdl.id " + LEFT_JOIN
 			+ " cs_ep_payment_config_items_v1 pci ON pc.id = pci.payment_config_id " + LEFT_JOIN
-			+ " cs_ep_premium_amount_config_items_v1 paci ON pc.id = paci.payment_config_id ";
+			+ " cs_ep_premium_amount_config_items_v1 paci ON pc.id = paci.payment_config_id "+ LEFT_JOIN
+			+ " cs_ep_auction aut ON aut.property_details_id = ptdl.id ";
 
 	private static final String OWNER_TABLE = " cs_ep_owner_v1 ownership " + LEFT_JOIN
 			+ " cs_ep_owner_details_v1 od ON ownership.id = od.owner_id ";
@@ -273,6 +274,36 @@ public class PropertyQueryBuilder {
 			preparedStmtList.put("branch_type", criteria.getBranchType());
 		}
 
+		if (null != criteria.getMohalla()) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append("ptdl.mohalla IN (:mohalla)");
+			preparedStmtList.put("mohalla", criteria.getMohalla());
+		}
+
+		if (null != criteria.getStreet()) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append("ptdl.street IN (:street)");
+			preparedStmtList.put("street", criteria.getStreet());
+		}
+
+		if (null != criteria.getHouseNumber()) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append("ptdl.house_number IN (:house_number)");
+			preparedStmtList.put("house_number", criteria.getHouseNumber());
+		}
+
+		if (null != criteria.getSector()) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append("pt.sector_number IN (:sector_number)");
+			preparedStmtList.put("sector_number", criteria.getSector());
+		}
+		
+		if (null != criteria.getAuctionId()) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append("aut.auction_id =:auction_id");
+			preparedStmtList.put("auction_id", criteria.getAuctionId());
+		}
+
 		return addPaginationWrapper(builder.toString(), preparedStmtList, criteria);
 	}
 
@@ -357,11 +388,8 @@ public class PropertyQueryBuilder {
 		sb.append(" FROM " + OFFLINE_PAYMENT_TABLE);
 		sb.append(" where offline.property_details_id IN (:propertyDetailIds)");
 		params.put("propertyDetailIds", propertyDetailIds);
-
-		List<String> relations = criteria.getRelations();
-		if (relations == null || relations.contains(PSConstants.RELATION_OPD)) {
-			sb.append(" ORDER BY offline.last_modified_time desc ");
-		}
+		sb.append(" ORDER BY offline.last_modified_time desc ");
+		
 		return sb.toString();
 	}
 

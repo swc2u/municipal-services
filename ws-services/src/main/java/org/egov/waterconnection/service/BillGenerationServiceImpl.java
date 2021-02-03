@@ -61,7 +61,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 							ccCode(bill.get(0).trim()).divSdiv(bill.get(1).trim()).consumerCode(bill.get(2).trim()).billCycle(bill.get(3).trim()).billGroup(bill.get(4).trim()).subGroup(bill.get(5).trim())
 							.billType(bill.get(6).trim()).name(bill.get(7).trim()).address(bill.get(8).trim()).cessCharge(bill.get(14).trim()).netAmount(bill.get(15).trim()).surcharge(bill.get(16).trim())
 							.grossAmount(bill.get(17).trim()).totalNetAmount(bill.get(18).trim()).totalSurcharge(bill.get(19).trim()).totalSurcharge(bill.get(20).trim())
-							.dueDateCash(dateFormatter.format(dateParser.parse(bill.get(23).trim()))).dueDateCheque(dateFormatter.format(dateParser.parse(bill.get(24).trim()))).build();
+							.toDate(billGenerationRequest.getBillGeneration().getToDate()).fromDate(billGenerationRequest.getBillGeneration().getFromDate()).dueDateCash(dateFormatter.format(dateParser.parse(bill.get(23).trim()))).dueDateCheque(dateFormatter.format(dateParser.parse(bill.get(24).trim()))).build();
 
 					listOfBills.add(uploadFileData);
 				}

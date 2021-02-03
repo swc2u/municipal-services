@@ -18,6 +18,7 @@ import org.egov.cpt.models.DuplicateCopy;
 import org.egov.cpt.models.Owner;
 import org.egov.cpt.models.Property;
 import org.egov.cpt.models.calculation.BusinessService;
+import org.egov.cpt.service.MDMSService;
 import org.egov.cpt.workflow.WorkflowService;
 import org.egov.mdms.model.MasterDetail;
 import org.egov.mdms.model.MdmsCriteria;
@@ -25,6 +26,7 @@ import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.mdms.model.ModuleDetail;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,9 @@ public class PropertyUtil {
 
 	@Autowired
 	private WorkflowService workflowService;
+
+	@Autowired
+	private MDMSService mdmsService;
 
 	/**
 	 * Method to return auditDetails for create/update flows
@@ -198,5 +203,16 @@ public class PropertyUtil {
 					"Transit number could not be extracted from consumer code " + consumerCode));
 		}
 		return null;
+	}
+
+	@Cacheable(value = "interestStartDate", key = "{#colony, #tenantId}")
+	public long getInterstStartFromMDMS(String colony,String tenantId) {
+		RequestInfo requestInfo = new RequestInfo();
+		String filter = "[?(@.code=='" + colony +"')].interestStartYear"; 
+		Map<String, List<Long>> interestStartDateList =(Map<String, List<Long>>)mdmsService.getMDMSResponse(requestInfo,
+				tenantId.split("\\.")[0], PTConstants.MDMS_PT_MOD_NAME,
+						"colonies",filter, PTConstants.JSONPATH_CODES); 
+				long interestStartDate = ((Number)interestStartDateList.get(PTConstants.MDMS_PT_COLONY).get(0)).longValue();
+				return interestStartDate;
 	}
 }

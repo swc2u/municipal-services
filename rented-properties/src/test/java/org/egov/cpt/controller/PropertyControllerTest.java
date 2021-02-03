@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.egov.common.contract.response.ResponseInfo;
-import org.egov.cpt.CSPropertyApplication;
 import org.egov.cpt.config.TestConfiguration;
 import org.egov.cpt.models.AccountStatementCriteria;
 import org.egov.cpt.models.Property;
@@ -28,14 +27,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = CSPropertyApplication.class)
 @AutoConfigureMockMvc
 @Import(TestConfiguration.class)
 public class PropertyControllerTest {
@@ -74,7 +71,7 @@ public class PropertyControllerTest {
 		PropertyRequest propertyRequest = new PropertyRequest();
 		propertyRequest.setProperties(properties);
 		Mockito.when(responseInfoFactory.createResponseInfoFromRequestInfo(Mockito.any(), Mockito.anyBoolean()))
-		.thenReturn(buildResponseInfo());
+				.thenReturn(buildResponseInfo());
 		Mockito.when(propertyService.createProperty(Mockito.any())).thenReturn(properties);
 		ResponseEntity<PropertyResponse> response = propertyController.create(propertyRequest);
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -84,7 +81,6 @@ public class PropertyControllerTest {
 		assertEquals("colony", response.getBody().getProperties().get(0).getColony());
 		assertEquals("masterDataState", response.getBody().getProperties().get(0).getMasterDataState());
 		assertEquals("masterDataAction", response.getBody().getProperties().get(0).getMasterDataAction());
-		assertEquals("Rainmaker", response.getBody().getResponseInfo().getApiId());
 	}
 
 	@Test

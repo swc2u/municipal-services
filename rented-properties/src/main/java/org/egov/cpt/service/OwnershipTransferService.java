@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.cpt.config.PropertyConfiguration;
 import org.egov.cpt.models.DuplicateCopySearchCriteria;
@@ -13,6 +12,7 @@ import org.egov.cpt.models.Property;
 import org.egov.cpt.models.PropertyCriteria;
 import org.egov.cpt.models.RentAccount;
 import org.egov.cpt.models.RentDemand;
+import org.egov.cpt.models.RentSummary;
 import org.egov.cpt.models.calculation.BusinessService;
 import org.egov.cpt.models.calculation.State;
 import org.egov.cpt.producer.Producer;
@@ -21,6 +21,7 @@ import org.egov.cpt.repository.PropertyRepository;
 import org.egov.cpt.service.calculation.DemandService;
 import org.egov.cpt.service.notification.PropertyNotificationService;
 import org.egov.cpt.util.PTConstants;
+import org.egov.cpt.util.PropertyUtil;
 import org.egov.cpt.validator.PropertyValidator;
 import org.egov.cpt.web.contracts.OwnershipTransferRequest;
 import org.egov.cpt.workflow.WorkflowIntegrator;
@@ -68,6 +69,9 @@ public class OwnershipTransferService {
 
 	@Autowired
 	private IRentCollectionService rentCollectionService;
+	
+	@Autowired
+	private PropertyUtil propertyUtil;
 
 	public List<Owner> createOwnershipTransfer(OwnershipTransferRequest request) {
 		// propertyValidator.validateCreateRequest(request);
@@ -166,10 +170,13 @@ public class OwnershipTransferService {
 			List<RentDemand> demands = propertyRepository.getPropertyRentDemandDetails(propertyCriteria);
 
 			RentAccount rentAccount = propertyRepository.getPropertyRentAccountDetails(propertyCriteria);
-			if (!CollectionUtils.isEmpty(demands) && null != rentAccount) {
+			if (!CollectionUtils.isEmpty(demands) && null != rentAccount && !CollectionUtils.isEmpty(propertiesFromDB)) {
+				long interestStartDate = propertyUtil.getInterstStartFromMDMS(propertiesFromDB.get(0).getColony(),propertiesFromDB.get(0).getTenantId());
 				owner.getProperty().setRentSummary(rentCollectionService.calculateRentSummary(demands, rentAccount,
-						propertiesFromDB.get(0).getPropertyDetails().getInterestRate()));
+						propertiesFromDB.get(0).getPropertyDetails().getInterestRate(),interestStartDate));
 			}
+			else 
+				owner.getProperty().setRentSummary(new RentSummary());
 		});
 
 	}
