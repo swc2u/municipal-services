@@ -175,11 +175,13 @@ public class DemandService {
 			}
 			WaterConnectionRequest waterConnectionRequest = WaterConnectionRequest.builder().waterConnection(connection)
 					.requestInfo(requestInfo).build();
-			Property property = wsCalculationUtil.getProperty(waterConnectionRequest);
+		//	Property property = wsCalculationUtil.getProperty(waterConnectionRequest);
 			String tenantId = calculation.getTenantId();
 			String consumerCode = isForConnectionNO == true ? calculation.getConnectionNo()
 					: calculation.getApplicationNO();
-			User owner = property.getOwners().get(0).toCommonUser();
+			User owner = waterConnectionRequest.getWaterConnection().getConnectionHolders().get(0).toCommonUser();
+
+		//	User owner = property.getOwners().get(0).toCommonUser();
 
 			List<DemandDetail> demandDetails = new LinkedList<>();
 			calculation.getTaxHeadEstimates().forEach(taxHeadEstimate -> {
