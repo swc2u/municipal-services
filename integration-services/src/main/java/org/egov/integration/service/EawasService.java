@@ -2,7 +2,7 @@ package org.egov.integration.service;
 
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.integration.common.CommonConstants;
-import org.egov.integration.config.EOfficeConfiguration;
+import org.egov.integration.config.EawasConfiguration;
 import org.egov.integration.model.EawasRequestInfoWrapper;
 import org.egov.integration.model.ResponseInfoWrapper;
 import org.json.JSONException;
@@ -31,14 +31,14 @@ public class EawasService {
 	private RequestFactory requestFactory;
 
 	@Autowired
-	private EOfficeConfiguration config;
+	private EawasConfiguration config;
 
 	public ResponseEntity<ResponseInfoWrapper> get(EawasRequestInfoWrapper request) throws JSONException {
 		RestTemplate restTemplate = requestFactory.getRestTemplate();
 		HttpHeaders http = new HttpHeaders();
 		http.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		MultiValueMap<String, Object> mmap = new LinkedMultiValueMap<String, Object>();
-		mmap.add("wsmsconstrant", request.getEawasRequest().getWsmsconstrant());
+		mmap.add("wsmsconstrant", config.getWsmsconstrant());
 		HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity(mmap, http);
 		String responses = restTemplate.postForObject(config.getEwawsHost(), entity, String.class);
 		Object obj = new Object();

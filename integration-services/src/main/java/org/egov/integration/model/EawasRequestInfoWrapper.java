@@ -22,6 +22,4 @@ public class EawasRequestInfoWrapper {
 	@JsonProperty("RequestInfo")
 	private RequestInfo requestInfo;
 
-	@JsonProperty("eawasRequest")
-	private EawasRequest eawasRequest;
 }

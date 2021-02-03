@@ -27,7 +27,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 @Component
-public class EOfficeConfiguration {
+public class EawasConfiguration {
 
 	@Value("${app.timezone}")
 	private String timeZone;
@@ -45,27 +45,10 @@ public class EOfficeConfiguration {
 		return converter;
 	}
 
-	@Value("${eoffice.service.host}")
-	private String eofficeHost;
+	@Value("${eawas.wsmsconstrant}")
+	private String wsmsconstrant;
 	
-	
-
-	@Value("${eoffice.service.url.filepending}")
-	private String eofficeuserfilepending;
-
-	@Value("${eoffice.service.url.fileclosed}")
-	private String eofficeuserfileclosed;
-
-	@Value("${eoffice.service.url.receiptpending}")
-	private String eofficeuserreceiptpending;
-
-	@Value("${eoffice.service.url.receiptclosed}")
-	private String eofficeuserreceiptclosed;
-
-	@Value("${eoffice.service.url.vipreceiptpending}")
-	private String eofficevipreceiptpending;
-
-	@Value("${eoffice.service.url.filependinghierarchy}")
-	private String eofficefilependinghierarchy;
+	@Value("${eawas.service.host}")
+	private String ewawsHost;
 
 }
