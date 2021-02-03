@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -121,6 +122,7 @@ public class NocController {
 	 *            applicationType,applicationstatus,tenantId,datapayload,requestinfo
 	 * @return If success then return sucess response
 	 */
+	@CrossOrigin
 	@PostMapping("_updateappstatus")
 	public ResponseEntity<ResponseData> updateApplicationStatus(@RequestBody RequestData requestData) {
 

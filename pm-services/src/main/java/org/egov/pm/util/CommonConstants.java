@@ -43,6 +43,7 @@ public class CommonConstants {
 	public static final String REMARKS = "remarks";
 	public static final String AMOUNT = "amount";
 	public static final String ISANYCHANGEINESTIMATION = "isAnyChangeInRoadCutEstimation";
+	public static final String ASSIGNEE = "assignee";
 	public static final String BADGENUMBER = "badgeNumber";
 	public static final String GSTAMOUNT = "gstAmount";
 	public static final String PERFORMANCEBANKGUARANTEECHARGES = "performanceBankGuaranteeCharges";
