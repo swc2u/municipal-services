@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
+import org.egov.common.contract.request.User;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.pm.PreApplicationRunnerImpl;
 import org.egov.pm.model.EmailTemplateModel;
@@ -544,6 +545,11 @@ public class NocRepository {
 		}
 
 		processInstances.setDocuments(workflowDocumentList);
+		if(requestData.getDataPayload().get("assignee") != null && !requestData.getDataPayload().get(CommonConstants.ASSIGNEE).toString().equals("")) {
+			User user = new User();
+			user.setUuid(requestData.getDataPayload().get("assignee").toString());
+			processInstances.setAssignee(user);
+		}
 
 		List<ProcessInstance> processList = Arrays.asList(processInstances);
 		workflowRequest.setProcessInstances(processList);
@@ -735,6 +741,23 @@ public class NocRepository {
 							.readValue(applicationDetailModel.getApplicationDetail(), JSONObject.class);
 					applicationDetailData.put(CommonConstants.ISANYCHANGEINESTIMATION,
 							dataPayLoad.get(CommonConstants.ISANYCHANGEINESTIMATION));
+					NOCApplicationDetail details = new NOCApplicationDetail();
+					details.setApplicationDetail(applicationDetailData.toJSONString());
+					details.setApplicationUuid(getAppIdUuid(requestData.getApplicationId()));
+					JSONObject object = new JSONObject();
+					object.put("NOCApplicationDetail", details);
+					producer.push(updateNOCApplicationDetailsTopic, object);
+				}
+			}else if (dataPayLoad.get(CommonConstants.ASSIGNEE) != null && !dataPayLoad.get(CommonConstants.ASSIGNEE).toString().equals("")) {
+				NOCApplicationDetail applicationDetailModel = jdbcTemplate.queryForObject(
+						QueryBuilder.SELECT_APPLICATION_DETAIL_QUERY, new Object[] { requestData.getApplicationId() },
+						BeanPropertyRowMapper.newInstance(NOCApplicationDetail.class));
+				if (applicationDetailModel != null) {
+					ObjectMapper objectMapper = new ObjectMapper();
+					JSONObject applicationDetailData = objectMapper
+							.readValue(applicationDetailModel.getApplicationDetail(), JSONObject.class);
+					applicationDetailData.put(CommonConstants.ASSIGNEE,
+							dataPayLoad.get(CommonConstants.ASSIGNEE));
 					NOCApplicationDetail details = new NOCApplicationDetail();
 					details.setApplicationDetail(applicationDetailData.toJSONString());
 					details.setApplicationUuid(getAppIdUuid(requestData.getApplicationId()));
