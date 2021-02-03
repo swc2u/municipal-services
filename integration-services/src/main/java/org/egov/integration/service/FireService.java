@@ -1,12 +1,14 @@
 
 package org.egov.integration.service;
 
+import java.util.Date;
 import java.util.UUID;
 
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.integration.common.CommonConstants;
 import org.egov.integration.config.RtiConfiguration;
 import org.egov.integration.model.AccountResponse;
+import org.egov.integration.model.AuditDetails;
 import org.egov.integration.model.FireNoc;
 import org.egov.integration.model.FireRequestInfoWrapper;
 import org.egov.integration.model.PtMapping;
@@ -52,7 +54,12 @@ public class FireService {
 			String uuid = UUID.randomUUID().toString();
 			data.setUuid(uuid);
 			data.setIsActive(true);
-			data.setAuditDetails(auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_CREATE));
+			AuditDetails auditDetails = new AuditDetails();
+			auditDetails.setCreatedBy("0");
+			auditDetails.setLastModifiedBy("0");
+			auditDetails.createdTime(new Date().getTime());
+			auditDetails.lastModifiedTime(new Date().getTime());
+		  data.setAuditDetails(auditDetails);
 			
 			repository.saveFireData(data);
 			
