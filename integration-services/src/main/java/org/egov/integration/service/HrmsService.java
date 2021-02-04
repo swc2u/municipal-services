@@ -87,5 +87,61 @@ public class HrmsService {
 				.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
 				.responseBody(notificationDetails.getBody()).build(), HttpStatus.OK);
 	}
+	public ResponseEntity<ResponseInfoWrapper> getEmployeeDetails(HrmsRequestInfoWrapper request) {
+		HrmsRequest hrmsReq = objectMapper.convertValue(request.getHrmsRequest(), HrmsRequest.class);
+		RestTemplate restTemplate = requestFactory.getRestTemplate();
+
+		HttpHeaders headers = new HttpHeaders();
+		String authStr = config.getHrmsAuthHeader() + ":"
+				+ config.getHrmsAuthKey();
+		String authEncoded = Base64Utils.encodeToString(authStr.getBytes());
+		headers.add("Authorization", "Basic " + authEncoded);
+		HttpEntity<String> reqEntity = new HttpEntity<String>(headers);
+		ResponseEntity<Object> stateDetails = restTemplate.exchange(config.getEhrmsHost() + config.getEmployeeDetails().replace("<<empcode>>", hrmsReq.getEmpCode()),
+				HttpMethod.GET, reqEntity, Object.class);
+
+		System.out.println(stateDetails);
+		return new ResponseEntity<>(ResponseInfoWrapper.builder()
+				.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+				.responseBody(stateDetails.getBody()).build(), HttpStatus.OK);
+	}
+	public ResponseEntity<ResponseInfoWrapper> getEmployeeLeaveDetails(HrmsRequestInfoWrapper request) {
+		HrmsRequest hrmsReq = objectMapper.convertValue(request.getHrmsRequest(), HrmsRequest.class);
+		RestTemplate restTemplate = requestFactory.getRestTemplate();
+
+		HttpHeaders headers = new HttpHeaders();
+		String authStr = config.getHrmsAuthHeader() + ":"
+				+ config.getHrmsAuthKey();
+		String authEncoded = Base64Utils.encodeToString(authStr.getBytes());
+		headers.add("Authorization", "Basic " + authEncoded);
+		HttpEntity<String> reqEntity = new HttpEntity<String>(headers);
+		ResponseEntity<Object> stateDetails = restTemplate.exchange(config.getEhrmsHost() + config.getEmployeeLeaveDetails().replace("<<empcode>>", hrmsReq.getEmpCode()),
+				HttpMethod.GET, reqEntity, Object.class);
+
+		System.out.println(stateDetails);
+		return new ResponseEntity<>(ResponseInfoWrapper.builder()
+				.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+				.responseBody(stateDetails.getBody()).build(), HttpStatus.OK);
+	}
+
+	
+	public ResponseEntity<ResponseInfoWrapper> getEmployeeJoiningDetails(HrmsRequestInfoWrapper request) {
+		HrmsRequest hrmsReq = objectMapper.convertValue(request.getHrmsRequest(), HrmsRequest.class);
+		RestTemplate restTemplate = requestFactory.getRestTemplate();
+
+		HttpHeaders headers = new HttpHeaders();
+		String authStr = config.getHrmsAuthHeader() + ":"
+				+ config.getHrmsAuthKey();
+		String authEncoded = Base64Utils.encodeToString(authStr.getBytes());
+		headers.add("Authorization", "Basic " + authEncoded);
+		HttpEntity<String> reqEntity = new HttpEntity<String>(headers);
+		ResponseEntity<Object> stateDetails = restTemplate.exchange(config.getEhrmsHost() + config.getEmployeeJoiningDetails().replace("<<empcode>>", hrmsReq.getEmpCode()),
+				HttpMethod.GET, reqEntity, Object.class);
+
+		System.out.println(stateDetails);
+		return new ResponseEntity<>(ResponseInfoWrapper.builder()
+				.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
+				.responseBody(stateDetails.getBody()).build(), HttpStatus.OK);
+	}
 
 }

@@ -68,5 +68,37 @@ public class HrmsController {
 	public ResponseEntity<ResponseInfoWrapper> getpayslip(@Valid @RequestBody HrmsRequestInfoWrapper request) {
 		return client.fetchPayslip(request);
 	}
+	
+	/**
+	 * Get employee details from ehrms portal
+	 * 
+	 * @param requestInfoWrapper
+	 * @return ResponseInfoWrapper
+	 */
+	@PostMapping(value = "/_getEmpDetails")
+	public ResponseEntity<ResponseInfoWrapper> getEmployeeDetails(@Valid @RequestBody HrmsRequestInfoWrapper request) {
+		return service.getEmployeeDetails(request);
+	}
+	
+	/**
+	 * Get employee details from ehrms portal
+	 * 
+	 * @param requestInfoWrapper
+	 * @return ResponseInfoWrapper
+	 */
+	@PostMapping(value = "/_getEmpLeaveDetails")
+	public ResponseEntity<ResponseInfoWrapper> getEmployeeLeaveDetails(@Valid @RequestBody HrmsRequestInfoWrapper request) {
+		return service.getEmployeeLeaveDetails(request);
+	}
+	/**
+	 * Get employee details from ehrms portal
+	 * 
+	 * @param requestInfoWrapper
+	 * @return ResponseInfoWrapper
+	 */
+	@PostMapping(value = "/_getEmpJoiningDetails")
+	public ResponseEntity<ResponseInfoWrapper> getEmployeeJoiningDetails(@Valid @RequestBody HrmsRequestInfoWrapper request) {
+		return service.getEmployeeJoiningDetails(request);
+	}
 
 }
