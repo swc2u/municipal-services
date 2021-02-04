@@ -403,7 +403,7 @@ public class MasterDataService {
 	 */
 	public Map<String, Long> getTaxPeriods(RequestInfo requestInfo, Object mdmsData) {
 		try {
-			String jsonPath = WSCalculationConstant.MDMS_FINACIALYEAR_PATH.replace("{}", "2019-20");
+			String jsonPath = WSCalculationConstant.MDMS_FINACIALYEAR_PATH.replace("{}", WSCalculationConstant.FINANCIALYEAR_MASTER_KEY);
 			List<Map<String, Object>> jsonOutput = JsonPath.read(mdmsData, jsonPath);
 			Map<String, Object> financialYearProperties = jsonOutput.get(0);
 			Object startDate = financialYearProperties.get(WSCalculationConstant.MDMS_STARTDATE);
@@ -415,7 +415,7 @@ public class MasterDataService {
 
 		} catch (Exception e) {
 
-			throw new CustomException("INVALID FINANCIALYEAR", "No data found for the financialYear: " + "2019-20");
+			throw new CustomException("INVALID FINANCIALYEAR", "No data found for the financialYear: " + WSCalculationConstant.FINANCIALYEAR_MASTER_KEY);
 		}
 	}
 

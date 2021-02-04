@@ -72,18 +72,18 @@ ColumnMaps:
      smsTemplate:  Dear Applicant, you are requested to provide clarification for your application ID - [:applicationId:] for Permission for Road Cut. Please visit MCC portal for details.
 
    - applicationType: ROADCUTNOC
-     status: [APPROVED]
+     status: [VERIFY AFTER APPROVAL L3]
      roles: [CITIZEN]
      emailSubject: Application Approved
-     template: Dear Applicant,<br/><p>Your application ID - [:applicationId:] for Permission for Road Cut is under processing. Kindly pay the requisite Road cut charges amounting to Rs. [:fees:] including GST and bank guarantee by visiting MCC Chandigarh portal.</p><br/>Regards,<br/>Portal Administrator (MCC Chandigarh)
-     smsTemplate: Dear Applicant, as per your application ID - [:applicationId:] for road cut permission is under processing, Kindly pay Rs. [:fees:] at MCC Chandigarh portal for approval.
+     template: Dear Applicant,<br/><p>Your application ID - [:applicationId:] for Permission for Road Cut is approved. Kindly pay the requisite Road cut charges including GST and bank guarantee by visiting MCC Chandigarh portal.</p><br/>Regards,<br/>Portal Administrator (MCC Chandigarh)
+     smsTemplate: Dear Applicant, as per your application ID - [:applicationId:] for road cut permission is approved,Kindly pay the requisite Road cut charges including GST and bank guarantee by visiting MCC Chandigarh portal.
 
    - applicationType: ROADCUTNOC
      status: [REJECTED]
      roles: [CITIZEN]
      emailSubject: Application Rejected
-     template: Dear Applicant,<br/><p> Dear Applicant<br/><p>Your application ID - [:applicationId:] for Permission for Road Cut is under processing. Kindly pay the requisite Road cut charges amounting to Rs. [:fees:] including GST and bank guarantee by visiting MCC Chandigarh portal.</p><br/>Regards,<br/>Portal Administrator (MCC Chandigarh)
-     smsTemplate: Dear Applicant, as per your application ID - [:applicationId:] for road cut permission is under processing, Kindly pay Rs. [:fees:] at MCC Chandigarh portal for approval.
+     template: Dear Applicant,<br/><p> Dear Applicant<br/><p>Your application ID - [:applicationId:] for Permission for Road Cut is rejected. Kindly visit MCC Chandigarh portal.</p><br/>Regards,<br/>Portal Administrator (MCC Chandigarh)
+     smsTemplate: Dear Applicant, as per your application ID - [:applicationId:] for road cut permission is rejected, Kindly visit MCC Chandigarh portal.
 
    - applicationType: ROADCUTNOC
      status: [PAID]

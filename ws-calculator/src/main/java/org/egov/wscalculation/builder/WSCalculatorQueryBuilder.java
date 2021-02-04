@@ -58,7 +58,7 @@ public class WSCalculatorQueryBuilder {
 			"       netamount as netAmount, grossamount as grossAmount , surcharge  , totalnetamount  , totalsurcharge  , \r\n" + 
 			"       totalgrossamount  , fixchargecode  , fixcharge  , duedatecash  , duedatecheque  , \r\n" + 
 			"       status  , billid  , paymentid , paymentstatus  , createdby  , lastmodifiedby  , \r\n" + 
-			"       createdtime  , lastmodifiedtime\r\n" + 
+			"       createdtime  , lastmodifiedtime,fromDate, toDate\r\n" + 
 			"  FROM public.eg_ws_savebilling where concat(divsdiv,consumercode) = ?;";
 
 	public String getDistinctTenantIds() {
