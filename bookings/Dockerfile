@@ -1,4 +1,4 @@
-FROM egovio/apline-jre:8u121
+FROM egovio/8-openjdk-alpine
 
 MAINTAINER Senthil<senthil.kalimuthu@tarento.com>
 
@@ -6,13 +6,13 @@ MAINTAINER Senthil<senthil.kalimuthu@tarento.com>
 # INSTRUCTIONS ON HOW TO BUILD JAR:
 # Move to the location where pom.xml is exist in project and build project using below command
 # "mvn clean package"
-COPY /target/rainmaker-pgr-0.0.2-SNAPSHOT.jar /opt/egov/rainmaker-pgr.jar
+COPY /target/bookings-0.0.2-SNAPSHOT.jar  /opt/egov/bookings-0.0.2-SNAPSHOT.jar
 
-COPY start.sh /usr/bin/start.sh
+COPY start.sh /opt/egov/
 
-RUN chmod +x /usr/bin/start.sh
+RUN chmod +x /opt/egov/start.sh
 
-CMD ["/usr/bin/start.sh"]
+CMD ["/opt/egov/start.sh"]
 
 # NOTE: the two 'RUN' commands can probably be combined inside of a single
 # script (i.e. RUN build-and-install-app.sh) so that we can also clean up the
