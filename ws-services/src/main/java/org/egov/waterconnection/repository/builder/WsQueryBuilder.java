@@ -51,7 +51,7 @@ public class WsQueryBuilder {
 	private static final String INNER_JOIN_STRING = " INNER JOIN ";
     private static final String LEFT_OUTER_JOIN_STRING = " LEFT OUTER JOIN ";
 
-	private static String holderSelectValues = "connectionholder.tenantid as holdertenantid, connectionholder.connectionid as holderapplicationId, userid, connectionholder.status as holderstatus, isprimaryholder, connectionholdertype, holdershippercentage, connectionholder.relationship as holderrelationship, connectionholder.createdby as holdercreatedby, connectionholder.createdtime as holdercreatedtime, connectionholder.lastmodifiedby as holderlastmodifiedby, connectionholder.lastmodifiedtime as holderlastmodifiedtime, ";
+	private static String holderSelectValues = "connectionholder.tenantid as holdertenantid, connectionholder.connectionid as holderapplicationId, userid, connectionholder.status as holderstatus, isprimaryholder, connectionholdertype,connectionholder.correspondance_address as holdercorrepondanceaddress, holdershippercentage, connectionholder.relationship as holderrelationship, connectionholder.createdby as holdercreatedby, connectionholder.createdtime as holdercreatedtime, connectionholder.lastmodifiedby as holderlastmodifiedby, connectionholder.lastmodifiedtime as holderlastmodifiedtime, ";
 	
 	private static final String WATER_SEARCH_QUERY = "SELECT "
 			/* + " conn.*, wc.*, document.*, plumber.*, application.*, property.*, " */
@@ -82,9 +82,9 @@ public class WsQueryBuilder {
 			+  LEFT_OUTER_JOIN_STRING
 			+ "eg_ws_plumberinfo plumber ON plumber.wsid = conn.id"
 			+ LEFT_OUTER_JOIN_STRING
-		    + "eg_ws_connectionholder connectionholder ON connectionholder.connectionid = conn.id"
-					+ LEFT_OUTER_JOIN_STRING
-				    + "eg_ws_connection_mapping cm ON cm.wsid = conn.id";
+		    + "eg_ws_connectionholder connectionholder ON connectionholder.connectionid = conn.id";
+			//		+ LEFT_OUTER_JOIN_STRING
+			//	    + "eg_ws_connection_mapping cm ON cm.wsid = conn.id";
 	
 	private static final String NO_OF_CONNECTION_SEARCH_QUERY = "SELECT count(*) FROM eg_ws_connection WHERE";
 	
@@ -111,17 +111,16 @@ public class WsQueryBuilder {
 				return null;
 		StringBuilder query = new StringBuilder(WATER_SEARCH_QUERY);
 		boolean propertyIdsPresent = false;
-		if (!StringUtils.isEmpty(criteria.getMobileNumber())) {
-			Set<String> propertyIds = new HashSet<>();
-			List<Property> propertyList = waterServicesUtil.propertySearchOnCriteria(criteria, requestInfo);
-			propertyList.forEach(property -> propertyIds.add(property.getId()));
-			if (!propertyIds.isEmpty()) {
-				addClauseIfRequired(preparedStatement, query);
-				query.append(" (conn.property_id in (").append(createQuery(propertyIds)).append(" )");
-				addToPreparedStatement(preparedStatement, propertyIds);
-				propertyIdsPresent = true;
-			}
-		}
+		/*
+		 * if (!StringUtils.isEmpty(criteria.getMobileNumber())) { Set<String>
+		 * propertyIds = new HashSet<>(); List<Property> propertyList =
+		 * waterServicesUtil.propertySearchOnCriteria(criteria, requestInfo);
+		 * propertyList.forEach(property -> propertyIds.add(property.getId())); if
+		 * (!propertyIds.isEmpty()) { addClauseIfRequired(preparedStatement, query);
+		 * query.append(" (conn.property_id in (").append(createQuery(propertyIds)).
+		 * append(" )"); addToPreparedStatement(preparedStatement, propertyIds);
+		 * propertyIdsPresent = true; } }
+		 */
 		if(!StringUtils.isEmpty(criteria.getMobileNumber())) {
 			Set<String> uuids = userService.getUUIDForUsers(criteria.getMobileNumber(), criteria.getTenantId(), requestInfo);
 			boolean userIdsPresent = false;
@@ -133,9 +132,9 @@ public class WsQueryBuilder {
 				addToPreparedStatement(preparedStatement, uuids);
 				userIdsPresent = true;
 			}
-			if(propertyIdsPresent && !userIdsPresent){
-				query.append(")");
-			}
+			/*
+			 * if(propertyIdsPresent && !userIdsPresent){ query.append(")"); }
+			 */
 		}
 		if (!StringUtils.isEmpty(criteria.getTenantId())) {
 			addClauseIfRequired(preparedStatement, query);
@@ -193,11 +192,12 @@ public class WsQueryBuilder {
 			query.append(" conn.applicationType = ? ");
 			preparedStatement.add(criteria.getApplicationType());
 		}
-		if (!StringUtils.isEmpty(criteria.getConnectionUserId())) {
-		addORClauseIfRequired(preparedStatement, query);
-			query.append(" cm.user_id = ? ");
-			preparedStatement.add(criteria.getConnectionUserId());
-		}
+		/*
+		 * if (!StringUtils.isEmpty(criteria.getConnectionUserId())) {
+		 * addORClauseIfRequired(preparedStatement, query);
+		 * query.append(" cm.user_id = ? ");
+		 * preparedStatement.add(criteria.getConnectionUserId()); }
+		 */
 		query.append(ORDER_BY_CLAUSE);
 		return addPaginationWrapper(query.toString(), preparedStatement, criteria);
 	}
