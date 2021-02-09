@@ -537,7 +537,7 @@
 			}
 		},
 		"EE-REVIEWOFEE L2": {
-			"VERIFYHDMEE": {
+			"VERIFYHDMEE L1": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -572,7 +572,7 @@
 				}
 			}
 		},
-		"HDMEE-VERIFYHDMEE": {
+		"HDMEE-VERIFYHDMEE L1": {
 			"VERIFYDMEE": {
 				"remarks": {
 					"fieldName": "remarks",
@@ -591,8 +591,80 @@
 				}
 			}
 		},
-		"DMEE-VERIFYDMEE": {
+		"HDMEE-VERIFYHDMEE L2": {
 			"REVIEWOFEE L3": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},
+			"REASSIGNTODMEE": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			}
+		},
+		"HDMEE-REASSIGNTOHDMEE": {
+			"REVIEWOFEE L3": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},
+			"REASSIGNTODMEE": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			}
+		},
+		"DMEE-VERIFYDMEE": {
+			"VERIFYHDMEE L2": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -611,7 +683,7 @@
 			}
 		},
 		"DMEE-REASSIGNTODMEE": {
-			"REVIEWOFEE L3": {
+			"VERIFYHDMEE L2": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -654,7 +726,7 @@
 					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
 				}
 			},
-			"REASSIGNTODMEE": {
+			"REASSIGNTOHDMEE": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -709,7 +781,7 @@
 					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
 				}
 			},
-			"REASSIGNTODMEE": {
+			"REASSIGNTOHDMEE": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -740,7 +812,7 @@
 			}
 		},
 		"SE-REVIEWOFSE L1": {
-			"VERIFYCHD": {
+			"VERIFYCHDSE L1": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -775,7 +847,7 @@
 				}
 			}
 		},
-		"CHD-VERIFYCHD": {
+		"CHDSE-VERIFYCHDSE L1": {
 			"VERIFYDMSE": {
 				"remarks": {
 					"fieldName": "remarks",
@@ -794,8 +866,80 @@
 				}
 			}
 		},
-		"DMSE-VERIFYDMSE": {
+		"CHDSE-VERIFYCHDSE L2": {
 			"REVIEWOFSE L2": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},
+			"REASSIGNTODMSE": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			}
+		},
+		"CHDSE-REASSIGNTOCHDSE": {
+			"REVIEWOFSE L2": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},
+			"REASSIGNTODMSE": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			}
+		},
+		"DMSE-VERIFYDMSE": {
+			"VERIFYCHDSE L2": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -814,7 +958,7 @@
 			}
 		},
 		"DMSE-REASSIGNTODMSE": {
-			"REVIEWOFSE L2": {
+			"VERIFYCHDSE L2": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -852,7 +996,7 @@
 					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
 				}
 			},
-			"REASSIGNTODMSE": {
+			"REASSIGNTOCHDSE": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -926,7 +1070,7 @@
 					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
 				}
 			},
-			"REASSIGNTODMSE": {
+			"REASSIGNTOCHDSE": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -962,7 +1106,7 @@
 			}
 		},
 		"CE-REVIEWOFCE L1": {
-			"VERIFYHDMCE L1": {
+			"VERIFYCHDCE L1": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -998,7 +1142,7 @@
 			}
 		},
 
-		"HDMCE-VERIFYHDMCE L1": {
+		"CHDCE-VERIFYCHDCE L1": {
 			"VERIFYDMCE": {
 				"remarks": {
 					"fieldName": "remarks",
@@ -1019,7 +1163,26 @@
 		},
 
 		"DMCE-VERIFYDMCE": {
-			"VERIFYHDMCE L2": {
+			"VERIFYCHDCE L2": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			}
+		},
+		"DMCE-REASSIGNTODMCE": {
+			"VERIFYCHDCE L2": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1038,8 +1201,25 @@
 			}
 		},
 
-		"HDMCE-VERIFYHDMCE L2": {
-			"REVIEWOFWD": {
+		"CHDCE-VERIFYCHDCE L2": {
+			"REVIEWOFSDEHQ": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},
+			"REASSIGNTODMCE": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1057,8 +1237,136 @@
 				}
 			}
 		},
+		"CHDCE-REASSIGNTOCHDCE": {
+			"REVIEWOFSDEHQ": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},
+			"REASSIGNTODMCE": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			}
+		},
+		"SDEHQ-REVIEWOFSDEHQ": {
+			"REVIEWOFWD": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},
+			"REASSIGNTOCHDCE": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			}
+			
+		},
+		"SDEHQ-REASSIGNTOSDEHQ": {
+			"REVIEWOFWD": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},
+			"REASSIGNTOCHDCE": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			}
+			
+		},
+
 		"WD-REVIEWOFWD": {
 			"PENDINGAPPROVAL": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},
+			"REASSIGNTOSDEHQ":{
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1078,6 +1386,23 @@
 		},
 		"WD-REASSIGNTOWD": {
 			"PENDINGAPPROVAL": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},
+			"REASSIGNTOSDEHQ":{
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",

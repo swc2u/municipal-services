@@ -1,0 +1,225 @@
+serviceMaps:
+ serviceName: bookings
+ mappings:
+ - version: 1.0
+   description: Persists the approver details into db
+   fromTopic: save-approver-details-topic
+   isTransaction: true
+   queryMaps:
+   
+       - query: INSERT INTO public.bk_approver(id, sector, uuid, role_code, created_date, last_modified_date) VALUES(?, ?, ?, ?, ?::timestamp, ?::timestamp);
+         basePath: ApproverDetails.*
+         jsonMaps:
+         
+          - jsonPath: $.ApproverDetails.*.id
+          
+          - jsonPath: $.ApproverDetails.*.sector
+  
+          - jsonPath: $.ApproverDetails.*.uuid
+          
+          - jsonPath: $.ApproverDetails.*.roleCode
+          
+          - jsonPath: $.ApproverDetails.*.createdDate
+          
+          - jsonPath: $.ApproverDetails.*.lastModifiedDate
+   
+          
+ - version: 1.0
+   description: Persists the booking details into db
+   fromTopic: update-approver-details-topic
+   isTransaction: true
+   queryMaps:  
+   
+       - query: UPDATE public.bk_approver SET sector=?, uuid=?, role_code=?, last_modified_date=?::timestamp WHERE id=?; 
+         basePath: ApproverDetails.*
+         jsonMaps:
+  
+          - jsonPath: $.ApproverDetails.*.sector
+  
+          - jsonPath: $.ApproverDetails.*.uuid
+          
+          - jsonPath: $.ApproverDetails.*.roleCode
+          
+          - jsonPath: $.ApproverDetails.*.lastModifiedDate
+          
+          - jsonPath: $.ApproverDetails.*.id
+           
+           
+           
+           
+    
+ - version: 1.0
+   description: Persists the OSBM fee details into db
+   fromTopic: save-osbm-fee-details-topic
+   isTransaction: true
+   queryMaps:
+
+       - query: INSERT INTO public.bk_osbm_fee (id, amount, construction_type, duration_in_months, residential_commercial, storage, village_city, created_date, last_modified_date) VALUES(?, ?, ?, ?, ?, ?, ?, ?::timestamp, ?::timestamp);
+         basePath: OsbmFeeDetails.*
+         jsonMaps:
+         
+          - jsonPath: $.OsbmFeeDetails.*.id 
+             
+          - jsonPath: $.OsbmFeeDetails.*.amount
+             
+          - jsonPath: $.OsbmFeeDetails.*.constructionType
+             
+          - jsonPath: $.OsbmFeeDetails.*.durationInMonths
+             
+          - jsonPath: $.OsbmFeeDetails.*.residentialCommercial
+             
+          - jsonPath: $.OsbmFeeDetails.*.storage
+             
+          - jsonPath: $.OsbmFeeDetails.*.villageCity
+          
+          - jsonPath: $.OsbmFeeDetails.*.createdDate
+          
+          - jsonPath: $.OsbmFeeDetails.*.lastModifiedDate
+             
+          
+          
+          
+
+ - version: 1.0
+   name: bookings
+   description: Persists the OSBM fee details into db
+   fromTopic: update-osbm-fee-details-topic
+   isTransaction: true
+   queryMaps:
+       
+       - query: UPDATE public.bk_osbm_fee SET amount=?, construction_type=?, duration_in_months=?, residential_commercial=?, storage=?, village_city=?, last_modified_date=?::timestamp WHERE id=?;
+         basePath: OsbmFeeDetails.*
+         jsonMaps:
+             
+          - jsonPath: $.OsbmFeeDetails.*.amount
+             
+          - jsonPath: $.OsbmFeeDetails.*.constructionType
+             
+          - jsonPath: $.OsbmFeeDetails.*.durationInMonths
+             
+          - jsonPath: $.OsbmFeeDetails.*.residentialCommercial
+             
+          - jsonPath: $.OsbmFeeDetails.*.storage
+             
+          - jsonPath: $.OsbmFeeDetails.*.villageCity
+          
+          - jsonPath: $.OsbmFeeDetails.*.lastModifiedDate
+          
+          - jsonPath: $.OsbmFeeDetails.*.id 
+          
+          
+          
+          
+          
+ - version: 1.0
+   description: Persists the OSUJM fee details into db
+   fromTopic: save-osujm-fee-details-topic
+   isTransaction: true
+   queryMaps:
+
+       - query: INSERT INTO public.bk_osujm_fee (id, area_from, area_to, rate_per_sqr_feet_per_day, sector, slab, created_date, last_modified_date) VALUES(?, ?, ?, ?, ?, ?, ?::timestamp, ?::timestamp);
+         basePath: OsujmFeeDetails.*
+         jsonMaps:
+         
+          - jsonPath: $.OsujmFeeDetails.*.id 
+             
+          - jsonPath: $.OsujmFeeDetails.*.areaFrom
+             
+          - jsonPath: $.OsujmFeeDetails.*.areaTo
+             
+          - jsonPath: $.OsujmFeeDetails.*.ratePerSqrFeetPerDay
+             
+          - jsonPath: $.OsujmFeeDetails.*.sector
+             
+          - jsonPath: $.OsujmFeeDetails.*.slab
+          
+          - jsonPath: $.OsujmFeeDetails.*.createdDate
+          
+          - jsonPath: $.OsujmFeeDetails.*.lastModifiedDate
+             
+             
+          
+          
+          
+
+ - version: 1.0
+   name: bookings
+   description: Persists the OSUJM fee details into db
+   fromTopic: update-osujm-fee-details-topic
+   isTransaction: true
+   queryMaps:
+       
+       - query: UPDATE public.bk_osujm_fee SET area_from=?, area_to=?, rate_per_sqr_feet_per_day=?, sector=?, slab=?, last_modified_date=?::timestamp WHERE id=?;
+         basePath: OsujmFeeDetails.*
+         jsonMaps:
+             
+          - jsonPath: $.OsujmFeeDetails.*.areaFrom
+             
+          - jsonPath: $.OsujmFeeDetails.*.areaTo
+             
+          - jsonPath: $.OsujmFeeDetails.*.ratePerSqrFeetPerDay
+             
+          - jsonPath: $.OsujmFeeDetails.*.sector
+             
+          - jsonPath: $.OsujmFeeDetails.*.slab      
+          
+          - jsonPath: $.OsujmFeeDetails.*.lastModifiedDate
+          
+          - jsonPath: $.OsujmFeeDetails.*.id 
+                                                       
+                                                       
+                                                       
+                                                       
+                                                       
+ - version: 1.0
+   description: Persists the GFCP fee details into db
+   fromTopic: save-gfcp-fee-details-topic
+   isTransaction: true
+   queryMaps:
+
+       - query: INSERT INTO public.bk_commercial_ground_fee (id, booking_venue, category, locality, rate_per_day, created_date, last_modified_date) VALUES(?, ?, ?, ?, ?, ?::timestamp, ?::timestamp);
+         basePath: GfcpFeeDetails.*
+         jsonMaps:
+         
+          - jsonPath: $.GfcpFeeDetails.*.id 
+             
+          - jsonPath: $.GfcpFeeDetails.*.bookingVenue
+             
+          - jsonPath: $.GfcpFeeDetails.*.category
+             
+          - jsonPath: $.GfcpFeeDetails.*.locality
+             
+          - jsonPath: $.GfcpFeeDetails.*.ratePerDay
+          
+          - jsonPath: $.GfcpFeeDetails.*.createdDate
+          
+          - jsonPath: $.GfcpFeeDetails.*.lastModifiedDate
+             
+             
+          
+          
+          
+
+ - version: 1.0
+   name: bookings
+   description: Persists the GFCP fee details into db
+   fromTopic: update-gfcp-fee-details-topic
+   isTransaction: true
+   queryMaps:
+       
+       - query: UPDATE public.bk_commercial_ground_fee SET booking_venue=?, category=?, locality=?, rate_per_day=?, last_modified_date=?::timestamp WHERE id=?;
+         basePath: GfcpFeeDetails.*
+         jsonMaps:
+             
+          - jsonPath: $.GfcpFeeDetails.*.bookingVenue
+             
+          - jsonPath: $.GfcpFeeDetails.*.category
+             
+          - jsonPath: $.GfcpFeeDetails.*.locality
+             
+          - jsonPath: $.GfcpFeeDetails.*.ratePerDay      
+          
+          - jsonPath: $.OsujmFeeDetails.*.lastModifiedDate
+          
+          - jsonPath: $.OsujmFeeDetails.*.id 
+                                                                                                              
