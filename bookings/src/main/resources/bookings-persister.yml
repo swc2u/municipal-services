@@ -1,0 +1,459 @@
+serviceMaps:
+ serviceName: bookings
+ mappings:
+ - version: 1.0
+   description: Persists the booking details into db
+   fromTopic: save-bookings-details
+   isTransaction: true
+   queryMaps:
+   
+       - query: INSERT INTO public.bk_bookings(bk_application_number, bk_action, bk_actual_delivery_time, bk_add_special_request_details, bk_address, bk_amount, bk_applicant_contact, bk_applicant_name, bk_application_status, bk_approved_by, bk_area_required, bk_booking_duration, bk_booking_purpose, bk_booking_time, bk_booking_type, bk_booking_venue, bk_category, bk_cgst, bk_cleansing_charges, bk_complete_address, bk_construction_type, bk_contact_no, bk_created_by, bk_current_charges, bk_customer_gst_no, bk_date, bk_date_created, bk_dimension, bk_document_uploaded_url, bk_driver_name, bk_duration, bk_email, bk_ending_date, bk_estimated_delivery_time, bk_facilitation_charges, bk_father_name, bk_from_date, bk_house_no, bk_id_proof,bk_landmark, bk_location, bk_location_change_amount, bk_location_pictures, bk_material_storage_area, bk_mobile_number, bk_module_type, bk_normal_water_failure_request, bk_open_space_location, bk_park_or_community_center, bk_payment_status, bk_plot_sketch, bk_property_owner_name, bk_refund_amount, bk_rent, bk_requirement_area, bk_residence_proof, bk_residential_or_commercial, bk_sector, bk_starting_date, bk_status, bk_status_update_request, bk_surcharge_rent, bk_time, bk_to_date, bk_type, bk_update_status_option, bk_utgst, bk_vehicle_number, bk_venue, bk_vill_city, bk_village, bk_wf_status, business_service, tenant_id, uuid, approver_name, financial_year,bk_remarks) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::date, ?::date, ?, ?, ?, ?, ?, ?::date, ?, ?, ?, ?::date, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::date, ?, ?, ?, ?, ?::date, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+         basePath: Booking.*
+         jsonMaps:
+
+          - jsonPath: $.Booking.*.bkApplicationNumber
+
+          - jsonPath: $.Booking.*.bkAction
+  
+          - jsonPath: $.Booking.*.bkActualDeliveryTime
+  
+          - jsonPath: $.Booking.*.bkAddSpecialRequestDetails
+         
+          - jsonPath: $.Booking.*.bkAddress
+         
+          - jsonPath: $.Booking.*.bkAmount
+         
+          - jsonPath: $.Booking.*. bkApplicantContact
+         
+          - jsonPath: $.Booking.*.bkApplicantName
+         
+          - jsonPath: $.Booking.*.bkApplicationStatus
+         
+          - jsonPath: $.Booking.*.bkApprovedBy
+         
+          - jsonPath: $.Booking.*.bkAreaRequired
+        
+          - jsonPath: $.Booking.*.bkBookingDuration
+        
+          - jsonPath: $.Booking.*.bkBookingPurpose
+        
+          - jsonPath: $.Booking.*.bkBookingTime
+        
+          - jsonPath: $.Booking.*.bkBookingType
+        
+          - jsonPath: $.Booking.*.bkBookingVenue
+        
+          - jsonPath: $.Booking.*.bkCategory
+        
+          - jsonPath: $.Booking.*.bkCgst
+        
+          - jsonPath: $.Booking.*.bkCleansingCharges
+        
+          - jsonPath: $.Booking.*.bkCompleteAddress
+        
+          - jsonPath: $.Booking.*.bkConstructionType
+        
+          - jsonPath: $.Booking.*.bkContactNo
+        
+          - jsonPath: $.Booking.*.bkCreatedBy
+        
+          - jsonPath: $.Booking.*.bkCurrentCharges
+        
+          - jsonPath: $.Booking.*.bkCustomerGstNo
+        
+          - jsonPath: $.Booking.*.bkDate
+        
+          - jsonPath: $.Booking.*.bkDateCreated
+        
+          - jsonPath: $.Booking.*.bkDimension
+        
+          - jsonPath: $.Booking.*.bkDocumentUploadedUrl
+        
+          - jsonPath: $.Booking.*.bkDriverName
+        
+          - jsonPath: $.Booking.*.bkDuration
+        
+          - jsonPath: $.Booking.*.bkEmail
+        
+          - jsonPath: $.Booking.*.bkEndingDate
+        
+          - jsonPath: $.Booking.*.bkEstimatedDeliveryTime
+        
+          - jsonPath: $.Booking.*.bkFacilitationCharges
+        
+          - jsonPath: $.Booking.*.bkFatherName
+        
+          - jsonPath: $.Booking.*.bkFromDate
+        
+          - jsonPath: $.Booking.*.bkHouseNo
+        
+          - jsonPath: $.Booking.*.bkIdProof
+        
+          - jsonPath: $.Booking.*.bkLandmark
+        
+          - jsonPath: $.Booking.*.bkLocation
+        
+          - jsonPath: $.Booking.*.bkLocationChangeAmount
+        
+          - jsonPath: $.Booking.*.bkLocationPictures
+        
+          - jsonPath: $.Booking.*.bkMaterialStorageArea
+        
+          - jsonPath: $.Booking.*.bkMobileNumber
+        
+          - jsonPath: $.Booking.*.bkModuleType
+        
+          - jsonPath: $.Booking.*.bkNormalWaterFailureRequest
+        
+          - jsonPath: $.Booking.*.bkOpenSpaceLocation
+        
+          - jsonPath: $.Booking.*.bkParkOrCommunityCenter
+        
+          - jsonPath: $.Booking.*.bkPaymentStatus
+        
+          - jsonPath: $.Booking.*.bkPlotSketch
+        
+          - jsonPath: $.Booking.*.bkPropertyOwnerName
+        
+          - jsonPath: $.Booking.*.bkRefundAmount
+        
+          - jsonPath: $.Booking.*.bkRent
+        
+          - jsonPath: $.Booking.*.bkRequirementArea
+        
+          - jsonPath: $.Booking.*.bkResidenceProof
+        
+          - jsonPath: $.Booking.*.bkResidentialOrCommercial
+        
+          - jsonPath: $.Booking.*.bkSector
+        
+          - jsonPath: $.Booking.*.bkStartingDate
+        
+          - jsonPath: $.Booking.*.bkStatus
+        
+          - jsonPath: $.Booking.*.bkStatusUpdateRequest
+        
+          - jsonPath: $.Booking.*.bkSurchargeRent
+        
+          - jsonPath: $.Booking.*.bkTime
+        
+          - jsonPath: $.Booking.*.bkToDate
+        
+          - jsonPath: $.Booking.*.bkType
+        
+          - jsonPath: $.Booking.*.bkUpdateStatusOption
+        
+          - jsonPath: $.Booking.*.bkUtgst
+        
+          - jsonPath: $.Booking.*.bkVehicleNumber
+        
+          - jsonPath: $.Booking.*.bkVenue
+        
+          - jsonPath: $.Booking.*.bkVillCity
+        
+          - jsonPath: $.Booking.*.bkVillage
+        
+          - jsonPath: $.Booking.*.bkWfStatus
+        
+          - jsonPath: $.Booking.*.businessService
+        
+          - jsonPath: $.Booking.*.tenantId
+        
+          - jsonPath: $.Booking.*.uuid
+        
+          - jsonPath: $.Booking.*.bkApproverName
+        
+          - jsonPath: $.Booking.*.financialYear
+         
+          - jsonPath: $.Booking.*.bkRemarks
+          
+          
+          
+          
+       - query: INSERT INTO public.bk_timeslots (id, slot, application_number) VALUES(?, ?, ?);
+         basePath: Booking.*.timeslots.*
+         jsonMaps:
+          - jsonPath: $.Booking.timeslots.*.id
+
+          - jsonPath: $.Booking.timeslots.*.slot
+
+          - jsonPath: $.Booking.timeslots.*.applicationNumber
+          
+          
+          
+          
+ - version: 1.0
+   description: Persists the booking details into db
+   fromTopic: update-bookings-details
+   isTransaction: true
+   queryMaps:  
+   
+       - query: UPDATE public.bk_bookings SET bk_action=?, bk_actual_delivery_time=?, bk_add_special_request_details=?, bk_address=?, bk_amount=?, bk_applicant_contact=?, bk_applicant_name=?, bk_application_status=?, bk_approved_by=?, bk_area_required=?, bk_booking_duration=?, bk_booking_purpose=?, bk_booking_time=?, bk_booking_type=?, bk_booking_venue=?, bk_category=?, bk_cgst=?, bk_cleansing_charges=?, bk_complete_address=?, bk_construction_type=?, bk_contact_no=?, bk_created_by=?, bk_current_charges=?, bk_customer_gst_no=?, bk_date=?::date, bk_date_created=?::date, bk_dimension=?, bk_document_uploaded_url=?, bk_driver_name=?, bk_duration=?, bk_email=?, bk_ending_date=?::date, bk_estimated_delivery_time=?, bk_facilitation_charges=?, bk_father_name=?, bk_from_date=?::date, bk_house_no=?, bk_id_proof=?, bk_landmark=?, bk_location=?, bk_location_change_amount=?, bk_location_pictures=?, bk_material_storage_area=?, bk_mobile_number=?, bk_module_type=?, bk_normal_water_failure_request=?, bk_open_space_location=?, bk_park_or_community_center=?, bk_payment_status=?, bk_plot_sketch=?, bk_property_owner_name=?, bk_refund_amount=?, bk_rent=?, bk_requirement_area=?, bk_residence_proof=?, bk_residential_or_commercial=?, bk_sector=?, bk_starting_date=?::date, bk_status=?, bk_status_update_request=?, bk_surcharge_rent=?, bk_time=?, bk_to_date=?::date, bk_type=?, bk_update_status_option=?, bk_utgst=?, bk_vehicle_number=?, bk_venue=?, bk_vill_city=?, bk_village=?, bk_wf_status=?, business_service=?, tenant_id=?, uuid=?, approver_name=?, financial_year=?, bk_remarks=? WHERE bk_application_number=?; 
+         basePath: Booking.*
+         jsonMaps:
+  
+           - jsonPath: $.Booking.*.bkAction
+    
+           - jsonPath: $.Booking.*.bkActualDeliveryTime
+    
+           - jsonPath: $.Booking.*.bkAddSpecialRequestDetails
+           
+           - jsonPath: $.Booking.*.bkAddress
+           
+           - jsonPath: $.Booking.*.bkAmount
+           
+           - jsonPath: $.Booking.*. bkApplicantContact
+           
+           - jsonPath: $.Booking.*.bkApplicantName
+           
+           - jsonPath: $.Booking.*.bkApplicationStatus
+           
+           - jsonPath: $.Booking.*.bkApprovedBy
+           
+           - jsonPath: $.Booking.*.bkAreaRequired
+          
+           - jsonPath: $.Booking.*.bkBookingDuration
+          
+           - jsonPath: $.Booking.*.bkBookingPurpose
+          
+           - jsonPath: $.Booking.*.bkBookingTime
+          
+           - jsonPath: $.Booking.*.bkBookingType
+          
+           - jsonPath: $.Booking.*.bkBookingVenue
+          
+           - jsonPath: $.Booking.*.bkCategory
+          
+           - jsonPath: $.Booking.*.bkCgst
+          
+           - jsonPath: $.Booking.*.bkCleansingCharges
+          
+           - jsonPath: $.Booking.*.bkCompleteAddress
+          
+           - jsonPath: $.Booking.*.bkConstructionType
+          
+           - jsonPath: $.Booking.*.bkContactNo
+          
+           - jsonPath: $.Booking.*.bkCreatedBy
+          
+           - jsonPath: $.Booking.*.bkCurrentCharges
+          
+           - jsonPath: $.Booking.*.bkCustomerGstNo
+          
+           - jsonPath: $.Booking.*.bkDate
+          
+           - jsonPath: $.Booking.*.bkDateCreated
+          
+           - jsonPath: $.Booking.*.bkDimension
+          
+           - jsonPath: $.Booking.*.bkDocumentUploadedUrl
+          
+           - jsonPath: $.Booking.*.bkDriverName
+          
+           - jsonPath: $.Booking.*.bkDuration
+          
+           - jsonPath: $.Booking.*.bkEmail
+          
+           - jsonPath: $.Booking.*.bkEndingDate
+          
+           - jsonPath: $.Booking.*.bkEstimatedDeliveryTime
+          
+           - jsonPath: $.Booking.*.bkFacilitationCharges
+          
+           - jsonPath: $.Booking.*.bkFatherName
+          
+           - jsonPath: $.Booking.*.bkFromDate
+          
+           - jsonPath: $.Booking.*.bkHouseNo
+          
+           - jsonPath: $.Booking.*.bkIdProof
+          
+           - jsonPath: $.Booking.*.bkLandmark
+          
+           - jsonPath: $.Booking.*.bkLocation
+          
+           - jsonPath: $.Booking.*.bkLocationChangeAmount
+          
+           - jsonPath: $.Booking.*.bkLocationPictures
+          
+           - jsonPath: $.Booking.*.bkMaterialStorageArea
+          
+           - jsonPath: $.Booking.*.bkMobileNumber
+          
+           - jsonPath: $.Booking.*.bkModuleType
+          
+           - jsonPath: $.Booking.*.bkNormalWaterFailureRequest
+          
+           - jsonPath: $.Booking.*.bkOpenSpaceLocation
+          
+           - jsonPath: $.Booking.*.bkParkOrCommunityCenter
+          
+           - jsonPath: $.Booking.*.bkPaymentStatus
+          
+           - jsonPath: $.Booking.*.bkPlotSketch
+          
+           - jsonPath: $.Booking.*.bkPropertyOwnerName
+          
+           - jsonPath: $.Booking.*.bkRefundAmount
+          
+           - jsonPath: $.Booking.*.bkRent
+          
+           - jsonPath: $.Booking.*.bkRequirementArea
+          
+           - jsonPath: $.Booking.*.bkResidenceProof
+          
+           - jsonPath: $.Booking.*.bkResidentialOrCommercial
+          
+           - jsonPath: $.Booking.*.bkSector
+          
+           - jsonPath: $.Booking.*.bkStartingDate
+          
+           - jsonPath: $.Booking.*.bkStatus
+          
+           - jsonPath: $.Booking.*.bkStatusUpdateRequest
+          
+           - jsonPath: $.Booking.*.bkSurchargeRent
+          
+           - jsonPath: $.Booking.*.bkTime
+          
+           - jsonPath: $.Booking.*.bkToDate
+          
+           - jsonPath: $.Booking.*.bkType
+          
+           - jsonPath: $.Booking.*.bkUpdateStatusOption
+          
+           - jsonPath: $.Booking.*.bkUtgst
+          
+           - jsonPath: $.Booking.*.bkVehicleNumber
+          
+           - jsonPath: $.Booking.*.bkVenue
+          
+           - jsonPath: $.Booking.*.bkVillCity
+          
+           - jsonPath: $.Booking.*.bkVillage
+          
+           - jsonPath: $.Booking.*.bkWfStatus
+          
+           - jsonPath: $.Booking.*.businessService
+          
+           - jsonPath: $.Booking.*.tenantId
+          
+           - jsonPath: $.Booking.*.uuid
+          
+           - jsonPath: $.Booking.*.bkApproverName
+          
+           - jsonPath: $.Booking.*.financialYear
+           
+           - jsonPath: $.Booking.*.bkRemarks
+         
+           - jsonPath: $.Booking.*.bkApplicationNumber       
+           
+           
+           
+           
+       - query: UPDATE public.bk_timeslots SET slot=? WHERE id=?;
+         basePath: Booking.*.timeslots.*
+         jsonMaps:
+
+          - jsonPath: $.Booking.timeslots.*.slot
+
+          - jsonPath: $.Booking.timeslots.*.id
+           
+           
+           
+
+ - version: 1.0
+   description: Persists the new location details into db
+   fromTopic: save-new-location-details
+   isTransaction: true
+   queryMaps:
+
+       - query: INSERT INTO public.bk_osujm_new_location (application_number, "action", applicant_address, applicant_name, application_status, area_requirement, business_service, contact, date_created, id_proof, landmark, locality_address, "location", mail_address, sector, tenant_id, uuid, remarks) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?::date, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+         basePath: NewLocationDetails.*
+         jsonMaps:
+          - jsonPath: $.NewLocationDetails.*.applicationNumber 
+             
+          - jsonPath: $.NewLocationDetails.*.action
+             
+          - jsonPath: $.NewLocationDetails.*.applicantAddress
+             
+          - jsonPath: $.NewLocationDetails.*.applicantName
+             
+          - jsonPath: $.NewLocationDetails.*.applicationStatus
+             
+          - jsonPath: $.NewLocationDetails.*.areaRequirement
+             
+          - jsonPath: $.NewLocationDetails.*.businessService
+             
+          - jsonPath: $.NewLocationDetails.*.contact
+             
+          - jsonPath: $.NewLocationDetails.*.dateCreated
+             
+          - jsonPath: $.NewLocationDetails.*.idProof
+             
+          - jsonPath: $.NewLocationDetails.*.landmark
+             
+          - jsonPath: $.NewLocationDetails.*.localityAddress
+             
+          - jsonPath: $.NewLocationDetails.*.location
+             
+          - jsonPath: $.NewLocationDetails.*.mailAddress
+             
+          - jsonPath: $.NewLocationDetails.*.sector
+             
+          - jsonPath: $.NewLocationDetails.*.tenantId
+             
+          - jsonPath: $.NewLocationDetails.*.uuid
+             
+          - jsonPath: $.NewLocationDetails.*.remarks
+          
+          
+          
+
+ - version: 1.0
+   name: bookings
+   description: Persists the new location details into db
+   fromTopic: update-new-location-details
+   isTransaction: true
+   queryMaps:
+       
+       - query: UPDATE public.bk_osujm_new_location SET "action"=?, applicant_address=?, applicant_name=?, application_status=?, area_requirement=?, business_service=?, contact=?, date_created=?::date, id_proof=?, landmark=?, locality_address=?, "location"=?, mail_address=?, sector=?, tenant_id=?, uuid=?, remarks=? WHERE application_number=?;
+         basePath: NewLocationDetails.*
+         jsonMaps:
+
+             - jsonPath: $.NewLocationDetails.*.action
+             
+             - jsonPath: $.NewLocationDetails.*.applicantAddress
+             
+             - jsonPath: $.NewLocationDetails.*.applicantName
+             
+             - jsonPath: $.NewLocationDetails.*.applicationStatus
+             
+             - jsonPath: $.NewLocationDetails.*.areaRequirement
+             
+             - jsonPath: $.NewLocationDetails.*.businessService
+             
+             - jsonPath: $.NewLocationDetails.*.contact
+             
+             - jsonPath: $.NewLocationDetails.*.dateCreated
+             
+             - jsonPath: $.NewLocationDetails.*.idProof
+             
+             - jsonPath: $.NewLocationDetails.*.landmark
+             
+             - jsonPath: $.NewLocationDetails.*.localityAddress
+             
+             - jsonPath: $.NewLocationDetails.*.location
+             
+             - jsonPath: $.NewLocationDetails.*.mailAddress
+             
+             - jsonPath: $.NewLocationDetails.*.sector
+             
+             - jsonPath: $.NewLocationDetails.*.tenantId
+             
+             - jsonPath: $.NewLocationDetails.*.uuid
+             
+             - jsonPath: $.NewLocationDetails.*.remarks
+             
+             - jsonPath: $.NewLocationDetails.*.applicationNumber
+                                            

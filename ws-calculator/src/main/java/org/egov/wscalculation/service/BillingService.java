@@ -1,6 +1,7 @@
 package org.egov.wscalculation.service;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,11 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.egov.wscalculation.constants.WSCalculationConstant;
 import org.egov.wscalculation.model.BillGeneration;
 import org.egov.wscalculation.model.BillGenerationRequest;
 import org.egov.wscalculation.model.Calculation;
+import org.egov.wscalculation.model.CalculationCriteria;
 import org.egov.wscalculation.model.Category;
 import org.egov.wscalculation.model.TaxHeadEstimate;
 import org.egov.wscalculation.model.TaxHeadMaster;
@@ -20,10 +23,15 @@ import org.egov.wscalculation.model.WaterConnection;
 import org.egov.wscalculation.repository.BillingRepository;
 import org.egov.wscalculation.util.CalculatorUtil;
 import org.egov.wscalculation.util.WSCalculationUtil;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONArray;
 @Service
 @Slf4j
 public class BillingService {
@@ -34,6 +42,9 @@ public class BillingService {
 	@Autowired
 	private MasterDataService masterDataService;
 
+	@Autowired
+	private ObjectMapper mapper;
+	
 	@Autowired
 	private WSCalculationUtil wSCalculationUtil;
 
@@ -48,18 +59,28 @@ public class BillingService {
 	
 
 
-	public List<BillGeneration> getBillingEstimation(BillGenerationRequest billGenerationRequest) {
+	public List<BillGeneration> getBillingEstimation(BillGenerationRequest billGenerationRequest){
 		BillGeneration bill = billingRepository.getBillingEstimation(billGenerationRequest.getBillGeneration().getConsumerCode());
+		bill.setConsumerCode(bill.getDivSdiv()+bill.getConsumerCode());
 		Map<String, Object> masterMap = masterDataService.loadMasterData(billGenerationRequest.getRequestInfo(),
 				billGenerationRequest.getBillGeneration().getTenantId());
 		List<BillGeneration> billList = new ArrayList<BillGeneration>();
-		try {
+		
 		String paymentMode =billGenerationRequest.getBillGeneration().getPaymentMode();
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
-		Date	todayDate = dateFormatter.parse(dateFormatter.format(new Date() ));
-		Date	dueDateCheque = dateFormatter.parse(dateFormatter.format(bill.getDueDateCheque()));
-		Date	dueDateCash = dateFormatter.parse(dateFormatter.format(bill.getDueDateCash()));
+		SimpleDateFormat dateFormatter1 = new SimpleDateFormat("yyyy-MM-dd");
+		Date todayDate = null;
+		Date	dueDateCheque = null;
+		Date	dueDateCash = null;
+		try {
+			todayDate = dateFormatter.parse(dateFormatter.format(new Date() ));
 		
+			dueDateCheque = dateFormatter1.parse(bill.getDueDateCheque());
+			dueDateCash = dateFormatter1.parse(bill.getDueDateCash());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if(paymentMode.equalsIgnoreCase(WSCalculationConstant.payment_cheque)) {
 			if(todayDate.compareTo(dueDateCheque) > 0) {
 				
@@ -81,6 +102,7 @@ public class BillingService {
 }
 		if(billGenerationRequest.getBillGeneration().isGenerateDemand()) {
 			List<Calculation> calculations = new ArrayList<Calculation>();
+			bill.getCalculation().setTenantId(billGenerationRequest.getBillGeneration().getTenantId());
 			calculations.add(bill.getCalculation());
 
 			demandService.generateDemand(billGenerationRequest.getRequestInfo(), calculations, masterMap, true);
@@ -88,14 +110,11 @@ public class BillingService {
 		}
 		 billList.add(bill);
 		
-
-		}catch(Exception e) {
-			throw new CustomException("ERROR_GETTING_ESTIMATION" , e.getMessage());
-		}
 		return billList;
 	}
 
 	private void enrichWaterCalculation(BillGenerationRequest billGenerationRequest, BillGeneration bill, Map<String, Object> masterMap, boolean isPenalty) {
+		
 		
 		
 		WaterConnection connection = calculatorUtil.getWaterConnection(billGenerationRequest.getRequestInfo(),
@@ -112,13 +131,16 @@ public class BillingService {
 
 			if(isPenalty) {	
 				 estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.
-				  WS_ADHOC_PENALTY) .estimateAmount(new BigDecimal(bill.getSurcharge())).build());
+						 WS_TIME_PENALTY) .estimateAmount(new BigDecimal(bill.getSurcharge())).build());
 			}
 			Map<String, List> estimatesAndBillingSlabs = new HashMap<>();
 			estimatesAndBillingSlabs.put("estimates", estimates);
 			Calculation calculation = getCalculation(estimatesAndBillingSlabs, masterMap, bill, connection);
-
-			enrichBillingPeriod(bill, masterMap);
+			CalculationCriteria criteria= CalculationCriteria.builder().waterConnection(connection).from(bill.getFromDate()).to(bill.getToDate()).build();
+			ArrayList<?> billingFrequencyMap = (ArrayList<?>) masterMap
+					.get(WSCalculationConstant.Billing_Period_Master);
+			masterDataService.enrichBillingPeriod(criteria, billingFrequencyMap, masterMap);
+		//	enrichBillingPeriod(bill, masterMap,billGenerationRequest.getRequestInfo());
 			bill.setCalculation(calculation);
 		
 	}
@@ -126,12 +148,16 @@ public class BillingService {
 }
 	
 
-	public Map<String, Object> enrichBillingPeriod(BillGeneration billGeneration, Map<String, Object> masterMap) {
+	public Map<String, Object> enrichBillingPeriod(BillGeneration billGeneration, Map<String, Object> masterMap, RequestInfo requestInfo) {
 
 		Map<String, Object> billingPeriod = new HashMap<>();
-
-		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, billGeneration.getFromDate());
-		billingPeriod.put(WSCalculationConstant.ENDING_DATE_APPLICABLES, billGeneration.getToDate());
+		List<Map<String, Object>> taxPeriods =	(List<Map<String, Object>>) masterMap.get(WSCalculationConstant.TAXPERIOD_MASTER_KEY);
+		JsonNode node = mapper.convertValue(taxPeriods.get(0), JsonNode.class);
+		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, node.get("fromDate"));
+		billingPeriod.put(WSCalculationConstant.ENDING_DATE_APPLICABLES,
+				System.currentTimeMillis() + WSCalculationConstant.APPLICATION_FEE_DEMAND_END_DATE);
+		billingPeriod.put(WSCalculationConstant.Demand_Expiry_Date_String, WSCalculationConstant.APPLICATION_FEE_DEMAND_EXP_DATE);
+		
 		masterMap.put(WSCalculationConstant.BILLING_PERIOD, billingPeriod);
 		return masterMap;
 	}

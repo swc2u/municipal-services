@@ -115,6 +115,12 @@ public class BillGeneration {
 	@JsonProperty("paymentMode")
 	private String paymentMode = null;
 	
+	@JsonProperty("fromDate")
+	private Long fromDate;
+
+	@JsonProperty("toDate")
+	private Long toDate;
+	
 	  @JsonProperty("totalAmountPaid")
 	    private String totalAmountPaid;
 	  
