@@ -48,6 +48,15 @@ public class ApiConfiguration {
 	@Value("${ehrms.nic.service.host}")
 	private String ehrmsHost;
 
+	@Value("${ehrms.nic.service.employeeDetail.path}")
+	private String employeeDetails;
+	
+	@Value("${ehrms.nic.service.employeeLeaveDetail.path}")
+	private String employeeLeaveDetails;
+	
+	@Value("${ehrms.nic.service.employeeJoiningDetails.path}")
+	private String employeeJoiningDetails;
+		
 	@Value("${ehrms.nic.service.statelist.path}")
 	private String hrmsStatelist;
 

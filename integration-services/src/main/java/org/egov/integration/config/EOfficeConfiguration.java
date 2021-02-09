@@ -47,6 +47,8 @@ public class EOfficeConfiguration {
 
 	@Value("${eoffice.service.host}")
 	private String eofficeHost;
+	
+	
 
 	@Value("${eoffice.service.url.filepending}")
 	private String eofficeuserfilepending;
