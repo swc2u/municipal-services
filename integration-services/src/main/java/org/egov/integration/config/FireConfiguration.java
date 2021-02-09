@@ -47,5 +47,12 @@ public class FireConfiguration {
 	
 	@Value("${persister.save.firedata.topic}")
 	private String fireDataSaveTopic;
+	
+	@Value("${persister.save.firedetails.topic}")
+	private String fireDataDetailsSaveTopic;
+	
+	@Value("${persister.save.exefiredetails.topic}")
+	private String fireExecutionDataSaveTopic;
 
+	
 }
