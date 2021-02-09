@@ -269,4 +269,10 @@ public class WCConstants {
 	public static final String ACTION_APPLY_FOR_REGULAR_CONNECTION = "APPLY_FOR_REGULAR_CONNECTION";
 
 	public static final String WS_BILLING_FILENAME = "billingData.txt";
+
+	public static final String WS_APPLY_FOR_TEMPORARY_CON = "APPLY_FOR_TEMPORARY_CONNECTION";
+
+	public static final String WS_APPLY_FOR_TEMP_TEMP_CON = "APPLY_FOR_TEMPORARY_TEMPORARY_CONNECTION";
+
+	public static final String WS_APPLY_FOR_TEMP_REGULAR_CON = "APPLY_FOR_TEMPORARY_REGULAR_CONNECTION";
 }
