@@ -138,11 +138,19 @@ public class WorkflowIntegrator {
 		switch (activityType) {
 			case WCConstants.WS_NEWCONNECTION:
 			case WCConstants.WS_APPLY_FOR_REGULAR_CON:				
-				return config.getBusinessServiceValue();				
+				return config.getBusinessServiceValue();
+			case WCConstants.WS_APPLY_FOR_TEMPORARY_CON:				
+				return config.getBusinessServiceTemporaryValue();	
+			case WCConstants.WS_APPLY_FOR_TEMP_TEMP_CON:				
+				return config.getBusinessServiceTempToTempValue();
+			case WCConstants.WS_APPLY_FOR_TEMP_REGULAR_CON:				
+				return config.getBusinessServiceTempToRegularValue();			
 			case WCConstants.WS_PERMANENT_DISCONNECTION:
+				return config.getBusinessServiceDisconnectionValue();	
 			case WCConstants.WS_TEMPORARY_DISCONNECTION:
+				return config.getBusinessServiceTempdisconnectValue();	
 			case WCConstants.WS_REACTIVATE:
-				return config.getBusinessServiceDisconnectionValue();
+				return config.getBusinessServicereactivateValue();
 			case WCConstants.WS_CHANGE_OWNER_INFO:
 				return config.getBusinessServiceRenameValue();
 			case WCConstants.WS_CONVERSION:

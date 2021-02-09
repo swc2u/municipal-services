@@ -45,7 +45,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 		List<BillGeneration> listOfBills = new ArrayList<BillGeneration>();
 		try {
  
-			input = new URL(billGenerationRequest.getBillGeneration().getDocument().getFileStroreUrl()).openStream();
+			input = new URL(billGenerationRequest.getBillGeneration().getDocument().getFileStoreUrl()).openStream();
 
 			AuditDetails auditDetails = waterServicesUtil
 					.getAuditDetails(billGenerationRequest.getRequestInfo().getUserInfo().getUuid(), true);

@@ -32,8 +32,8 @@ public class Document {
   @JsonProperty("documentUid")
   private String documentUid ;
 
-  @JsonProperty("fileStroreUrl")
-  private String fileStroreUrl ;
+  @JsonProperty("fileStoreUrl")
+  private String fileStoreUrl ;
   
   @JsonProperty("auditDetails")
   private AuditDetails auditDetails;
