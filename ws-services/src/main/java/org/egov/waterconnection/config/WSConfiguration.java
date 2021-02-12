@@ -185,6 +185,21 @@ public class WSConfiguration {
 	@Value("${create.ws.disconnection.workflow.name}")
 	private String businessServiceDisconnectionValue;
 
+	@Value("${create.ws.temporary.workflow.name}")
+	private String businessServiceTemporaryValue;
+
+	@Value("${create.ws.temporarytotemp.workflow.name}")
+	private String businessServiceTempToTempValue;
+
+	@Value("${create.ws.temptoregular.workflow.name}")
+	private String businessServiceTempToRegularValue;
+
+	@Value("${create.ws.tempdisconnection.workflow.name}")
+	private String businessServiceTempdisconnectValue;
+	
+	@Value("${create.ws.reactivate.workflow.name}")
+	private String businessServicereactivateValue;
+	
 	@Value("${create.ws.rename.workflow.name}")
 	private String businessServiceRenameValue;
 
