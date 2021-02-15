@@ -90,7 +90,16 @@ public class MaterialReceiptService extends DomainService {
 		}
 		return materialReceiptPagination;
 	}
+	public JSONArray searchStock(MaterialReceiptSearch materialReceiptSearch) {
+		JSONArray materialReceiptPagination = materialReceiptJdbcRepository
+				.searchStock(materialReceiptSearch);
 
+		
+		return materialReceiptPagination;
+	}
+	
+	
+	
 	public JSONArray getInventoryReport(MaterialReceiptSearch materialReceiptSearch) {
 		return materialReceiptJdbcRepository.getInventoryReport(materialReceiptSearch);
 	}
