@@ -33,11 +33,11 @@ public class FireNoc {
 	private String uuid;
 	
 	private String data ;
-	
-	
+	@JsonProperty("details")
+	private JSONObject details ;
+		
 	@JsonProperty("isActive")
 	private Boolean isActive ;
-	
 	
 	
 	@JsonProperty("auditDetails")

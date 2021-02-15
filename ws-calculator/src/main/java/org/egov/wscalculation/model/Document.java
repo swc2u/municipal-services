@@ -29,8 +29,8 @@ public class Document {
   private String fileStoreId ;
 
 
-  @JsonProperty("fileStroreUrl")
-  private String fileStroreUrl ;
+  @JsonProperty("fileStoreUrl")
+  private String fileStoreUrl ;
   
   @JsonProperty("documentUid")
   private String documentUid ;

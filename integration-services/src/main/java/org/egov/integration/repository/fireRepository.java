@@ -20,18 +20,30 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class fireRepository {
-	
+
 	@Autowired
 	private Producer producer;
-	
+
 	@Autowired
 	private FireConfiguration config;
-	
-	
+
 	public void saveFireData(FireNoc data) {
-		FireRequest		 infoWrapper = FireRequest.builder().fireNocRequest(data).build();
+		FireRequest infoWrapper = FireRequest.builder().fireNocRequest(data).build();
 		producer.push(config.getFireDataSaveTopic(), infoWrapper);
 	}
-	
-	
+
+	public void saveFireDetailsData(FireNoc data) {
+
+		FireRequest infoWrapper = FireRequest.builder().fireNocRequest(data).build();
+		producer.push(config.getFireDataDetailsSaveTopic(), infoWrapper);
+
+	}
+
+	public void saveFireExecutionDetailsData(FireNoc data) {
+        data.setData("");
+		FireRequest infoWrapper = FireRequest.builder().fireNocRequest(data).build();
+		producer.push(config.getFireExecutionDataSaveTopic(), infoWrapper);
+
+	}
+
 }
