@@ -87,6 +87,7 @@ public class OpeningbalanceApiController {
 			@RequestParam(value = "financialyear", required = true) String financialyear,
 			@RequestParam(value = "isprint", required = true) boolean forprint) {
 		List<String> mrnStatus=Arrays.asList(MaterialReceipt.MrnStatusEnum.APPROVED.toString());
+
 		MaterialReceiptSearch materialReceiptSearch = MaterialReceiptSearch.builder().tenantId(tenantId).mrnStatus(mrnStatus)
 				.receiptType(Arrays.asList("OPENING BALANCE")).forprint(forprint).receivingStore(storecode)
 				.forprint(forprint).financialYear(financialyear).build();
