@@ -16,6 +16,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import org.egov.ps.config.Configuration;
 import org.egov.ps.model.EstateDemandCriteria;
 import org.egov.ps.model.PaymentConfig;
@@ -35,8 +37,6 @@ import org.joda.time.DateTimeComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import com.google.common.util.concurrent.AtomicDouble;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -154,9 +154,12 @@ public class EstateDemandGenerationService {
 		relations.add("owner");
 		relations.add("paymentconfig");
 		AtomicInteger counter = new AtomicInteger(0);
+		List<String> states = new ArrayList<>();
+		states.add(PSConstants.PM_APPROVED);
+		states.add(PSConstants.ES_PM_EB_APPROVED);
 		PropertyCriteria propertyCriteria = new PropertyCriteria();
 		propertyCriteria.setRelations(relations);
-		propertyCriteria.setState(Arrays.asList(PSConstants.PM_APPROVED));
+		propertyCriteria.setState(states);
 		List<Property> propertyList = propertyRepository.getProperties(propertyCriteria);
 
 		propertyList.forEach(property -> {

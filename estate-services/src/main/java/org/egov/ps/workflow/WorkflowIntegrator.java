@@ -110,14 +110,25 @@ public class WorkflowIntegrator {
 				});
 			}
 			obj.put(TENANTIDKEY, wfTenantId);
-			if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)
-					&& !property.getState().contentEquals(PSConstants.PM_APPROVED)) {
-				/**
-				 * Estate Branch PM & AOS Workflow integretor
-				 */
-				obj.put(BUSINESSSERVICEKEY, config.getAosBusinessServiceValue());
-				obj.put(BUSINESSIDKEY, property.getFileNumber());
-				obj.put(ACTIONKEY, property.getAction());
+			if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)) {
+				if (property.getPropertyMasterOrAllotmentOfSite().equalsIgnoreCase(PSConstants.PROPERTY_MASTER)
+						&& !property.getState().contentEquals(PSConstants.PM_APPROVED)) {
+					/**
+					 * Estate Branch PM Workflow integretor
+					 */
+					obj.put(BUSINESSSERVICEKEY, config.getEbPmBusinessServiceValue());
+					obj.put(BUSINESSIDKEY, property.getFileNumber());
+					obj.put(ACTIONKEY, property.getAction());
+				} else if (!property.getPropertyMasterOrAllotmentOfSite().equalsIgnoreCase(PSConstants.PROPERTY_MASTER)
+						&& !property.getState().contentEquals(PSConstants.ES_PM_EB_APPROVED)) {
+					/**
+					 * Estate Branch AOS Workflow integretor
+					 */
+					obj.put(BUSINESSSERVICEKEY, config.getAosBusinessServiceValue());
+					obj.put(BUSINESSIDKEY, property.getFileNumber());
+					obj.put(ACTIONKEY, property.getAction());
+				}
+
 			} else if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.BUILDING_BRANCH)) {
 				/**
 				 * Building Branch PM Workflow integretor
@@ -126,7 +137,8 @@ public class WorkflowIntegrator {
 				obj.put(BUSINESSIDKEY, property.getFileNumber());
 				obj.put(ACTIONKEY, property.getAction());
 			} else if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)
-					&& property.getState().contentEquals(PSConstants.PM_APPROVED)
+					&& (property.getState().contentEquals(PSConstants.PM_APPROVED)
+							|| property.getState().contentEquals(PSConstants.ES_PM_EB_APPROVED))
 					&& property.getPropertyDetails().getBidders().get(0).getAuctionId() != null) {
 				/**
 				 * Estate Branch Refund Of EMD (ROE) Workflow integretor
@@ -160,7 +172,8 @@ public class WorkflowIntegrator {
 
 		// setting the status back to Property object from wf response
 		request.getProperties().forEach(property -> {
-			if (!property.getState().contentEquals(PSConstants.PM_APPROVED)) {
+			if (!(property.getState().contentEquals(PSConstants.PM_APPROVED) 
+					|| property.getState().contentEquals(PSConstants.ES_PM_MM_APPROVED))) {
 				property.setState(idStatusMap.get(property.getFileNumber()));
 			} else {
 				property.getPropertyDetails().getBidders().forEach(bidder -> {

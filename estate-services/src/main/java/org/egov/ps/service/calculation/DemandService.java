@@ -400,9 +400,16 @@ public class DemandService {
 		List<Demand> demands = new LinkedList<>();
 		String existingConsumerCode = property.getRentPaymentConsumerCode();
 		if (existingConsumerCode != null) {
-			List<Demand> searchResult = searchDemand(property.getTenantId(),
-					Collections.singleton(property.getRentPaymentConsumerCode()), requestInfo,
-					config.getAosBusinessServiceValue());
+			List<Demand> searchResult = new ArrayList<>();
+			if (property.getPropertyMasterOrAllotmentOfSite().equalsIgnoreCase(PSConstants.PROPERTY_MASTER)) {
+				searchResult = searchDemand(property.getTenantId(),
+						Collections.singleton(property.getRentPaymentConsumerCode()), requestInfo,
+						config.getEbPmBusinessServiceValue());
+			} else {
+				searchResult = searchDemand(property.getTenantId(),
+						Collections.singleton(property.getRentPaymentConsumerCode()), requestInfo,
+						config.getAosBusinessServiceValue());
+			}
 
 			if (!CollectionUtils.isEmpty(searchResult)) {
 				Demand demand = searchResult.get(0);

@@ -154,6 +154,7 @@ public class ApplicationValidatorService {
 				.setEstateAccount(propertyRepository.getPropertyEstateAccountDetails(propertyDetailsIds));
 
 		if (!property.getState().contentEquals(PSConstants.PM_APPROVED)
+				&& !property.getState().contentEquals(PSConstants.ES_PM_EB_APPROVED)
 				&& !property.getState().contentEquals(PSConstants.ES_APPROVED)
 				&& !property.getState().contentEquals(PSConstants.ES_PM_MM_APPROVED)) {
 			throw new CustomException("INVALID_PROPERTY", "Property with the given " + propertyId + " is not approved");
