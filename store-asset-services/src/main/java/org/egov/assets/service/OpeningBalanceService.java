@@ -564,9 +564,15 @@ public class OpeningBalanceService extends DomainService {
 					materialDetail.put("materialName", detail.getMaterial().getName());
 					materialDetail.put("materialType", detail.getMaterial().getMaterialType().getName());
 					materialDetail.put("uomName", detail.getMaterial().getPurchaseUom().getCode());
-					materialDetail.put("quantity", detail.getUserAcceptedQty());
+					materialDetail.put("quantity", detail.getAcceptedQty());
 					materialDetail.put("unitRate", detail.getUnitRate());
-					materialDetail.put("totalAmount", detail.getUserAcceptedQty().multiply(detail.getUnitRate()));
+					if(detail.getAcceptedQty()!=null && detail.getUnitRate()!=null)
+					{
+					materialDetail.put("totalAmount", detail.getAcceptedQty().multiply(detail.getUnitRate()));
+					}
+					else {
+						materialDetail.put("totalAmount", "");
+					}
 					materialDetail.put("remarks", detail.getRemarks());
 					materialDetails.add(materialDetail);
 				}
