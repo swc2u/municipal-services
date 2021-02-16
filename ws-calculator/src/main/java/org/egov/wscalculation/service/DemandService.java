@@ -179,7 +179,7 @@ public class DemandService {
 			String tenantId = calculation.getTenantId();
 			String consumerCode = isForConnectionNO == true ? calculation.getConnectionNo()
 					: calculation.getApplicationNO();
-			User owner = waterConnectionRequest.getWaterConnection().getConnectionHolders().get(0).toCommonUser();
+			User owner = requestInfo.getUserInfo();
 
 		//	User owner = property.getOwners().get(0).toCommonUser();
 
