@@ -548,9 +548,8 @@ public class EstimationService {
 			}
 
 			List<BillingSlab> billingSlabs = null;
-
 			billingSlabs = mappingBillingSlab.stream().filter(slab -> {
-				boolean isBuildingTypeMatching = slab.getBuildingType().equalsIgnoreCase(property.getUsageCategory());// property.usagecategory
+				boolean isBuildingTypeMatching = slab.getBuildingType().equalsIgnoreCase(property.getUsageCategory().split("\\.")[0]);// property.usagecategory
 
 				return isBuildingTypeMatching;
 			}).collect(Collectors.toList());
