@@ -2279,8 +2279,9 @@ public class ServiceRequestService {
 			
 			log.info("REMINDER days remaining is : "+ days );
 			
-			if(days < hcConfiguration.getSlaDays())
-				sendReminderOverdueSlaNotification(role,serviceRequestId,HCConstants.REMINDER,request.getService_request_date(),tenantId,request.getServiceType(),days);
+			if(days < hcConfiguration.getSlaDays()){
+				//sendReminderOverdueSlaNotification(role,serviceRequestId,HCConstants.REMINDER,request.getService_request_date(),tenantId,request.getServiceType(),days);
+			}
 			else
 				continue;
 			
@@ -2297,7 +2298,7 @@ public class ServiceRequestService {
 				days =-(days);
 			}
 			
-			sendReminderOverdueSlaNotification(role,serviceRequestId,HCConstants.OVERDAYS,request.getService_request_date(),tenantId,request.getServiceType(),days);
+			//sendReminderOverdueSlaNotification(role,serviceRequestId,HCConstants.OVERDAYS,request.getService_request_date(),tenantId,request.getServiceType(),days);
 			
 		}
 		

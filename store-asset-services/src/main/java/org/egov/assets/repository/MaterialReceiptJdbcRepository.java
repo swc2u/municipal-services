@@ -70,7 +70,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class MaterialReceiptJdbcRepository extends JdbcRepository {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MaterialReceipt.class);
-
+	
+	
 	@Autowired
 	NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -188,6 +189,13 @@ public class MaterialReceiptJdbcRepository extends JdbcRepository {
 			paramValues.put("tenantId", materialReceiptSearch.getTenantId());
 		}
 
+		if (materialReceiptSearch.getAsOnDate() != null) {
+			if (params.length() > 0)
+				params.append(" and ");
+			params.append(" TO_DATE(TO_CHAR(TO_TIMESTAMP(receiptDate / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <=DATE(:asOnDate)");
+			paramValues.put("asOnDate", materialReceiptSearch.getAsOnDate());
+		}
+
 		Pagination<MaterialReceipt> page = new Pagination<>();
 		if (materialReceiptSearch.getPageSize() != null)
 			page.setPageSize(materialReceiptSearch.getPageSize());
@@ -222,7 +230,62 @@ public class MaterialReceiptJdbcRepository extends JdbcRepository {
 
 		return page;
 	}
+	public JSONArray searchStock(MaterialReceiptSearch materialReceiptSearch) {
+		String searchQuery = "SELECT ( unitrate ) unitrate, SUM(finalResult.section1::numeric(18,2)) AS below90Days, SUM(finalResult.section2::numeric(18,2)) AS between90to180Days,SUM(finalResult.section3::numeric(18,2))\r\n" + 
+				"AS above180Days FROM \r\n" + 
+				"( SELECT tab.unitrate,SUM(tab.balance) section1 ,0 section2,0 section3 from\r\n" + 
+				"(select materialreceipt.tenantid as tenantId, materialreceipt.id as receiptId,rctdtl.id as receiptDetailId,rctdtl.mrnnumber as mrnNumber,receivingstore as issueStoreCode, material as materialCode, uomno as uomCode,materialreceipt.receiptdate as receiptDate, (COALESCE(addinfo.quantity,acceptedqty) - COALESCE (case when addinfo.id is not null then (select sum(issuereceipt.quantity) from materialissuedfromreceipt\r\n" + 
+				"issuereceipt where addinfo.id=issuereceipt.receiptdetailaddnlinfoid and issuereceipt.receiptdetailid=rctdtl.id and issuereceipt.status=true)\r\n" + 
+				"else (select sum(issuereceipt.quantity) from materialissuedfromreceipt issuereceipt where issuereceipt.receiptdetailid=rctdtl.id and issuereceipt.status=true) end,0)) as balance,unitrate\r\n" + 
+				"from materialreceipt left outer join materialreceiptdetail rctdtl on materialreceipt.mrnnumber = rctdtl.mrnnumber left outer join\r\n" + 
+				"materialreceiptdetailaddnlinfo  addinfo on rctdtl.id= addinfo.receiptdetailid\r\n" + 
+				"where  (isscrapitem IS NULL or isscrapitem=false) and (rctdtl.deleted=false or rctdtl.deleted is null ) and receivingstore=?  and materialreceipt.tenantid= ?\r\n" + 
+				"and material in (?) and mrnstatus in ('Approved') ) as tab where\r\n" + 
+				"  TO_DATE(TO_CHAR(TO_TIMESTAMP(tab.receiptdate / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <=DATE(?) and ( DATE_PART( 'day', now() :: timestamp - TO_DATE( TO_CHAR(TO_TIMESTAMP(tab.receiptdate / 1000 ), 'YYYY-MM-DD' ),\r\n" + 
+				" 'YYYY-MM-DD'):: timestamp ))<= 90 and ( DATE_PART('day', now() :: timestamp - TO_DATE( TO_CHAR( TO_TIMESTAMP( tab.receiptdate /\r\n" + 
+				" 1000),'YYYY-MM-DD' ), 'YYYY-MM-DD' ):: timestamp ) )>= 0 GROUP BY tab.unitrate \r\n" + 
+				" UNION ALL \r\n" + 
+				" SELECT tab.unitrate, 0 section1,\r\n" + 
+				" SUM(tab.balance) section2 , 0 section3 from (select materialreceipt.tenantid as tenantId, materialreceipt.id as receiptId,rctdtl.id as receiptDetailId,rctdtl.mrnnumber as mrnNumber,receivingstore as issueStoreCode, material as materialCode, uomno as uomCode,materialreceipt.receiptdate as receiptDate, (COALESCE(addinfo.quantity,acceptedqty) - COALESCE (case when addinfo.id is not null then (select sum(issuereceipt.quantity) from materialissuedfromreceipt\r\n" + 
+				"issuereceipt where addinfo.id=issuereceipt.receiptdetailaddnlinfoid and issuereceipt.receiptdetailid=rctdtl.id and issuereceipt.status=true)\r\n" + 
+				"else (select sum(issuereceipt.quantity) from materialissuedfromreceipt issuereceipt where issuereceipt.receiptdetailid=rctdtl.id and issuereceipt.status=true) end,0)) as balance,unitrate\r\n" + 
+				"from materialreceipt left outer join materialreceiptdetail rctdtl on materialreceipt.mrnnumber = rctdtl.mrnnumber left outer join\r\n" + 
+				"materialreceiptdetailaddnlinfo  addinfo on rctdtl.id= addinfo.receiptdetailid\r\n" + 
+				"where  (isscrapitem IS NULL or isscrapitem=false) and (rctdtl.deleted=false or rctdtl.deleted is null ) and receivingstore=?  and materialreceipt.tenantid= ?\r\n" + 
+				"and material in (?) and mrnstatus in ('Approved') ) as tab where \r\n" + 
+				" TO_DATE(TO_CHAR(TO_TIMESTAMP(tab.receiptdate / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <=DATE(?) and\r\n" + 
+				" ( DATE_PART( 'day', now() :: timestamp - TO_DATE( TO_CHAR(  TO_TIMESTAMP(  tab.receiptdate / 1000  ),  'YYYY-MM-DD' ),\r\n" + 
+				" 'YYYY-MM-DD' ):: timestamp ) )>= 90 and ( DATE_PART( 'day', now() :: timestamp - TO_DATE( TO_CHAR(  TO_TIMESTAMP( \r\n" + 
+				" tab.receiptdate / 1000  ),  'YYYY-MM-DD' ), 'YYYY-MM-DD' ):: timestamp ) )<= 180 GROUP BY tab.unitrate\r\n" + 
+				" UNION ALL \r\n" + 
+				" SELECT tab.unitrate, 0 section2, 0 section1, SUM(tab.balance) section3 from \r\n" + 
+				" (select materialreceipt.tenantid as tenantId, materialreceipt.id as receiptId,rctdtl.id as receiptDetailId,rctdtl.mrnnumber as mrnNumber,receivingstore as issueStoreCode, material as materialCode, uomno as uomCode,materialreceipt.receiptdate as receiptDate, (COALESCE(addinfo.quantity,acceptedqty) - COALESCE (case when addinfo.id is not null then (select sum(issuereceipt.quantity) from materialissuedfromreceipt\r\n" + 
+				"issuereceipt where addinfo.id=issuereceipt.receiptdetailaddnlinfoid and issuereceipt.receiptdetailid=rctdtl.id and issuereceipt.status=true)\r\n" + 
+				"else (select sum(issuereceipt.quantity) from materialissuedfromreceipt issuereceipt where issuereceipt.receiptdetailid=rctdtl.id and issuereceipt.status=true) end,0)) as balance,unitrate\r\n" + 
+				"from materialreceipt left outer join materialreceiptdetail rctdtl on materialreceipt.mrnnumber = rctdtl.mrnnumber left outer join\r\n" + 
+				"materialreceiptdetailaddnlinfo  addinfo on rctdtl.id= addinfo.receiptdetailid\r\n" + 
+				"where  (isscrapitem IS NULL or isscrapitem=false) and (rctdtl.deleted=false or rctdtl.deleted is null ) and receivingstore=?  and materialreceipt.tenantid= ?\r\n" + 
+				"and material in (?) and mrnstatus in ('Approved') ) as tab where TO_DATE(TO_CHAR(TO_TIMESTAMP(tab.receiptdate / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <=DATE(?) and ( DATE_PART( 'day', now() :: timestamp - TO_DATE( TO_CHAR(  TO_TIMESTAMP(\r\n" + 
+				" tab.receiptdate / 1000  ),  'YYYY-MM-DD' ), 'YYYY-MM-DD' ):: timestamp ) )>= 180 GROUP BY tab.unitrate )\r\n" + 
+				" finalResult GROUP BY finalResult.unitrate ORDER BY finalResult.unitrate ";
+		StringBuffer params = new StringBuffer();
+		Map<String, Object> paramValues = new HashMap<>();
+		List<JSONArray> sep = new ArrayList<>();
+		if (materialReceiptSearch.getSortBy() != null && !materialReceiptSearch.getSortBy().isEmpty()) {
+			validateSortByOrder(materialReceiptSearch.getSortBy());
+			validateEntityFieldName(materialReceiptSearch.getSortBy(), MaterialReceiptSearch.class);
+		}
 
+	
+		StockRowMapper stockowMapper=new StockRowMapper();
+		sep = jdbcTemplate.query(searchQuery,
+				new Object[] { materialReceiptSearch.getReceivingStore(),materialReceiptSearch.getTenantId(),materialReceiptSearch.getMaterials().get(0).toString(),materialReceiptSearch.getAsOnDate(),
+						 materialReceiptSearch.getReceivingStore(),materialReceiptSearch.getTenantId(),materialReceiptSearch.getMaterials().get(0).toString(),materialReceiptSearch.getAsOnDate(),
+						 materialReceiptSearch.getReceivingStore(),materialReceiptSearch.getTenantId(),materialReceiptSearch.getMaterials().get(0).toString(),materialReceiptSearch.getAsOnDate()
+							 },stockowMapper);
+		return sep.isEmpty() ? new JSONArray() : sep.get(0);
+		
+	}
 	public Pagination<MaterialBalanceRate> searchBalanceRate(MaterialReceiptSearch materialReceiptSearch) {
 		String searchQuery = "select * from (select materialreceipt.tenantid as tenantId, materialreceipt.id as receiptId,rctdtl.id as receiptDetailId,rctdtl.mrnnumber as mrnNumber,receivingstore as issueStoreCode, material as materialCode, uomno as uomCode,materialreceipt.receiptdate as receiptDate,\n"
 				+ "(COALESCE(addinfo.quantity,acceptedqty) - COALESCE (case when addinfo.id is not null then (select sum(issuereceipt.quantity) from materialissuedfromreceipt\n"
@@ -282,8 +345,8 @@ public class MaterialReceiptJdbcRepository extends JdbcRepository {
 				+ "from (select materialreceipt.tenantid,rctdtl.id,materialreceipt.receiptdate, materialreceipt.receivingstore storecode, st.department,rctdtl.material,rctdtl.uomno, materialreceipt.mrnnumber,COALESCE(addinfo.quantity,acceptedqty)::numeric(18,2) qtyopeningbalance,unitRate::numeric(18,2) unitrateopeningbalance, (COALESCE(addinfo.quantity,acceptedqty)::numeric(18,2)*unitRate::numeric(18,2)) valueopeningbalance\r\n"
 				+ "from materialreceipt materialreceipt inner join materialreceiptdetail rctdtl on materialreceipt.mrnnumber = rctdtl.mrnnumber inner join\r\n"
 				+ "materialreceiptdetailaddnlinfo  addinfo on rctdtl.id= addinfo.receiptdetailid left join store st on materialreceipt.receivingstore=st.code\r\n"
-				+ "where materialreceipt.receipttype= 'OPENING BALANCE') as opnBalance left join (select iss.id, iss.issuenumber,iss.tostore,st.department,issuedetails.materialcode, issuedetails.uom, iss.issuedate,receiptdetailid, issuedetails.id issuedetailid,issuereceipt.status,issuereceipt.quantity::numeric(18,2) from materialissue iss inner join materialissuedetail issuedetails on iss.issuenumber=issuedetails.materialissuenumber inner join materialissuedfromreceipt issuereceipt \r\n"
-				+ "on issuedetails.id=issuereceipt.issuedetailid left join store st on iss.tostore=st.code) issues on issues.status=true and issues.receiptdetailid=opnBalance.id\r\n"
+				+ "where materialreceipt.receipttype= 'OPENING BALANCE' and materialreceipt.mrnstatus='Approved') as opnBalance left join (select iss.id, iss.issuenumber,iss.tostore,st.department,issuedetails.materialcode, issuedetails.uom, iss.issuedate,receiptdetailid, issuedetails.id issuedetailid,issuereceipt.status,issuereceipt.quantity::numeric(18,2) from materialissue iss inner join materialissuedetail issuedetails on iss.issuenumber=issuedetails.materialissuenumber inner join materialissuedfromreceipt issuereceipt \r\n"
+				+ "on issuedetails.id=issuereceipt.issuedetailid left join store st on iss.tostore=st.code where iss.materialissuestatus='Approved') issues on issues.status=true and issues.receiptdetailid=opnBalance.id\r\n"
 				+ "order by opnBalance.mrnnumber, issues.id, issues.issuedate asc)\r\n" + "union all\r\n"
 				+ "(select tenantid,'' openmrn, opnBalance.storecode openstore, opnBalance.department opendepart, opnBalance.material openmat,\r\n"
 				+ " '' openuom,0 openqty, 0 openrate, 0 opentotalvalue,\r\n"
@@ -296,8 +359,8 @@ public class MaterialReceiptJdbcRepository extends JdbcRepository {
 				+ "from (select materialreceipt.tenantid,rctdtl.id,materialreceipt.receiptdate, materialreceipt.receivingstore storecode, st.department,rctdtl.material,rctdtl.uomno, materialreceipt.mrnnumber,COALESCE(addinfo.quantity,acceptedqty)::numeric(18,2) qtyopeningbalance,unitRate::numeric(18,2) unitrateopeningbalance, (COALESCE(addinfo.quantity,acceptedqty)::numeric(18,2)*unitRate::numeric(18,2)) valueopeningbalance\r\n"
 				+ "from materialreceipt materialreceipt inner join materialreceiptdetail rctdtl on materialreceipt.mrnnumber = rctdtl.mrnnumber inner join\r\n"
 				+ "materialreceiptdetailaddnlinfo  addinfo on rctdtl.id= addinfo.receiptdetailid left join store st on materialreceipt.receivingstore=st.code\r\n"
-				+ "where materialreceipt.receipttype <> 'OPENING BALANCE') as opnBalance left join (select iss.id, iss.issuenumber,iss.tostore,st.department,issuedetails.materialcode, issuedetails.uom, iss.issuedate,receiptdetailid, issuedetails.id issuedetailid,issuereceipt.status,issuereceipt.quantity::numeric(18,2) from materialissue iss inner join materialissuedetail issuedetails on iss.issuenumber=issuedetails.materialissuenumber inner join materialissuedfromreceipt issuereceipt \r\n"
-				+ "on issuedetails.id=issuereceipt.issuedetailid left join store st on iss.tostore=st.code) issues on issues.status=true and issues.receiptdetailid=opnBalance.id order by opnBalance.mrnnumber, issues.id, issues.issuedate asc)) as MainTable\r\n"
+				+ "where materialreceipt.receipttype <> 'OPENING BALANCE' and materialreceipt.mrnstatus='Approved') as opnBalance left join (select iss.id, iss.issuenumber,iss.tostore,st.department,issuedetails.materialcode, issuedetails.uom, iss.issuedate,receiptdetailid, issuedetails.id issuedetailid,issuereceipt.status,issuereceipt.quantity::numeric(18,2) from materialissue iss inner join materialissuedetail issuedetails on iss.issuenumber=issuedetails.materialissuenumber inner join materialissuedfromreceipt issuereceipt \r\n"
+				+ "on issuedetails.id=issuereceipt.issuedetailid left join store st on iss.tostore=st.code where iss.materialissuestatus='Approved') issues on issues.status=true and issues.receiptdetailid=opnBalance.id order by opnBalance.mrnnumber, issues.id, issues.issuedate asc)) as MainTable\r\n"
 				+ "where MainTable.openstore=:storecode and MainTable.openmat in (:material) and MainTable.tenantid=:tenantid";
 
 		Map<String, Object> paramValues = new HashMap<>();
