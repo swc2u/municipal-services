@@ -37,7 +37,7 @@ public class CommonConstants {
 	public static final String EOFFICE_VIP = "VipReceipts";
 	public static final String EOFFICE_HIERARCHY = "FileHierarchy";
 	public static final String EOFFICE_EXCEPTION_CODE = "EOFFICE_EXCEPTION";
-	
+	public static final String DEPARTMENT_ID="departmentId";
 	
 
 }
