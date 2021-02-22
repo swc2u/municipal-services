@@ -24,6 +24,7 @@ import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.google.gson.Gson;
 
@@ -193,16 +195,26 @@ public class EOfficeService {
 		HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity(mmap, http);
 			log.info("integration-services logs :: process() :: Before calling eOffice APi" );
 			System.out.println(config.getEofficeHost() + config.getEofficeEmplyoeeDetials());
-		String xml = restTemplate.postForObject(config.getEofficeHost() + config.getEofficeEmplyoeeDetials(), entity,
+			UriComponentsBuilder builder = UriComponentsBuilder
+					.fromUriString(config.getEofficeHost() + config.getEofficeEmplyoeeDetials())
+					.queryParam(CommonConstants.DEPARTMENT_ID, config.getEofficeDepartmentId());
+			log.info("integration-services logs :: process() ::  calling eOffice APi-url "+builder.toUriString().toString() );
+			
+			
+		ResponseEntity<String> xml = restTemplate.exchange((new StringBuilder(builder.toUriString())).toString(),HttpMethod.GET, entity,
 				String.class);
 			
-				
-		log.info("integration-services logs :: process() :: after calling eOffice APi-response" );
+			
+		log.info("integration-services logs :: process() :: after calling eOffice APi-response,{}",xml );
+		
+		log.info("integration-services logs :: process() :: after calling eOffice APi-response toString,{}",xml.toString() );
+		
 		JSONObject response = new JSONObject();
 		
 		
 		List<EmployeePostDetailMap> map = new ArrayList<>();
-		JSONObject xmlJSONObj = XML.toJSONObject(xml);
+		
+		JSONObject xmlJSONObj = XML.toJSONObject(xml.toString());
 		if (xmlJSONObj != null && xmlJSONObj.has("DETAIL")) {
 			JSONObject objDAta = xmlJSONObj.getJSONObject("DETAIL");
 
