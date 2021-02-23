@@ -16,7 +16,6 @@ import org.egov.assets.model.MaterialReceipt;
 import org.egov.assets.model.MaterialReceiptDetail;
 import org.egov.assets.model.MaterialReceiptDetailSearch;
 import org.egov.assets.model.MaterialReceiptSearch;
-import org.egov.assets.model.MaterialType;
 import org.egov.assets.model.PurchaseOrderDetail;
 import org.egov.assets.model.PurchaseOrderDetailSearch;
 import org.egov.assets.model.Store;
@@ -160,21 +159,20 @@ public class MaterialReceiptService extends DomainService {
 	private Map<String, Material> getMaterials(String tenantId, final ObjectMapper mapper, RequestInfo requestInfo) {
 		net.minidev.json.JSONArray responseJSONArray = mdmsRepository.getByCriteria(tenantId, "store-asset", "Material",
 				null, null, requestInfo);
-		net.minidev.json.JSONArray responseJSONArraytype = mdmsRepository.getByCriteria(tenantId, "store-asset", "MaterialType",
-				null, null, requestInfo);
 		Map<String, Material> materialMap = new HashMap<>();
 
 		if (responseJSONArray != null && responseJSONArray.size() > 0) {
 			for (int i = 0; i < responseJSONArray.size(); i++) {
 				Material material = mapper.convertValue(responseJSONArray.get(i), Material.class);
-				MaterialType materialType=mapper.convertValue(responseJSONArraytype.get(i), MaterialType.class);
-				material.setMaterialType(materialType);
 				materialMap.put(material.getCode(), material);
 			}
 
 		}
 		return materialMap;
 	}
+	
+	
+
 
 	private Map<String, Uom> getUoms(String tenantId, final ObjectMapper mapper, RequestInfo requestInfo) {
 		net.minidev.json.JSONArray responseJSONArray = mdmsRepository.getByCriteria(tenantId, "common-masters", "UOM",
