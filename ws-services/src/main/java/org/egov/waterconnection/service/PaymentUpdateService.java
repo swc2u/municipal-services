@@ -147,8 +147,8 @@ public class PaymentUpdateService {
 					
 					
 					repo.updateWaterConnection(waterConnectionRequest, false);
-					BillGeneration bill = BillGeneration.builder().paymentStatus(WCConstants.STATUS_PAID).status(WCConstants.STATUS_PAID).consumerCode(paymentDetail.getBill().getConsumerCode()).
-							paymentId(paymentDetail.getReceiptNumber()).billId(paymentDetail.getBillId()).totalAmountPaid(paymentDetail.getTotalAmountPaid().toString()).build();
+					BillGeneration bill = BillGeneration.builder().paymentStatus(paymentDetail.getBill().getStatus().toString()).status(paymentDetail.getBill().getStatus().toString()).consumerCode(paymentDetail.getBill().getConsumerCode()).
+							paymentMode(paymentRequest.getPayment().getPaymentMode().toString()).paymentId(paymentDetail.getReceiptNumber()).billId(paymentDetail.getBillId()).totalAmountPaid(paymentDetail.getTotalAmountPaid().toString()).build();
 					repo.updatebillingstatus(bill);
 				}
 			}
