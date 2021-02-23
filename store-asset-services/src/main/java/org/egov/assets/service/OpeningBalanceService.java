@@ -24,6 +24,7 @@ import org.egov.assets.model.MaterialReceipt.ReceiptTypeEnum;
 import org.egov.assets.model.MaterialReceiptDetail;
 import org.egov.assets.model.MaterialReceiptDetailAddnlinfo;
 import org.egov.assets.model.MaterialReceiptSearch;
+import org.egov.assets.model.MaterialType;
 import org.egov.assets.model.OpeningBalanceRequest;
 import org.egov.assets.model.OpeningBalanceResponse;
 import org.egov.assets.model.PDFResponse;
@@ -610,6 +611,10 @@ public class OpeningBalanceService extends DomainService {
 
 			Material material = materialService.fetchMaterial(materialReceiptSearch.getTenantId(),
 					materialReceiptSearch.getMaterials().get(0), new RequestInfo());
+			
+			MaterialType materialType = materialService.fetchMaterialType(materialReceiptSearch.getTenantId(),
+					material.getMaterialType().getCode(), new RequestInfo());
+			
 			requestMain.put("storeName", store.getStores().isEmpty() ? materialReceiptSearch.getReceivingStore()
 					: store.getStores().get(0).getName());
 			requestMain.put("storeDepartment",
@@ -621,7 +626,7 @@ public class OpeningBalanceService extends DomainService {
 				JSONObject js1=(JSONObject)js;
 				js1.put("materialName", material.getName());
 				js1.put("materialCode", material.getCode());
-				js1.put("materialType","");
+				js1.put("materialType",materialType.getName());
 				//(JSONObject) js.pu
 				
 			}
