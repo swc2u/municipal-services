@@ -69,6 +69,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
                 currentWaterConnection.setCcCode(rs.getString("cccode"));
                 currentWaterConnection.setBillGroup(rs.getString("billGroup"));
                 currentWaterConnection.setContractValue(rs.getString("contract_value"));
+                currentWaterConnection.setProposedUsageCategory(rs.getString("proposedUsage_category"));
 
                 currentWaterConnection.setLedgerGroup(rs.getString("ledgerGroup"));
                 currentWaterConnection.setMeterCount(rs.getString("meterCount"));
