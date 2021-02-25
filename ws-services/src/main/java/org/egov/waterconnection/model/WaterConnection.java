@@ -88,6 +88,31 @@ public class WaterConnection extends Connection {
 	@JsonProperty("activityType")
 	private String activityType = null;
 
+	@JsonProperty("contractValue")
+	private String contractValue = null;
+
+	@JsonProperty("billGroup")
+	private String billGroup = null;
+	
+	@JsonProperty("proposedUsageCategory")
+	private String proposedUsageCategory = null;
+	
+	public String getContractValue() {
+		return contractValue;
+	}
+
+	public void setContractValue(String contractValue) {
+		this.contractValue = contractValue;
+	}
+
+	public String getBillGroup() {
+		return billGroup;
+	}
+
+	public void setBillGroup(String billGroup) {
+		this.billGroup = billGroup;
+	}
+
 	public WaterConnection waterSource(String waterSource) {
 		this.waterSource = waterSource;
 		return this;
@@ -402,5 +427,13 @@ public class WaterConnection extends Connection {
 
 	public void setLedgerGroup(String ledgerGroup) {
 		this.ledgerGroup = ledgerGroup;
+	}
+
+	public String getProposedUsageCategory() {
+		return proposedUsageCategory;
+	}
+
+	public void setProposedUsageCategory(String proposedUsageCategory) {
+		this.proposedUsageCategory = proposedUsageCategory;
 	}
 }

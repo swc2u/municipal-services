@@ -5,9 +5,12 @@ import static org.springframework.util.StringUtils.isEmpty;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.egov.assets.common.Constants;
 import org.egov.assets.common.DomainService;
@@ -17,18 +20,19 @@ import org.egov.assets.common.exception.CustomBindException;
 import org.egov.assets.common.exception.ErrorCode;
 import org.egov.assets.common.exception.InvalidDataException;
 import org.egov.assets.model.FinancialYear;
-import org.egov.assets.model.IndentResponse;
 import org.egov.assets.model.Material;
 import org.egov.assets.model.MaterialReceipt;
 import org.egov.assets.model.MaterialReceipt.ReceiptTypeEnum;
 import org.egov.assets.model.MaterialReceiptDetail;
 import org.egov.assets.model.MaterialReceiptDetailAddnlinfo;
 import org.egov.assets.model.MaterialReceiptSearch;
+import org.egov.assets.model.MaterialType;
 import org.egov.assets.model.OpeningBalanceRequest;
 import org.egov.assets.model.OpeningBalanceResponse;
 import org.egov.assets.model.PDFResponse;
 import org.egov.assets.model.Store;
 import org.egov.assets.model.StoreGetRequest;
+import org.egov.assets.model.StoreResponse;
 import org.egov.assets.model.Tenant;
 import org.egov.assets.model.Uom;
 import org.egov.assets.model.WorkFlowDetails;
@@ -81,6 +85,9 @@ public class OpeningBalanceService extends DomainService {
 
 	@Autowired
 	private StoreJdbcRepository storeJdbcRepository;
+	
+	@Autowired
+	private StoreService storeService;
 
 	@Autowired
 	private MaterialReceiptService materialReceiptService;
@@ -219,6 +226,7 @@ public class OpeningBalanceService extends DomainService {
 				materialReceiptPagination.getPagedData().size() > 0 ? materialReceiptPagination.getPagedData()
 						: Collections.EMPTY_LIST);
 	}
+
 
 	private String getOpbNumber(MaterialReceipt receipt, RequestInfo info) {
 		InvalidDataException errors = new InvalidDataException();
@@ -491,7 +499,7 @@ public class OpeningBalanceService extends DomainService {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("storeName", balanceResponse.getMaterialReceipt().get(0).getReceivingStore().getName());
 			jsonObject.put("financialYear", balanceResponse.getMaterialReceipt().get(0).getFinancialYear());
-
+			Map<String, MaterialType> materialMap = getMaterialsType(materialReceiptSearch.getTenantId(), mapper, new RequestInfo());
 			org.json.simple.JSONArray materialDetails = new org.json.simple.JSONArray();
 			org.json.simple.JSONArray mainMaterials = new org.json.simple.JSONArray();
 			int i = 0;
@@ -501,7 +509,7 @@ public class OpeningBalanceService extends DomainService {
 					materialDetail.put("srNo", i++);
 					materialDetail.put("materialCode", detail.getMaterial().getCode());
 					materialDetail.put("materialName", detail.getMaterial().getName());
-					materialDetail.put("materialType", detail.getMaterial().getMaterialType().getName());
+					materialDetail.put("materialType",materialMap.get(detail.getMaterial().getMaterialType().getCode()).getName());
 					materialDetail.put("uomName", detail.getMaterial().getPurchaseUom().getCode());
 					materialDetail.put("quantity", detail.getUserAcceptedQty());
 					materialDetail.put("unitRate", detail.getUnitRate());
@@ -524,6 +532,147 @@ public class OpeningBalanceService extends DomainService {
 
 		return PDFResponse.builder()
 				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+	}
+	
+	public PDFResponse printClosingBalanceReportPdf(MaterialReceiptSearch materialReceiptSearch,
+			RequestInfo requestInfo) {
+		OpeningBalanceResponse balanceResponse = search(materialReceiptSearch);
+
+		if (!balanceResponse.getMaterialReceipt().isEmpty()) {
+
+			JSONObject mainRequest = new JSONObject();
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
+				if (materialReceiptSearch.isForprint())
+					mainRequest.put("RequestInfo", reqInfo);
+				else
+					mainRequest.put("ResponseInfo", null);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("storeName", balanceResponse.getMaterialReceipt().get(0).getReceivingStore().getName());
+			jsonObject.put("asOnDate", materialReceiptSearch.getAsOnDate());
+			Map<String, MaterialType> materialMap = getMaterialsType(materialReceiptSearch.getTenantId(), mapper, new RequestInfo());
+			org.json.simple.JSONArray materialDetails = new org.json.simple.JSONArray();
+			org.json.simple.JSONArray mainMaterials = new org.json.simple.JSONArray();
+			int i = 0;
+			for (MaterialReceipt materialReceipt : balanceResponse.getMaterialReceipt()) {
+				for (MaterialReceiptDetail detail : materialReceipt.getReceiptDetails()) {
+					JSONObject materialDetail = new JSONObject();
+					materialDetail.put("srNo", i++);
+					materialDetail.put("materialCode", detail.getMaterial().getCode());
+					materialDetail.put("materialName", detail.getMaterial().getName());
+					materialDetail.put("materialType", materialMap.get(detail.getMaterial().getMaterialType().getCode()).getName());
+					materialDetail.put("uomName", detail.getMaterial().getPurchaseUom().getCode());
+					materialDetail.put("quantity", detail.getAcceptedQty());
+					materialDetail.put("unitRate", detail.getUnitRate());
+					if(detail.getAcceptedQty()!=null && detail.getUnitRate()!=null)
+					{
+					materialDetail.put("totalAmount", detail.getAcceptedQty().multiply(detail.getUnitRate()));
+					}
+					else {
+						materialDetail.put("totalAmount", "");
+					}
+					materialDetail.put("remarks", detail.getRemarks());
+					materialDetails.add(materialDetail);
+				}
+			}
+			jsonObject.put("balanceDetails", materialDetails);
+			mainMaterials.add(jsonObject);
+			mainRequest.put("OpeningBalanceReport", mainMaterials);
+
+			if (materialReceiptSearch.isForprint())
+				return pdfServiceReposistory.getPrint(mainRequest, "store-asset-report-closing-balance",
+						materialReceiptSearch.getTenantId());
+				
+				/*return pdfServiceReposistory.getPrint(mainRequest, "store-asset-stock-report",
+						materialReceiptSearch.getTenantId());*/
+			else
+				return PDFResponse.builder().responseInfo(ResponseInfo.builder().status("Success").build())
+						.printData(mainRequest).build();
+		}
+
+		return PDFResponse.builder()
+				.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+	}
+	
+	
+	private Map<String, MaterialType> getMaterialsType(String tenantId, final ObjectMapper mapper, RequestInfo requestInfo) {
+		net.minidev.json.JSONArray responseJSONArray = mdmsRepository.getByCriteria(tenantId, "store-asset", "MaterialType",
+				null, null, requestInfo);
+		Map<String, MaterialType> materialMap = new HashMap<>();
+
+		if (responseJSONArray != null && responseJSONArray.size() > 0) {
+			for (int i = 0; i < responseJSONArray.size(); i++) {
+				MaterialType material = mapper.convertValue(responseJSONArray.get(i), MaterialType.class);
+				materialMap.put(material.getCode(), material);
+			}
+
+		}
+		return materialMap;
+	}
+	public PDFResponse printStockBalanceReportPdf(MaterialReceiptSearch materialReceiptSearch,
+			RequestInfo requestInfo) {
+		org.json.simple.JSONArray jsonArray = materialReceiptService.searchStock(materialReceiptSearch);
+		
+		JSONArray arrayPrintData = new JSONArray();
+		if (!jsonArray.isEmpty()) {
+			JSONObject requestMain = new JSONObject();
+
+			StoreGetRequest storeGetRequest = new StoreGetRequest();
+			storeGetRequest.setCode(Arrays.asList(materialReceiptSearch.getReceivingStore()));
+			storeGetRequest.setTenantId(materialReceiptSearch.getTenantId());
+			StoreResponse store = storeService.search(storeGetRequest);
+
+			Material material = materialService.fetchMaterial(materialReceiptSearch.getTenantId(),
+					materialReceiptSearch.getMaterials().get(0), new RequestInfo());
+			
+			MaterialType materialType = materialService.fetchMaterialType(materialReceiptSearch.getTenantId(),
+					material.getMaterialType().getCode(), new RequestInfo());
+			
+			requestMain.put("storeName", store.getStores().isEmpty() ? materialReceiptSearch.getReceivingStore()
+					: store.getStores().get(0).getName());
+			requestMain.put("storeDepartment",
+					store.getStores().isEmpty() ? "" : store.getStores().get(0).getDepartment().getName());
+			requestMain.put("materialName", material.getName());
+			requestMain.put("asOnDate",materialReceiptSearch.getAsOnDate());
+			for(Object js:jsonArray)
+			{
+				JSONObject js1=(JSONObject)js;
+				js1.put("materialName", material.getName());
+				js1.put("materialCode", material.getCode());
+				js1.put("materialType",materialType.getName());
+				//(JSONObject) js.pu
+				
+			}
+			requestMain.put("stockDetails", jsonArray);
+			arrayPrintData.add(requestMain);
+		}
+
+		if (!arrayPrintData.isEmpty() && materialReceiptSearch.isForprint()) {
+			JSONObject finalDta = new JSONObject();
+
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				JSONObject reqInfo = (JSONObject) new JSONParser().parse(mapper.writeValueAsString(requestInfo));
+				finalDta.put("RequestInfo", reqInfo);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			finalDta.put("stockDetails", arrayPrintData);
+
+			return pdfServiceReposistory.getPrint(finalDta, "store-asset-stock-report",
+					materialReceiptSearch.getTenantId());
+		} else if (!arrayPrintData.isEmpty() && !materialReceiptSearch.isForprint()) {
+			return PDFResponse.builder().responseInfo(ResponseInfo.builder().status("Success").build())
+					.printData(arrayPrintData).build();
+		} else {
+			return PDFResponse.builder()
+					.responseInfo(ResponseInfo.builder().status("Failed").resMsgId("No data found").build()).build();
+		}
 	}
 
 	public OpeningBalanceResponse updateStatus(OpeningBalanceRequest openingBalance) {

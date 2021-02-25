@@ -90,7 +90,16 @@ public class MaterialReceiptService extends DomainService {
 		}
 		return materialReceiptPagination;
 	}
+	public JSONArray searchStock(MaterialReceiptSearch materialReceiptSearch) {
+		JSONArray materialReceiptPagination = materialReceiptJdbcRepository
+				.searchStock(materialReceiptSearch);
 
+		
+		return materialReceiptPagination;
+	}
+	
+	
+	
 	public JSONArray getInventoryReport(MaterialReceiptSearch materialReceiptSearch) {
 		return materialReceiptJdbcRepository.getInventoryReport(materialReceiptSearch);
 	}
@@ -161,6 +170,9 @@ public class MaterialReceiptService extends DomainService {
 		}
 		return materialMap;
 	}
+	
+	
+
 
 	private Map<String, Uom> getUoms(String tenantId, final ObjectMapper mapper, RequestInfo requestInfo) {
 		net.minidev.json.JSONArray responseJSONArray = mdmsRepository.getByCriteria(tenantId, "common-masters", "UOM",
