@@ -73,6 +73,13 @@ public class SewerageConnection extends Connection {
 
 	@JsonProperty("billGroup")
 	private String billGroup = null;
+	
+	@JsonProperty("aadharNo")
+	private String aadharNo = null;
+
+	@JsonProperty("ferruleSize")
+	private String ferruleSize = null;
+	
 
 	public String getDiv() {
 		return div;
@@ -276,6 +283,22 @@ public class SewerageConnection extends Connection {
 
 	public void setProposedToilets(Integer proposedToilets) {
 		this.proposedToilets = proposedToilets;
+	}
+
+	public String getAadharNo() {
+		return aadharNo;
+	}
+
+	public void setAadharNo(String aadharNo) {
+		this.aadharNo = aadharNo;
+	}
+
+	public String getFerruleSize() {
+		return ferruleSize;
+	}
+
+	public void setFerruleSize(String ferruleSize) {
+		this.ferruleSize = ferruleSize;
 	}
 
 	@Override

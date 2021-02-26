@@ -218,7 +218,7 @@ public class BillingService {
 
 		Calculation cal = Calculation.builder().totalAmount(totalAmount).taxAmount(taxAmt).penalty(penalty)
 				.exemption(exemption).charge(waterCharge).fee(fee).rebate(rebate).tenantId(billGeneration.getTenantId())
-				.taxHeadEstimates(estimates).connectionNo(billGeneration.getConsumerCode()).waterConnection(connection)
+				.taxHeadEstimates(estimates).connectionNo(billGeneration.getBillGenerationId()).waterConnection(connection)
 				.build();
 
 		return cal;
