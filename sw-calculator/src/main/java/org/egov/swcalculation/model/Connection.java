@@ -43,6 +43,10 @@ public class Connection {
 	@JsonProperty("applicationStatus")
 	private String applicationStatus = null;
 
+	@JsonProperty("connectionHolders")
+	@Valid
+	private List<ConnectionHolderInfo> connectionHolders;
+
 	/**
 	 * Gets or Sets status
 	 */
@@ -90,6 +94,10 @@ public class Connection {
 	@JsonProperty("plumberInfo")
 	@Valid
 	private List<PlumberInfo> plumberInfo = null;
+	
+	@JsonProperty("swProperty")
+	@Valid
+	private SWProperty swProperty = null;
 
 	@JsonProperty("roadType")
 	private String roadType = null;
@@ -114,19 +122,6 @@ public class Connection {
 
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
-	
-
-	@JsonProperty("swProperty")
-	@Valid
-	private SWProperty swProperty = null;
-
-	public SWProperty getSwProperty() {
-		return swProperty;
-	}
-
-	public void setSwProperty(SWProperty swProperty) {
-		this.swProperty = swProperty;
-	}
 
 	public Connection id(String id) {
 		this.id = id;
@@ -517,6 +512,7 @@ public class Connection {
 				&& Objects.equals(this.oldConnectionNo, connection.oldConnectionNo)
 				&& Objects.equals(this.documents, connection.documents)
 				&& Objects.equals(this.plumberInfo, connection.plumberInfo)
+				&& Objects.equals(this.swProperty, connection.swProperty)
 				&& Objects.equals(this.roadType, connection.roadType)
 				&& Objects.equals(this.roadCuttingArea, connection.roadCuttingArea)
 				&& Objects.equals(this.connectionExecutionDate, connection.connectionExecutionDate)
@@ -529,7 +525,7 @@ public class Connection {
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, tenantId, propertyId, applicationNo, applicationStatus, status, connectionNo,
-				oldConnectionNo, documents, plumberInfo, roadType, roadCuttingArea, connectionExecutionDate,
+				oldConnectionNo, documents, plumberInfo, swProperty, roadType, roadCuttingArea, connectionExecutionDate,
 				connectionCategory, connectionType, additionalDetails, auditDetails);
 	}
 
@@ -548,6 +544,7 @@ public class Connection {
 		sb.append("    oldConnectionNo: ").append(toIndentedString(oldConnectionNo)).append("\n");
 		sb.append("    documents: ").append(toIndentedString(documents)).append("\n");
 		sb.append("    plumberInfo: ").append(toIndentedString(plumberInfo)).append("\n");
+		sb.append("    swProperty: ").append(toIndentedString(swProperty)).append("\n");
 		sb.append("    roadType: ").append(toIndentedString(roadType)).append("\n");
 		sb.append("    roadCuttingArea: ").append(toIndentedString(roadCuttingArea)).append("\n");
 		sb.append("    connectionExecutionDate: ").append(toIndentedString(connectionExecutionDate)).append("\n");
@@ -568,5 +565,30 @@ public class Connection {
 			return "null";
 		}
 		return o.toString().replace("\n", "\n    ");
+	}
+
+	public SWProperty getSwProperty() {
+		return swProperty;
+	}
+
+	public List<ConnectionHolderInfo> getConnectionHolders() {
+		return connectionHolders;
+	}
+
+	public void setConnectionHolders(List<ConnectionHolderInfo> connectionHolders) {
+		this.connectionHolders = connectionHolders;
+	}
+
+	public void setSwProperty(SWProperty swProperty) {
+		this.swProperty = swProperty;
+	}
+	
+	public Connection addConnectionHolderInfo(ConnectionHolderInfo connectionHolderInfo) {
+		if (this.connectionHolders == null) {
+			this.connectionHolders = new ArrayList<ConnectionHolderInfo>();
+		}
+		if (!this.connectionHolders.contains(connectionHolderInfo))
+			this.connectionHolders.add(connectionHolderInfo);
+		return this;
 	}
 }
