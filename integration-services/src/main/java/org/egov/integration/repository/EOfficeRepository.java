@@ -41,6 +41,7 @@ public class EOfficeRepository {
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put("employeeCode", request.getEmployeePostDetailMap().getEmployeeCode());	
 		list = namedParameterJdbcTemplate.query(QueryBuilder.GET_POST_DETAIL_QUERY, paramValues, rowMapper);	
+		
 		System.out.println(list);
 		return list;
 	}
