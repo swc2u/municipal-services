@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import org.egov.pgr.contract.ReportRequest;
+import org.egov.pgr.model.DiscriptionReport;
+import org.egov.pgr.model.DiscriptionRequestInfoWrapper;
+import org.egov.pgr.model.RequestInfoWrapper;
+import org.egov.pgr.producer.PGRProducer;
 import org.egov.pgr.utils.ReportConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +23,13 @@ public class ReportRepository {
 	
 	@Autowired
 	private ReportQueryBuilder reportQueryBuilder;
+	
+	@Autowired
+	private PGRProducer pGRProducer;
+	
+	
+	@Value("${kafka.topics.save.discription}")
+	private String saveDiscriptionTopic;
 	
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -64,6 +75,14 @@ public class ReportRepository {
 				log.error("Execution failed: "+e);
 			}
 		}
+	}
+
+	public void saveData(RequestInfoWrapper request,DiscriptionReport data) {
+		
+		DiscriptionRequestInfoWrapper infoWrapper = DiscriptionRequestInfoWrapper.builder().discriptionReport(data).build();		
+		pGRProducer.push(saveDiscriptionTopic, infoWrapper);
+		
+		
 	}
 
 }
