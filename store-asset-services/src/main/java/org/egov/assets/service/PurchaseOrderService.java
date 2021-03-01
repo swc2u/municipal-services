@@ -52,13 +52,16 @@ import org.egov.assets.model.Supplier;
 import org.egov.assets.model.Uom;
 import org.egov.assets.model.WorkFlowDetails;
 import org.egov.assets.model.MaterialIssue.MaterialIssueStatusEnum;
+import org.egov.assets.repository.IndentDetailJdbcRepository;
 import org.egov.assets.repository.IndentJdbcRepository;
 import org.egov.assets.repository.MaterialReceiptJdbcRepository;
 import org.egov.assets.repository.PDFServiceReposistory;
 import org.egov.assets.repository.PriceListJdbcRepository;
+import org.egov.assets.repository.PurchaseIndentDetailJdbcRepository;
 import org.egov.assets.repository.PurchaseOrderJdbcRepository;
 import org.egov.assets.repository.StoreJdbcRepository;
 import org.egov.assets.repository.entity.IndentEntity;
+import org.egov.assets.repository.entity.PurchaseIndentDetailEntity;
 import org.egov.assets.util.InventoryUtilities;
 import org.egov.assets.wf.WorkflowIntegrator;
 import org.egov.assets.wf.model.ProcessInstance;
@@ -121,6 +124,12 @@ public class PurchaseOrderService extends DomainService {
 
 	@Autowired
 	private IndentJdbcRepository indentRepository;
+
+	@Autowired
+	private IndentDetailJdbcRepository indentDetailJdbcRepository;
+
+	@Autowired
+	private PurchaseIndentDetailJdbcRepository purchaseIndentDetailJdbcRepository;
 
 	@Autowired
 	SupplierRepository supplierRepository;
@@ -574,6 +583,22 @@ public class PurchaseOrderService extends DomainService {
 						}
 						totalAmount = totalAmount.add(eachPurchaseOrderDetail.getOrderQuantity()
 								.multiply(eachPurchaseOrderDetail.getUnitPrice()).add(totalAmount));
+					
+					
+						PurchaseIndentDetailEntity indentDetailEntity = new PurchaseIndentDetailEntity();
+						indentDetailEntity.setPurchaseOrderDetail(eachPurchaseOrderDetail.getId());
+						indentDetailEntity.setTenantId(eachPurchaseOrderDetail.getTenantId());
+						PurchaseIndentDetail purchaseIndentDetail = purchaseIndentDetailJdbcRepository
+								.findByPODetailId(indentDetailEntity);
+
+						if (purchaseIndentDetail != null) {
+							IndentDetail indentDetail = indentDetailJdbcRepository.findIndentDetailsId(
+									Arrays.asList(purchaseIndentDetail.getIndentDetail().getId()),
+									eachPurchaseOrderDetail.getTenantId());
+							purchaseIndentDetail.setIndentDetail(indentDetail);
+							eachPurchaseOrderDetail.setPurchaseIndentDetails(Arrays.asList(purchaseIndentDetail));
+						}
+
 					}
 					eachPurchaseOrder.setTotalAmount(totalAmount);
 
@@ -599,17 +624,19 @@ public class PurchaseOrderService extends DomainService {
 			if (errors.getValidationErrors().size() > 0)
 				throw errors;
 
-			for (PurchaseOrder po : purchaseOrderRequest.getPurchaseOrders()) {
-				if (po.getRateType() != null
-						&& po.getRateType().toString().equalsIgnoreCase(RateTypeEnum.GEM.toString())) {
-					updateRateContractForGem(purchaseOrderRequest, tenantId);
-				}
-			}
+//			for (PurchaseOrder po : purchaseOrderRequest.getPurchaseOrders()) {
+//				if (po.getRateType() != null
+//						&& po.getRateType().toString().equalsIgnoreCase(RateTypeEnum.GEM.toString())) {
+//					updateRateContractForGem(purchaseOrderRequest, tenantId);
+//				}
+//			}
 
 			if (purchaseOrder.size() > 0 && purchaseOrder.get(0).getPurchaseType() != null) {
 				if (purchaseOrder.get(0).getPurchaseType().toString()
-						.equalsIgnoreCase(PurchaseTypeEnum.INDENT.toString()))
+						.equalsIgnoreCase(PurchaseTypeEnum.INDENT.toString())) {
+					updateOldIndentQuantity(purchaseOrderRequest, tenantId);
 					kafkaQue.send(updateTopic, updateKey, purchaseOrderRequest);
+				}	
 				else
 					kafkaQue.send(updateNonIndentTopic, updateNonIndentKey, purchaseOrderRequest);
 			} else
@@ -624,6 +651,31 @@ public class PurchaseOrderService extends DomainService {
 			throw e;
 		}
 
+	}
+
+	private void updateOldIndentQuantity(PurchaseOrderRequest purchaseOrderRequest, String tenantId) {
+		for (PurchaseOrder po : purchaseOrderRequest.getPurchaseOrders()) {
+			Pagination<PurchaseOrder> search = null;
+			PurchaseOrderSearch purchaseOrderSearch = new PurchaseOrderSearch();
+			purchaseOrderSearch.setTenantId(tenantId);
+			purchaseOrderSearch.setPurchaseOrderNumber(po.getPurchaseOrderNumber());
+			search = purchaseOrderRepository.search(purchaseOrderSearch);
+			List<PurchaseOrder> dataFromDB = search.getPagedData();
+			if (!dataFromDB.isEmpty()) {
+				for(PurchaseOrder po1:dataFromDB) {
+					PurchaseOrderDetailSearch purchaseOrderDetailSearch = new PurchaseOrderDetailSearch();
+					purchaseOrderDetailSearch.setPurchaseOrder(po1.getPurchaseOrderNumber());
+					purchaseOrderDetailSearch.setTenantId(po1.getTenantId());
+					Pagination<PurchaseOrderDetail> detailPagination = purchaseOrderDetailService
+							.search(purchaseOrderDetailSearch);
+					po1.setPurchaseOrderDetails(
+							!detailPagination.getPagedData().isEmpty() ? detailPagination.getPagedData()
+									: Collections.EMPTY_LIST);
+				}
+
+				purchaseOrderRepository.removeIndentUsedForPo(purchaseOrderRequest,dataFromDB, tenantId);
+			}
+		}
 	}
 
 	public PurchaseOrderResponse search(PurchaseOrderSearch is) {
