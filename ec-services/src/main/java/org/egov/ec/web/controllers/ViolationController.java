@@ -80,6 +80,30 @@ public class ViolationController {
 			@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
 		return genearateChallanService.addPayment(requestInfoWrapper);
 	}
+	
+	/**
+	* update  violationPayment  controller
+	* 
+	* @param RequestInfoWrapper List of ViolationDetail
+	* @return HTTP status 200 on success
+	*/
+	@PostMapping(value = "/_updatePayment")
+	public ResponseEntity<ResponseInfoWrapper> updatePayment(
+			@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
+		return genearateChallanService.updatePayment(requestInfoWrapper);
+	}
+	
+	/**
+	* delete challan  violationPayment  controller
+	* 
+	* @param RequestInfoWrapper List of ViolationDetail
+	* @return HTTP status 200 on success
+	*/
+	@PostMapping(value = "/_deleteChallan")
+	public ResponseEntity<ResponseInfoWrapper> deleteChallan(
+			@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
+		return genearateChallanService.deleteChallan(requestInfoWrapper);
+	}
 
 	/**
 	* Send Email Notification
