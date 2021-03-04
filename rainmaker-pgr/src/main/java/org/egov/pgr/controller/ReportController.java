@@ -1,9 +1,12 @@
 package org.egov.pgr.controller;
 
 import javax.validation.Valid;
-
+	
 import org.egov.pgr.contract.ReportRequest;
+import org.egov.pgr.model.RequestInfoWrapper;
+import org.egov.pgr.model.ResponseInfoWrapper;
 import org.egov.pgr.service.ReportService;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,5 +29,10 @@ public class ReportController {
 		Object response = service.getReports(reportRequest);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 
+	}
+	
+	@PostMapping(value = "/_jobscheduler")
+	public ResponseEntity<ResponseInfoWrapper> process( @Valid @RequestBody RequestInfoWrapper request) throws JSONException {		
+		return service.process(request);		
 	}
 }

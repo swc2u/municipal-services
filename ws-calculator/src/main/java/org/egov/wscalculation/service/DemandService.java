@@ -554,7 +554,7 @@ public class DemandService {
 		for (Calculation calculation : calculations) {
 			Set<String> consumerCodes = new HashSet<>();
 			consumerCodes = isForConnectionNo == true
-					? Collections.singleton(calculation.getWaterConnection().getConnectionNo())
+					? Collections.singleton(calculation.getConnectionNo())
 					: Collections.singleton(calculation.getWaterConnection().getApplicationNo());
 			List<Demand> searchResult = searchDemand(calculation.getTenantId(), consumerCodes, fromDateSearch,
 					toDateSearch, requestInfo);
