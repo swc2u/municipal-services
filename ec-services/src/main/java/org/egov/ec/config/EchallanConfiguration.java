@@ -158,6 +158,13 @@ public class EchallanConfiguration {
 	@Value("${persister.create.deviceSource.topic}")
 	public String RequestDeviceSource;
 	
+	@Value("${persister.update.payment.topic}")
+	public String updatePayment;
+	
+	@Value("${persister.delete.challan.topic}")
+	public String dataBckChallan;
+	
+	
 	@Value("${echallan.notification.flag}")
 	public String echallanNotificationFlag;
 	

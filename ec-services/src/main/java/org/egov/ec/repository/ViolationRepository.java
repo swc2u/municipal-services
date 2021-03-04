@@ -8,11 +8,15 @@ import javax.validation.Valid;
 import org.egov.ec.config.EchallanConfiguration;
 import org.egov.ec.producer.Producer;
 import org.egov.ec.repository.builder.EcQueryBuilder;
+import org.egov.ec.repository.rowmapper.ColumnsRowMapper;
 import org.egov.ec.repository.rowmapper.ViolationDetailRowMapper;
+import org.egov.ec.web.models.ChallanDataBckUp;
 import org.egov.ec.web.models.EcPayment;
+import org.egov.ec.web.models.EcPaymentData;
 import org.egov.ec.web.models.EcSearchCriteria;
 import org.egov.ec.web.models.RequestInfoWrapper;
 import org.egov.ec.web.models.Violation;
+import org.json.simple.JSONArray;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -26,6 +30,8 @@ public class ViolationRepository {
 
 	private ViolationDetailRowMapper rowMapper;
 
+	private ColumnsRowMapper columnsRowMapper;
+	
 	private Producer producer;
 
 	private EchallanConfiguration config;
@@ -33,12 +39,13 @@ public class ViolationRepository {
 	private EcQueryBuilder ecQueryBuilder;
 
 	public ViolationRepository(JdbcTemplate jdbcTemplate, Producer producer, EchallanConfiguration config,
-			ViolationDetailRowMapper rowMapper) {
+			ViolationDetailRowMapper rowMapper, ColumnsRowMapper columnsRowMapper) {
 		this.jdbcTemplate = jdbcTemplate;
 		this.rowMapper = rowMapper;
 		this.producer = producer;
 		this.config = config;
 		this.ecQueryBuilder = ecQueryBuilder;
+		this.columnsRowMapper=columnsRowMapper;
 	}
 
 	 /**
@@ -211,4 +218,49 @@ public class ViolationRepository {
 
 	}
 
+
+
+	public void updatePayment(EcPaymentData ecPayment) {
+		log.info("Violation Repository - updatePayment Method");
+		RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().requestBody(ecPayment).build();
+		producer.push(config.getUpdatePayment(), infoWrapper);
+	}
+
+	public void deleteChallan(ChallanDataBckUp bck) {
+		RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().requestBody(bck).build();
+		producer.push(config.getDataBckChallan(), infoWrapper);
+		
+	}
+
+	public JSONArray getdataProcessInstance(ChallanDataBckUp bck) {
+		return  jdbcTemplate.query(EcQueryBuilder.SEARCH_PROCESS_INSTANCE,new Object[] { bck.getChallanId() ,bck.getChallanId() },	columnsRowMapper);
+	}
+	
+	public JSONArray getdataEgecDocument(ChallanDataBckUp bck) {
+		return  jdbcTemplate.query(EcQueryBuilder.SEARCH_DOCUMENt,new Object[] { bck.getChallanId()  },columnsRowMapper);
+	}
+
+	public JSONArray getdataStoreItem(ChallanDataBckUp bck) {
+		return  jdbcTemplate.query(EcQueryBuilder.SEARCH_STORE_ITEM,new Object[] { bck.getChallanId()  },columnsRowMapper);
+	}
+
+	public JSONArray getdatPayment(ChallanDataBckUp bck) {
+		return  jdbcTemplate.query(EcQueryBuilder.SEARCH_PAYMENT,new Object[] { bck.getChallanId()  },columnsRowMapper);
+	}
+   
+	public JSONArray getdatChallanDetail(ChallanDataBckUp bck) {
+		return  jdbcTemplate.query(EcQueryBuilder.SEARCH_CHALLAN_DETAILS,new Object[] { bck.getChallanId()  },columnsRowMapper);
+	}
+	
+	public JSONArray getdatChallanMaster(ChallanDataBckUp bck) {
+		return  jdbcTemplate.query(EcQueryBuilder.SEARCH_CHALLAN_MASTER,new Object[] { bck.getChallanId()  },columnsRowMapper);
+	}
+
+	public JSONArray getdatViolationDetail(ChallanDataBckUp bck) {
+		return  jdbcTemplate.query(EcQueryBuilder.SEARCH_VIOLATION_DETAIL,new Object[] { },columnsRowMapper);
+	}
+
+	public JSONArray getdatViolationMaster(ChallanDataBckUp bck) {
+		return  jdbcTemplate.query(EcQueryBuilder.SEARCH_VIOLATION_MASTER_DETAILS,new Object[] {   },columnsRowMapper);
+	}
 }
