@@ -298,7 +298,7 @@ public class EnrichmentService {
 		List<TaxHeadEstimate> estimates = new LinkedList<>();
 
 		TaxHeadEstimate estimateDue = new TaxHeadEstimate();
-		
+
 		estimateDue.setEstimateAmount(new BigDecimal(0.0));
 		estimateDue.setCategory(Category.FEE);
 		estimateDue.setTaxHeadCode(getTaxHeadCodeWithCharge(owner.getBillingBusinessService(),
@@ -432,7 +432,7 @@ public class EnrichmentService {
 				String gen_application_id = UUID.randomUUID().toString();
 				application.setId(gen_application_id);
 				application.getProperty()
-						.setId(duplicateCopyRequest.getDuplicateCopyApplications().get(0).getProperty().getId());
+				.setId(duplicateCopyRequest.getDuplicateCopyApplications().get(0).getProperty().getId());
 				application.setAuditDetails(propertyAuditDetails);
 
 				if (!CollectionUtils.isEmpty(application.getApplicant())) {
@@ -461,7 +461,7 @@ public class EnrichmentService {
 				String gen_application_id = UUID.randomUUID().toString();
 				application.setId(gen_application_id);
 				application.getProperty()
-						.setId(propertyImagesRequest.getPropertyImagesApplications().get(0).getProperty().getId());
+				.setId(propertyImagesRequest.getPropertyImagesApplications().get(0).getProperty().getId());
 				application.setAuditDetails(propertyAuditDetails);
 
 				application.setCapturedBy(requestInfo.getUserInfo().getName());
@@ -823,7 +823,7 @@ public class EnrichmentService {
 				String gen_notice_id = UUID.randomUUID().toString();
 				notice.setId(gen_notice_id);
 				notice.getProperty()
-						.setId(noticeGenerationRequest.getNoticeApplications().get(0).getProperty().getId());
+				.setId(noticeGenerationRequest.getNoticeApplications().get(0).getProperty().getId());
 				notice.setAuditDetails(noticeAuditDetails);
 
 				enrichDocuments(notice.getApplicationDocuments(), requestInfo, notice.getProperty().getId(),
@@ -890,11 +890,11 @@ public class EnrichmentService {
 
 		if (amount >= balInterest) {
 			if(balInterest>0) {
-			TaxHeadEstimate estimate1 = new TaxHeadEstimate();
-			estimate1.setEstimateAmount(new BigDecimal(balInterest));
-			estimate1.setCategory(Category.INTEREST);
-			estimate1.setTaxHeadCode(getTaxHeadCode(property.getBillingBusinessService(), Category.INTEREST));
-			estimates.add(estimate1);
+				TaxHeadEstimate estimate1 = new TaxHeadEstimate();
+				estimate1.setEstimateAmount(new BigDecimal(balInterest));
+				estimate1.setCategory(Category.INTEREST);
+				estimate1.setTaxHeadCode(getTaxHeadCode(property.getBillingBusinessService(), Category.INTEREST));
+				estimates.add(estimate1);
 			}
 			double remainingAmmount = amount - balInterest;
 			if (remainingAmmount >= balPrincipal && balPrincipal>0) {
@@ -936,5 +936,30 @@ public class EnrichmentService {
 		property.setCalculation(calculation);
 
 	}
+
+	public void enrichOwnerDemandCalculation(Owner owner) {
+		List<TaxHeadEstimate> estimates = new LinkedList<>();
+		TaxHeadEstimate estimate1 = new TaxHeadEstimate();
+		estimate1.setEstimateAmount(owner.getOwnerDetails().getDueAmount());
+		estimate1.setCategory(Category.FEE);
+		estimate1.setTaxHeadCode(getTaxHeadCodeWithCharge(owner.getBillingBusinessService(),
+				PTConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
+		estimates.add(estimate1);
+
+		if(owner.getOwnerDetails().getAproCharge()!=null) {
+			TaxHeadEstimate estimate2 = new TaxHeadEstimate();
+			estimate2.setEstimateAmount(owner.getOwnerDetails().getAproCharge());
+			estimate2.setCategory(Category.FEE);
+			estimate2.setTaxHeadCode(getTaxHeadCodeWithCharge(owner.getBillingBusinessService(),
+					PTConstants.TAX_HEAD_CODE_PUBLICATION_CHARGE, Category.FEE));
+			estimates.add(estimate2);
+		}
+		Calculation calculation = Calculation.builder()
+				.applicationNumber(owner.getOwnerDetails().getApplicationNumber()).taxHeadEstimates(estimates)
+				.tenantId(owner.getTenantId()).build();
+		owner.setCalculation(calculation);
+
+	}
+
 
 }

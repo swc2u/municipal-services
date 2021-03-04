@@ -45,7 +45,6 @@ public class OwnerDetails {
 	@JsonProperty("tenantId")
 	private String tenantId;
 
-	@NotNull
 	@JsonProperty("name")
 	@Size(max = 256, message = "Name must be between 0 and 256 characters in length")
 	private String name;
@@ -178,5 +177,19 @@ public class OwnerDetails {
 
 	@JsonProperty("aproCharge")
 	private BigDecimal aproCharge;
+	
+	@JsonProperty("transactionId")
+	@Size(max = 256, message = "Transaction id must be between 0 and 256 characters in length")
+	private String transactionId;
+
+	@JsonProperty("bankName")
+	@Size(max = 256, message = "Bank name must be between 0 and 256 characters in length")
+	private String bankName;
+	
+	/**
+	 * Amount to be paid
+	 */
+	@JsonProperty("paymentAmount")
+	private Double paymentAmount;
 
 }

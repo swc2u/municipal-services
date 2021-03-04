@@ -2,6 +2,7 @@ package org.egov.cpt.service.calculation;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -405,6 +406,25 @@ public class DemandService {
 		// Generate a new consumer code and new demands.
 		property.setRentPaymentConsumerCode(utils.getPropertyRentConsumerCode(property.getTransitNumber()));
 		return createRentDemand(requestInfo, property);
+	}
+	
+	
+	public List<Demand> generateFinanceOTDemand(RequestInfo requestInfo, Owner ownerFromDB) {
+		List<Demand> demands = new LinkedList<>();
+			List<Demand> searchResult = searchDemand(ownerFromDB.getTenantId(),
+					Collections.singleton(ownerFromDB.getOwnerDetails().getApplicationNumber()), requestInfo,
+					ownerFromDB.getBillingBusinessService());
+			if (!CollectionUtils.isEmpty(searchResult)) {
+				Demand demand = searchResult.get(0);
+				List<DemandDetail> demandDetails = demand.getDemandDetails();
+				List<DemandDetail> updatedDemandDetails = getUpdatedDemandDetails(ownerFromDB, demandDetails);
+				demand.setDemandDetails(updatedDemandDetails);
+				demands.add(demand);
+				demands = demandRepository.updateDemand(requestInfo, demands);
+				log.info("Demand generated");
+				return demands;
+			}
+			return createDemand(requestInfo, Arrays.asList(ownerFromDB));
 	}
 
 	private List<DemandDetail> getUpdatedDemandDetails(Property property, List<DemandDetail> demandDetails) {
