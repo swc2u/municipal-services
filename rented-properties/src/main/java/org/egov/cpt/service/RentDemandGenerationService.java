@@ -3,7 +3,9 @@ package org.egov.cpt.service;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -31,6 +33,7 @@ import org.egov.cpt.service.notification.DemandNotificationService;
 import org.egov.cpt.util.PTConstants;
 import org.egov.cpt.util.PropertyUtil;
 import org.egov.cpt.web.contracts.PropertyRequest;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -50,7 +53,7 @@ public class RentDemandGenerationService {
 	private RentCollectionService rentCollectionService;
 
 	private DemandNotificationService demandNotificationService;
-	
+
 	@Autowired
 	private PropertyUtil propertyUtil;
 
@@ -124,27 +127,34 @@ public class RentDemandGenerationService {
 
 	private void generateRentDemand(Property property, RentDemand firstDemand, Date date,
 			List<RentDemand> rentDemandList, List<RentPayment> rentPaymentList, RentAccount rentAccount) {
-		int oldYear = new Date(firstDemand.getGenerationDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+		float oldYear =  new Date(firstDemand.getGenerationDate()).toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
 				.getYear();
-		int oldMonth = new Date(firstDemand.getGenerationDate()).toInstant().atZone(ZoneId.systemDefault())
+		float oldMonth = new Date(firstDemand.getGenerationDate()).toInstant().atZone(ZoneId.systemDefault())
 				.toLocalDate().getMonthValue();
+
+		oldYear=oldYear+(oldMonth/12);
+		
 		LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-		int currentYear = localDate.getYear();
-		int currentMonth = localDate.getMonthValue();
+		float currentYear = localDate.getYear();
+		float currentMonth = localDate.getMonthValue();
+		
+		currentYear=currentYear+(currentMonth/12);
 
 		Double collectionPrincipal = firstDemand.getCollectionPrincipal();
+		
 		oldYear = oldYear + property.getPropertyDetails().getRentIncrementPeriod();
-		while (oldYear <= currentYear) {
-			if (oldYear == currentYear && currentMonth >= oldMonth) {
-				collectionPrincipal = (collectionPrincipal
-						* (100 + property.getPropertyDetails().getRentIncrementPercentage())) / 100;
-			} else if (oldYear < currentYear) {
-				collectionPrincipal = (collectionPrincipal
-						* (100 + property.getPropertyDetails().getRentIncrementPercentage())) / 100;
-			}
-			oldYear = oldYear + property.getPropertyDetails().getRentIncrementPeriod();
-		}
 
+			while (oldYear <= currentYear) {
+				if (oldYear == currentYear && currentMonth >= oldMonth) {
+					collectionPrincipal = (collectionPrincipal
+							* (100 + property.getPropertyDetails().getRentIncrementPercentage())) / 100;
+				} else if (oldYear < currentYear) {
+					collectionPrincipal = (collectionPrincipal
+							* (100 + property.getPropertyDetails().getRentIncrementPercentage())) / 100;
+				}
+				oldYear = oldYear + property.getPropertyDetails().getRentIncrementPeriod();
+			}
+			
 		AuditDetails auditDetails = AuditDetails.builder().createdBy("System").createdTime(new Date().getTime())
 				.lastModifiedBy("System").lastModifiedTime(new Date().getTime()).build();
 
@@ -152,7 +162,6 @@ public class RentDemandGenerationService {
 				.mode(ModeEnum.GENERATED).generationDate(date.getTime()).collectionPrincipal(collectionPrincipal)
 				.auditDetails(auditDetails).remainingPrincipal(collectionPrincipal).interestSince(date.getTime())
 				.build();
-
 		log.info("Generating Rent demand id '{}' of principal '{}' for property with transit no {}", rentDemand.getId(),
 				collectionPrincipal, property.getTransitNumber());
 		property.setDemands(Collections.singletonList(rentDemand));
