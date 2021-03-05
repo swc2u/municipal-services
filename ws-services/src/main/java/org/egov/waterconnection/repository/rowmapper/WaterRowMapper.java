@@ -26,7 +26,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 		Map<String, WaterConnection> connectionListMap = new HashMap<>();
 		WaterConnection currentWaterConnection = new WaterConnection();
 		while (rs.next()) {
-			String applicationNo = rs.getString("app_applicationno");
+			String applicationNo = rs.getString("connection_Id");
 			if (connectionListMap.getOrDefault(applicationNo, null) == null) {
 				currentWaterConnection = new WaterConnection();
 				currentWaterConnection.setTenantId(rs.getString("tenantid"));
@@ -70,6 +70,8 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
                 currentWaterConnection.setBillGroup(rs.getString("billGroup"));
                 currentWaterConnection.setContractValue(rs.getString("contract_value"));
                 currentWaterConnection.setProposedUsageCategory(rs.getString("proposedUsage_category"));
+                currentWaterConnection.setFerruleSize(rs.getString("ferruleSize"));
+                currentWaterConnection.setAadharNo(rs.getString("aadharNo"));
 
                 currentWaterConnection.setLedgerGroup(rs.getString("ledgerGroup"));
                 currentWaterConnection.setMeterCount(rs.getString("meterCount"));
@@ -147,8 +149,34 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
         addDocumentToWaterConnection(rs, waterConnection);
         addPlumberInfoToWaterConnection(rs, waterConnection);
         addHoldersDeatilsToWaterConnection(rs, waterConnection);
+        addWaterApplicationList(rs, waterConnection);
     }
 
+    private void addWaterApplicationList(ResultSet rs, WaterConnection waterConnection) throws SQLException {
+    	 
+		 String applicationId=rs.getString("application_id");
+		if (!StringUtils.isEmpty(applicationId)) {
+			WaterApplication app = new WaterApplication();
+			app.setId(rs.getString("application_id"));
+			app.setApplicationNo(rs.getString("app_applicationno"));
+			app.setActivityType(rs.getString("app_activitytype"));
+			app.setApplicationStatus(rs.getString("app_applicationstatus"));
+			app.setAction(rs.getString("app_action"));
+			app.setComments(rs.getString("app_comments"));
+			app.setIsFerruleApplicable(rs.getBoolean("app_ferrule"));
+			app.setSecurityCharge(rs.getDouble("app_securitycharge"));
+			
+			AuditDetails auditdetails1 = AuditDetails.builder()
+                   .createdBy(rs.getString("app_createdBy"))
+                   .createdTime(rs.getLong("app_createdTime"))
+                   .lastModifiedBy(rs.getString("app_lastModifiedBy"))
+                   .lastModifiedTime(rs.getLong("app_lastModifiedTime"))
+                   .build();
+			app.setAuditDetails(auditdetails1);
+		 
+			waterConnection.addWaterApplication(app);
+		}
+    }
     private void addDocumentToWaterConnection(ResultSet rs, WaterConnection waterConnection) throws SQLException {
         String document_Id = rs.getString("doc_Id");
         String isActive = rs.getString("doc_active");

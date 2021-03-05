@@ -35,7 +35,7 @@ public class SWQueryBuilder {
 			+ " sc.connectionExecutionDate, sc.noOfWaterClosets, sc.noOfToilets,sc.proposedWaterClosets, sc.proposedToilets, sc.connectionType, sc.connection_id as connection_Id, sc.appCreatedDate,"
 			+ " sc.metercount,sc.meterrentcode,sc.mfrcode,sc.meterdigits,sc.meterunit,sc.sanctionedcapacity,sc.detailsprovidedby, sc.estimationfileStoreId , sc.sanctionfileStoreId , sc.estimationLetterDate,"
 			+ " conn.id as conn_id, conn.tenantid, conn.applicationNo, conn.applicationStatus, conn.status, conn.connectionNo, conn.oldConnectionNo, conn.property_id,"
-			+ " conn.cccode,conn.div,conn.subdiv,conn.ledger_no,conn.ledgergroup,conn.billgroup,conn.contract_value,conn.roadcuttingarea, conn.action, conn.adhocpenalty, conn.adhocrebate, conn.createdBy as sw_createdBy,"
+			+ " conn.aadharNo, conn.ferruleSize, conn.cccode,conn.div,conn.subdiv,conn.ledger_no,conn.ledgergroup,conn.billgroup,conn.contract_value,conn.roadcuttingarea, conn.action, conn.adhocpenalty, conn.adhocrebate, conn.createdBy as sw_createdBy,"
 			+ " conn.lastModifiedBy as sw_lastModifiedBy, conn.createdTime as sw_createdTime, conn.lastModifiedTime as sw_lastModifiedTime, "
 			+ " conn.adhocpenaltyreason, conn.adhocpenaltycomment, conn.adhocrebatereason, conn.adhocrebatecomment,"
 			+ " conn.roadtype, document.id as doc_Id, document.documenttype, document.filestoreid, document.active as doc_active, plumber.id as plumber_id, plumber.name as plumber_name, plumber.licenseno,"

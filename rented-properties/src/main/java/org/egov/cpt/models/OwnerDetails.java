@@ -191,5 +191,8 @@ public class OwnerDetails {
 	 */
 	@JsonProperty("paymentAmount")
 	private Double paymentAmount;
+	
+	@JsonProperty("isAPROChargePaid")
+	private boolean isAPROChargePaid;
 
 }
