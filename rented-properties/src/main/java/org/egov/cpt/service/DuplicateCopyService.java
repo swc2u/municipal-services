@@ -8,10 +8,12 @@ import java.util.List;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.cpt.config.PropertyConfiguration;
+import org.egov.cpt.models.Applicant;
 import org.egov.cpt.models.BillV2;
 import org.egov.cpt.models.DuplicateCopy;
 import org.egov.cpt.models.DuplicateCopySearchCriteria;
 import org.egov.cpt.models.Owner;
+import org.egov.cpt.models.OwnerDetails;
 import org.egov.cpt.models.Property;
 import org.egov.cpt.models.PropertyCriteria;
 import org.egov.cpt.models.RentAccount;
@@ -28,7 +30,6 @@ import org.egov.cpt.util.PTConstants;
 import org.egov.cpt.util.PropertyUtil;
 import org.egov.cpt.validator.PropertyValidator;
 import org.egov.cpt.web.contracts.DuplicateCopyRequest;
-import org.egov.cpt.web.contracts.OwnershipTransferRequest;
 import org.egov.cpt.workflow.WorkflowIntegrator;
 import org.egov.cpt.workflow.WorkflowService;
 import org.egov.tracer.model.CustomException;
@@ -67,16 +68,16 @@ public class DuplicateCopyService {
 
 	@Autowired
 	private WorkflowService workflowService;
-	
+
 	@Autowired
 	private IRentCollectionService rentCollectionService;
-	
+
 	@Autowired
 	private PropertyUtil propertyUtil;
-	
+
 	@Autowired
 	private DemandRepository demandRepository;
-	
+
 	@Autowired
 	private UserService userService;
 
@@ -92,10 +93,10 @@ public class DuplicateCopyService {
 		/**
 		 * calling Rent summary
 		 */
-		
+
 		addRentSummary(duplicateCopyRequest.getDuplicateCopyApplications());
-		
-		
+
+
 		return duplicateCopyRequest.getDuplicateCopyApplications();
 	}
 
@@ -132,9 +133,9 @@ public class DuplicateCopyService {
 			else
 				return Collections.emptyList();
 		}
-		
+
 		addRentSummary(applications);
-		
+
 		return applications;
 	}
 
@@ -155,26 +156,26 @@ public class DuplicateCopyService {
 		}
 		producer.push(config.getUpdateDuplicateCopyTopic(), duplicateCopyRequest);
 		notificationService.process(duplicateCopyRequest);
-		
+
 		/**
 		 * calling Rent summary
 		 */
 		addRentSummary(duplicateCopyRequest.getDuplicateCopyApplications());
-		
+
 		return duplicateCopyRequest.getDuplicateCopyApplications();
 	}
-	
+
 	private void addRentSummary(List<DuplicateCopy> duplicateCopyApplications) {
 		duplicateCopyApplications.stream().filter(application -> application.getProperty().getId() != null)
 		.forEach(application -> {
-			
+
 			PropertyCriteria propertyCriteria = PropertyCriteria.builder().relations(Arrays.asList("owner"))
 					.propertyId(application.getProperty().getId()).build();
 
 			List<Property> propertiesFromDB = repository.getProperties(propertyCriteria);
 			List<RentDemand> demands = repository
 					.getPropertyRentDemandDetails(propertyCriteria);
-			
+
 			RentAccount rentAccount = repository
 					.getPropertyRentAccountDetails(propertyCriteria);
 			if (!CollectionUtils.isEmpty(demands) && null != rentAccount && !CollectionUtils.isEmpty(propertiesFromDB)) {
@@ -186,7 +187,7 @@ public class DuplicateCopyService {
 				application.getProperty().setRentSummary(new RentSummary());
 		});
 	}
-	
+
 	public List<DuplicateCopy> collectPayment(DuplicateCopyRequest dcRequest) {
 		/**
 		 * Validate not empty
@@ -195,7 +196,7 @@ public class DuplicateCopyService {
 			return Collections.emptyList();
 		}
 		DuplicateCopy dcApplicationFromRequest = dcRequest.getDuplicateCopyApplications().get(0);
-		
+
 		/**
 		 * Validate that this is a valid application number.
 		 */
@@ -210,7 +211,7 @@ public class DuplicateCopyService {
 			throw new CustomException(Collections.singletonMap("INVALID_PAYMENT_AMOUNT",
 					"Payment amount should valid"));
 		}
-		
+
 		DuplicateCopySearchCriteria dcCriteria = DuplicateCopySearchCriteria.builder()
 				.applicationNumber(dcApplicationFromRequest.getApplicationNumber()).status(Collections.singletonList(PTConstants.DC_PENDINGPAYMENT))
 				.build();
@@ -227,7 +228,7 @@ public class DuplicateCopyService {
 
 		DuplicateCopy dcApplicationFromDB = dcApplicationsFromDB.get(0);
 		BigDecimal totalDue=dcApplicationFromDB.getApplicant().get(0).getAproCharge();
-		
+
 		/**
 		 * Validate payment amount
 		 */
@@ -245,7 +246,7 @@ public class DuplicateCopyService {
 		 */
 		userService.createUser(dcRequest.getRequestInfo(), dcApplicationFromDB.getApplicant().get(0).getPhone(),
 				dcApplicationFromDB.getApplicant().get(0).getName(), dcApplicationFromDB.getApplicant().get(0).getTenantId());
-		
+
 		enrichmentService.enrichDCDemandCalculation(dcApplicationFromDB);
 
 		/**
@@ -269,9 +270,15 @@ public class DuplicateCopyService {
 			 * if offline, create a payment.
 			 */
 			log.info("Payment Amount:"+dcApplicationFromDB.getPaymentAmount());
+
+			Applicant applicant = dcApplicationFromDB.getApplicant().get(0);
 			
-//			demandService.createCashPayment(dcRequest.getRequestInfo(), dcApplicationFromDB.getPaymentAmount(),
-//					bills.get(0).getId(), dcApplicationFromDB, dcApplicationFromDB.getBillingBusinessService());
+			OwnerDetails ownerDetail = OwnerDetails.builder().name(applicant.getName()).phone(applicant.getPhone()).build();
+
+			Owner owner = Owner.builder().ownerDetails(ownerDetail).tenantId(applicant.getTenantId()).build();
+
+			demandService.createCashPayment(dcRequest.getRequestInfo(), dcApplicationFromDB.getPaymentAmount(),
+					bills.get(0).getId(), owner, dcApplicationFromDB.getBillingBusinessService());
 
 			dcRequest.setDuplicateCopyApplications(Collections.singletonList(dcApplicationFromDB));
 			producer.push(config.getOwnershipTransferUpdateTopic(), dcRequest);
@@ -280,12 +287,12 @@ public class DuplicateCopyService {
 		/*
 		 * else {
 		 *//**
-			 * We return the application along with the consumerCode that we set earlier.
-			 * Also save it so the consumer code gets persisted.
-			 *//*
-				 * otRequest.setOwners(Collections.singletonList(ownerFromDB));
-				 * producer.push(config.getOwnershipTransferUpdateTopic(), otRequest); }
-				 */
+		 * We return the application along with the consumerCode that we set earlier.
+		 * Also save it so the consumer code gets persisted.
+		 *//*
+		 * otRequest.setOwners(Collections.singletonList(ownerFromDB));
+		 * producer.push(config.getOwnershipTransferUpdateTopic(), otRequest); }
+		 */
 		return Collections.singletonList(dcApplicationFromDB);
 
 	}
