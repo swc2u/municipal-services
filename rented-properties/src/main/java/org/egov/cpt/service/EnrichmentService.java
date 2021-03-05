@@ -961,5 +961,20 @@ public class EnrichmentService {
 
 	}
 
+	public void enrichDCDemandCalculation(DuplicateCopy dcApplicationFromDB) {
+		List<TaxHeadEstimate> estimates = new LinkedList<>();
+		TaxHeadEstimate estimateFee = new TaxHeadEstimate();
+		estimateFee.setEstimateAmount(new BigDecimal(0.0));
+		estimateFee.setCategory(Category.FEE);
+		estimateFee.setTaxHeadCode(getTaxHeadCodeWithCharge(dcApplicationFromDB.getBillingBusinessService(),
+				PTConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
+		estimates.add(estimateFee);
+
+		Calculation calculation = Calculation.builder().applicationNumber(dcApplicationFromDB.getApplicationNumber())
+				.taxHeadEstimates(estimates).tenantId(dcApplicationFromDB.getTenantId()).build();
+		dcApplicationFromDB.setCalculation(calculation);
+		
+	}
+
 
 }

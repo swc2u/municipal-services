@@ -426,6 +426,25 @@ public class DemandService {
 			}
 			return createDemand(requestInfo, Arrays.asList(ownerFromDB));
 	}
+	
+	public List<Demand> generateFinanceDCDemand(RequestInfo requestInfo, DuplicateCopy dcApplicationFromDB) {
+		List<Demand> demands = new LinkedList<>();
+		List<Demand> searchResult = searchDemand(dcApplicationFromDB.getTenantId(),
+				Collections.singleton(dcApplicationFromDB.getApplicationNumber()), requestInfo,
+				dcApplicationFromDB.getBillingBusinessService());
+		if (!CollectionUtils.isEmpty(searchResult)) {
+			Demand demand = searchResult.get(0);
+			List<DemandDetail> demandDetails = demand.getDemandDetails();
+			List<DemandDetail> updatedDemandDetails = getUpdatedDuplicateCopyDemandDetails(dcApplicationFromDB, demandDetails);
+			demand.setDemandDetails(updatedDemandDetails);
+			demands.add(demand);
+			demands = demandRepository.updateDemand(requestInfo, demands);
+			log.info("Demand generated");
+			return demands;
+		}
+		return createDuplicateCopyDemand(requestInfo, Arrays.asList(dcApplicationFromDB));
+		
+	}
 
 	private List<DemandDetail> getUpdatedDemandDetails(Property property, List<DemandDetail> demandDetails) {
 		List<DemandDetail> newDemandDetails = new ArrayList<>();

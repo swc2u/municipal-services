@@ -122,5 +122,19 @@ public class DuplicateCopy {
 		this.applicationDocuments.add(newApplicationDocumentsItem);
 		return this;
 	}
+	
+	@JsonProperty("transactionId")
+	@Size(max = 256, message = "Transaction id must be between 0 and 256 characters in length")
+	private String transactionId;
+
+	@JsonProperty("bankName")
+	@Size(max = 256, message = "Bank name must be between 0 and 256 characters in length")
+	private String bankName;
+	
+	/**
+	 * Amount to be paid
+	 */
+	@JsonProperty("paymentAmount")
+	private Double paymentAmount;
 
 }

@@ -1,5 +1,6 @@
 package org.egov.cpt.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,8 +8,10 @@ import java.util.List;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.cpt.config.PropertyConfiguration;
+import org.egov.cpt.models.BillV2;
 import org.egov.cpt.models.DuplicateCopy;
 import org.egov.cpt.models.DuplicateCopySearchCriteria;
+import org.egov.cpt.models.Owner;
 import org.egov.cpt.models.Property;
 import org.egov.cpt.models.PropertyCriteria;
 import org.egov.cpt.models.RentAccount;
@@ -18,12 +21,14 @@ import org.egov.cpt.models.calculation.BusinessService;
 import org.egov.cpt.models.calculation.State;
 import org.egov.cpt.producer.Producer;
 import org.egov.cpt.repository.PropertyRepository;
+import org.egov.cpt.service.calculation.DemandRepository;
 import org.egov.cpt.service.calculation.DemandService;
 import org.egov.cpt.service.notification.DuplicateCopyNotificationService;
 import org.egov.cpt.util.PTConstants;
 import org.egov.cpt.util.PropertyUtil;
 import org.egov.cpt.validator.PropertyValidator;
 import org.egov.cpt.web.contracts.DuplicateCopyRequest;
+import org.egov.cpt.web.contracts.OwnershipTransferRequest;
 import org.egov.cpt.workflow.WorkflowIntegrator;
 import org.egov.cpt.workflow.WorkflowService;
 import org.egov.tracer.model.CustomException;
@@ -68,6 +73,12 @@ public class DuplicateCopyService {
 	
 	@Autowired
 	private PropertyUtil propertyUtil;
+	
+	@Autowired
+	private DemandRepository demandRepository;
+	
+	@Autowired
+	private UserService userService;
 
 	public List<DuplicateCopy> createApplication(DuplicateCopyRequest duplicateCopyRequest) {
 		propertyValidator.isPropertyExist(duplicateCopyRequest);
@@ -179,6 +190,109 @@ public class DuplicateCopyService {
 			else 
 				application.getProperty().setRentSummary(new RentSummary());
 		});
+	}
+	
+	public List<DuplicateCopy> collectPayment(DuplicateCopyRequest dcRequest) {
+		/**
+		 * Validate not empty
+		 */
+		if (CollectionUtils.isEmpty(dcRequest.getDuplicateCopyApplications())) {
+			return Collections.emptyList();
+		}
+		DuplicateCopy dcApplicationFromRequest = dcRequest.getDuplicateCopyApplications().get(0);
+		
+		/**
+		 * Validate that this is a valid application number.
+		 */
+		if (dcApplicationFromRequest.getApplicationNumber() == null) {
+			throw new CustomException(Collections.singletonMap("NO_APPLICATION_NUMBER_FOUND",
+					"No application number found to process payment"));
+		}
+		/**
+		 * Validate payment amount
+		 */
+		if(dcApplicationFromRequest.getPaymentAmount()==null) {
+			throw new CustomException(Collections.singletonMap("INVALID_PAYMENT_AMOUNT",
+					"Payment amount should valid"));
+		}
+		
+		DuplicateCopySearchCriteria dcCriteria = DuplicateCopySearchCriteria.builder()
+				.applicationNumber(dcApplicationFromRequest.getApplicationNumber()).status(Collections.singletonList(PTConstants.DC_PENDINGPAYMENT))
+				.build();
+
+		/**
+		 * Retrieve owner from db with the given ids.
+		 */
+		List<DuplicateCopy> dcApplicationsFromDB = repository.getDuplicateCopyProperties(dcCriteria);
+		if (CollectionUtils.isEmpty(dcApplicationsFromDB)) {
+			throw new CustomException(
+					Collections.singletonMap("APPLICATION_NOT_FOUND", String.format("Could not find any valid application %s with pending payment state",
+							dcApplicationFromRequest.getApplicationNumber())));
+		}
+
+		DuplicateCopy dcApplicationFromDB = dcApplicationsFromDB.get(0);
+		BigDecimal totalDue=dcApplicationFromDB.getApplicant().get(0).getAproCharge();
+		
+		/**
+		 * Validate payment amount
+		 */
+		if(dcApplicationFromRequest.getPaymentAmount() < totalDue.doubleValue()) {
+			throw new CustomException(Collections.singletonMap("INVALID_PAYMENT_AMOUNT",
+					"Payment amount should be equal to due amount"));
+		}
+
+		dcApplicationFromDB.setTransactionId(dcApplicationFromRequest.getTransactionId());
+		dcApplicationFromDB.setBankName(dcApplicationFromRequest.getBankName());
+		dcApplicationFromDB.setPaymentAmount(dcApplicationFromRequest.getPaymentAmount());
+
+		/**
+		 * Create egov user if not already present.
+		 */
+		userService.createUser(dcRequest.getRequestInfo(), dcApplicationFromDB.getApplicant().get(0).getPhone(),
+				dcApplicationFromDB.getApplicant().get(0).getName(), dcApplicationFromDB.getApplicant().get(0).getTenantId());
+		
+		enrichmentService.enrichDCDemandCalculation(dcApplicationFromDB);
+
+		/**
+		 * Generate an actual finance demand
+		 */
+		demandService.generateFinanceDCDemand(dcRequest.getRequestInfo(), dcApplicationFromDB);
+
+		/**
+		 * Get the bill generated.
+		 */
+		List<BillV2> bills = demandRepository.fetchBill(dcRequest.getRequestInfo(), dcApplicationFromDB.getTenantId(),
+				dcApplicationFromDB.getApplicationNumber(), dcApplicationFromDB.getBillingBusinessService());
+		if (CollectionUtils.isEmpty(bills)) {
+			throw new CustomException("BILL_NOT_GENERATED", "No bills were found for the consumer code "
+					+ dcApplicationFromDB.getApplicationNumber());
+		}
+
+		if (dcRequest.getRequestInfo().getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_EMPLOYEE)) {
+			log.info("OFFLINE PAYMENT");
+			/**
+			 * if offline, create a payment.
+			 */
+			log.info("Payment Amount:"+dcApplicationFromDB.getPaymentAmount());
+			
+//			demandService.createCashPayment(dcRequest.getRequestInfo(), dcApplicationFromDB.getPaymentAmount(),
+//					bills.get(0).getId(), dcApplicationFromDB, dcApplicationFromDB.getBillingBusinessService());
+
+			dcRequest.setDuplicateCopyApplications(Collections.singletonList(dcApplicationFromDB));
+			producer.push(config.getOwnershipTransferUpdateTopic(), dcRequest);
+
+		}
+		/*
+		 * else {
+		 *//**
+			 * We return the application along with the consumerCode that we set earlier.
+			 * Also save it so the consumer code gets persisted.
+			 *//*
+				 * otRequest.setOwners(Collections.singletonList(ownerFromDB));
+				 * producer.push(config.getOwnershipTransferUpdateTopic(), otRequest); }
+				 */
+		return Collections.singletonList(dcApplicationFromDB);
+
 	}
 
 }

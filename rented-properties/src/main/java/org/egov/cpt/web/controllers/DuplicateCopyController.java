@@ -7,11 +7,14 @@ import javax.validation.Valid;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.cpt.models.DuplicateCopy;
 import org.egov.cpt.models.DuplicateCopySearchCriteria;
+import org.egov.cpt.models.Owner;
 import org.egov.cpt.models.RequestInfoWrapper;
 import org.egov.cpt.service.DuplicateCopyService;
 import org.egov.cpt.util.ResponseInfoFactory;
 import org.egov.cpt.web.contracts.DuplicateCopyRequest;
 import org.egov.cpt.web.contracts.DuplicateCopyResponse;
+import org.egov.cpt.web.contracts.OwnershipTransferRequest;
+import org.egov.cpt.web.contracts.OwnershipTransferResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +88,16 @@ public class DuplicateCopyController {
 				.createResponseInfoFromRequestInfo(duplicateCopyRequest.getRequestInfo(), true);
 		DuplicateCopyResponse response = DuplicateCopyResponse.builder().duplicateCopyApplications(applications)
 				.responseInfo(resInfo).build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@PostMapping("/_pay-fee")
+	public ResponseEntity<DuplicateCopyResponse> rentPayment(@Valid @RequestBody DuplicateCopyRequest otRequest) {
+		List<DuplicateCopy> applications= duplicateCopyService.collectPayment(otRequest);
+		ResponseInfo resInfo = responseInfoFactory.createResponseInfoFromRequestInfo(otRequest.getRequestInfo(),
+				true);
+		DuplicateCopyResponse response = DuplicateCopyResponse.builder().duplicateCopyApplications(applications).responseInfo(resInfo)
+				.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 

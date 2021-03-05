@@ -284,13 +284,6 @@ public class OwnershipTransferService {
 			demandService.createCashPayment(otRequest.getRequestInfo(), ownerFromDB.getOwnerDetails().getPaymentAmount(),
 					bills.get(0).getId(), ownerFromDB, ownerFromDB.getBillingBusinessService());
 
-//			AuditDetails auditDetails = utils.getAuditDetails(otRequest.getRequestInfo().getUserInfo().getUuid(),true);
-//			OfflinePaymentDetails offlinePaymentDetails = OfflinePaymentDetails.builder()
-//					.id(UUID.randomUUID().toString()).propertyId(ownerFromDB.getId())
-//					.demandId(bills.get(0).getBillDetails().get(0).getDemandId()).amount(ownerFromDB.getPaymentAmount())
-//					.bankName(ownerFromDB.getBankName()).transactionNumber(ownerFromDB.getTransactionId())
-//					.auditDetails(auditDetails).build();
-//			ownerFromDB.setOfflinePaymentDetails(Collections.singletonList(offlinePaymentDetails));
 			otRequest.setOwners(Collections.singletonList(ownerFromDB));
 			producer.push(config.getOwnershipTransferUpdateTopic(), otRequest);
 
