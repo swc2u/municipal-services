@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -407,12 +408,40 @@ public class PurchaseOrderJdbcRepository extends org.egov.assets.common.JdbcRepo
 //					paramValues.put("indentquantity", purchaseIndentDetail.getIndentDetail().getIndentQuantity());
 					paramValues.put("indentquantity", purchaseOrderDetail.getOrderQuantity());
 					
-					namedParameterJdbcTemplate.update(query.toString(), paramValues);
+					int update = namedParameterJdbcTemplate.update(query.toString(), paramValues);
+					LOG.info("PO Update d: {}",update);
 				}
 			}
 		}
 	}
 
+	public void removeIndentUsedForPo(PurchaseOrderRequest purchaseOrderRequest,List<PurchaseOrder> dataFromDB, String tenantId) {
+		for (PurchaseOrder poFromRequest : purchaseOrderRequest.getPurchaseOrders()) {
+			for (PurchaseOrderDetail purchaseOrderDetail : poFromRequest.getPurchaseOrderDetails()) {
+					for (PurchaseIndentDetail purchaseIndentDetail : purchaseOrderDetail.getPurchaseIndentDetails()) {
+						Map<String, Object> paramValues = new HashMap<>();
+						BigDecimal differenceofOrder = getDifferenceofOrder(dataFromDB,purchaseOrderDetail.getId(),purchaseOrderDetail.getOrderQuantity());
+						String query = "update indentdetail set poorderedquantity = poorderedquantity + :indentquantity where id = :id and tenantid = :tenantId and (deleted is not true)";
+						paramValues.put("id", purchaseIndentDetail.getIndentDetail().getId());
+						paramValues.put("tenantId", tenantId);
+						paramValues.put("indentquantity", differenceofOrder);
+						int update = namedParameterJdbcTemplate.update(query.toString(), paramValues);
+						LOG.info("PO Updated: {}",update);
+				}
+			}
+		}
+	}
+
+	public BigDecimal getDifferenceofOrder(List<PurchaseOrder> dataFromDB, String detailId, BigDecimal newOrderQuantity) {
+		BigDecimal diff=new BigDecimal(0);
+		for(PurchaseOrder data:dataFromDB){
+			 Optional<PurchaseOrderDetail> findFirst = data.getPurchaseOrderDetails().stream().filter(podetail->podetail.getId().equals(detailId)).findFirst();
+			 if(findFirst.isPresent()) {
+				 diff= newOrderQuantity.subtract(findFirst.get().getOrderQuantity());
+			 }
+		}
+		return diff;
+	}
 	public void markIndentNotUsedForPo(PurchaseOrderRequest purchaseOrderRequest, String tenantId) {
 		for (PurchaseOrder purchaseOrder : purchaseOrderRequest.getPurchaseOrders()) {
 			if (purchaseOrder.getStatus().equals(PurchaseOrder.StatusEnum.fromValue("Rejected")))

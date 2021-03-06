@@ -2,6 +2,7 @@ package org.egov.ec.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -12,9 +13,12 @@ import org.egov.ec.config.EchallanConfiguration;
 import org.egov.ec.producer.Producer;
 import org.egov.ec.repository.IdGenRepository;
 import org.egov.ec.repository.ViolationRepository;
+import org.egov.ec.repository.rowmapper.ColumnsRowMapper;
 import org.egov.ec.service.validator.CustomBeanValidator;
+import org.egov.ec.web.models.ChallanDataBckUp;
 import org.egov.ec.web.models.ChallanDetails;
 import org.egov.ec.web.models.EcPayment;
+import org.egov.ec.web.models.EcPaymentData;
 import org.egov.ec.web.models.EcSearchCriteria;
 import org.egov.ec.web.models.NotificationTemplate;
 import org.egov.ec.web.models.RequestInfoWrapper;
@@ -25,8 +29,8 @@ import org.egov.ec.web.models.workflow.ProcessInstance;
 import org.egov.ec.web.models.workflow.ProcessInstanceRequest;
 import org.egov.ec.workflow.WorkflowIntegrator;
 import org.egov.tracer.model.CustomException;
+import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -44,7 +48,7 @@ public class ViolationService {
 	private CustomBeanValidator validate;
 	private ViolationRepository repository;
 	private DeviceSourceService deviceSource;
-
+    
 	private Producer producer;
 	private EchallanConfiguration config;
 
@@ -66,6 +70,7 @@ public class ViolationService {
 		this.config = config;
 		this.validate=validate;
 		this.deviceSource=deviceSource;
+		
 	}
 	
 	/**
@@ -418,6 +423,44 @@ public class ViolationService {
 		}
 	}
 	
+
+	/**
+	*This method will be used to update payment entries
+	* @param RequestInfoWrapper containing payment object
+	* @return HTTP status on success
+	* @throws CustomException STOREITEM_ADDPAYMENT_EXCEPTION
+	*/
+	public ResponseEntity<ResponseInfoWrapper> updatePayment(RequestInfoWrapper requestInfoWrapper) {
+		log.info("Violation Service - Add Payment");
+		try {
+			EcPaymentData ecPayment = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), EcPaymentData.class);
+			String responseValidate = "";
+			
+		
+			
+		
+			if(responseValidate.equals("")) 
+			{
+				
+					ecPayment.setLastModifiedBy(requestInfoWrapper.getRequestInfo().getUserInfo().getId().toString());
+					ecPayment.setLastModifiedTime(new Date().getTime());
+					repository.updatePayment(ecPayment);
+		
+					return new ResponseEntity<>(ResponseInfoWrapper.builder()
+							.responseInfo(ResponseInfo.builder().status(EcConstants.STATUS_SUCCESS).build()).responseBody(ecPayment).build(),
+							HttpStatus.OK);
+			}
+			else
+			{
+				throw new CustomException("STOREITEM_ADDPAYMENT_EXCEPTION", responseValidate);
+			}
+		} catch (Exception e) {
+			log.error("Violation Service - update Payment Exception"+e.getMessage());
+			throw new CustomException("STOREITEM_ADDPAYMENT_EXCEPTION", e.getMessage());
+
+		}
+	}
+	
 	/**
 	*This method will be used to send email notification
 	* @param RequestInfoWrapper containing NotificationTemplate object
@@ -527,5 +570,23 @@ public class ViolationService {
 				ResponseInfoWrapper.builder().responseInfo(ResponseInfo.builder().status(EcConstants.STATUS_SUCCESS).build())
 						.responseBody(violationMaster).build(),
 				HttpStatus.OK);
+	}
+
+	public ResponseEntity<ResponseInfoWrapper> deleteChallan(RequestInfoWrapper requestInfoWrapper) {
+		ChallanDataBckUp bck = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), ChallanDataBckUp.class);
+		
+			bck.setEgWfProcessinstanceV2( repository.getdataProcessInstance(bck));
+			bck.setEgecDocument(repository.getdataEgecDocument(bck));
+			bck.setEgecStoreItemRegister(repository.getdataStoreItem(bck));
+			bck.setEgecPayment(repository.getdatPayment(bck));
+			bck.setEgecChallanDetail(repository.getdatChallanDetail(bck));
+			bck.setEgecChallanMaster(repository.getdatChallanMaster(bck));
+			bck.setEgecViolationDetail(repository.getdatViolationDetail(bck));
+			bck.setEgecViolationMaster(repository.getdatViolationMaster(bck));
+		
+		repository.deleteChallan(bck);
+		return new ResponseEntity<>(
+				ResponseInfoWrapper.builder().responseInfo(ResponseInfo.builder().status(EcConstants.STATUS_SUCCESS).build())
+						.responseBody(bck).build(),	HttpStatus.OK);
 	}
 }

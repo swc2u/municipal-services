@@ -203,11 +203,11 @@ public class EOfficeService {
 				+ builder.toUriString().toString());
 
 	
-		  ResponseEntity<String> xml = restTemplate.exchange((new
+		 ResponseEntity<String> xml = restTemplate.exchange((new
 		  StringBuilder(builder.toUriString())).toString(),HttpMethod.GET, entity,
 		  String.class);
-		  
 		 
+			
 		 log. info("integration-services logs :: process() :: after calling eOffice APi-response,{}",xml );
 		 
 		
@@ -246,6 +246,7 @@ public class EOfficeService {
 							System.out.println(postdetailData);
 							obj.setPostDetailId(postdetailData.get("postDetailId").toString());
 							obj.setPost(postdetailData.get("repPost").toString());
+							obj.setOrgUnitId(postdetailData.get("orgUnitId").toString());
 							String uuid = UUID.randomUUID().toString();
 							obj.setUuid(uuid);
 							obj.setAuditDetails(auditDetailsUtil.getAuditDetails(request.getRequestInfo(),
@@ -260,6 +261,7 @@ public class EOfficeService {
 								JSONObject jsonData1 = postdetailData.getJSONObject(j);
 								obj.setPostDetailId(jsonData1.get("postDetailId").toString());
 								obj.setPost(jsonData1.get("repPost").toString());
+								obj.setOrgUnitId(jsonData1.get("orgUnitId").toString());
 								String uuid = UUID.randomUUID().toString();
 								obj.setUuid(uuid);
 								obj.setAuditDetails(auditDetailsUtil.getAuditDetails(request.getRequestInfo(),
