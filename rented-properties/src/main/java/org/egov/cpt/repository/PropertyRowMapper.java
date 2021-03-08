@@ -52,13 +52,15 @@ public class PropertyRowMapper implements ResultSetExtractor<List<Property>> {
 						.currentOwner(rs.getString("current_owner")).floors(rs.getString("floors"))
 						.additionalDetails(rs.getString("additional_details")).address(address)
 						.rentIncrementPercentage(rs.getDouble("pd_rent_inc_pg"))
-						.rentIncrementPeriod(rs.getInt("pd_rent_inc_period")).interestRate(rs.getDouble("pd_int_rate"))
+						.rentIncrementPeriod(rs.getFloat("pd_rent_inc_period"))
+						.interestRate(rs.getDouble("pd_int_rate"))
 						.auditDetails(auditdetails).build();
 
 				currentProperty = Property.builder().id(propertyId).transitNumber(rs.getString("transit_number"))
 						.tenantId(tenantId).colony(rs.getString("colony"))
 						.masterDataState(rs.getString("master_data_state"))
 						.masterDataAction(rs.getString("master_data_action")).propertyDetails(propertyDetails)
+						.rentPaymentConsumerCode(rs.getString("pt_consumer_code"))
 						.auditDetails(auditdetails).build();
 				propertyMap.put(propertyId, currentProperty);
 			}
