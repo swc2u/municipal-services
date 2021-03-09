@@ -33,6 +33,9 @@ public class WaterApplication {
 	@JsonProperty("securityCharge")
 	private Double securityCharge = null;
 	
+	  @JsonProperty("totalAmountPaid")
+	    private String totalAmountPaid;
+	
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
 
@@ -149,5 +152,13 @@ public class WaterApplication {
 
 	public void setSecurityCharge(Double securityCharge) {
 		this.securityCharge = securityCharge;
+	}
+
+	public String getTotalAmountPaid() {
+		return totalAmountPaid;
+	}
+
+	public void setTotalAmountPaid(String totalAmountPaid) {
+		this.totalAmountPaid = totalAmountPaid;
 	}
 }

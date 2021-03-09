@@ -79,6 +79,9 @@ public class SewerageConnection extends Connection {
 	@JsonProperty("ferruleSize")
 	private String ferruleSize = null;
 
+	@JsonProperty("totalAmountPaid")
+	private String totalAmountPaid;
+
 	public SewerageConnection noOfWaterClosets(Integer noOfWaterClosets) {
 		this.noOfWaterClosets = noOfWaterClosets;
 		return this;
@@ -341,5 +344,13 @@ public class SewerageConnection extends Connection {
 
 	public void setFerruleSize(String ferruleSize) {
 		this.ferruleSize = ferruleSize;
+	}
+
+	public String getTotalAmountPaid() {
+		return totalAmountPaid;
+	}
+
+	public void setTotalAmountPaid(String totalAmountPaid) {
+		this.totalAmountPaid = totalAmountPaid;
 	}
 }

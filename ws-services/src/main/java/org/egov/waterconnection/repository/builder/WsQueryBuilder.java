@@ -51,7 +51,7 @@ public class WsQueryBuilder {
 	private static final String INNER_JOIN_STRING = " INNER JOIN ";
     private static final String LEFT_OUTER_JOIN_STRING = " LEFT OUTER JOIN ";
 
-	private static String holderSelectValues = "connectionholder.tenantid as holdertenantid, connectionholder.connectionid as holderapplicationId, userid, connectionholder.status as holderstatus, isprimaryholder, connectionholdertype,connectionholder.correspondance_address as holdercorrepondanceaddress, holdershippercentage, connectionholder.relationship as holderrelationship,connectionholder.name as holdername, connectionholder.createdby as holdercreatedby, connectionholder.createdtime as holdercreatedtime, connectionholder.lastmodifiedby as holderlastmodifiedby, connectionholder.lastmodifiedtime as holderlastmodifiedtime, ";
+	private static String holderSelectValues = "connectionholder.tenantid as holdertenantid, connectionholder.connectionid as holderapplicationId, userid, connectionholder.status as holderstatus, isprimaryholder, connectionholdertype,connectionholder.correspondance_address as holdercorrepondanceaddress, holdershippercentage, connectionholder.relationship as holderrelationship,connectionholder.name as holdername,connectionholder.proposed_mobile_no as proposedMobileNo ,connectionholder.proposed_name as  proposedName,connectionholder.proposed_gender as proposedGender ,connectionholder.proposed_guardian_name as proposedGuardianName ,connectionholder.proposed_correspondance_address as  proposedCorrespondanceAddress , connectionholder.createdby as holdercreatedby, connectionholder.createdtime as holdercreatedtime, connectionholder.lastmodifiedby as holderlastmodifiedby, connectionholder.lastmodifiedtime as holderlastmodifiedtime, ";
 	
 	private static final String WATER_SEARCH_QUERY = "SELECT "
 			/* + " conn.*, wc.*, document.*, plumber.*, application.*, property.*, " */
@@ -95,6 +95,17 @@ public class WsQueryBuilder {
             "WHERE offset_ > ? AND offset_ <= ?";
 	
 	private static final String ORDER_BY_CLAUSE= " ORDER BY application.createdTime DESC";
+
+	public static final String GET_PIECHART_DATA = "SELECT id, cccode, divsdiv, consumercode, billcycle, billgroup, subgroup, \r\n" + 
+			"       billtype, name, address, cesscharge, netamount, grossamount, \r\n" + 
+			"       surcharge, totalnetamount, totalsurcharge, totalgrossamount, \r\n" + 
+			"       fixchargecode, fixcharge, duedatecash, duedatecheque, status, \r\n" + 
+			"       billid, paymentid, paymentstatus, createdby, lastmodifiedby, \r\n" + 
+			"       createdtime, lastmodifiedtime, totalamount_paid, paymentmode, \r\n" + 
+			"       fromdate, todate, receiptdate, year\r\n" + 
+			"  FROM public.eg_ws_monthlybill_history where lastmodifiedtime >= ? and lastmodifiedtime <= ? ;";
+	
+	
 	/**
 	 * 
 	 * @param criteria
