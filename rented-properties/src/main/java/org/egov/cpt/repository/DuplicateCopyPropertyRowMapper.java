@@ -45,6 +45,9 @@ public class DuplicateCopyPropertyRowMapper implements ResultSetExtractor<List<D
 						.allotmentNumber(rs.getString("owner_allot_number"))
 						.allotmentStartDate(rs.getLong("allot_start_date"))
 						.allotmentEndDate(rs.getLong("allot_end_date"))
+						.paymentAmount(rs.getDouble("payment_amount"))
+						.bankName(rs.getString("bank_name"))
+						.transactionId(rs.getString("transaction_number"))
 						.auditDetails(auditdetails).build();
 				applicationMap.put(applicationId, currentapplication);
 			}

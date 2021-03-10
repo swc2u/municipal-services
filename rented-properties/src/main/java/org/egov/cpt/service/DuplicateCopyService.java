@@ -197,20 +197,8 @@ public class DuplicateCopyService {
 		}
 		DuplicateCopy dcApplicationFromRequest = dcRequest.getDuplicateCopyApplications().get(0);
 
-		/**
-		 * Validate that this is a valid application number.
-		 */
-		if (dcApplicationFromRequest.getApplicationNumber() == null) {
-			throw new CustomException(Collections.singletonMap("NO_APPLICATION_NUMBER_FOUND",
-					"No application number found to process payment"));
-		}
-		/**
-		 * Validate payment amount
-		 */
-		if(dcApplicationFromRequest.getPaymentAmount()==null) {
-			throw new CustomException(Collections.singletonMap("INVALID_PAYMENT_AMOUNT",
-					"Payment amount should valid"));
-		}
+		propertyValidator.validatePaymentRequest(dcApplicationFromRequest.getApplicationNumber(),dcApplicationFromRequest.getPaymentAmount());
+
 
 		DuplicateCopySearchCriteria dcCriteria = DuplicateCopySearchCriteria.builder()
 				.applicationNumber(dcApplicationFromRequest.getApplicationNumber()).status(Collections.singletonList(PTConstants.DC_PENDINGPAYMENT))
@@ -227,7 +215,7 @@ public class DuplicateCopyService {
 		}
 
 		DuplicateCopy dcApplicationFromDB = dcApplicationsFromDB.get(0);
-		BigDecimal totalDue=dcApplicationFromDB.getApplicant().get(0).getAproCharge();
+		BigDecimal totalDue=dcApplicationFromDB.getApplicant().get(0).getFeeAmount();
 
 		/**
 		 * Validate payment amount
@@ -240,19 +228,13 @@ public class DuplicateCopyService {
 		dcApplicationFromDB.setTransactionId(dcApplicationFromRequest.getTransactionId());
 		dcApplicationFromDB.setBankName(dcApplicationFromRequest.getBankName());
 		dcApplicationFromDB.setPaymentAmount(dcApplicationFromRequest.getPaymentAmount());
+		dcApplicationFromDB.setPaymentMode(dcApplicationFromRequest.getPaymentMode());
 
 		/**
 		 * Create egov user if not already present.
 		 */
 		userService.createUser(dcRequest.getRequestInfo(), dcApplicationFromDB.getApplicant().get(0).getPhone(),
 				dcApplicationFromDB.getApplicant().get(0).getName(), dcApplicationFromDB.getApplicant().get(0).getTenantId());
-
-		enrichmentService.enrichDCDemandCalculation(dcApplicationFromDB);
-
-		/**
-		 * Generate an actual finance demand
-		 */
-		demandService.generateFinanceDCDemand(dcRequest.getRequestInfo(), dcApplicationFromDB);
 
 		/**
 		 * Get the bill generated.
@@ -265,34 +247,22 @@ public class DuplicateCopyService {
 		}
 
 		if (dcRequest.getRequestInfo().getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_EMPLOYEE)) {
-			log.info("OFFLINE PAYMENT");
 			/**
 			 * if offline, create a payment.
 			 */
-			log.info("Payment Amount:"+dcApplicationFromDB.getPaymentAmount());
-
 			Applicant applicant = dcApplicationFromDB.getApplicant().get(0);
-			
+
 			OwnerDetails ownerDetail = OwnerDetails.builder().name(applicant.getName()).phone(applicant.getPhone()).build();
 
 			Owner owner = Owner.builder().ownerDetails(ownerDetail).tenantId(applicant.getTenantId()).build();
 
-			demandService.createCashPayment(dcRequest.getRequestInfo(), dcApplicationFromDB.getPaymentAmount(),
-					bills.get(0).getId(), owner, dcApplicationFromDB.getBillingBusinessService());
+			demandService.createCashPayment(dcRequest.getRequestInfo(), dcApplicationFromDB.getPaymentAmount(),dcApplicationFromDB.getTransactionId(),
+					bills.get(0).getId(), owner, dcApplicationFromDB.getBillingBusinessService(),dcApplicationFromDB.getPaymentMode());
 
 			dcRequest.setDuplicateCopyApplications(Collections.singletonList(dcApplicationFromDB));
 			producer.push(config.getOwnershipTransferUpdateTopic(), dcRequest);
 
 		}
-		/*
-		 * else {
-		 *//**
-		 * We return the application along with the consumerCode that we set earlier.
-		 * Also save it so the consumer code gets persisted.
-		 *//*
-		 * otRequest.setOwners(Collections.singletonList(ownerFromDB));
-		 * producer.push(config.getOwnershipTransferUpdateTopic(), otRequest); }
-		 */
 		return Collections.singletonList(dcApplicationFromDB);
 
 	}

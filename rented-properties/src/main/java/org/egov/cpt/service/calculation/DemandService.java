@@ -2,8 +2,8 @@ package org.egov.cpt.service.calculation;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -407,78 +407,16 @@ public class DemandService {
 		property.setRentPaymentConsumerCode(utils.getPropertyRentConsumerCode(property.getTransitNumber()));
 		return createRentDemand(requestInfo, property);
 	}
-	
-	
-	public List<Demand> generateFinanceOTDemand(RequestInfo requestInfo, Owner ownerFromDB) {
-		List<Demand> demands = new LinkedList<>();
-			List<Demand> searchResult = searchDemand(ownerFromDB.getTenantId(),
-					Collections.singleton(ownerFromDB.getOwnerDetails().getApplicationNumber()), requestInfo,
-					ownerFromDB.getBillingBusinessService());
-			if (!CollectionUtils.isEmpty(searchResult)) {
-				Demand demand = searchResult.get(0);
-				List<DemandDetail> demandDetails = demand.getDemandDetails();
-				List<DemandDetail> updatedDemandDetails = getUpdatedDemandDetails(ownerFromDB, demandDetails);
-				demand.setDemandDetails(updatedDemandDetails);
-				demands.add(demand);
-				demands = demandRepository.updateDemand(requestInfo, demands);
-				log.info("Demand generated");
-				return demands;
-			}
-			return createDemand(requestInfo, Arrays.asList(ownerFromDB));
-	}
-	
-	public List<Demand> generateFinanceDCDemand(RequestInfo requestInfo, DuplicateCopy dcApplicationFromDB) {
-		List<Demand> demands = new LinkedList<>();
-		List<Demand> searchResult = searchDemand(dcApplicationFromDB.getTenantId(),
-				Collections.singleton(dcApplicationFromDB.getApplicationNumber()), requestInfo,
-				dcApplicationFromDB.getBillingBusinessService());
-		if (!CollectionUtils.isEmpty(searchResult)) {
-			Demand demand = searchResult.get(0);
-			List<DemandDetail> demandDetails = demand.getDemandDetails();
-			List<DemandDetail> updatedDemandDetails = getUpdatedDuplicateCopyDemandDetails(dcApplicationFromDB, demandDetails);
-			demand.setDemandDetails(updatedDemandDetails);
-			demands.add(demand);
-			demands = demandRepository.updateDemand(requestInfo, demands);
-			log.info("Demand generated");
-			return demands;
-		}
-		return createDuplicateCopyDemand(requestInfo, Arrays.asList(dcApplicationFromDB));
-		
-	}
 
 	private List<DemandDetail> getUpdatedDemandDetails(Property property, List<DemandDetail> demandDetails) {
 		List<DemandDetail> newDemandDetails = new ArrayList<>();
-		Map<String, List<DemandDetail>> taxHeadToDemandDetail = new HashMap<>();
-
-		demandDetails.forEach(demandDetail -> {
-			if (!taxHeadToDemandDetail.containsKey(demandDetail.getTaxHeadMasterCode())) {
-				List<DemandDetail> demandDetailList = new LinkedList<>();
-				demandDetailList.add(demandDetail);
-				taxHeadToDemandDetail.put(demandDetail.getTaxHeadMasterCode(), demandDetailList);
-			} else
-				taxHeadToDemandDetail.get(demandDetail.getTaxHeadMasterCode()).add(demandDetail);
+		demandDetails.stream().filter(demandDetail->demandDetail.getCollectionAmount().compareTo(BigDecimal.ZERO)==0).forEach(demandDetail->{
+			demandDetail.setCollectionAmount(demandDetail.getTaxAmount());
 		});
-
-		BigDecimal diffInTaxAmount;
-		List<DemandDetail> demandDetailList;
-		BigDecimal total;
-
 		for (TaxHeadEstimate taxHeadEstimate : property.getCalculation().getTaxHeadEstimates()) {
-			if (!taxHeadToDemandDetail.containsKey(taxHeadEstimate.getTaxHeadCode()))
-				newDemandDetails.add(DemandDetail.builder().taxAmount(taxHeadEstimate.getEstimateAmount())
-						.taxHeadMasterCode(taxHeadEstimate.getTaxHeadCode()).tenantId(property.getTenantId())
-						.collectionAmount(BigDecimal.ZERO).build());
-			else {
-				demandDetailList = taxHeadToDemandDetail.get(taxHeadEstimate.getTaxHeadCode());
-				total = demandDetailList.stream().map(DemandDetail::getTaxAmount).reduce(BigDecimal.ZERO,
-						BigDecimal::add);
-				diffInTaxAmount = taxHeadEstimate.getEstimateAmount().subtract(total);
-				if (diffInTaxAmount.compareTo(BigDecimal.ZERO) != 0) {
-					newDemandDetails.add(DemandDetail.builder().taxAmount(diffInTaxAmount)
-							.taxHeadMasterCode(taxHeadEstimate.getTaxHeadCode()).tenantId(property.getTenantId())
-							.collectionAmount(BigDecimal.ZERO).build());
-				}
-			}
+			newDemandDetails.add(DemandDetail.builder().taxAmount(taxHeadEstimate.getEstimateAmount())
+					.taxHeadMasterCode(taxHeadEstimate.getTaxHeadCode()).tenantId(property.getTenantId())
+					.collectionAmount(BigDecimal.ZERO).build());
 		}
 		List<DemandDetail> combinedBillDetials = new LinkedList<>(demandDetails);
 		combinedBillDetials.addAll(newDemandDetails);
@@ -488,9 +426,9 @@ public class DemandService {
 	private List<Demand> createRentDemand(RequestInfo requestInfo, Property property) {
 		User user=null;
 		if(requestInfo.getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_EMPLOYEE)){
-			 user = getEgovUser(property, requestInfo);
+			user = getEgovUser(property, requestInfo);
 		}else{
-			 user = requestInfo.getUserInfo();
+			user = requestInfo.getUserInfo();
 		}
 		List<DemandDetail> demandDetails = new LinkedList<>();
 		if (!CollectionUtils.isEmpty(property.getCalculation().getTaxHeadEstimates())) {
@@ -547,21 +485,30 @@ public class DemandService {
 	 * @param requestInfo   RequestInfo object from the original request.
 	 * @param paymentAmount Total amount paid.
 	 * @param billId        The bill that was generated for this payment.
+	 * @param string 
 	 * @param tenantId      The tenantId to look up mdmsService businessService from
 	 *                      bill.
+	 * @param paymentMode   The mode used for payment (CASH,DD,CHEQUE)
 	 * @return
 	 */
-	public Object createCashPayment(RequestInfo requestInfo, Double paymentAmount, String billId, Owner owner,
-			String billingBusinessService) {
+	public Object createCashPayment(RequestInfo requestInfo, Double paymentAmount,String transactionNumber, String billId,  Owner owner,
+			String billingBusinessService,String paymentMode) {
 		String tenantId = owner.getTenantId();
 		OwnerDetails ownerDetails = owner.getOwnerDetails();
 		CollectionPaymentDetail paymentDetail = CollectionPaymentDetail.builder().tenantId(tenantId)
 				.totalAmountPaid(BigDecimal.valueOf(paymentAmount)).receiptDate(System.currentTimeMillis())
 				.businessService(billingBusinessService).billId(billId).build();
-		CollectionPayment payment = CollectionPayment.builder().paymentMode(CollectionPaymentModeEnum.CASH)
+		CollectionPayment payment = CollectionPayment.builder().paymentMode(CollectionPaymentModeEnum.fromValue(paymentMode))
 				.tenantId(tenantId).totalAmountPaid(BigDecimal.valueOf(paymentAmount)).payerName(ownerDetails.getName())
 				.paidBy("COUNTER").mobileNumber(ownerDetails.getPhone())
-				.paymentDetails(Collections.singletonList(paymentDetail)).build();
+				.paymentDetails(Collections.singletonList(paymentDetail))
+				.build();
+
+		if(!CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.CASH)) {
+			payment.setTransactionNumber(transactionNumber);
+			payment.setInstrumentDate(new Date().getTime());
+			payment.setInstrumentNumber(transactionNumber);
+		}
 
 		CollectionPaymentRequest paymentRequest = CollectionPaymentRequest.builder().requestInfo(requestInfo)
 				.payment(payment).build();

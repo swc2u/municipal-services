@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.Email;
@@ -191,6 +190,9 @@ public class OwnerDetails {
 	 */
 	@JsonProperty("paymentAmount")
 	private Double paymentAmount;
+	
+	@JsonProperty("paymentMode")
+	private String paymentMode;
 	
 	@JsonProperty("isAPROChargePaid")
 	private boolean isAPROChargePaid;

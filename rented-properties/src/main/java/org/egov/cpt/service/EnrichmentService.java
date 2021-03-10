@@ -481,13 +481,6 @@ public class EnrichmentService {
 				PTConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
 		estimates.add(estimateFee);
 
-		TaxHeadEstimate estimateCharges = new TaxHeadEstimate();
-		estimateCharges.setEstimateAmount(new BigDecimal(0.0));
-		estimateCharges.setCategory(Category.FEE);
-		estimateCharges.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
-				PTConstants.TAX_HEAD_CODE_PUBLICATION_CHARGE, Category.FEE));
-		estimates.add(estimateCharges);
-
 		Calculation calculation = Calculation.builder().applicationNumber(application.getApplicationNumber())
 				.taxHeadEstimates(estimates).tenantId(application.getTenantId()).build();
 		application.setCalculation(calculation);
@@ -930,45 +923,4 @@ public class EnrichmentService {
 		property.setCalculation(calculation);
 
 	}
-
-	public void enrichOwnerDemandCalculation(Owner owner) {
-		List<TaxHeadEstimate> estimates = new LinkedList<>();
-		TaxHeadEstimate estimate1 = new TaxHeadEstimate();
-		estimate1.setEstimateAmount(owner.getOwnerDetails().getDueAmount());
-		estimate1.setCategory(Category.FEE);
-		estimate1.setTaxHeadCode(getTaxHeadCodeWithCharge(owner.getBillingBusinessService(),
-				PTConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
-		estimates.add(estimate1);
-
-		if(owner.getOwnerDetails().getAproCharge()!=null) {
-			TaxHeadEstimate estimate2 = new TaxHeadEstimate();
-			estimate2.setEstimateAmount(owner.getOwnerDetails().getAproCharge());
-			estimate2.setCategory(Category.FEE);
-			estimate2.setTaxHeadCode(getTaxHeadCodeWithCharge(owner.getBillingBusinessService(),
-					PTConstants.TAX_HEAD_CODE_PUBLICATION_CHARGE, Category.FEE));
-			estimates.add(estimate2);
-		}
-		Calculation calculation = Calculation.builder()
-				.applicationNumber(owner.getOwnerDetails().getApplicationNumber()).taxHeadEstimates(estimates)
-				.tenantId(owner.getTenantId()).build();
-		owner.setCalculation(calculation);
-
-	}
-
-	public void enrichDCDemandCalculation(DuplicateCopy dcApplicationFromDB) {
-		List<TaxHeadEstimate> estimates = new LinkedList<>();
-		TaxHeadEstimate estimateFee = new TaxHeadEstimate();
-		estimateFee.setEstimateAmount(new BigDecimal(0.0));
-		estimateFee.setCategory(Category.FEE);
-		estimateFee.setTaxHeadCode(getTaxHeadCodeWithCharge(dcApplicationFromDB.getBillingBusinessService(),
-				PTConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
-		estimates.add(estimateFee);
-
-		Calculation calculation = Calculation.builder().applicationNumber(dcApplicationFromDB.getApplicationNumber())
-				.taxHeadEstimates(estimates).tenantId(dcApplicationFromDB.getTenantId()).build();
-		dcApplicationFromDB.setCalculation(calculation);
-		
-	}
-
-
 }

@@ -258,6 +258,9 @@ public class Property {
 	@JsonProperty("bankName")
 	@Size(max = 256, message = "Bank name must be between 0 and 256 characters in length")
 	private String bankName;
+	
+	@JsonProperty("paymentMode")
+	private String paymentMode;
 
 	@JsonProperty("billingBusinessService")
 	@Size(max = 256, message = "Billing business service must be between 0 and 256 characters in length")

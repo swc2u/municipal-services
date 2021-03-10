@@ -145,7 +145,7 @@ public class OwnershipTransferService {
 		List<Owner> ownersFromSearch = propertyValidator.validateUpdateRequest(request);
 		enrichmentService.enrichUpdateOwnershipTransfer(request, ownersFromSearch);
 		String applicationState = request.getOwners().get(0).getApplicationState(); 
-		
+
 		// demand generation
 		/*
 		 * if (applicationState.equalsIgnoreCase(PTConstants.
@@ -163,7 +163,7 @@ public class OwnershipTransferService {
 		if (request.getOwners().get(0).getApplicationState().equalsIgnoreCase(PTConstants.OT_STATUS_APPROVED)) {
 			enrichmentService.postStatusEnrichment(request);
 		}
-//		notificationService.process(request);
+		//		notificationService.process(request);
 
 		/**
 		 * calling rent Summary
@@ -203,7 +203,9 @@ public class OwnershipTransferService {
 			return Collections.emptyList();
 		}
 		Owner ownerFromRequest = otRequest.getOwners().get(0);
-		
+
+		propertyValidator.validatePaymentRequest(ownerFromRequest.getOwnerDetails().getApplicationNumber(),ownerFromRequest.getOwnerDetails().getPaymentAmount());
+
 		/**
 		 * Validate that this is a valid application number.
 		 */
@@ -218,7 +220,7 @@ public class OwnershipTransferService {
 			throw new CustomException(Collections.singletonMap("INVALID_PAYMENT_AMOUNT",
 					"Payment amount should valid"));
 		}
-		
+
 		DuplicateCopySearchCriteria otCriteria = DuplicateCopySearchCriteria.builder()
 				.applicationNumber(ownerFromRequest.getOwnerDetails().getApplicationNumber()).status(Collections.singletonList(PTConstants.OT_PENDINGPAYMENT))
 				.build();
@@ -240,7 +242,6 @@ public class OwnershipTransferService {
 		}else {
 			totalDue=ownerFromDB.getOwnerDetails().getDueAmount();
 		}
-		
 		/**
 		 * Validate payment amount
 		 */
@@ -252,19 +253,13 @@ public class OwnershipTransferService {
 		ownerFromDB.getOwnerDetails().setTransactionId(ownerFromRequest.getOwnerDetails().getTransactionId());
 		ownerFromDB.getOwnerDetails().setBankName(ownerFromRequest.getOwnerDetails().getBankName());
 		ownerFromDB.getOwnerDetails().setPaymentAmount(ownerFromRequest.getOwnerDetails().getPaymentAmount());
+		ownerFromDB.getOwnerDetails().setPaymentMode(ownerFromRequest.getOwnerDetails().getPaymentMode());
 
 		/**
 		 * Create egov user if not already present.
 		 */
 		userService.createUser(otRequest.getRequestInfo(), ownerFromDB.getOwnerDetails().getPhone(),
 				ownerFromDB.getOwnerDetails().getName(), ownerFromDB.getTenantId());
-		
-		enrichmentService.enrichOwnerDemandCalculation(ownerFromDB);
-
-		/**
-		 * Generate an actual finance demand
-		 */
-		demandService.generateFinanceOTDemand(otRequest.getRequestInfo(), ownerFromDB);
 
 		/**
 		 * Get the bill generated.
@@ -277,28 +272,16 @@ public class OwnershipTransferService {
 		}
 
 		if (otRequest.getRequestInfo().getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_EMPLOYEE)) {
-			log.info("OFFLINE PAYMENT");
 			/**
 			 * if offline, create a payment.
 			 */
-			log.info("Payment Amount:"+ownerFromDB.getOwnerDetails().getPaymentAmount());
-			
-			demandService.createCashPayment(otRequest.getRequestInfo(), ownerFromDB.getOwnerDetails().getPaymentAmount(),
-					bills.get(0).getId(), ownerFromDB, ownerFromDB.getBillingBusinessService());
+			demandService.createCashPayment(otRequest.getRequestInfo(), ownerFromDB.getOwnerDetails().getPaymentAmount(),ownerFromDB.getOwnerDetails().getTransactionId(),
+					bills.get(0).getId(), ownerFromDB, ownerFromDB.getBillingBusinessService(),ownerFromDB.getOwnerDetails().getPaymentMode());
 
 			otRequest.setOwners(Collections.singletonList(ownerFromDB));
 			producer.push(config.getOwnershipTransferUpdateTopic(), otRequest);
 
 		}
-		/*
-		 * else {
-		 *//**
-			 * We return the application along with the consumerCode that we set earlier.
-			 * Also save it so the consumer code gets persisted.
-			 *//*
-				 * otRequest.setOwners(Collections.singletonList(ownerFromDB));
-				 * producer.push(config.getOwnershipTransferUpdateTopic(), otRequest); }
-				 */
 		return Collections.singletonList(ownerFromDB);
 
 	}

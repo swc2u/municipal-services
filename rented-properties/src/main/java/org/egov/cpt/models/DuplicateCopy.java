@@ -136,5 +136,7 @@ public class DuplicateCopy {
 	 */
 	@JsonProperty("paymentAmount")
 	private Double paymentAmount;
-
+	
+	@JsonProperty("paymentMode")
+	private String paymentMode;
 }
