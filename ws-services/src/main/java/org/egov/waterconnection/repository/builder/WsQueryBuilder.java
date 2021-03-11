@@ -89,7 +89,7 @@ public class WsQueryBuilder {
 	private static final String NO_OF_CONNECTION_SEARCH_QUERY = "SELECT count(*) FROM eg_ws_connection WHERE";
 	
 	private static final String PAGINATION_WRAPPER = "SELECT * FROM " +
-            "(SELECT *, DENSE_RANK() OVER (ORDER BY app_applicationno) offset_ FROM " +
+            "(SELECT *, DENSE_RANK() OVER (ORDER BY app_applicationno desc) offset_ FROM " +
             "({})" +
             " result) result_offset " +
             "WHERE offset_ > ? AND offset_ <= ?";
