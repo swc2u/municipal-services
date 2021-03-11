@@ -1119,4 +1119,22 @@ public class PropertyValidator {
 		return true;
 	}
 
+	public void validatePaymentRequest(String applicationNumber, Double paymentAmount) {
+		/**
+		 * Validate that this is a valid application number.
+		 */
+		if (applicationNumber == null) {
+			throw new CustomException(Collections.singletonMap("NO_APPLICATION_NUMBER_FOUND",
+					"No application number found to process payment"));
+		}
+		/**
+		 * Validate payment amount
+		 */
+		if(paymentAmount== null || paymentAmount == 0) {
+			throw new CustomException(Collections.singletonMap("INVALID_PAYMENT_AMOUNT",
+					"Payment amount should valid"));
+		}
+		
+	}
+
 }

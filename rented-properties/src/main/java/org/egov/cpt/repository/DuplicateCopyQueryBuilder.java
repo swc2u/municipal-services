@@ -23,7 +23,8 @@ public class DuplicateCopyQueryBuilder {
 			+ " result) result_offset " + "WHERE offset_ > :start AND offset_ <= :end";
 
 	private static final String DUPLICATE_COPY_SEARCH_QUERY = SELECT + "dca.*,ap.*,doc.*,pt.*,address.*,ownership.*,"
-			+ " dca.id as appid, dca.property_id, dca.tenantid as pttenantid, dca.state, dca.action,"
+			+ " dca.id as appid, dca.property_id, dca.tenantid as pttenantid, dca.state, dca.action, "
+			+ " dca.payment_amount,dca.bank_name,dca.transaction_number, "
 			+ " dca.application_number as app_number,dca.modified_time as dcModifiedTime,"
 
 			+ " pt.id as pid, pt.transit_number,pt.colony,pt.modified_date as pmodified_date,"

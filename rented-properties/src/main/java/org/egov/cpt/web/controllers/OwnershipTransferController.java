@@ -7,10 +7,13 @@ import javax.validation.Valid;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.cpt.models.DuplicateCopySearchCriteria;
 import org.egov.cpt.models.Owner;
+import org.egov.cpt.models.Property;
 import org.egov.cpt.service.OwnershipTransferService;
 import org.egov.cpt.util.ResponseInfoFactory;
 import org.egov.cpt.web.contracts.OwnershipTransferRequest;
 import org.egov.cpt.web.contracts.OwnershipTransferResponse;
+import org.egov.cpt.web.contracts.PropertyRequest;
+import org.egov.cpt.web.contracts.PropertyResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +68,16 @@ public class OwnershipTransferController {
 		OwnershipTransferResponse response = OwnershipTransferResponse.builder().owners(owners).responseInfo(resInfo)
 				.build();
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/_pay-fee")
+	public ResponseEntity<OwnershipTransferResponse> rentPayment(@Valid @RequestBody OwnershipTransferRequest otRequest) {
+		List<Owner> owners = ownershipTransferService.collectPayment(otRequest);
+		ResponseInfo resInfo = responseInfoFactory.createResponseInfoFromRequestInfo(otRequest.getRequestInfo(),
+				true);
+		OwnershipTransferResponse response = OwnershipTransferResponse.builder().owners(owners).responseInfo(resInfo)
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 }

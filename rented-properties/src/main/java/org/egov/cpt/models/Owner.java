@@ -1,5 +1,6 @@
 package org.egov.cpt.models;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -103,4 +104,5 @@ public class Owner {
 	@Valid
 	@JsonProperty("wfDocuments")
 	private List<Document> wfdocuments;
+	
 }

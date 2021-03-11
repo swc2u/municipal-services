@@ -52,6 +52,9 @@ public class OwnershipTransferRowMapper implements ResultSetExtractor<List<Owner
 						.relationWithDeceasedAllottee(rs.getString("relation_with_deceased_allottee"))
 						.permanent(rs.getBoolean("permanent")).dueAmount(rs.getBigDecimal("due_amount"))
 						.isAPROChargePaid(rs.getBoolean("isapro_charge_paid"))
+						.paymentAmount(rs.getDouble("payment_amount"))
+						.bankName(rs.getString("bank_name"))
+						.transactionId(rs.getString("transaction_number"))
 						.aproCharge(rs.getBigDecimal("apro_charge")).auditDetails(auditdetails).build();
 
 				Property property = Property.builder().id(rs.getString("pid"))
