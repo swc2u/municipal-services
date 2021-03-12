@@ -52,6 +52,8 @@ public class WaterApplication {
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
 
+	  @JsonProperty("totalAmountPaid")
+	    private String totalAmountPaid;
 	@Override
 	public boolean equals(java.lang.Object o) {
 		if (this == o) {
@@ -149,5 +151,13 @@ public class WaterApplication {
 
 	public void setAuditDetails(AuditDetails auditDetails) {
 		this.auditDetails = auditDetails;
+	}
+
+	public String getTotalAmountPaid() {
+		return totalAmountPaid;
+	}
+
+	public void setTotalAmountPaid(String totalAmountPaid) {
+		this.totalAmountPaid = totalAmountPaid;
 	}
 }

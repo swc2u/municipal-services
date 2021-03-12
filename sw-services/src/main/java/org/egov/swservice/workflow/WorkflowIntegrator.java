@@ -73,10 +73,9 @@ public class WorkflowIntegrator {
 				.action(connection.getProcessInstance().getAction()).additionalDetails(sewerageConnectionRequest.getSewerageConnection().getProcessInstance().getAdditionalDetails()).build();
 
 		if (!StringUtils.isEmpty(sewerageConnectionRequest.getSewerageConnection().getProcessInstance())) {
-			if (!CollectionUtils
-					.isEmpty(sewerageConnectionRequest.getSewerageConnection().getProcessInstance().getAssignes())) {
-				processInstance.setAssignes(
-						sewerageConnectionRequest.getSewerageConnection().getProcessInstance().getAssignes());
+			if ((sewerageConnectionRequest.getSewerageConnection().getProcessInstance().getAssignee())!=null) {
+				processInstance.setAssignee(
+						sewerageConnectionRequest.getSewerageConnection().getProcessInstance().getAssignee());
 			}
 			if (!CollectionUtils
 					.isEmpty(sewerageConnectionRequest.getSewerageConnection().getProcessInstance().getDocuments())) {
