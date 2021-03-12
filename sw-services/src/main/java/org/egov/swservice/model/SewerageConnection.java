@@ -27,7 +27,6 @@ public class SewerageConnection extends Connection {
 
 	@JsonProperty("noOfToilets")
 	private Integer noOfToilets = null;
-	
 
 	@JsonProperty("div")
 	private String div = null;
@@ -61,10 +60,10 @@ public class SewerageConnection extends Connection {
 
 	@JsonProperty("ledgerGroup")
 	private String ledgerGroup = null;
-	
+
 	@JsonProperty("inWorkflow")
 	private Boolean inWorkflow = false;
-	
+
 	@JsonProperty("activityType")
 	private String activityType = null;
 
@@ -73,13 +72,15 @@ public class SewerageConnection extends Connection {
 
 	@JsonProperty("billGroup")
 	private String billGroup = null;
-	
+
 	@JsonProperty("aadharNo")
 	private String aadharNo = null;
 
 	@JsonProperty("ferruleSize")
 	private String ferruleSize = null;
-	
+
+	@JsonProperty("totalAmountPaid")
+	private String totalAmountPaid;
 
 	public String getDiv() {
 		return div;
@@ -343,5 +344,13 @@ public class SewerageConnection extends Connection {
 			return "null";
 		}
 		return o.toString().replace("\n", "\n    ");
+	}
+
+	public String getTotalAmountPaid() {
+		return totalAmountPaid;
+	}
+
+	public void setTotalAmountPaid(String totalAmountPaid) {
+		this.totalAmountPaid = totalAmountPaid;
 	}
 }

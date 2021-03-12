@@ -56,6 +56,22 @@ public class ConnectionHolderInfo extends User {
     @JsonProperty("relationship")
     private Relationship relationship;
 
+
+    @JsonProperty("proposedMobileNo")
+    private String proposedMobileNo;
+
+    @JsonProperty("proposedName")
+    private String proposedName;
+
+    @JsonProperty("proposedGender")
+    private String proposedGender;
+
+    @JsonProperty("proposedGuardianName")
+    private String proposedGuardianName;
+
+    @JsonProperty("proposedCorrespondanceAddress")
+    private String proposedCorrespondanceAddress;
+
     @Builder
     public ConnectionHolderInfo(Long id, String uuid, String userName, String password, String salutation, String name,
                                 String gender, String mobileNumber, String emailId, String altContactNumber, String pan,
@@ -66,6 +82,7 @@ public class ConnectionHolderInfo extends User {
                                 String createdBy, Long createdDate, String lastModifiedBy, Long lastModifiedDate, String tenantId,
                                 String ownerInfoUuid, String mobileNumber2, String gender2, String fatherOrHusbandName2,
                                 String correspondenceAddress2, Boolean isPrimaryOwner, Double ownerShipPercentage, String ownerType,
+                                String proposedName,String proposedMobileNo,String proposedGender,String proposedGuardianName,String proposedCorrespondanceAddress,
                                 String institutionId, Status status, List<Document> documents, Relationship relationship) {
         super(id, uuid, userName, password, salutation, name, gender, mobileNumber, emailId, altContactNumber, pan,
                 aadhaarNumber, permanentAddress, permanentCity, permanentPincode, correspondenceCity,
@@ -84,6 +101,11 @@ public class ConnectionHolderInfo extends User {
         this.status = status;
         this.documents = documents;
         this.relationship = relationship;
+        this.proposedName=proposedName;
+        this.proposedCorrespondanceAddress=proposedCorrespondanceAddress;
+        this.proposedGender=proposedGender;
+        this.proposedMobileNo=proposedMobileNo;
+        this.proposedGuardianName=proposedGuardianName ;
     }
 
     public ConnectionHolderInfo addDocumentsItem(Document documentsItem) {
