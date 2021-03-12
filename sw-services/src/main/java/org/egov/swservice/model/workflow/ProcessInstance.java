@@ -83,9 +83,10 @@ public class ProcessInstance {
     @JsonProperty("additionalDetails")
     @JsonInclude(Include.NON_NULL)
     private JSONObject additionalDetails = null;
-    
-	@JsonProperty("assignes")
-	private List<User> assignes;
+
+	@JsonProperty("assignee")
+	private User assignee;
+
 
 	public ProcessInstance addDocumentsItem(Document documentsItem) {
 		if (this.documents == null) {
