@@ -1,6 +1,6 @@
 package org.egov.integration.model;
 
-import org.egov.common.contract.request.RequestInfo;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -23,5 +23,5 @@ public class EOfficeRequest {
 	private String orgid;
 
 	@JsonProperty("postdetailid")
-	private String postdetailid;
+	private List<String> postdetailid;
 }

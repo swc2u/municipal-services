@@ -310,13 +310,15 @@ public class IndentService extends DomainService {
 							 * LOG.debug(material.getPurchaseUom().getCode());
 							 * LOG.debug(uomMap.get(material.getPurchaseUom().getCode()).getCode());
 							 */
-							material.setPurchaseUom(uomMap.get(
-									(material.getPurchaseUom() != null ? material.getPurchaseUom().getCode() : "")));
-							material.setStockingUom(uomMap.get(
-									(material.getStockingUom() != null ? material.getStockingUom().getCode() : "")));
-							material.setBaseUom(
-									uomMap.get((material.getBaseUom() != null ? material.getBaseUom().getCode() : "")));
-							detail.setMaterial(material);
+							if(material!=null) {
+								material.setPurchaseUom(uomMap.get(
+										(material.getPurchaseUom() != null ? material.getPurchaseUom().getCode() : "")));
+								material.setStockingUom(uomMap.get(
+										(material.getStockingUom() != null ? material.getStockingUom().getCode() : "")));
+								material.setBaseUom(
+										uomMap.get((material.getBaseUom() != null ? material.getBaseUom().getCode() : "")));
+								detail.setMaterial(material);
+							}
 							indent.addIndentDetailsItem(detail);
 
 							detail.setUom(
@@ -422,7 +424,7 @@ public class IndentService extends DomainService {
 					 * errors.addDataError(ErrorCode.DATE_GE_CURRENTDATE.getCode (),
 					 * "expectedDeliveryDate",indent.getExpectedDeliveryDate(). toString()); }
 					 */
-					if (indent.getExpectedDeliveryDate() != null
+					if (indent.getExpectedDeliveryDate() != null 
 							&& indent.getIndentDate().compareTo(indent.getExpectedDeliveryDate()) > 0) {
 						LOG.info("expectedDeliveryDate=" + toDateStr(indent.getExpectedDeliveryDate()));
 						LOG.info("indentDate=" + toDateStr(indent.getIndentDate()));

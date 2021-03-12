@@ -1,12 +1,8 @@
 package org.egov.ec.web.controllers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.egov.ec.service.ViolationService;
-import org.egov.ec.web.models.NotificationTemplate;
 import org.egov.ec.web.models.RequestInfoWrapper;
 import org.egov.ec.web.models.ResponseInfoWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +80,30 @@ public class ViolationController {
 			@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
 		return genearateChallanService.addPayment(requestInfoWrapper);
 	}
+	
+	/**
+	* update  violationPayment  controller
+	* 
+	* @param RequestInfoWrapper List of ViolationDetail
+	* @return HTTP status 200 on success
+	*/
+	@PostMapping(value = "/_updatePayment")
+	public ResponseEntity<ResponseInfoWrapper> updatePayment(
+			@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
+		return genearateChallanService.updatePayment(requestInfoWrapper);
+	}
+	
+	/**
+	* delete challan  violationPayment  controller
+	* 
+	* @param RequestInfoWrapper List of ViolationDetail
+	* @return HTTP status 200 on success
+	*/
+	@PostMapping(value = "/_deleteChallan")
+	public ResponseEntity<ResponseInfoWrapper> deleteChallan(
+			@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
+		return genearateChallanService.deleteChallan(requestInfoWrapper);
+	}
 
 	/**
 	* Send Email Notification
@@ -109,5 +129,13 @@ public class ViolationController {
 				+ "."+ Thread.currentThread().getStackTrace()[1].getMethodName());
 		return genearateChallanService.getSearchChallan(requestInfoWrapper);
 	}
-				
+
+	@PostMapping(value = "/_sendMessage")
+	public ResponseEntity<ResponseInfoWrapper> sendMessage(
+			@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,@RequestHeader("User-Agent") String requestHeader) {
+		log.info("Entering: " + Thread.currentThread().getStackTrace()[1].getClassName()
+				+ "."+ Thread.currentThread().getStackTrace()[1].getMethodName());
+		return genearateChallanService.sendMessage(requestInfoWrapper,requestHeader);
+	}
+
 }

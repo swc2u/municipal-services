@@ -245,7 +245,8 @@ public class PropertyService {
 			if (config.getIsWorkflowEnabled() && !roeAction.contentEquals("")
 					&& (state.contentEquals(PSConstants.PM_APPROVED)
 							|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
-					&& !addCourtCases.contentEquals(PSConstants.EB_ADD_COURT_CASES)) {
+					&& !addCourtCases.contentEquals(PSConstants.EB_ADD_COURT_CASES)
+					&& !request.getProperties().get(0).getPropertyDetails().isAdhocDemand()) {
 				wfIntegrator.callWorkFlow(request);
 			}
 		}
@@ -515,7 +516,14 @@ public class PropertyService {
 		}
 
 		Property property = propertiesFromDB.get(0);
-		Owner owner = utils.getCurrentOwnerFromProperty(property);
+		Owner owner = null;
+		if (null != propertyFromRequest.getPayer() && null != propertyFromRequest.getPayer().getUuid()
+				&& !propertyFromRequest.getPayer().getUuid().isEmpty()) {
+			owner = property.getPropertyDetails().getOwners().stream()
+					.filter(o -> o.getId().equals(propertyFromRequest.getPayer().getUuid())).findFirst().get();
+		} else {
+			owner = utils.getCurrentOwnerFromProperty(property);
+		}
 
 		/**
 		 * Create egov user if not already present.

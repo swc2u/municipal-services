@@ -167,13 +167,13 @@ public class MaterialIssueService extends DomainService {
 					for (MaterialIssueDetail materialIssueDetail : materialIssue.getMaterialIssueDetails()) {
 						materialIssueDetail.setId(detailSequenceNos.get(j));
 						materialIssueDetail.setTenantId(materialIssue.getTenantId());
-						//fetch amount from receipt table --aniket review
+						// fetch amount from receipt table --aniket review
 						BigDecimal value = getMaterialIssuedFromReceiptData(materialIssue.getFromStore(),
 								materialIssueDetail.getMaterial(), materialIssue.getIssueDate(),
 								materialIssue.getTenantId(), materialIssueDetail);
 						totalIssueValue = totalIssueValue.add(value);
 						materialIssueDetail.setValue(value);
-						//update indent issue quantity in indentdetail table for that material
+						// update indent issue quantity in indentdetail table for that material
 						backUpdateIndentAdd(materialIssueDetail, materialIssue.getTenantId());
 						j++;
 					}
@@ -188,8 +188,8 @@ public class MaterialIssueService extends DomainService {
 
 				WorkFlowDetails workFlowDetails = materialIssueRequest.getWorkFlowDetails();
 				workFlowDetails.setBusinessId(materialIssue.getIssueNumber());
-				workflowIntegrator.callWorkFlow(materialIssueRequest.getRequestInfo(), workFlowDetails,
-						materialIssue.getTenantId());
+				workflowIntegrator.callWorkFlowForIndent(materialIssueRequest.getRequestInfo(), workFlowDetails,
+						materialIssue.getTenantId(),materialIssueRequest);
 
 			}
 			kafkaTemplate.send(createTopic, createKey, materialIssueRequest);
@@ -206,6 +206,16 @@ public class MaterialIssueService extends DomainService {
 		HashMap<String, String> hashMap = new HashMap<>();
 		hashMap.put("indentissuedquantity",
 				"indentissuedquantity  + " + materialIssueDetail.getQuantityIssued().toString());
+		materialIssueDetail.getIndentDetail().setTenantId(tenantId);
+		materialIssueJdbcRepository.updateColumn(
+				new IndentDetailEntity().toEntity(materialIssueDetail.getIndentDetail()), "indentdetail", hashMap,
+				null);
+	}
+	
+	public void backUpdateIndentMinusForWorkFlow(MaterialIssueDetail materialIssueDetail, String tenantId) {
+		HashMap<String, String> hashMap = new HashMap<>();
+		hashMap.put("indentissuedquantity",
+				"indentissuedquantity  - " + materialIssueDetail.getQuantityIssued().toString());
 		materialIssueDetail.getIndentDetail().setTenantId(tenantId);
 		materialIssueJdbcRepository.updateColumn(
 				new IndentDetailEntity().toEntity(materialIssueDetail.getIndentDetail()), "indentdetail", hashMap,
@@ -327,11 +337,14 @@ public class MaterialIssueService extends DomainService {
 			materialIssue.setIssueType(IssueTypeEnum.INDENTISSUE);
 		else
 			materialIssue.setIssueType(IssueTypeEnum.MATERIALOUTWARD);
-/*if (StringUtils.isNotBlank(materialIssue.getIndent().getIndentCreatedBy()))
-			materialIssue.setIssuedToEmployee(materialIssue.getIndent().getIndentCreatedBy());
-		if (StringUtils.isNotBlank(materialIssue.getIndent().getDesignation()))
-			materialIssue.setIssuedToDesignation(materialIssue.getIndent().getDesignation());
-*/
+		/*
+		 * if (StringUtils.isNotBlank(materialIssue.getIndent().getIndentCreatedBy()))
+		 * materialIssue.setIssuedToEmployee(materialIssue.getIndent().
+		 * getIndentCreatedBy()); if
+		 * (StringUtils.isNotBlank(materialIssue.getIndent().getDesignation()))
+		 * materialIssue.setIssuedToDesignation(materialIssue.getIndent().getDesignation
+		 * ());
+		 */
 		if (action.equals(Constants.ACTION_CREATE)) {
 			int year = Calendar.getInstance().get(Calendar.YEAR);
 
@@ -888,7 +901,7 @@ public class MaterialIssueService extends DomainService {
 	public MaterialIssueResponse search(final MaterialIssueSearchContract searchContract, String type) {
 		Pagination<MaterialIssue> materialIssues = null;
 
-			materialIssues = materialIssueJdbcRepository.search(searchContract, type);
+		materialIssues = materialIssueJdbcRepository.search(searchContract, type);
 
 		if (materialIssues.getPagedData().size() > 0)
 			for (MaterialIssue materialIssue : materialIssues.getPagedData()) {
@@ -1212,8 +1225,10 @@ public class MaterialIssueService extends DomainService {
 					BigDecimal totalUnitRate = BigDecimal.ZERO;
 					BigDecimal total = BigDecimal.ZERO;
 					for (MaterialIssuedFromReceipt rec : detail.getMaterialIssuedFromReceipts()) {
-						total = total.add(rec.getQuantity().multiply(rec.getMaterialReceiptDetail().getUnitRate()));
-						totalUnitRate = totalUnitRate.add(rec.getMaterialReceiptDetail().getUnitRate());
+						if (rec.getStatus()==true) {
+							total = total.add(rec.getQuantity().multiply(rec.getMaterialReceiptDetail().getUnitRate()));
+							totalUnitRate = totalUnitRate.add(rec.getMaterialReceiptDetail().getUnitRate());
+						}
 					}
 					indentDetail.put("totalValue", total);
 					indentDetail.put("unitRate", totalUnitRate);
@@ -1221,6 +1236,9 @@ public class MaterialIssueService extends DomainService {
 					indentDetails.add(indentDetail);
 					totalIssueAmount = totalIssueAmount.add(total);
 				}
+				if(in.getTotalDeductionValue()!=null)
+					totalIssueAmount=totalIssueAmount.add(in.getTotalDeductionValue());
+				
 				indent.put("issueTotalAmount", totalIssueAmount);
 				indent.put("materialDetails", indentDetails);
 
@@ -1234,7 +1252,7 @@ public class MaterialIssueService extends DomainService {
 					Instant wfDate = Instant.ofEpochMilli(processData.getAuditDetails().getCreatedTime());
 					// Need to integrate Workflow
 					JSONObject jsonWork = new JSONObject();
-					jsonWork.put("srNo", j+1);
+					jsonWork.put("srNo", j + 1);
 					jsonWork.put("date", wfdateFormat.format(wfDate.atZone(ZoneId.systemDefault())));
 					jsonWork.put("updatedBy", processData.getAssigner().getName());
 					jsonWork.put("comments", processData.getComment());

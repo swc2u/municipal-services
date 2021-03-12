@@ -1,17 +1,24 @@
 package org.egov.pgr.repository;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.egov.pgr.model.DiscriptionReport;
+import org.egov.pgr.model.RequestInfoWrapper;
+import org.egov.pgr.repository.rowmapper.ColumnsRowMapper;
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.client.RestTemplate;
 
 @Repository
 @Slf4j
@@ -19,6 +26,10 @@ public class ServiceRequestRepository {
 		
 	@Autowired
 	private RestTemplate restTemplate;
+	
+	
+	
+	
 		
 	/**
 	 * Fetches results from searcher framework based on the uri and request that define what is to be searched.
@@ -44,4 +55,8 @@ public class ServiceRequestRepository {
 		return response;
 		
 	}
+
+	
+
+	
 }
