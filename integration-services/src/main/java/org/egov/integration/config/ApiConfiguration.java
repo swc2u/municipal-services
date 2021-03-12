@@ -78,4 +78,13 @@ public class ApiConfiguration {
 	
 	@Value("${persister.save.eofficeData.topic}")
 	private String eofficeSaveTopic;
+	
+	@Value("${url.shortner.host}")
+	private String urlShortnerHost;
+
+	@Value("${url.shortner.path}")
+	private String urlShortnerPath;
+	
+	@Value("${url.shortner.key}")
+	private String urlShortnerKey;
 }
