@@ -360,14 +360,14 @@ serviceMaps:
       jsonMaps:
       - jsonPath: $.Properties.*.id
 
-    - query: UPDATE cs_pt_property_v1 SET tenantid=?, colony=?,rent_payment_consumer_code=?, master_data_state=?, master_data_action=?, modified_by=?, modified_date=? where id=? AND transit_number=?;
+    - query: UPDATE cs_pt_property_v1 SET tenantid=?, rent_payment_consumer_code=?, colony=?, master_data_state=?, master_data_action=?, modified_by=?, modified_date=?  where id=? AND transit_number=?;
       basePath: Properties.*
       jsonMaps:
       - jsonPath: $.Properties.*.tenantId
+      
+      - jsonPath: $.Properties.*.rpConsumerCode
 
       - jsonPath: $.Properties.*.colony
-      
-      - jsonPath: $.Properties.*.rentPaymentConsumerCode
       
       - jsonPath: $.Properties.*.masterDataState
 
@@ -1074,11 +1074,11 @@ serviceMaps:
 
       - jsonPath: $.DuplicateCopyApplications.*.action
       
-      - jsonPath: $.DuplicateCopyApplications.*.bankName
-      
       - jsonPath: $.DuplicateCopyApplications.*.paymentAmount
       
-      - jsonPath: $.DuplicateCopyApplications.*.paymentMode 
+      - jsonPath: $.DuplicateCopyApplications.*.bankName
+      
+      - jsonPath: $.DuplicateCopyApplications.*.transactionId 
       
       - jsonPath: $.DuplicateCopyApplications.*.auditDetails.lastModifiedBy
 
