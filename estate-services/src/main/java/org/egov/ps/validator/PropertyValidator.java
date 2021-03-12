@@ -240,10 +240,14 @@ public class PropertyValidator {
 		List<Map<String, Object>> fieldConfigurations=new ArrayList<Map<String,Object>>();
 		List<Document> documents = owner.getOwnerDetails().getOwnerDocuments();
 		
-		if(branchType.equalsIgnoreCase(PSConstants.BUILDING_BRANCH)) 
-			fieldConfigurations = mdmsservice.getDocumentConfig("buildingBranchOwnerDocs", requestInfo,tenantId);
-		else
-			fieldConfigurations = mdmsservice.getDocumentConfig("documents", requestInfo,tenantId);
+		if (owner.getOwnerDetails().getIsCurrentOwner().equals(Boolean.TRUE)) {
+			if (branchType.equalsIgnoreCase(PSConstants.BUILDING_BRANCH))
+				fieldConfigurations = mdmsservice.getDocumentConfig("buildingBranchOwnerDocs", requestInfo, tenantId);
+			else
+				fieldConfigurations = mdmsservice.getDocumentConfig("documents", requestInfo, tenantId);
+		} else if (owner.getOwnerDetails().getIsCurrentOwner().equals(Boolean.FALSE)) {
+			fieldConfigurations = mdmsservice.getDocumentConfig("previousOwnerDocs", requestInfo, tenantId);
+		}
 		
 		ObjectMapper mapper = new ObjectMapper();
 		List<EstateDocumentList> documentTypeList = mapper.convertValue(fieldConfigurations,
