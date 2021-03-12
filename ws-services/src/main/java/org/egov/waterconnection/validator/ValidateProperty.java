@@ -32,15 +32,17 @@ public class ValidateProperty {
 	 */
 	public Property getOrValidateProperty(WaterConnectionRequest waterConnectionRequest) {
 		Optional<Property> propertyList = waterServiceUtil.propertySearch(waterConnectionRequest).stream().findFirst();
-		if (!propertyList.isPresent()) {
-			throw new CustomException("INVALID WATER CONNECTION PROPERTY",
-					"Water connection cannot be enriched without property");
-		}
+		/*
+		 * if (!propertyList.isPresent()) { throw new
+		 * CustomException("INVALID WATER CONNECTION PROPERTY",
+		 * "Water connection cannot be enriched without property"); }
+		 */
 		Property property = propertyList.get();
-		if (StringUtils.isEmpty(property.getUsageCategory())) {
-			throw new CustomException("INVALID WATER CONNECTION PROPERTY USAGE TYPE",
-					"Water connection cannot be enriched without property usage type");
-		}
+		/*
+		 * if (StringUtils.isEmpty(property.getUsageCategory())) { throw new
+		 * CustomException("INVALID WATER CONNECTION PROPERTY USAGE TYPE",
+		 * "Water connection cannot be enriched without property usage type"); }
+		 */
 		return property;
 	}
 	

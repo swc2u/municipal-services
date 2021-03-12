@@ -109,6 +109,7 @@ public class PaymentUpdateService {
 					Property property = validateProperty.getOrValidateProperty(sewerageConnectionRequest);
 					wfIntegrator.callWorkFlow(sewerageConnectionRequest, property);
 					enrichmentService.enrichFileStoreIds(sewerageConnectionRequest);
+					sewerageConnectionRequest.getSewerageConnection().setTotalAmountPaid(paymentDetail.getTotalAmountPaid().toString());
 					repo.updateSewerageConnection(sewerageConnectionRequest, false);
 				}
 			}
