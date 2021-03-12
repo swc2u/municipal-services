@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.ec.config.EcConstants;
 import org.egov.ec.config.EchallanConfiguration;
-import org.egov.ec.web.models.RequestInfoWrapper;
 import org.egov.ec.web.models.workflow.ProcessInstanceRequest;
 import org.egov.tracer.model.CustomException;
 import org.json.simple.JSONArray;
@@ -20,18 +19,18 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.PathNotFoundException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -213,5 +212,40 @@ public class WorkflowIntegrator {
 		return responseText;
 
 	}
+
+	public String getShortnedUrl(String link) {
+	try {
+		HttpHeaders http = new HttpHeaders();
+		http.setContentType(MediaType.APPLICATION_JSON);
+		http.add("Authorization", "Bearer "+"G6NmtEhU6U2jfUqAzY9oLkoYt457wpFkoPYR2ovOYRL5BNhkB7Zt5xWGQUU0");
+		MultiValueMap<String, Object> mmap = new LinkedMultiValueMap<String, Object>();
+		mmap.add("url", link);
+		JSONObject object=new JSONObject();
+		object.put("url", link);
+		HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity(object, http);
+		log.info("ec-services logs :: url shortner() :: Before calling urlshortner APi");
+		JsonNode response = rest.postForObject(config.getUrlShortnerHost().concat(config.getUrlShortnerPath()),entity,
+				JsonNode.class);
+		if (!isNull(response)) {
+			ObjectMapper mapper = new ObjectMapper();
+			log.info("ShortURL Success : " + response);
+			JSONObject responseInfo = mapper.convertValue(response.get("data"), JSONObject.class);
+			StringBuilder builder=new StringBuilder();
+			return builder.append("https://").append(responseInfo.get("domain").toString()).append("/").append(responseInfo.get("alias").toString()).toString();
+		} else {
+			log.info("ShortURL Failed : Reason " + response);
+		}
+
+	} catch (Exception e) {
+		log.info("URL Shortneting Exception while processing: ERROR " + e.getMessage());
+		ResponseInfo responseInfo = new ResponseInfo();
+		responseInfo.setResMsgId(HttpStatus.BAD_REQUEST.toString());
+		responseInfo.setStatus("Fail");
+		log.info("URL Shortneting Created Success : " + responseInfo.getMsgId());
+		return null;
+
+	}
+	return null;
+}
 
 }

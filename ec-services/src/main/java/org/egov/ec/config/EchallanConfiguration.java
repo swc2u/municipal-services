@@ -167,5 +167,11 @@ public class EchallanConfiguration {
 	
 	@Value("${echallan.notification.flag}")
 	public String echallanNotificationFlag;
-	
+
+	@Value("${url.shortner.host}")
+	private String urlShortnerHost;
+
+	@Value("${url.shortner.path}")
+	private String urlShortnerPath;
+
 }
