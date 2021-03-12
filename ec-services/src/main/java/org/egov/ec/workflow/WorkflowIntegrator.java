@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.ec.config.EcConstants;
 import org.egov.ec.config.EchallanConfiguration;
@@ -19,13 +20,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -213,25 +209,27 @@ public class WorkflowIntegrator {
 
 	}
 
-	public String getShortnedUrl(String link) {
+	public String getShortnedUrl(String link, RequestInfo requestInfo) {
 	try {
-		HttpHeaders http = new HttpHeaders();
-		http.setContentType(MediaType.APPLICATION_JSON);
-		http.add("Authorization", "Bearer "+"G6NmtEhU6U2jfUqAzY9oLkoYt457wpFkoPYR2ovOYRL5BNhkB7Zt5xWGQUU0");
-		MultiValueMap<String, Object> mmap = new LinkedMultiValueMap<String, Object>();
-		mmap.add("url", link);
+
 		JSONObject object=new JSONObject();
-		object.put("url", link);
-		HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity(object, http);
+		JSONObject integartionRequest=new JSONObject();
+		integartionRequest.put("url", link);
+		object.put("RequestInfo", requestInfo);
+		object.put("IntegrationRequest", integartionRequest);
+
 		log.info("ec-services logs :: url shortner() :: Before calling urlshortner APi");
-		JsonNode response = rest.postForObject(config.getUrlShortnerHost().concat(config.getUrlShortnerPath()),entity,
+		JsonNode response = rest.postForObject(config.getUrlShortnerHost().concat(config.getUrlShortnerPath()),object,
 				JsonNode.class);
 		if (!isNull(response)) {
 			ObjectMapper mapper = new ObjectMapper();
 			log.info("ShortURL Success : " + response);
-			JSONObject responseInfo = mapper.convertValue(response.get("data"), JSONObject.class);
-			StringBuilder builder=new StringBuilder();
-			return builder.append("https://").append(responseInfo.get("domain").toString()).append("/").append(responseInfo.get("alias").toString()).toString();
+			ResponseInfo responseInfo1 = mapper.convertValue(response.get("ResponseInfo"), ResponseInfo.class);
+			if(responseInfo1 != null && responseInfo1.getStatus().equalsIgnoreCase(EcConstants.STATUS_SUCCESS)){
+				JSONObject responseInfo = mapper.convertValue(response.get("ResponseBody"), JSONObject.class);
+				StringBuilder builder=new StringBuilder();
+				return builder.append("https://").append(responseInfo.get("domain").toString()).append("/").append(responseInfo.get("alias").toString()).toString();
+			}
 		} else {
 			log.info("ShortURL Failed : Reason " + response);
 		}
@@ -242,10 +240,10 @@ public class WorkflowIntegrator {
 		responseInfo.setResMsgId(HttpStatus.BAD_REQUEST.toString());
 		responseInfo.setStatus("Fail");
 		log.info("URL Shortneting Created Success : " + responseInfo.getMsgId());
-		return null;
+		return "";
 
 	}
-	return null;
+	return "";
 }
 
 }

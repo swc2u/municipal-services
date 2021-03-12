@@ -168,10 +168,10 @@ public class EchallanConfiguration {
 	@Value("${echallan.notification.flag}")
 	public String echallanNotificationFlag;
 
-	@Value("${url.shortner.host}")
+	@Value("${integration.service.host}")
 	private String urlShortnerHost;
 
-	@Value("${url.shortner.path}")
+	@Value("${integration.service.path}")
 	private String urlShortnerPath;
 
 }

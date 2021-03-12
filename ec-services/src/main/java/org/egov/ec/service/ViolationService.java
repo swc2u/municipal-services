@@ -216,7 +216,7 @@ public class ViolationService {
 							.replace("<EnchroachmentType>", violationMaster.getEncroachmentType())
 							.replace("<Date and Time>",
 									violationMaster.getViolationDate() + " " + violationMaster.getViolationTime())
-							.replace("<Link>", wfIntegrator.getShortnedUrl((config.getLoginUrl()+"?mobileno="+violationMaster.getContactNumber()+"&ecno="+violationMaster.getChallanId())))
+							.replace("<Link>", wfIntegrator.getShortnedUrl((config.getLoginUrl()+"?mobileno="+violationMaster.getContactNumber()+"&ecno="+violationMaster.getChallanId()),requestInfoWrapper.getRequestInfo()))
 							.replace("<br>","\r\n");
 					System.out.println("dsvdjhvd"+strOutput);
 					violationMaster.getNotificationTemplate().setBody(strOutput);
@@ -559,7 +559,7 @@ public class ViolationService {
 				.replace("<EnchroachmentType>", violationMaster.getEncroachmentType())
 				.replace("<Date and Time>",
 						violationMaster.getViolationDate() + " " + violationMaster.getViolationTime())
-				.replace("<Link>",wfIntegrator.getShortnedUrl((config.getLoginUrl()+"?mobileno="+violationMaster.getContactNumber()+"&ecno="+violationMaster.getChallanId())))
+				.replace("<Link>",wfIntegrator.getShortnedUrl((config.getLoginUrl()+"?mobileno="+violationMaster.getContactNumber()+"&ecno="+violationMaster.getChallanId()),requestInfoWrapper.getRequestInfo()))
 				.replace("<br>","\r\n");
 		log.info("Message Ready To Send : {}",strOutput);
 		violationMaster.getNotificationTemplate().setBody(strOutput);
