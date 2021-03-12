@@ -167,5 +167,11 @@ public class EchallanConfiguration {
 	
 	@Value("${echallan.notification.flag}")
 	public String echallanNotificationFlag;
-	
+
+	@Value("${integration.service.host}")
+	private String urlShortnerHost;
+
+	@Value("${integration.service.path}")
+	private String urlShortnerPath;
+
 }
