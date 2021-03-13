@@ -222,6 +222,9 @@ public class ViolationServiceTest {
 		.thenReturn("");
 		when(wfIntegrator.callWorkFlow(Matchers.any(ProcessInstanceRequest.class)))
 		.thenReturn(ResponseInfo.builder().status("successful").build());
+		when(wfIntegrator.getShortnedUrl(Matchers.any(String.class)))
+		.thenReturn("");
+
 		Assert.assertEquals(HttpStatus.OK, serv.generateChallan(infoWrapper,"vjh").getStatusCode());
 		
 	}

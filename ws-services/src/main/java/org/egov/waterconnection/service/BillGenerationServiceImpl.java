@@ -57,11 +57,11 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 					List<String> bill = Arrays.asList(values);
 					
 					BillGeneration uploadFileData = BillGeneration.builder()
-							.billGenerationId(UUID.randomUUID().toString()).auditDetails(auditDetails).isFileGenerated(false).status(WCConstants.STATUS_INITIATED).
-							ccCode(bill.get(0).trim()).divSdiv(bill.get(1).trim()).consumerCode(bill.get(2).trim()).billCycle(bill.get(3).trim()).billGroup(bill.get(4).trim()).subGroup(bill.get(5).trim())
+							.billGenerationId(UUID.randomUUID().toString()).auditDetails(auditDetails).isFileGenerated(false).status(WCConstants.STATUS_INITIATED).paymentStatus(WCConstants.STATUS_INITIATED)
+							.ccCode(bill.get(0).trim()).divSdiv(bill.get(1).trim()).consumerCode(bill.get(2).trim()).billCycle(bill.get(3).trim()).billGroup(bill.get(4).trim()).subGroup(bill.get(5).trim())
 							.billType(bill.get(6).trim()).name(bill.get(7).trim()).address(bill.get(8).trim()).cessCharge(bill.get(14).trim()).netAmount(bill.get(15).trim()).surcharge(bill.get(16).trim())
 							.grossAmount(bill.get(17).trim()).totalNetAmount(bill.get(18).trim()).totalSurcharge(bill.get(19).trim()).totalSurcharge(bill.get(20).trim())
-							.toDate(billGenerationRequest.getBillGeneration().getToDate()).fromDate(billGenerationRequest.getBillGeneration().getFromDate()).dueDateCash(dateFormatter.format(dateParser.parse(bill.get(23).trim()))).dueDateCheque(dateFormatter.format(dateParser.parse(bill.get(24).trim()))).build();
+							.receiptDate(null).totalAmountPaid(null).billId(null).paymentId(null).toDate(billGenerationRequest.getBillGeneration().getToDate()).fromDate(billGenerationRequest.getBillGeneration().getFromDate()).dueDateCash(dateFormatter.format(dateParser.parse(bill.get(23).trim()))).dueDateCheque(dateFormatter.format(dateParser.parse(bill.get(24).trim()))).build();
 
 					listOfBills.add(uploadFileData);
 				}
