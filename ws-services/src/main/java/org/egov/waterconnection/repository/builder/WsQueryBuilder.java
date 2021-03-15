@@ -34,7 +34,7 @@ public class WsQueryBuilder {
 			"       billtype as billType, name as name, address as address, add1 as add1, add2 as add2, add3  , add4  , add5  , cesscharge , \r\n" + 
 			"       netamount , grossamount , surcharge , totalnetamount  , totalsurcharge  , \r\n" + 
 			"       totalgrossamount , fixchargecode , fixcharge  , duedatecash , duedatecheque  , \r\n" + 
-			"       status , billid , paymentid  , paymentmode, receiptdate, paymentstatus , createdby , lastmodifiedby  , \r\n" + 
+			"       status , billid , paymentid  ,totalamount_paid as totalAmountPaid, paymentmode, receiptdate, paymentstatus , createdby , lastmodifiedby  , \r\n" + 
 			"       createdtime , lastmodifiedtime\r\n" + 
 			"  FROM public.eg_ws_savebilling where status ='PAID';";
 
