@@ -365,7 +365,7 @@ serviceMaps:
       jsonMaps:
       - jsonPath: $.Properties.*.tenantId
       
-      - jsonPath: $.Properties.*.rpConsumerCode
+      - jsonPath: $.Properties.*.rentPaymentConsumerCode
 
       - jsonPath: $.Properties.*.colony
       
