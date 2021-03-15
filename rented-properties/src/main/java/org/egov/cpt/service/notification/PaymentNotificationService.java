@@ -63,7 +63,8 @@ public class PaymentNotificationService {
 
 	private PropertyService propertyService;
 
-	private final static String CASH = "cash";
+	
+	private final static ArrayList<String> offlineModes =new ArrayList<>(Arrays.asList("CASH","CHEQUE","DD"));
 
 	@Value("${egov.allowed.businessServices}")
 	private String allowedBusinessServices;
@@ -228,7 +229,7 @@ public class PaymentNotificationService {
 							List<Property> propertyList = propertyService.searchProperty(propertyCriteria, requestInfo);
 							propertyList.forEach(property -> {
 								Owner owner = null;
-								if (paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase(CASH)) {
+								if (offlineModes.contains(paymentRequest.getPayment().getPaymentMode())) {
 									owner = propertyUtil.getCurrentOwnerFromProperty(property);
 								}
 								String localizationMessages = util.getLocalizationMessages(property.getTenantId(),
@@ -403,7 +404,7 @@ public class PaymentNotificationService {
 				paymentRequest);
 		ownerMessage = ownerMessage.replaceAll("<br/>", "");
 		SMSRequest ownerSmsRequest = null;
-		if (paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase(CASH)) {
+		if (offlineModes.contains(paymentRequest.getPayment().getPaymentMode())) {
 			ownerSmsRequest = new SMSRequest(owner.getOwnerDetails().getPhone(), ownerMessage);
 		} else {
 			ownerSmsRequest = new SMSRequest(paymentRequest.getRequestInfo().getUserInfo().getMobileNumber(),
@@ -433,7 +434,7 @@ public class PaymentNotificationService {
 		String emailSignature = util.getMessageTemplate(PTConstants.EMAIL_SIGNATURE, localizationMessages);
 		message = message.concat(emailSignature);
 		EmailRequest emailRequest = null;
-		if (paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase(CASH)) {
+		if (offlineModes.contains(paymentRequest.getPayment().getPaymentMode())) {
 			emailRequest = EmailRequest.builder().subject(PTConstants.EMAIL_SUBJECT).isHTML(true)
 					.email(owner.getOwnerDetails().getEmail()).body(message).build();
 		} else {

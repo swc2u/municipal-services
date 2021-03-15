@@ -38,8 +38,6 @@ public class PaymentUpdateService {
 
 	private OwnershipTransferService ownershipTransferService;
 
-	private PropertyService propertyService;
-
 	private OwnershipTransferRepository repositoryOt;
 
 	private DuplicateCopyService duplicateCopyService;
@@ -70,7 +68,6 @@ public class PaymentUpdateService {
 		this.workflowService = workflowService;
 		this.util = util;
 		this.rentEnrichmentService = rentEnrichmentService;
-		this.propertyService = propertyService;
 	}
 
 	final String tenantId = "tenantId";
@@ -176,14 +173,18 @@ public class PaymentUpdateService {
 
 							PropertyCriteria searchCriteria = new PropertyCriteria();
 							searchCriteria.setTransitNumber(util.getTransitNumberFromConsumerCode(consumerCode));
-
-							List<Property> properties = propertyService.searchProperty(searchCriteria, requestInfo);
+							
+							List<Property> properties = propertyRepository.getProperties(searchCriteria);
+//							List<Property> properties = propertyService.searchProperty(searchCriteria, requestInfo);
+							
+							Property property = properties.get(0);
+							property.setRentPaymentConsumerCode(consumerCode);
 
 							if (CollectionUtils.isEmpty(properties))
 								throw new CustomException("INVALID RECEIPT",
 										"No Property found for the comsumerCode " + consumerCode);
 
-							rentEnrichmentService.postEnrichmentForRentPayment(requestInfo, properties.get(0),
+							rentEnrichmentService.postEnrichmentForRentPayment(requestInfo, property,
 									paymentDetail);
 
 							break;

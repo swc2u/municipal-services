@@ -58,7 +58,7 @@ public class NotificationUtil {
 
 	private static DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
-	private final static String CASH = "cash";
+	private final static ArrayList<String> offlineModes =new ArrayList<>(Arrays.asList("CASH","CHEQUE","DD"));
 
 	@Autowired
 	public NotificationUtil(PropertyConfiguration config, ServiceRequestRepository serviceRequestRepository,
@@ -434,7 +434,7 @@ public class NotificationUtil {
 	public String getRPOwnerPaymentMsg(Owner owner, PaymentDetail paymentDetail, String localizationMessages,
 			String transitNumber, PaymentRequest paymentRequest) {
 		String messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_PAYMENT_RECIEVED, localizationMessages);
-		if (paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase(CASH)) {
+		if (paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase("DD") || paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase("CHEQUE")) {
 			messageTemplate = messageTemplate.replace("<1>", owner.getOwnerDetails().getName());
 			messageTemplate = messageTemplate.replace("<4>", owner.getProperty().getOfflinePaymentDetails().get(0).getTransactionNumber());
 		} else {
@@ -567,7 +567,7 @@ public class NotificationUtil {
 				paymentRequest);
 		message = message.replaceAll("<br/>", "");
 		Map<String, String> mobileNumberToOwner = new HashMap<>();
-		if (paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase(CASH)) {
+		if (offlineModes.contains(paymentRequest.getPayment().getPaymentMode())) {
 			mobileNumberToOwner.put(owner.getOwnerDetails().getPhone(), owner.getOwnerDetails().getName());
 		} else {
 			mobileNumberToOwner.put(paymentRequest.getRequestInfo().getUserInfo().getMobileNumber(),
