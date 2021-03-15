@@ -86,10 +86,10 @@ public class BillingService {
 				
            enrichWaterCalculation(billGenerationRequest,bill,masterMap,true);
 
-				}
+				}else {
 			  enrichWaterCalculation(billGenerationRequest,bill,masterMap,false);
 			
-				
+				}	
 			}
 			else {
 				if(todayDate.compareTo(dueDateCash) > 0) {
