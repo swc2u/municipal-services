@@ -34,9 +34,9 @@ public class WsQueryBuilder {
 			"       billtype as billType, name as name, address as address, add1 as add1, add2 as add2, add3  , add4  , add5  , cesscharge , \r\n" + 
 			"       netamount , grossamount , surcharge , totalnetamount  , totalsurcharge  , \r\n" + 
 			"       totalgrossamount , fixchargecode , fixcharge  , duedatecash , duedatecheque  , \r\n" + 
-			"       status , billid , paymentid  , paymentstatus , createdby , lastmodifiedby  , \r\n" + 
+			"       status , billid , paymentid  , paymentmode, receiptdate, paymentstatus , createdby , lastmodifiedby  , \r\n" + 
 			"       createdtime , lastmodifiedtime\r\n" + 
-			"  FROM public.eg_ws_savebilling where status ='PAID' and isFileGenerated = false;";
+			"  FROM public.eg_ws_savebilling where status ='PAID';";
 
 	public static final String GET_WS_BILLING_FILES = "SELECT  filestore_url as billFileStoreUrl, filestore_id as billFileStoreId, filegeneration_time as fileGenerationTime\r\n" + 
 			"  FROM public.eg_ws_billfile_history;";

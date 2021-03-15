@@ -58,7 +58,10 @@ public class ApplicationRowMapper implements ResultSetExtractor<List<Application
 							.paymentAmount(rs.getBigDecimal("appamount")).paymentType(rs.getString("apppayment_type"))
 							.dateOfPayment(rs.getLong("appdate_of_payment"))
 							.newsPaperAdvertisementDate(rs.getLong("appnews_paper_advertisement_date"))
-							.auditDetails(auditdetails).build();
+							.applicationSubmissionDate(rs.getLong("appapplication_submission_date"))
+							.auditDetails(auditdetails).bookNumber(rs.getString("appbook_number"))
+							.pageNumber(rs.getString("apppage_number")).volumeNumber(rs.getString("appvolume_number"))
+							.build();
 
 					PGobject applicationDetailsPgObject = (PGobject) rs.getObject("appapplication_details");
 					if (applicationDetailsPgObject != null) {
@@ -146,8 +149,8 @@ public class ApplicationRowMapper implements ResultSetExtractor<List<Application
 							.tenantId(rs.getString("otenantid")).serialNumber(rs.getString("oserial_number"))
 							.share(rs.getDouble("oshare")).cpNumber(rs.getString("ocp_number"))
 							.state(rs.getString("ostate")).action(rs.getString("oaction"))
-							.ownershipType(rs.getString("ownership_type")).ownerDetails(ownerDetails)
-							.auditDetails(auditdetails).build();
+							.npNumber(rs.getString("onp_number")).ownershipType(rs.getString("ownership_type"))
+							.ownerDetails(ownerDetails).auditDetails(auditdetails).build();
 
 					currentApplication.getProperty().getPropertyDetails().addOwnerItem(owners);
 				}
