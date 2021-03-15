@@ -39,7 +39,7 @@ public class Address {
 	private String propertyId;
 
 	@JsonProperty("transitNumber")
-	@Size(max = 4, message = "Transit number must be between 0 and 4 characters in length")
+//	@Size(max = 4, message = "Transit number must be between 0 and 4 characters in length")
 	private String transitNumber;
 
 	@JsonProperty("tenantId")
