@@ -99,4 +99,10 @@ public class OfflinePaymentDetails {
 
 	@JsonProperty("mmPaymentTillDate")
 	private Long mmPaymentTillDate;
+	
+	@JsonProperty("fromDate")
+	private String fromDate;
+
+	@JsonProperty("toDate")
+	private String toDate;
 }
