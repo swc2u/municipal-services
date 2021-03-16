@@ -105,9 +105,9 @@ public class PropertyValidator {
 					|| requestProperty.getPropertyDetails().getTypeOfAllocation().trim().isEmpty()) {
 				errorMap.put("INVALID_TYPE_OF_ALLOCATION", "Type of allocation can not be empty");
 			}
-			if (requestProperty.getPropertyDetails().getAreaSqft() < 1) {
-				errorMap.put("INVALID_AREA_SQFT", "Area per sq.ft can not be empty");
-			}
+//			if (requestProperty.getPropertyDetails().getAreaSqft() < 1) {
+//				errorMap.put("INVALID_AREA_SQFT", "Area per sq.ft can not be empty");
+//			}
 			if (requestProperty.getPropertyDetails().getRatePerSqft() == null
 					|| requestProperty.getPropertyDetails().getRatePerSqft().signum() < 1) {
 				errorMap.put("INVALID_RATE_PER_SQFT", "Rate per sq.ft can not be less than or equals to zero");
