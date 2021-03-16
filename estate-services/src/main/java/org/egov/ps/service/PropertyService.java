@@ -608,17 +608,36 @@ public class PropertyService {
 			AuditDetails auditDetails = util.getAuditDetails(propertyRequest.getRequestInfo().getUserInfo().getUuid(),
 					true);
 
-			OfflinePaymentDetails offlinePaymentDetails = OfflinePaymentDetails.builder()
-					.id(UUID.randomUUID().toString()).propertyDetailsId(property.getPropertyDetails().getId())
-					.demandId(bills.get(0).getBillDetails().get(0).getDemandId())
-					.amount(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount())
-					.bankName(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getBankName())
-					.transactionNumber(
-							property.getPropertyDetails().getOfflinePaymentDetails().get(0).getTransactionNumber())
-					.dateOfPayment(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getDateOfPayment())
-					.auditDetails(auditDetails).build();
-			property.getPropertyDetails().setOfflinePaymentDetails(Collections.singletonList(offlinePaymentDetails));
-
+			if (property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)) {
+				OfflinePaymentDetails offlinePaymentDetails = OfflinePaymentDetails.builder()
+						.id(UUID.randomUUID().toString()).propertyDetailsId(property.getPropertyDetails().getId())
+						.demandId(bills.get(0).getBillDetails().get(0).getDemandId())
+						.amount(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount())
+						.bankName(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getBankName())
+						.transactionNumber(
+								property.getPropertyDetails().getOfflinePaymentDetails().get(0).getTransactionNumber())
+						.dateOfPayment(
+								property.getPropertyDetails().getOfflinePaymentDetails().get(0).getDateOfPayment())
+						.fromDate(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails().get(0)
+								.getFromDate())
+						.toDate(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails().get(0).getToDate())
+						.auditDetails(auditDetails).build();
+				property.getPropertyDetails()
+						.setOfflinePaymentDetails(Collections.singletonList(offlinePaymentDetails));
+			} else {
+				OfflinePaymentDetails offlinePaymentDetails = OfflinePaymentDetails.builder()
+						.id(UUID.randomUUID().toString()).propertyDetailsId(property.getPropertyDetails().getId())
+						.demandId(bills.get(0).getBillDetails().get(0).getDemandId())
+						.amount(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount())
+						.bankName(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getBankName())
+						.transactionNumber(
+								property.getPropertyDetails().getOfflinePaymentDetails().get(0).getTransactionNumber())
+						.dateOfPayment(
+								property.getPropertyDetails().getOfflinePaymentDetails().get(0).getDateOfPayment())
+						.auditDetails(auditDetails).build();
+				property.getPropertyDetails()
+						.setOfflinePaymentDetails(Collections.singletonList(offlinePaymentDetails));
+			}
 			propertyRequest.setProperties(Collections.singletonList(property));
 			producer.push(config.getUpdatePropertyTopic(), propertyRequest);
 
