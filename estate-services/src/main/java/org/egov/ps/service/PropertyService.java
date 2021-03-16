@@ -200,7 +200,8 @@ public class PropertyService {
 		}
 		/* Approved Property Add Estate Branch Missing Demands */
 		if (null != request.getProperties().get(0).getState()
-				&& PSConstants.PENDING_SO_APPROVAL.equalsIgnoreCase(property.getState())
+				&& (PSConstants.PENDING_SO_APPROVAL.equalsIgnoreCase(property.getState())
+						|| PSConstants.ES_EB_PM_PENDING_SO_APPROVAL.equalsIgnoreCase(property.getState()))
 				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)
 				&& !action.contentEquals("")
 				&& property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
@@ -234,14 +235,16 @@ public class PropertyService {
 		}
 
 		if (config.getIsWorkflowEnabled() && !action.contentEquals("") && !action.contentEquals(PSConstants.ES_DRAFT)
-				&& !state.contentEquals(PSConstants.PM_APPROVED)) {
+				&& !(state.contentEquals(PSConstants.PM_APPROVED)
+						|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))) {
 			wfIntegrator.callWorkFlow(request);
 		}
 		if (!CollectionUtils.isEmpty(request.getProperties().get(0).getPropertyDetails().getBidders())) {
 			String roeAction = request.getProperties().get(0).getPropertyDetails().getBidders().get(0).getAction();
 			String addCourtCases = request.getProperties().get(0).getPropertyDetails().getAddCourtCases();
 			if (config.getIsWorkflowEnabled() && !roeAction.contentEquals("")
-					&& state.contentEquals(PSConstants.PM_APPROVED)
+					&& (state.contentEquals(PSConstants.PM_APPROVED)
+							|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
 					&& !addCourtCases.contentEquals(PSConstants.EB_ADD_COURT_CASES)
 					&& !request.getProperties().get(0).getPropertyDetails().isAdhocDemand()) {
 				wfIntegrator.callWorkFlow(request);
@@ -267,11 +270,24 @@ public class PropertyService {
 			 * Set the list of states to exclude draft states. Allow criteria to have
 			 * creator as current user.
 			 */
+			List<String> allStates = new ArrayList<>();
+
 			BusinessService businessService = workflowService.getBusinessService(PSConstants.TENANT_ID, requestInfo,
 					config.getAosBusinessServiceValue());
 			List<String> states = businessService.getStates().stream().map(State::getApplicationStatus)
 					.filter(s -> s != null && s.length() != 0).collect(Collectors.toList());
-			criteria.setState(states);
+
+			allStates.addAll(states);
+
+			BusinessService pmBusinessService = workflowService.getBusinessService(PSConstants.TENANT_ID, requestInfo,
+					config.getEbPmBusinessServiceValue());
+
+			List<String> pmStates = pmBusinessService.getStates().stream().map(State::getApplicationStatus)
+					.filter(s -> s != null && s.length() != 0).collect(Collectors.toList());
+
+			allStates.addAll(pmStates);
+
+			criteria.setState(allStates);
 			criteria.setUserId(requestInfo.getUserInfo().getUuid());
 		} else if (criteria.getState() != null && criteria.getState().contains(PSConstants.PM_DRAFTED)) {
 			/**
@@ -290,6 +306,7 @@ public class PropertyService {
 		if (requestInfo.getUserInfo().getType().equalsIgnoreCase(PSConstants.ROLE_EMPLOYEE)) {
 			Set<String> employeeBranches = new HashSet<>();
 			String businessServiceName = null;
+			String ebPmBusinessServiceName = null;
 			requestInfo.getUserInfo().getRoles().stream().filter(role -> role.getCode() != PSConstants.ROLE_EMPLOYEE)
 					.map(role -> role.getCode()).forEach(rolecode -> {
 						if (rolecode.startsWith("ES_EB")) {
@@ -314,21 +331,31 @@ public class PropertyService {
 
 				if (criteria.branchTypeOnly()) {
 					for (String branch : criteria.getBranchType()) {
-						if (branch.equalsIgnoreCase(PSConstants.ESTATE_BRANCH))
+
+						if (branch.equalsIgnoreCase(PSConstants.ESTATE_BRANCH)) {
+
 							businessServiceName = config.getAosBusinessServiceValue();
-						else if (branch.equalsIgnoreCase(PSConstants.BUILDING_BRANCH))
+							ebPmBusinessServiceName = config.getEbPmBusinessServiceValue();
+						} else if (branch.equalsIgnoreCase(PSConstants.BUILDING_BRANCH))
 							businessServiceName = config.getBbPmBusinessServiceValue();
 						else
 							businessServiceName = config.getMmPmBusinessServiceValue();
 
 						BusinessService businessService = workflowService.getBusinessService(PSConstants.TENANT_ID,
 								requestInfo, businessServiceName);
+
 						List<String> states = businessService.getStates().stream().map(State::getApplicationStatus)
 								.filter(s -> s != null && s.length() != 0).collect(Collectors.toList());
+
+						if (null != ebPmBusinessServiceName) {
+							BusinessService ebPmBusinessService = workflowService
+									.getBusinessService(PSConstants.TENANT_ID, requestInfo, ebPmBusinessServiceName);
+							states.addAll(ebPmBusinessService.getStates().stream().map(State::getApplicationStatus)
+									.filter(s -> s != null && s.length() != 0).collect(Collectors.toList()));
+						}
 						criteria.setState(states);
 						criteria.setUserId(requestInfo.getUserInfo().getUuid());
 					}
-					;
 				} else if (!CollectionUtils.isEmpty(criteria.getState())
 						&& criteria.getState().contains(PSConstants.PM_DRAFTED))
 					criteria.setUserId(requestInfo.getUserInfo().getUuid());
@@ -567,9 +594,16 @@ public class PropertyService {
 			/**
 			 * if offline, create a payment.
 			 */
-			demandService.createCashPaymentProperty(propertyRequest.getRequestInfo(),
-					property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount(), bills.get(0).getId(),
-					owner, config.getAosBusinessServiceValue());
+			if (propertyFromRequest.getPropertyMasterOrAllotmentOfSite()
+					.equalsIgnoreCase(PSConstants.PROPERTY_MASTER)) {
+				demandService.createCashPaymentProperty(propertyRequest.getRequestInfo(),
+						property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount(),
+						bills.get(0).getId(), owner, config.getEbPmBusinessServiceValue());
+			} else {
+				demandService.createCashPaymentProperty(propertyRequest.getRequestInfo(),
+						property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount(),
+						bills.get(0).getId(), owner, config.getAosBusinessServiceValue());
+			}
 
 			AuditDetails auditDetails = util.getAuditDetails(propertyRequest.getRequestInfo().getUserInfo().getUuid(),
 					true);
@@ -619,7 +653,10 @@ public class PropertyService {
 	}
 
 	public void getDueAmount(RequestInfo requestInfo) {
-		PropertyCriteria criteria = PropertyCriteria.builder().state(Arrays.asList(PSConstants.PM_APPROVED))
+		List<String> states = new ArrayList<>();
+		states.add(PSConstants.PM_APPROVED);
+		states.add(PSConstants.ES_PM_EB_APPROVED);
+		PropertyCriteria criteria = PropertyCriteria.builder().state(states)
 				.relations(Arrays.asList(PropertyQueryBuilder.RELATION_OWNER)).build();
 		List<Property> properties = repository.getProperties(criteria);
 		if (CollectionUtils.isEmpty(properties))

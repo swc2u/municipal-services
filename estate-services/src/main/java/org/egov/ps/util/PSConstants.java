@@ -12,6 +12,8 @@ public class PSConstants {
 
 	public static final String ES_PM_MM_APPROVED = "ES_PM_MM_APPROVED";
 
+	public static final String ES_PM_EB_APPROVED = "ES_PM_EB_APPROVED";
+
 	public static final String ES_PM_LEASEHOLD = "PROPERTY_TYPE.LEASEHOLD";
 
 	public static final String ES_WF_DOCS = "WF_DOCS";
@@ -133,6 +135,8 @@ public class PSConstants {
 
 	public static final String APPLICATION_TYPE_NDC = "NDC";
 	public static final String PENDING_SO_APPROVAL = "ES_PENDING_SO_APPROVAL";
+
+	public static final String ES_EB_PM_PENDING_SO_APPROVAL = "ES_EB_PM_PENDING_SO_APPROVAL";
 
 	public static final String PENDING_PM_MM_APPROVAL = "ES_PM_MM_PENDING_APPROVAL";
 	public static final String PENDING_MM_SO_APPROVAL = "ES_MM_PENDING_SO_APPROVAL";

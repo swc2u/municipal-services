@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.io.IOUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.util.Util;
@@ -22,6 +20,8 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -72,6 +72,8 @@ public class WorkflowCreationService {
 				Arrays.asList(ApplicationType.builder().name("ES-EB-IS-RefundOfEmd").prefix("ES_EB_ROE_").build()));
 		templateMapping.put("template-allotment_of_site-estate",
 				Arrays.asList(ApplicationType.builder().name("ES-EB-AllotmentOfSite").prefix("ES_").build()));
+		templateMapping.put("template-property_master-estate",
+				Arrays.asList(ApplicationType.builder().name("ES-EB-PropertyMaster").prefix("ES_EB_PM_").build()));
 		// Building Branch
 		templateMapping.put("template-bb-property_master",
 				Arrays.asList(ApplicationType.builder().name("ES-BB-PropertyMaster").prefix("ES_BB_PM_").build()));
