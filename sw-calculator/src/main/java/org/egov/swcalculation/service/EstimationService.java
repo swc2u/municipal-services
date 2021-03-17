@@ -356,7 +356,7 @@ public class EstimationService {
 
 		for (Slab slabs : billingSlabs.get(0).getSlabs()) {
 
-			if (landArea > slabs.getFrom() && landArea < slabs.getTo()
+			if (landArea > slabs.getFrom() && landArea <= slabs.getTo()
 
 					&& slabs.getCode().equalsIgnoreCase(property.getUsageCategory())) {
 				charge = slabs.getCharge();

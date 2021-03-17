@@ -360,14 +360,14 @@ serviceMaps:
       jsonMaps:
       - jsonPath: $.Properties.*.id
 
-    - query: UPDATE cs_pt_property_v1 SET tenantid=?, colony=?,rent_payment_consumer_code=?, master_data_state=?, master_data_action=?, modified_by=?, modified_date=? where id=? AND transit_number=?;
+    - query: UPDATE cs_pt_property_v1 SET tenantid=?, rent_payment_consumer_code=?, colony=?, master_data_state=?, master_data_action=?, modified_by=?, modified_date=?  where id=? AND transit_number=?;
       basePath: Properties.*
       jsonMaps:
       - jsonPath: $.Properties.*.tenantId
-
-      - jsonPath: $.Properties.*.colony
       
       - jsonPath: $.Properties.*.rentPaymentConsumerCode
+
+      - jsonPath: $.Properties.*.colony
       
       - jsonPath: $.Properties.*.masterDataState
 
@@ -868,7 +868,7 @@ serviceMaps:
           jsonMaps:
             - jsonPath: $.Owners.*.ownerDetails.id
 
-        - query: UPDATE cs_pt_ownershipdetails_v1 SET name=?, email=?, phone=?, gender=?, date_of_birth=?, aadhaar_number=?, allotment_startdate=?, allotment_enddate=?, posession_startdate=?, posession_enddate=?, monthly_rent=?, revision_period=?, revision_percentage=?, father_or_husband=?, relation=?, relation_with_deceased_allottee=?, date_of_death_allottee=?, application_type=?, modified_by=?, modified_date=?, due_amount=?, apro_charge=?, permanent=?, isapro_charge_paid=? where id=?;
+        - query: UPDATE cs_pt_ownershipdetails_v1 SET name=?, email=?, phone=?, gender=?, date_of_birth=?, aadhaar_number=?, allotment_startdate=?, allotment_enddate=?, posession_startdate=?, posession_enddate=?, monthly_rent=?, revision_period=?, revision_percentage=?, father_or_husband=?, relation=?, relation_with_deceased_allottee=?, date_of_death_allottee=?, application_type=?, modified_by=?, modified_date=?, due_amount=?, apro_charge=?, permanent=?, payment_amount=?,bank_name=?,transaction_number=?, isapro_charge_paid=? where id=?;
           basePath: $.Owners.*.ownerDetails
           jsonMaps:
             - jsonPath: $.Owners.*.ownerDetails.name
@@ -916,6 +916,12 @@ serviceMaps:
             - jsonPath: $.Owners.*.ownerDetails.aproCharge
 
             - jsonPath: $.Owners.*.ownerDetails.permanent
+            
+            - jsonPath: $.Owners.*.ownerDetails.paymentAmount
+            
+            - jsonPath: $.Owners.*.ownerDetails.bankName
+            
+            - jsonPath: $.Owners.*.ownerDetails.transactionId
             
             - jsonPath: $.Owners.*.ownerDetails.isAPROChargePaid
 
@@ -1060,13 +1066,19 @@ serviceMaps:
       jsonMaps:
       - jsonPath: $.DuplicateCopyApplications.*.id
 
-    - query: UPDATE cs_pt_duplicate_ownership_application SET  state=?, action=?, modified_by=?, modified_time=? WHERE id=?;
+    - query: UPDATE cs_pt_duplicate_ownership_application SET  state=?, action=?,payment_amount=?,bank_name=?,transaction_number=?, modified_by=?, modified_time=? WHERE id=?;
       basePath: DuplicateCopyApplications.*
       jsonMaps:
 
       - jsonPath: $.DuplicateCopyApplications.*.state
 
-      - jsonPath: $.DuplicateCopyApplications.*.action 
+      - jsonPath: $.DuplicateCopyApplications.*.action
+      
+      - jsonPath: $.DuplicateCopyApplications.*.paymentAmount
+      
+      - jsonPath: $.DuplicateCopyApplications.*.bankName
+      
+      - jsonPath: $.DuplicateCopyApplications.*.transactionId 
       
       - jsonPath: $.DuplicateCopyApplications.*.auditDetails.lastModifiedBy
 
