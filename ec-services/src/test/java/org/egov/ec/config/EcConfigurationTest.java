@@ -129,8 +129,9 @@ public class EcConfigurationTest {
 		String UpdateVendorTopic = "";
 		String RequestDeviceSource="";
 		String echallanNotificationFlag="";
-
-		EchallanConfiguration result = new EchallanConfiguration(timeZone, userHost, userSearchEndpoint, usernamePrefix, idGenHost, idGenPath, applicationNumberIdgenName, applicationNumberIdgenFormat, saveTopic, updateTopic, updateWorkflowTopic, localizationHost, localizationContextPath, localizationSearchEndpoint, mdmsHost, mdmsEndPoint, businessServiceValue, loginUrl, wfHost, wfTransitionPath, wfBusinessServiceSearchPath, uiAppHost, saveUserEventsTopic, payLink, payCode, payTriggers, businessService, itemMasterSaveTopic, itemMasterUpdateTopic, FineMasterSaveTopic, FineMasterupdateTopic, emailNotificationTopic, smsNotificationTopic, generateChallanTopic, updateChallanTopic, echallanNotificationFlag, echallanNotificationFlag, echallanNotificationFlag);
+		String editChallanTopic="";
+		
+		EchallanConfiguration result = new EchallanConfiguration(timeZone, userHost, userSearchEndpoint, usernamePrefix, idGenHost, idGenPath, applicationNumberIdgenName, applicationNumberIdgenFormat, saveTopic, updateTopic, updateWorkflowTopic, localizationHost, localizationContextPath, localizationSearchEndpoint, mdmsHost, mdmsEndPoint, businessServiceValue, loginUrl, wfHost, wfTransitionPath, wfBusinessServiceSearchPath, uiAppHost, saveUserEventsTopic, payLink, payCode, payTriggers, businessService, itemMasterSaveTopic, itemMasterUpdateTopic, FineMasterSaveTopic, FineMasterupdateTopic, emailNotificationTopic, smsNotificationTopic, generateChallanTopic, updateChallanTopic, echallanNotificationFlag, echallanNotificationFlag, echallanNotificationFlag, echallanNotificationFlag, echallanNotificationFlag,editChallanTopic);
 
 		
 		assertNotNull(result);
@@ -181,7 +182,7 @@ public class EcConfigurationTest {
 
 		
 		assertNotNull(result);
-		assertEquals("EchallanConfiguration.EchallanConfigurationBuilder(timeZone=null, hrmsHost=null, hrmsSearchEndpoint=null, idGenHost=null, idGenPath=null, applicationNumberIdgenName=null, applicationNumberIdgenFormat=null, fileStoreHost=null, fileStoreUrl=null, uploadFile=null, mdmsHost=null, mdmsEndPoint=null, loginUrl=null, wfHost=null, wfTransitionPath=null, wfBusinessServiceSearchPath=null, itemMasterSaveTopic=null, itemMasterUpdateTopic=null, FineMasterSaveTopic=null, FineMasterupdateTopic=null, emailNotificationTopic=null, smsNotificationTopic=null, generateChallanTopic=null, updateChallanTopic=null, CreateStoreItemTopic=null, updateStoreItemTopic=null, updateStoreItemOfflineTopic=null, saveAuctionTopic=null, updateauctionTopic=null, rejectauctionTopic=null, updatePenaltyAmountTopic=null, addpaymentHistoryTopic=null, CreateVendorTopic=null, UpdateVendorTopic=null, RequestDeviceSource=null, echallanNotificationFlag=null)", result.toString());
+		assertEquals("EchallanConfiguration.EchallanConfigurationBuilder(timeZone=null, hrmsHost=null, hrmsSearchEndpoint=null, idGenHost=null, idGenPath=null, applicationNumberIdgenName=null, applicationNumberIdgenFormat=null, fileStoreHost=null, fileStoreUrl=null, uploadFile=null, mdmsHost=null, mdmsEndPoint=null, loginUrl=null, wfHost=null, wfTransitionPath=null, wfBusinessServiceSearchPath=null, itemMasterSaveTopic=null, itemMasterUpdateTopic=null, editChallanTopic=null, FineMasterSaveTopic=null, FineMasterupdateTopic=null, emailNotificationTopic=null, smsNotificationTopic=null, generateChallanTopic=null, updateChallanTopic=null, CreateStoreItemTopic=null, updateStoreItemTopic=null, updateStoreItemOfflineTopic=null, saveAuctionTopic=null, updateauctionTopic=null, rejectauctionTopic=null, updatePenaltyAmountTopic=null, addpaymentHistoryTopic=null, CreateVendorTopic=null, UpdateVendorTopic=null, RequestDeviceSource=null, updatePayment=null, dataBckChallan=null, echallanNotificationFlag=null, urlShortnerHost=null, urlShortnerPath=null)", result.toString());
 	}
 	
 	@Test
@@ -274,7 +275,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetAddpaymentHistoryTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null, null, null);
 
 		String result = fixture.getAddpaymentHistoryTopic();
 
@@ -292,7 +293,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetApplicationNumberIdgenFormat_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null, null, null);
 
 		String result = fixture.getApplicationNumberIdgenFormat();
 
@@ -310,7 +311,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetApplicationNumberIdgenName_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null, null, null);
 
 		String result = fixture.getApplicationNumberIdgenName();
 
@@ -328,7 +329,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetCreateStoreItemTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null, null, null);
 
 		String result = fixture.getCreateStoreItemTopic();
 
@@ -346,7 +347,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetCreateVendorTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", "",null,null,null,null);
 
 		String result = fixture.getCreateVendorTopic();
 
@@ -364,7 +365,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetEmailNotificationTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 
 		String result = fixture.getEmailNotificationTopic();
 
@@ -382,7 +383,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetFineMasterSaveTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 
 		String result = fixture.getFineMasterSaveTopic();
 
@@ -400,7 +401,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetFineMasterupdateTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 
 		String result = fixture.getFineMasterupdateTopic();
 
@@ -418,7 +419,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetGenerateChallanTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 
 		String result = fixture.getGenerateChallanTopic();
 
@@ -436,7 +437,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetIdGenHost_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getIdGenHost();
 
@@ -454,7 +455,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetIdGenPath_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getIdGenPath();
 
@@ -472,7 +473,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetItemMasterSaveTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getItemMasterSaveTopic();
 
@@ -490,7 +491,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetItemMasterUpdateTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getItemMasterUpdateTopic();
 
@@ -508,7 +509,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetMdmsEndPoint_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getMdmsEndPoint();
 
@@ -526,7 +527,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetMdmsHost_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getMdmsHost();
 
@@ -544,7 +545,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetSaveAuctionTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getSaveAuctionTopic();
 
@@ -562,7 +563,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetSmsNotificationTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getSmsNotificationTopic();
 
@@ -580,7 +581,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetTimeZone_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getTimeZone();
 
@@ -599,7 +600,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetUpdateChallanTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getUpdateChallanTopic();
 
@@ -617,7 +618,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetUpdatePenaltyAmountTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getUpdatePenaltyAmountTopic();
 
@@ -635,7 +636,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetUpdateStoreItemOfflineTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getUpdateStoreItemOfflineTopic();
 
@@ -653,7 +654,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetUpdateStoreItemTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getUpdateStoreItemTopic();
 
@@ -671,7 +672,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetUpdateVendorTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getUpdateVendorTopic();
 
@@ -682,7 +683,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetRequestDeviceSource_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getRequestDeviceSource();
 
@@ -700,7 +701,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetUpdateauctionTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getUpdateauctionTopic();
 
@@ -711,7 +712,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetRejectAuctionTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getRejectauctionTopic();
 
@@ -729,7 +730,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetWfBusinessServiceSearchPath_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getWfBusinessServiceSearchPath();
 
@@ -747,7 +748,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetWfHost_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getWfHost();
 
@@ -765,7 +766,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetWfTransitionPath_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		String result = fixture.getWfTransitionPath();
 
@@ -783,7 +784,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testInitialize_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 
 		fixture.initialize();
 
@@ -800,7 +801,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testJacksonConverter_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		MappingJackson2HttpMessageConverter result = fixture.jacksonConverter(objectMapper);
@@ -819,7 +820,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetAddpaymentHistoryTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 		String addpaymentHistoryTopic = "";
 
 		fixture.setAddpaymentHistoryTopic(addpaymentHistoryTopic);
@@ -837,7 +838,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetApplicationNumberIdgenFormat_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 		String applicationNumberIdgenFormat = "";
 
 		fixture.setApplicationNumberIdgenFormat(applicationNumberIdgenFormat);
@@ -855,7 +856,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetApplicationNumberIdgenName_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 		String applicationNumberIdgenName = "";
 
 		fixture.setApplicationNumberIdgenName(applicationNumberIdgenName);
@@ -873,7 +874,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetCreateStoreItemTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 		String CreateStoreItemTopic = "";
 
 		fixture.setCreateStoreItemTopic(CreateStoreItemTopic);
@@ -891,7 +892,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetCreateVendorTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 		String CreateVendorTopic = "";
 
 		fixture.setCreateVendorTopic(CreateVendorTopic);
@@ -909,7 +910,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetEmailNotificationTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 		String emailNotificationTopic = "";
 
 		fixture.setEmailNotificationTopic(emailNotificationTopic);
@@ -927,7 +928,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetFineMasterSaveTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 		String FineMasterSaveTopic = "";
 
 		fixture.setFineMasterSaveTopic(FineMasterSaveTopic);
@@ -945,7 +946,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetFineMasterupdateTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 		String FineMasterupdateTopic = "";
 
 		fixture.setFineMasterupdateTopic(FineMasterupdateTopic);
@@ -963,7 +964,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetGenerateChallanTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null,null,null);
 		String generateChallanTopic = "";
 
 		fixture.setGenerateChallanTopic(generateChallanTopic);
@@ -981,7 +982,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetIdGenHost_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String idGenHost = "";
 
 		fixture.setIdGenHost(idGenHost);
@@ -999,7 +1000,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetIdGenPath_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String idGenPath = "";
 
 		fixture.setIdGenPath(idGenPath);
@@ -1017,7 +1018,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetItemMasterSaveTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String itemMasterSaveTopic = "";
 
 		fixture.setItemMasterSaveTopic(itemMasterSaveTopic);
@@ -1035,7 +1036,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetItemMasterUpdateTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String itemMasterUpdateTopic = "";
 
 		fixture.setItemMasterUpdateTopic(itemMasterUpdateTopic);
@@ -1053,7 +1054,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetMdmsEndPoint_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String mdmsEndPoint = "";
 
 		fixture.setMdmsEndPoint(mdmsEndPoint);
@@ -1071,7 +1072,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetMdmsHost_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String mdmsHost = "";
 
 		fixture.setMdmsHost(mdmsHost);
@@ -1089,7 +1090,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetSaveAuctionTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String saveAuctionTopic = "";
 
 		fixture.setSaveAuctionTopic(saveAuctionTopic);
@@ -1107,7 +1108,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetSmsNotificationTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String smsNotificationTopic = "";
 
 		fixture.setSmsNotificationTopic(smsNotificationTopic);
@@ -1125,7 +1126,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetTimeZone_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String timeZone = "";
 
 		fixture.setTimeZone(timeZone);
@@ -1143,7 +1144,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetUpdateChallanTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String updateChallanTopic = "";
 
 		fixture.setUpdateChallanTopic(updateChallanTopic);
@@ -1161,7 +1162,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetUpdatePenaltyAmountTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String updatePenaltyAmountTopic = "";
 
 		fixture.setUpdatePenaltyAmountTopic(updatePenaltyAmountTopic);
@@ -1179,7 +1180,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetUpdateStoreItemOfflineTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String updateStoreItemOfflineTopic = "";
 
 		fixture.setUpdateStoreItemOfflineTopic(updateStoreItemOfflineTopic);
@@ -1197,7 +1198,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetUpdateStoreItemTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String updateStoreItemTopic = "";
 
 		fixture.setUpdateStoreItemTopic(updateStoreItemTopic);
@@ -1215,7 +1216,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetUpdateVendorTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String UpdateVendorTopic = "";
 
 		fixture.setUpdateVendorTopic(UpdateVendorTopic);
@@ -1233,7 +1234,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetUpdateauctionTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String updateauctionTopic = "";
 
 		fixture.setUpdateauctionTopic(updateauctionTopic);
@@ -1251,7 +1252,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetWfBusinessServiceSearchPath_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String wfBusinessServiceSearchPath = "";
 
 		fixture.setWfBusinessServiceSearchPath(wfBusinessServiceSearchPath);
@@ -1269,7 +1270,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetWfHost_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String wfHost = "";
 
 		fixture.setWfHost(wfHost);
@@ -1280,7 +1281,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetRejectauctionTopic_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String rejectauctionTopic = "";
 
 		fixture.setRejectauctionTopic(rejectauctionTopic);;
@@ -1298,7 +1299,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetWfTransitionPath_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String wfTransitionPath = "";
 
 		fixture.setWfTransitionPath(wfTransitionPath);
@@ -1309,7 +1310,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetRequestDeviceSource_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","","", null,null,null,null);
 		String RequestDeviceSource = "";
 
 		fixture.setRequestDeviceSource(RequestDeviceSource);
@@ -1320,7 +1321,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetLoginUrl_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null, null, null);
 		String loginUrl = "";
 
 		fixture.setLoginUrl(loginUrl);
@@ -1331,7 +1332,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetLoginUrl_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null, null, null);
 
 		String result = fixture.getLoginUrl();		
 		assertEquals("", result);
@@ -1340,7 +1341,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testSetEchallanNotificationFlag_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null, null, null);
 		String echallanNotificationFlag = "";
 
 		fixture.setEchallanNotificationFlag(echallanNotificationFlag);
@@ -1351,7 +1352,7 @@ public class EcConfigurationTest {
 	@Test
 	public void testGetEchallanNotificationFlag_1()
 		throws Exception {
-		EchallanConfiguration fixture = new EchallanConfiguration("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", null,null);
+		EchallanConfiguration fixture = new EchallanConfiguration("","", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
 
 		String result = fixture.getEchallanNotificationFlag();		
 		assertEquals("", result);

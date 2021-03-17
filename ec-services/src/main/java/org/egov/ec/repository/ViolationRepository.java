@@ -263,4 +263,8 @@ public class ViolationRepository {
 	public JSONArray getdatViolationMaster(ChallanDataBckUp bck) {
 		return  jdbcTemplate.query(EcQueryBuilder.SEARCH_VIOLATION_MASTER_DETAILS,new Object[] {   },columnsRowMapper);
 	}
+	public void editChallan(Violation violationMaster) {
+		RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().requestBody(violationMaster).build();
+		producer.push(config.getEditChallanTopic(), infoWrapper);
+	}
 }
