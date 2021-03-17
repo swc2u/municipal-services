@@ -27,6 +27,7 @@ public class HCQueryBuilder {
 	
 	public static final String SELECT_SERVICE_DETAIL = "SELECT service_request_uuid, owner_name, tenant_id, location, latitude, longitude, locality, street_name, landmark, contact_number, email_id, tree_count, service_request_document, service_request_status, service_request_id, service_type, description,current_assignee, createdby, to_char(to_timestamp(cast(createdtime/1000 as bigint))::date,'DD/MM/YYYY') as createdtimes,servicerequest_lang ,lastmodifiedby,to_char(to_timestamp(cast(lastmodifiedtime/1000 as bigint))::date,'DD/MM/YYYY') as lastmodifiedtime,servicerequestsubtype,sla,sla_modified_date,sla_days_elapsed from eg_hc_service_request WHERE service_request_id =?";
 	
+	public static final String SELECT_SERVICE_MEDIA_DETAIL = "SELECT service_request_uuid,service_request_document from eg_hc_service_request WHERE service_request_id =?";
 	public static final String GET_CREATED_TIME = "SELECT service_type,createdtime,service_request_id,current_assignee,to_char(to_timestamp(cast(createdtime/1000 as bigint))::date ,'DD-MM-YYYY')as serviceRequestDate \r\n" + 
 			"from eg_hc_service_request WHERE \r\n" + 
 			" service_request_status != '"+HCConstants.REJECTED_STATUS+"' AND\r\n" + 
@@ -44,7 +45,7 @@ public class HCQueryBuilder {
 			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY lastmodifiedtime DESC) offset_ FROM " + "({})"
 			+ " result) result_offset "
 			+ "WHERE offset_ > ? AND offset_ <= ?";
-
+	
 	public String getHCSearchQuery(RequestData criteria, List<Object> preparedStmtList) {
 
 

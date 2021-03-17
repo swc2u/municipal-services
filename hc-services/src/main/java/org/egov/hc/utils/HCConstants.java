@@ -87,7 +87,7 @@ public class HCConstants {
 	public static final String FAIL = "fail";
 	public static final String MEDIA = "media";
 
-	
+	public static final String ACTION_CREATE="CREATE";
 	public static final String ACTION_UPDATE  = "UPDATE";
 	
 	public static final String LOCALIZATION_MODULE_NAME = "rainmaker-hc";
