@@ -170,5 +170,7 @@ public class PSConstants {
 	public static final String RELATION_BIDDER = "bidder";
 	
 	public static final String ACTION_SUBMIT = "SUBMIT";
+	
+	public static final String NOC = "NOC"; 
 
 }

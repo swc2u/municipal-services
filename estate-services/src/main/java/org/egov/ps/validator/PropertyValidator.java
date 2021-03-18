@@ -93,9 +93,9 @@ public class PropertyValidator {
 		// requestProperty.getSubCategory().trim().isEmpty()) {
 		// errorMap.put("INVALID_SUB_CATEGORY", "Sub category can not be empty");
 		// }
-		if (requestProperty.getSiteNumber() == null || requestProperty.getSiteNumber().trim().isEmpty()) {
-			errorMap.put("INVALID_SITE_NUMBER", "Site number can not be empty");
-		}
+//		if (requestProperty.getSiteNumber() == null || requestProperty.getSiteNumber().trim().isEmpty()) {
+//			errorMap.put("INVALID_SITE_NUMBER", "Site number can not be empty");
+//		}
 		if (requestProperty.getPropertyDetails().getBranchType() == PSConstants.ESTATE_BRANCH) {
 			if (requestProperty.getPropertyDetails().getPropertyType() == null
 					|| requestProperty.getPropertyDetails().getPropertyType().trim().isEmpty()) {
