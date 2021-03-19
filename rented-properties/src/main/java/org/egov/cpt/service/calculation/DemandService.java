@@ -397,6 +397,13 @@ public class DemandService {
 				List<DemandDetail> demandDetails = demand.getDemandDetails();
 				List<DemandDetail> updatedDemandDetails = getUpdatedDemandDetails(property, demandDetails);
 				demand.setDemandDetails(updatedDemandDetails);
+				User user=null;
+				if(requestInfo.getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_EMPLOYEE)){
+					user = getEgovUser(property, requestInfo);
+				}else{
+					user = requestInfo.getUserInfo();
+				}
+				demand.setPayer(user);
 				demands.add(demand);
 				demands = demandRepository.updateDemand(requestInfo, demands);
 				log.info("Demand generated");
