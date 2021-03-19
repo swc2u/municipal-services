@@ -48,5 +48,7 @@
 	"firstFloorcommercialActivity": 0,
 	"firstFloorcommercialActivityInch": 0,
 	"secondFloorcommercialActivity": 0,
-	"secondFloorcommercialActivityInch": 0
+	"secondFloorcommercialActivityInch": 0,
+	"developmentCharges": 0,
+	"conversionCharges": 0
 }

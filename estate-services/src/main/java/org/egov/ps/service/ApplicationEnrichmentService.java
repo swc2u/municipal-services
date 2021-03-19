@@ -68,7 +68,8 @@ public class ApplicationEnrichmentService {
 
 	public void enrichApplication(RequestInfo requestInfo, Application application) {
 		AuditDetails auditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-		if(!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC))) { 
+		if (!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
+				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC))) {
 			enrichApplicationDetails(application);
 			enrichPropertyDetails(application);
 		}
@@ -169,15 +170,25 @@ public class ApplicationEnrichmentService {
 	private void enrichGenerateDemand(Application application, RequestInfo requestInfo) {
 		List<TaxHeadEstimate> estimates = new LinkedList<>();
 
-		if (application.getState().contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
+		if (application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
+				&& application.getApplicationType().contentEquals(PSConstants.NOC)) {
 
-			if (application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
-					&& application.getApplicationType().contentEquals(PSConstants.NOC)) {
+			JsonNode applicationDetails = application.getApplicationDetails();
 
-				JsonNode applicationDetails = application.getApplicationDetails();
+			if (application.getState().contains(PSConstants.BB_NOC_PENDING_SDE_JE_VERIFICATION)) {
 
-				//				Development Charges
 				BigDecimal developmentCharges = calculateDevelopmentCharges(applicationDetails);
+				((ObjectNode) applicationDetails).put("developmentCharges", developmentCharges);
+
+				BigDecimal conversionCharges = calculateConversionCharges(applicationDetails);
+				((ObjectNode) applicationDetails).put("conversionCharges", conversionCharges);
+
+			}
+			
+			if (application.getState().contains(PSConstants.BB_NOC_PENDING_DA_PROPOSAL)) {
+
+				// Development Charges
+				BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").toString());
 				TaxHeadEstimate developmentChargesEstimate = new TaxHeadEstimate();
 				developmentChargesEstimate.setEstimateAmount(developmentCharges);
 				developmentChargesEstimate.setCategory(Category.CHARGES);
@@ -185,8 +196,8 @@ public class ApplicationEnrichmentService {
 						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "DEVELOPMENT", Category.CHARGES));
 				estimates.add(developmentChargesEstimate);
 
-				//				Conversion charges
-				BigDecimal conversionCharges = calculateConversionCharges(applicationDetails);
+				// Conversion charges
+				BigDecimal conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").toString());
 				TaxHeadEstimate conversionChargesEstimate = new TaxHeadEstimate();
 				conversionChargesEstimate.setEstimateAmount(conversionCharges);
 				conversionChargesEstimate.setCategory(Category.CHARGES);
@@ -194,7 +205,7 @@ public class ApplicationEnrichmentService {
 						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "CONVERSION", Category.CHARGES));
 				estimates.add(conversionChargesEstimate);
 
-				//				Scrutiny charges
+				// Scrutiny charges
 				BigDecimal scrutinyCharges = BigDecimal.ZERO;
 				if (null != applicationDetails.get("scrutinyCharges")) {
 					scrutinyCharges = new BigDecimal(applicationDetails.get("scrutinyCharges").toString());
@@ -206,7 +217,7 @@ public class ApplicationEnrichmentService {
 						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "SCRUTINY", Category.CHARGES));
 				estimates.add(scrutinyChargesEstimate);
 
-				//				Transfer fees
+				// Transfer fees
 				BigDecimal transferFee = BigDecimal.ZERO;
 				if (null != applicationDetails.get("transferFee")) {
 					transferFee = new BigDecimal(applicationDetails.get("transferFee").toString());
@@ -218,7 +229,7 @@ public class ApplicationEnrichmentService {
 						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "TRANSFER", Category.FEE));
 				estimates.add(transferFeeEstimate);
 
-				//				Allotment number
+				// Allotment number
 				BigDecimal applicationNumberCharges = BigDecimal.ZERO;
 				if (null != applicationDetails.get("applicationNumberCharges")) {
 					applicationNumberCharges = new BigDecimal(
@@ -228,38 +239,40 @@ public class ApplicationEnrichmentService {
 				applicationNumberChargesEstimate.setEstimateAmount(applicationNumberCharges);
 				applicationNumberChargesEstimate.setCategory(Category.CHARGES);
 				applicationNumberChargesEstimate
-				.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
-						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
+						.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+								PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
 				estimates.add(applicationNumberChargesEstimate);
+			}
 
-			} else {
-				try {
-					List<Map<String, Object>> feesConfigurations = mdmsService.getApplicationFees(
-							application.getMDMSModuleName(), requestInfo, application.getTenantId());
+		} else if (application.getState().contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
 
-					BigDecimal estimateAmount = fetchEstimateAmountFromMDMSJson(feesConfigurations, application);
-					TaxHeadEstimate estimateDue = new TaxHeadEstimate();
-					estimateDue.setEstimateAmount(estimateAmount);
-					estimateDue.setCategory(Category.FEE);
-					estimateDue.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
-							PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
-					estimates.add(estimateDue);
+			try {
+				List<Map<String, Object>> feesConfigurations = mdmsService
+						.getApplicationFees(application.getMDMSModuleName(), requestInfo, application.getTenantId());
 
-					TaxHeadEstimate estimateGst = new TaxHeadEstimate();
-					BigDecimal gstEstimatePercentage = feesGSTOfApplication(application, requestInfo);
-					if (null != gstEstimatePercentage && null != estimateAmount) {
-						BigDecimal gstEstimateAmount = (estimateAmount.multiply(gstEstimatePercentage))
-								.divide(new BigDecimal(100));
-						estimateGst.setEstimateAmount(gstEstimateAmount);
-						estimateGst.setCategory(Category.TAX);
-						estimateGst.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
-								PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.TAX));
-						estimates.add(estimateGst);
-					}
+				BigDecimal estimateAmount = fetchEstimateAmountFromMDMSJson(feesConfigurations, application);
+				TaxHeadEstimate estimateDue = new TaxHeadEstimate();
+				estimateDue.setEstimateAmount(estimateAmount);
+				estimateDue.setCategory(Category.FEE);
+				estimateDue.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
+				estimates.add(estimateDue);
 
-				} catch (JSONException e) {
-					log.error("Can not parse Json file", e);
+				TaxHeadEstimate estimateGst = new TaxHeadEstimate();
+				BigDecimal gstEstimatePercentage = feesGSTOfApplication(application, requestInfo);
+				if (null != gstEstimatePercentage && null != estimateAmount) {
+					BigDecimal gstEstimateAmount = (estimateAmount.multiply(gstEstimatePercentage))
+							.divide(new BigDecimal(100));
+					estimateGst.setEstimateAmount(gstEstimateAmount);
+					estimateGst.setCategory(Category.TAX);
+					estimateGst.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+							PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.TAX));
+					estimates.add(estimateGst);
 				}
+
+			} catch (JSONException e) {
+				log.error("Can not parse Json file", e);
+
 			}
 		}
 
@@ -389,7 +402,7 @@ public class ApplicationEnrichmentService {
 					.collect(Collectors.toList());
 			responseEstimateAmount = !feesConfigurationsForCommonCatandSubCat.isEmpty()
 					? new BigDecimal(feesConfigurationsForCommonCatandSubCat.get(0).get("amount").toString())
-							: new BigDecimal("0");
+					: new BigDecimal("0");
 		}
 		return responseEstimateAmount;
 	}
