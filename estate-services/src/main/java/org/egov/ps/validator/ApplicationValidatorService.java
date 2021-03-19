@@ -93,7 +93,7 @@ public class ApplicationValidatorService {
 	public void validateCreateRequest(ApplicationRequest request) {
 		List<Application> applications = request.getApplications();
 		for (Application application : applications) {
-			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)) 
+			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) 
 				continue;
 			String propertyId = application.getProperty().getId();
 			validatePropertyExists(request.getRequestInfo(), propertyId, application);
@@ -309,7 +309,7 @@ public class ApplicationValidatorService {
 
 	public void validateUpdateRequest(ApplicationRequest applicationRequest) {
 		for (Application application : applicationRequest.getApplications()) {
-			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)) 
+			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) 
 				continue;
 			validateApplicationIdExistsInDB(application.getId());
 
