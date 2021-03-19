@@ -62,6 +62,9 @@ public class HCConfiguration {
 	    
 		@Value("${kafka.topics.update.serviceRequest.service}")
 		private String updateServiceRequestData;
+		
+		 @Value("${kafka.topics.deleteDoc.service}")
+		 private String deleteDocTopic;
 	    
 		@Value("${kafka.topics.update.service}")
 		private String updateTopic;
