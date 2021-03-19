@@ -92,7 +92,9 @@ public class ApplicationValidatorService {
 
 	public void validateCreateRequest(ApplicationRequest request) {
 		List<Application> applications = request.getApplications();
-		applications.stream().forEach(application -> {
+		for (Application application : applications) {
+			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)) 
+				continue;
 			String propertyId = application.getProperty().getId();
 			validatePropertyExists(request.getRequestInfo(), propertyId, application);
 			JsonNode applicationDetails = application.getApplicationDetails();
@@ -116,7 +118,7 @@ public class ApplicationValidatorService {
 				log.error("Exception", e);
 			}
 
-		});
+		}
 	}
 
 	private void validateSharePercentage(Application application, RequestInfo requestInfo) {
@@ -306,7 +308,9 @@ public class ApplicationValidatorService {
 	}
 
 	public void validateUpdateRequest(ApplicationRequest applicationRequest) {
-		applicationRequest.getApplications().forEach(application -> {
+		for (Application application : applicationRequest.getApplications()) {
+			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)) 
+				continue;
 			validateApplicationIdExistsInDB(application.getId());
 
 			if (application.getApplicationType().contains(PSConstants.APPLICATION_TYPE_NDC)
@@ -326,7 +330,7 @@ public class ApplicationValidatorService {
 							String.format("Property has rent due: %s, so can not approve for NDC", rentDue));
 				}
 			}
-		});
+		}
 	}
 
 	private void validateApplicationIdExistsInDB(String applicationId) {
