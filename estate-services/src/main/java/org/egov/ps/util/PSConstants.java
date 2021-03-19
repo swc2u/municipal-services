@@ -164,13 +164,19 @@ public class PSConstants {
 
 	public static final String OWNERSHIP_TRANSFER = "OwnershipTransfer";
 	public static final String MODE_OF_TRANSFER = "MODE_OF_TRANSFER";
-	
+
 	public static final double GST_INTEREST_RATE = 18.0;
-	
+
 	public static final String RELATION_BIDDER = "bidder";
-	
+
 	public static final String ACTION_SUBMIT = "SUBMIT";
-	
-	public static final String NOC = "NOC"; 
+
+	public static final String NOC = "NOC";
+
+	public static final String BB_NOC_PENDING_SDE_JE_VERIFICATION = "PENDING_SDE_JE_VERIFICATION";
+
+	public static final String BB_NOC_PENDING_DA_PROPOSAL = "PENDING_DA_PROPOSAL";
+
+	public static final String BB_NOC_PENDING_AC_APPROVAL = "PENDING_AC_APPROVAL";
 
 }
