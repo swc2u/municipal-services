@@ -143,8 +143,9 @@ public class ApplicationEnrichmentService {
 				modifyAuditDetails.setLastModifiedBy(auditDetails.getLastModifiedBy());
 				modifyAuditDetails.setLastModifiedTime(auditDetails.getLastModifiedTime());
 				application.setAuditDetails(modifyAuditDetails);
-				
-				if(application.getAction().equalsIgnoreCase(PSConstants.ACTION_SUBMIT) && application.getState().equalsIgnoreCase(""))
+
+				if (application.getAction().equalsIgnoreCase(PSConstants.ACTION_SUBMIT)
+						&& application.getState().equalsIgnoreCase(""))
 					application.setApplicationSubmissionDate(auditDetails.getLastModifiedTime());
 
 				List<Document> applicationDocuments = application.getAllDocuments();
@@ -168,38 +169,172 @@ public class ApplicationEnrichmentService {
 
 		if (application.getState().contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
 
-			try {
-				List<Map<String, Object>> feesConfigurations = mdmsService
-						.getApplicationFees(application.getMDMSModuleName(), requestInfo, application.getTenantId());
+			if (application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
+					&& application.getApplicationType().contentEquals(PSConstants.NOC)) {
 
-				BigDecimal estimateAmount = fetchEstimateAmountFromMDMSJson(feesConfigurations, application);
-				TaxHeadEstimate estimateDue = new TaxHeadEstimate();
-				estimateDue.setEstimateAmount(estimateAmount);
-				estimateDue.setCategory(Category.FEE);
-				estimateDue.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
-						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
-				estimates.add(estimateDue);
+				JsonNode applicationDetails = application.getApplicationDetails();
 
-				TaxHeadEstimate estimateGst = new TaxHeadEstimate();
-				BigDecimal gstEstimatePercentage = feesGSTOfApplication(application, requestInfo);
-				if (null != gstEstimatePercentage && null != estimateAmount) {
-					BigDecimal gstEstimateAmount = (estimateAmount.multiply(gstEstimatePercentage))
-							.divide(new BigDecimal(100));
-					estimateGst.setEstimateAmount(gstEstimateAmount);
-					estimateGst.setCategory(Category.TAX);
-					estimateGst.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
-							PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.TAX));
-					estimates.add(estimateGst);
+//				Development Charges
+				BigDecimal developmentCharges = calculateDevelopmentCharges(applicationDetails);
+				TaxHeadEstimate developmentChargesEstimate = new TaxHeadEstimate();
+				developmentChargesEstimate.setEstimateAmount(developmentCharges);
+				developmentChargesEstimate.setCategory(Category.CHARGES);
+				developmentChargesEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "DEVELOPMENT", Category.CHARGES));
+				estimates.add(developmentChargesEstimate);
+
+//				Conversion charges
+				BigDecimal conversionCharges = calculateConversionCharges(applicationDetails);
+				TaxHeadEstimate conversionChargesEstimate = new TaxHeadEstimate();
+				conversionChargesEstimate.setEstimateAmount(conversionCharges);
+				conversionChargesEstimate.setCategory(Category.CHARGES);
+				conversionChargesEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "CONVERSION", Category.CHARGES));
+				estimates.add(conversionChargesEstimate);
+
+//				Scrutiny charges
+				BigDecimal scrutinyCharges = BigDecimal.ZERO;
+				if (null != applicationDetails.get("scrutinyCharges")) {
+					scrutinyCharges = new BigDecimal(applicationDetails.get("scrutinyCharges").toString());
 				}
+				TaxHeadEstimate scrutinyChargesEstimate = new TaxHeadEstimate();
+				scrutinyChargesEstimate.setEstimateAmount(scrutinyCharges);
+				scrutinyChargesEstimate.setCategory(Category.CHARGES);
+				scrutinyChargesEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "SCRUTINY", Category.CHARGES));
+				estimates.add(scrutinyChargesEstimate);
 
-			} catch (JSONException e) {
-				log.error("Can not parse Json file", e);
+//				Transfer fees
+				BigDecimal transferFee = BigDecimal.ZERO;
+				if (null != applicationDetails.get("transferFee")) {
+					transferFee = new BigDecimal(applicationDetails.get("transferFee").toString());
+				}
+				TaxHeadEstimate transferFeeEstimate = new TaxHeadEstimate();
+				transferFeeEstimate.setEstimateAmount(transferFee);
+				transferFeeEstimate.setCategory(Category.FEE);
+				transferFeeEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "TRANSFER", Category.FEE));
+				estimates.add(transferFeeEstimate);
+
+//				Allotment number
+				BigDecimal applicationNumberCharges = BigDecimal.ZERO;
+				if (null != applicationDetails.get("applicationNumberCharges")) {
+					applicationNumberCharges = new BigDecimal(
+							applicationDetails.get("applicationNumberCharges").toString());
+				}
+				TaxHeadEstimate applicationNumberChargesEstimate = new TaxHeadEstimate();
+				applicationNumberChargesEstimate.setEstimateAmount(applicationNumberCharges);
+				applicationNumberChargesEstimate.setCategory(Category.CHARGES);
+				applicationNumberChargesEstimate
+						.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+								PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
+				estimates.add(applicationNumberChargesEstimate);
+
+			} else {
+				try {
+					List<Map<String, Object>> feesConfigurations = mdmsService.getApplicationFees(
+							application.getMDMSModuleName(), requestInfo, application.getTenantId());
+
+					BigDecimal estimateAmount = fetchEstimateAmountFromMDMSJson(feesConfigurations, application);
+					TaxHeadEstimate estimateDue = new TaxHeadEstimate();
+					estimateDue.setEstimateAmount(estimateAmount);
+					estimateDue.setCategory(Category.FEE);
+					estimateDue.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+							PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
+					estimates.add(estimateDue);
+
+					TaxHeadEstimate estimateGst = new TaxHeadEstimate();
+					BigDecimal gstEstimatePercentage = feesGSTOfApplication(application, requestInfo);
+					if (null != gstEstimatePercentage && null != estimateAmount) {
+						BigDecimal gstEstimateAmount = (estimateAmount.multiply(gstEstimatePercentage))
+								.divide(new BigDecimal(100));
+						estimateGst.setEstimateAmount(gstEstimateAmount);
+						estimateGst.setCategory(Category.TAX);
+						estimateGst.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+								PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.TAX));
+						estimates.add(estimateGst);
+					}
+
+				} catch (JSONException e) {
+					log.error("Can not parse Json file", e);
+				}
 			}
 		}
 
 		Calculation calculation = Calculation.builder().applicationNumber(application.getApplicationNumber())
 				.taxHeadEstimates(estimates).tenantId(application.getTenantId()).build();
 		application.setCalculation(calculation);
+	}
+
+	public BigDecimal calculateDevelopmentCharges(JsonNode applicationDetails) {
+		BigDecimal developmentCharges = BigDecimal.ZERO;
+		double calculateDevelopmentCharges = 0.0;
+
+		double frontElevationWidthFt = applicationDetails.get("frontElevationWidth").asDouble();
+		double frontElevationWidthInch = applicationDetails.get("frontElevationWidthInch").asDouble();
+		double frontElevationWidth = frontElevationWidthFt + (frontElevationWidthInch / 12);
+
+		double streetWidthFt = applicationDetails.get("streetWidth").asDouble();
+		double streetWidthInch = applicationDetails.get("streetWidthInch").asDouble();
+		double streetWidth = streetWidthFt + (streetWidthInch / 12);
+
+		boolean otherSideStreet = applicationDetails.get("otherSideStreet").asBoolean();
+		if (otherSideStreet) {
+
+			double sameWidthOfSideStreetFT = applicationDetails.get("sameWidthOfSideStreet").asDouble();
+			double sameWidthOfSideStreetInch = applicationDetails.get("sameWidthOfSideStreetInch").asDouble();
+			double sameWidthOfSideStreet = sameWidthOfSideStreetFT + (sameWidthOfSideStreetInch / 12);
+
+			double sameHeightOfSideStreetFT = applicationDetails.get("sameHeightOfSideStreet").asDouble();
+			double sameHeightOfSideStreetInch = applicationDetails.get("sameHeightOfSideStreetInch").asDouble();
+			double sameHeightOfSideStreet = sameHeightOfSideStreetFT + (sameHeightOfSideStreetInch / 12);
+
+			calculateDevelopmentCharges = ((frontElevationWidth * streetWidth)
+					+ (sameWidthOfSideStreet * sameHeightOfSideStreet)) * (100 / 2);
+
+		} else {
+			calculateDevelopmentCharges = (frontElevationWidth * streetWidth) * (100 / 2);
+		}
+
+		developmentCharges = BigDecimal.valueOf(calculateDevelopmentCharges);
+		developmentCharges = developmentCharges.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+		return developmentCharges;
+	}
+
+	public BigDecimal calculateConversionCharges(JsonNode applicationDetails) {
+		BigDecimal conversionCharges = BigDecimal.ZERO;
+		double calculateconversionCharges = 0.0;
+
+		boolean commercialActivity = applicationDetails.get("commercialActivity").asBoolean();
+
+		if (commercialActivity) {
+
+			double groundFloorcommercialActivityFt = applicationDetails.get("groundFloorcommercialActivity").asDouble();
+			double groundFloorcommercialActivityInch = applicationDetails.get("groundFloorcommercialActivityInch")
+					.asDouble();
+			double groundFloorcommercialActivity = groundFloorcommercialActivityFt
+					+ (groundFloorcommercialActivityInch / 12);
+
+			double firstFloorcommercialActivityFt = applicationDetails.get("firstFloorcommercialActivity").asDouble();
+			double firstFloorcommercialActivityInch = applicationDetails.get("firstFloorcommercialActivityInch")
+					.asDouble();
+			double firstFloorcommercialActivity = firstFloorcommercialActivityFt
+					+ (firstFloorcommercialActivityInch / 12);
+
+			double secondFloorcommercialActivityFt = applicationDetails.get("secondFloorcommercialActivity").asDouble();
+			double secondFloorcommercialActivityInch = applicationDetails.get("secondFloorcommercialActivityInch")
+					.asDouble();
+			double secondFloorcommercialActivity = secondFloorcommercialActivityFt
+					+ (secondFloorcommercialActivityInch / 12);
+
+			calculateconversionCharges = ((groundFloorcommercialActivity + firstFloorcommercialActivity
+					+ secondFloorcommercialActivity) / 9) * 2400;
+
+		}
+
+		conversionCharges = BigDecimal.valueOf(calculateconversionCharges);
+		conversionCharges = conversionCharges.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+		return conversionCharges;
 	}
 
 	// Used for get feePercentGST
@@ -259,6 +394,11 @@ public class ApplicationEnrichmentService {
 
 	public String getTaxHeadCodeWithCharge(String billingBusService, String chargeFor, Category category) {
 		return String.format("%s_%s_%s", billingBusService, chargeFor, category.toString());
+	}
+
+	public String getBbNocTaxHeadCode(String billingBusService, String chargeFor, String chargeType,
+			Category category) {
+		return String.format("%s_%s_%s_%s", billingBusService, chargeFor, chargeType, category.toString());
 	}
 
 	public void collectPayment(ApplicationRequest applicationRequest) {
