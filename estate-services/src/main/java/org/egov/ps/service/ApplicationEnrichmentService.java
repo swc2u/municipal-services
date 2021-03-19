@@ -68,7 +68,7 @@ public class ApplicationEnrichmentService {
 
 	public void enrichApplication(RequestInfo requestInfo, Application application) {
 		AuditDetails auditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-		if(!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC))) { 
+		if(!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null)) { 
 			enrichApplicationDetails(application);
 			enrichPropertyDetails(application);
 		}
@@ -140,7 +140,9 @@ public class ApplicationEnrichmentService {
 
 		if (!CollectionUtils.isEmpty(request.getApplications())) {
 			request.getApplications().forEach(application -> {
-				enrichApplicationDetails(application);
+				if(!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null)) {
+					enrichApplicationDetails(application);
+				}
 				AuditDetails modifyAuditDetails = application.getAuditDetails();
 				modifyAuditDetails.setLastModifiedBy(auditDetails.getLastModifiedBy());
 				modifyAuditDetails.setLastModifiedTime(auditDetails.getLastModifiedTime());
