@@ -397,4 +397,7 @@ public class PropertyDetails {
 	
 	@JsonProperty("adhocDemand")
 	private boolean adhocDemand;
+	
+	@JsonProperty("adhocPayment")
+	private boolean adhocPayment;
 }

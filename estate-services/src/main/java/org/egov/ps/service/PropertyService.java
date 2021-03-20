@@ -246,7 +246,8 @@ public class PropertyService {
 					&& (state.contentEquals(PSConstants.PM_APPROVED)
 							|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
 					&& !addCourtCases.contentEquals(PSConstants.EB_ADD_COURT_CASES)
-					&& !request.getProperties().get(0).getPropertyDetails().isAdhocDemand()) {
+					&& !request.getProperties().get(0).getPropertyDetails().isAdhocDemand()
+					&& !request.getProperties().get(0).getPropertyDetails().isAdhocPayment()) {
 				wfIntegrator.callWorkFlow(request);
 			}
 		}

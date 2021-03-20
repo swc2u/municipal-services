@@ -203,4 +203,35 @@ public class BbNocApplicationFeesValidator {
 		org.junit.Assert.assertTrue(expectedValue2.compareTo(actualValue2) == 0);
 	}
 
+	@Test
+	public void testObjectNodeToBigDecimal() {
+
+		((ObjectNode) applicationDetails).put("scrutinyCharges", "100");
+		((ObjectNode) applicationDetails).put("transferFee", 100);
+		((ObjectNode) applicationDetails).put("applicationNumberCharges", 100.0);
+
+		BigDecimal scrutinyCharges = BigDecimal.ZERO;
+		if (null != applicationDetails.get("scrutinyCharges")) {
+			scrutinyCharges = new BigDecimal(applicationDetails.get("scrutinyCharges").asText());
+		}
+
+		BigDecimal transferFee = BigDecimal.ZERO;
+		if (null != applicationDetails.get("transferFee")) {
+			transferFee = new BigDecimal(applicationDetails.get("transferFee").asText());
+		}
+
+		BigDecimal applicationNumberCharges = BigDecimal.ZERO;
+		if (null != applicationDetails.get("applicationNumberCharges")) {
+			applicationNumberCharges = new BigDecimal(applicationDetails.get("applicationNumberCharges").asText());
+		}
+
+		BigDecimal expectedValue = new BigDecimal("100");
+		org.junit.Assert.assertTrue(expectedValue.compareTo(scrutinyCharges) == 0);
+
+		org.junit.Assert.assertTrue(expectedValue.compareTo(transferFee) == 0);
+
+		org.junit.Assert.assertTrue(expectedValue.compareTo(applicationNumberCharges) == 0);
+
+	}
+
 }

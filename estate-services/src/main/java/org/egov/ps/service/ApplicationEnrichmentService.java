@@ -69,7 +69,7 @@ public class ApplicationEnrichmentService {
 
 	public void enrichApplication(RequestInfo requestInfo, Application application) {
 		AuditDetails auditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-		if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) 
+		if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
 				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) {
 			Property dummyPropertyFromDB = propertyRepository.fetchDummyProperty(PropertyCriteria.builder().fileNumber(PSConstants.BB_NOC_DUMMY_FILENO).limit(1l).build());
 			application.setProperty(dummyPropertyFromDB);
@@ -145,8 +145,8 @@ public class ApplicationEnrichmentService {
 
 		if (!CollectionUtils.isEmpty(request.getApplications())) {
 			request.getApplications().forEach(application -> {
-				if(!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) 
-						&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) 
+				if(!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
+						&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)
 						&& application.getProperty().getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO))) {
 					enrichApplicationDetails(application);
 				}
@@ -216,7 +216,7 @@ public class ApplicationEnrichmentService {
 				// Scrutiny charges
 				BigDecimal scrutinyCharges = BigDecimal.ZERO;
 				if (null != applicationDetails.get("scrutinyCharges")) {
-					scrutinyCharges = new BigDecimal(applicationDetails.get("scrutinyCharges").toString());
+					scrutinyCharges = new BigDecimal(applicationDetails.get("scrutinyCharges").asText());
 				}
 				TaxHeadEstimate scrutinyChargesEstimate = new TaxHeadEstimate();
 				scrutinyChargesEstimate.setEstimateAmount(scrutinyCharges);
@@ -228,7 +228,7 @@ public class ApplicationEnrichmentService {
 				// Transfer fees
 				BigDecimal transferFee = BigDecimal.ZERO;
 				if (null != applicationDetails.get("transferFee")) {
-					transferFee = new BigDecimal(applicationDetails.get("transferFee").toString());
+					transferFee = new BigDecimal(applicationDetails.get("transferFee").asText());
 				}
 				TaxHeadEstimate transferFeeEstimate = new TaxHeadEstimate();
 				transferFeeEstimate.setEstimateAmount(transferFee);
@@ -241,7 +241,7 @@ public class ApplicationEnrichmentService {
 				BigDecimal applicationNumberCharges = BigDecimal.ZERO;
 				if (null != applicationDetails.get("applicationNumberCharges")) {
 					applicationNumberCharges = new BigDecimal(
-							applicationDetails.get("applicationNumberCharges").toString());
+							applicationDetails.get("applicationNumberCharges").asText());
 				}
 				TaxHeadEstimate applicationNumberChargesEstimate = new TaxHeadEstimate();
 				applicationNumberChargesEstimate.setEstimateAmount(applicationNumberCharges);
