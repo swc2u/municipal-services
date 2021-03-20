@@ -72,7 +72,7 @@ public class ApplicationEnrichmentService {
 		if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) 
 				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) {
 			Property dummyPropertyFromDB = propertyRepository.fetchDummyProperty(PropertyCriteria.builder().fileNumber(PSConstants.BB_NOC_DUMMY_FILENO).limit(1l).build());
-			application.setProperty(Property.builder().id(dummyPropertyFromDB.getId()).fileNumber(dummyPropertyFromDB.getFileNumber()).build());
+			application.setProperty(dummyPropertyFromDB);
 		}else {
 			enrichApplicationDetails(application);
 			enrichPropertyDetails(application);
