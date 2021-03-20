@@ -14,6 +14,7 @@ import org.egov.ps.model.ApplicationCriteria;
 import org.egov.ps.model.Document;
 import org.egov.ps.model.Owner;
 import org.egov.ps.model.Property;
+import org.egov.ps.model.PropertyCriteria;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.model.calculation.Category;
 import org.egov.ps.model.calculation.TaxHeadEstimate;
@@ -68,9 +69,11 @@ public class ApplicationEnrichmentService {
 
 	public void enrichApplication(RequestInfo requestInfo, Application application) {
 		AuditDetails auditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-		if (!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
-				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)
-				&& application.getProperty() == null)) {
+		if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
+				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) {
+			Property dummyPropertyFromDB = propertyRepository.fetchDummyProperty(PropertyCriteria.builder().fileNumber(PSConstants.BB_NOC_DUMMY_FILENO).limit(1l).build());
+			application.setProperty(dummyPropertyFromDB);
+		}else {
 			enrichApplicationDetails(application);
 			enrichPropertyDetails(application);
 		}
@@ -142,9 +145,9 @@ public class ApplicationEnrichmentService {
 
 		if (!CollectionUtils.isEmpty(request.getApplications())) {
 			request.getApplications().forEach(application -> {
-				if (!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
+				if(!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
 						&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)
-						&& application.getProperty() == null)) {
+						&& application.getProperty().getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO))) {
 					enrichApplicationDetails(application);
 				}
 				AuditDetails modifyAuditDetails = application.getAuditDetails();
@@ -244,8 +247,8 @@ public class ApplicationEnrichmentService {
 				applicationNumberChargesEstimate.setEstimateAmount(applicationNumberCharges);
 				applicationNumberChargesEstimate.setCategory(Category.CHARGES);
 				applicationNumberChargesEstimate
-						.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
-								PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
+				.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
 				estimates.add(applicationNumberChargesEstimate);
 			}
 
@@ -407,7 +410,7 @@ public class ApplicationEnrichmentService {
 					.collect(Collectors.toList());
 			responseEstimateAmount = !feesConfigurationsForCommonCatandSubCat.isEmpty()
 					? new BigDecimal(feesConfigurationsForCommonCatandSubCat.get(0).get("amount").toString())
-					: new BigDecimal("0");
+							: new BigDecimal("0");
 		}
 		return responseEstimateAmount;
 	}

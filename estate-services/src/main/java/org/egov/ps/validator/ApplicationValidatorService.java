@@ -309,7 +309,9 @@ public class ApplicationValidatorService {
 
 	public void validateUpdateRequest(ApplicationRequest applicationRequest) {
 		for (Application application : applicationRequest.getApplications()) {
-			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) 
+			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
+					&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && 
+					application.getProperty().getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO)) 
 				continue;
 			validateApplicationIdExistsInDB(application.getId());
 
