@@ -468,4 +468,21 @@ public class PropertyQueryBuilder {
 		params.put("propertyDetailIds", propertyDetailIds);
 		return sb.toString();
 	}
+
+	public String getDummyPropertySearchQuery(PropertyCriteria criteria, Map<String, Object> paramMap) {
+		StringBuilder sb = new StringBuilder(SELECT);
+		sb.append(PT_COLUMNS);
+
+		sb.append(PT_TABLE);
+		
+		if (!ObjectUtils.isEmpty(criteria.getFileNumber())) {
+			addClauseIfRequired(paramMap, sb);
+			sb.append(" pt.file_number=:fileNumber ");
+			paramMap.put("fileNumber", criteria.getFileNumber());
+		}
+		
+		sb.append(" and pt.is_dummy_property= true");
+		
+		return sb.toString();
+	}
 }
