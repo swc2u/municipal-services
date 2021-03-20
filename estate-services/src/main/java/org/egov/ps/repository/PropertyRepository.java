@@ -418,6 +418,18 @@ public class PropertyRepository {
 		}
 		return properties.get(0);
 	}
+	
+	public Property fetchDummyProperty(PropertyCriteria criteria) {
+		Map<String, Object> paramMap = new HashMap<>();
+		String query = propertyQueryBuilder.getDummyPropertySearchQuery(criteria, paramMap);
+		log.debug("Property Query {}", query);
+		log.debug("ParamMap {}", paramMap);
+		List<Property> properties = namedParameterJdbcTemplate.query(query, paramMap, propertyRowMapper);
+		if (properties == null || properties.isEmpty()) {
+			return null;
+		}
+		return properties.get(0);
+	}
 
 	public EstateAccount getPropertyEstateAccountDetails(List<String> propertyDetailsIds) {
 		Map<String, Object> preparedStmtList = new HashMap<>();
