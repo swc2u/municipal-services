@@ -459,20 +459,80 @@ public class ApplicationEnrichmentService {
 	private void enrichCollectPaymentDemand(Application application, RequestInfo requestInfo) {
 		List<TaxHeadEstimate> estimates = new LinkedList<>();
 
-		TaxHeadEstimate estimateFee = new TaxHeadEstimate();
-		estimateFee.setEstimateAmount(application.getPaymentAmount());
-		estimateFee.setCategory(Category.FEE);
-		estimateFee.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
-				PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
+		if (application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
+				&& application.getApplicationType().contentEquals(PSConstants.NOC)) {
 
-		TaxHeadEstimate estimateGst = new TaxHeadEstimate();
-		estimateGst.setEstimateAmount(application.getGst());
-		estimateGst.setCategory(Category.TAX);
-		estimateGst.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
-				PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.TAX));
+			JsonNode applicationDetails = application.getApplicationDetails();
 
-		estimates.add(estimateFee);
-		estimates.add(estimateGst);
+			BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").toString());
+			TaxHeadEstimate developmentChargesEstimate = new TaxHeadEstimate();
+			developmentChargesEstimate.setEstimateAmount(developmentCharges);
+			developmentChargesEstimate.setCategory(Category.CHARGES);
+			developmentChargesEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "DEVELOPMENT", Category.CHARGES));
+			estimates.add(developmentChargesEstimate);
+
+			// Conversion charges
+			BigDecimal conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").toString());
+			TaxHeadEstimate conversionChargesEstimate = new TaxHeadEstimate();
+			conversionChargesEstimate.setEstimateAmount(conversionCharges);
+			conversionChargesEstimate.setCategory(Category.CHARGES);
+			conversionChargesEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "CONVERSION", Category.CHARGES));
+			estimates.add(conversionChargesEstimate);
+
+			// Scrutiny charges
+			BigDecimal scrutinyCharges = BigDecimal.ZERO;
+			if (null != applicationDetails.get("scrutinyCharges")) {
+				scrutinyCharges = new BigDecimal(applicationDetails.get("scrutinyCharges").asText());
+			}
+			TaxHeadEstimate scrutinyChargesEstimate = new TaxHeadEstimate();
+			scrutinyChargesEstimate.setEstimateAmount(scrutinyCharges);
+			scrutinyChargesEstimate.setCategory(Category.CHARGES);
+			scrutinyChargesEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "SCRUTINY", Category.CHARGES));
+			estimates.add(scrutinyChargesEstimate);
+
+			// Transfer fees
+			BigDecimal transferFee = BigDecimal.ZERO;
+			if (null != applicationDetails.get("transferFee")) {
+				transferFee = new BigDecimal(applicationDetails.get("transferFee").asText());
+			}
+			TaxHeadEstimate transferFeeEstimate = new TaxHeadEstimate();
+			transferFeeEstimate.setEstimateAmount(transferFee);
+			transferFeeEstimate.setCategory(Category.FEE);
+			transferFeeEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "TRANSFER", Category.FEE));
+			estimates.add(transferFeeEstimate);
+
+			// Allotment number
+			BigDecimal applicationNumberCharges = BigDecimal.ZERO;
+			if (null != applicationDetails.get("applicationNumberCharges")) {
+				applicationNumberCharges = new BigDecimal(applicationDetails.get("applicationNumberCharges").asText());
+			}
+			TaxHeadEstimate applicationNumberChargesEstimate = new TaxHeadEstimate();
+			applicationNumberChargesEstimate.setEstimateAmount(applicationNumberCharges);
+			applicationNumberChargesEstimate.setCategory(Category.CHARGES);
+			applicationNumberChargesEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
+			estimates.add(applicationNumberChargesEstimate);
+		} else {
+
+			TaxHeadEstimate estimateFee = new TaxHeadEstimate();
+			estimateFee.setEstimateAmount(application.getPaymentAmount());
+			estimateFee.setCategory(Category.FEE);
+			estimateFee.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
+
+			TaxHeadEstimate estimateGst = new TaxHeadEstimate();
+			estimateGst.setEstimateAmount(application.getGst());
+			estimateGst.setCategory(Category.TAX);
+			estimateGst.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.TAX));
+
+			estimates.add(estimateFee);
+			estimates.add(estimateGst);
+		}
 
 		Calculation calculation = Calculation.builder().applicationNumber(application.getApplicationNumber())
 				.taxHeadEstimates(estimates).tenantId(application.getTenantId()).build();
