@@ -13,6 +13,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.model.AuctionBidder;
 import org.egov.ps.model.Document;
 import org.egov.ps.model.ExtensionFee;
+import org.egov.ps.model.ModeEnum;
 import org.egov.ps.model.Owner;
 import org.egov.ps.model.OwnerDetails;
 import org.egov.ps.model.PaymentConfig;
@@ -95,6 +96,7 @@ public class PropertyEnrichmentService {
 
 		enrichManiMajraDemand(property, requestInfo);
 		enrichManiMajraPayment(property, requestInfo);
+
 	}
 
 	private void enrichAccountStatementDoc(Property property, RequestInfo requestInfo) {
@@ -327,6 +329,17 @@ public class PropertyEnrichmentService {
 					estatePayment.setId(UUID.randomUUID().toString());
 					estatePayment.setPropertyDetailsId(property.getPropertyDetails().getId());
 
+					if (property.getPropertyDetails().isAdhocPayment() && null != estatePayment.getAmountPaid()) {
+						estatePayment.setMode(ModeEnum.ADJUSTMENT);
+						estatePayment.setProcessed(false);
+						estatePayment.setRentReceived(estatePayment.getAmountPaid());
+//						estatePayment.setReceiptNo("");
+//						estatePayment.setReceiptDate(System.currentTimeMillis());
+						if (null == estatePayment.getDateOfPayment()) {
+							estatePayment.setDateOfPayment(System.currentTimeMillis());
+							estatePayment.setPaymentDate(System.currentTimeMillis());
+						}
+					}
 				}
 				AuditDetails estatePaymentAuditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(),
 						true);
