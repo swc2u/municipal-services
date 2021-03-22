@@ -446,7 +446,8 @@ public class TransferinwardsService extends DomainService {
 				indent.put("indentingStoreDept", in.getReceivingStore().getDepartment().getName());
 				indent.put("inwardStatus", in.getMrnStatus());
 
-				indent.put("remark", in.getDescription());
+//				indent.put("remark", in.getDescription());
+				indent.put("remark", in.getInspectionRemarks());
 				indent.put("createdBy", in.getReceivedBy());
 				indent.put("designation", in.getDesignation());
 
