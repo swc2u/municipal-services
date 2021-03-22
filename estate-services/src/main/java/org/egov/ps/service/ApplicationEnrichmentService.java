@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.extern.slf4j.Slf4j;
@@ -69,16 +70,10 @@ public class ApplicationEnrichmentService {
 
 	public void enrichApplication(RequestInfo requestInfo, Application application) {
 		AuditDetails auditDetails = util.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-		if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
-				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)
-				&& application.getProperty() == null) {
-			Property dummyPropertyFromDB = propertyRepository.fetchDummyProperty(
-					PropertyCriteria.builder().fileNumber(PSConstants.BB_NOC_DUMMY_FILENO).limit(1l).build());
-			application.setProperty(dummyPropertyFromDB);
-		} else {
-			enrichApplicationDetails(application);
-			enrichPropertyDetails(application);
-		}
+
+		enrichApplicationDetails(application);
+		enrichPropertyDetails(application);
+
 		application.setId(UUID.randomUUID().toString());
 		application.setAuditDetails(auditDetails);
 		application.setApplicationNumber(
@@ -92,51 +87,71 @@ public class ApplicationEnrichmentService {
 		JsonNode transferor = (applicationDetails.get("transferor") != null) ? applicationDetails.get("transferor")
 				: applicationDetails.get("owner");
 
-		String propertyId = application.getProperty().getId();
-		String transferorId = "";
-		if (null != transferor && null != transferor.get("id")) {
-			transferorId = transferor.get("id").asText();
-		}
+		if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
+				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)
+				&& application.getProperty() == null) {
+			final ObjectMapper mapper = new ObjectMapper();
+			final ObjectNode transferorDetails = mapper.createObjectNode();
 
-		Property property = propertyRepository.findPropertyById(propertyId);
-		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getOwners())) {
-			for (Owner owner : property.getPropertyDetails().getOwners()) {
-				if (owner.getId().equals(transferorId)) {
-					((ObjectNode) transferor).put("name", owner.getOwnerDetails().getOwnerName());
-					((ObjectNode) transferor).put("serialNumber", owner.getSerialNumber());
-					((ObjectNode) transferor).put("share", owner.getShare());
-					((ObjectNode) transferor).put("cpNumber", owner.getCpNumber());
-					((ObjectNode) transferor).set("transferorDetails", owner.getOwnerDetails().copyAsJsonNode());
+			transferorDetails.put("ownerName", applicationDetails.get("owner").get("name"));
+			transferorDetails.put("mobileNumber", applicationDetails.get("owner").get("ownerDetails").get("mobileNumber"));
+			((ObjectNode) transferor).set("transferorDetails", transferorDetails);
+		}else {
+			String propertyId = application.getProperty().getId();
+			String transferorId = "";
+			if (null != transferor && null != transferor.get("id")) {
+				transferorId = transferor.get("id").asText();
+			}
+
+			Property property = propertyRepository.findPropertyById(propertyId);
+			if (!CollectionUtils.isEmpty(property.getPropertyDetails().getOwners())) {
+				for (Owner owner : property.getPropertyDetails().getOwners()) {
+					if (owner.getId().equals(transferorId)) {
+						((ObjectNode) transferor).put("name", owner.getOwnerDetails().getOwnerName());
+						((ObjectNode) transferor).put("serialNumber", owner.getSerialNumber());
+						((ObjectNode) transferor).put("share", owner.getShare());
+						((ObjectNode) transferor).put("cpNumber", owner.getCpNumber());
+						((ObjectNode) transferor).set("transferorDetails", owner.getOwnerDetails().copyAsJsonNode());
+					}
 				}
 			}
-		}
 
-		if (applicationDetails.get("transferee") != null && applicationDetails.get("transferee").get("id") != null) {
-			JsonNode transferee = applicationDetails.get("transferee");
-			String transfereeId = "";
-			if (null != transferee && null != transferee.get("id")) {
-				transferee.get("id").asText();
-			}
+			if (applicationDetails.get("transferee") != null && applicationDetails.get("transferee").get("id") != null) {
+				JsonNode transferee = applicationDetails.get("transferee");
+				String transfereeId = "";
+				if (null != transferee && null != transferee.get("id")) {
+					transferee.get("id").asText();
+				}
 
-			if (!CollectionUtils.isEmpty(property.getPropertyDetails().getOwners())) {
-				property.getPropertyDetails().getOwners().forEach(owner -> {
-					if (owner.getId().equals(transfereeId)) {
-						((ObjectNode) transferee).put("name", owner.getOwnerDetails().getOwnerName());
-						((ObjectNode) transferee).put("fatherOrHusbandName", owner.getOwnerDetails().getGuardianName());
-						((ObjectNode) transferee).put("relation", owner.getOwnerDetails().getGuardianRelation());
-						((ObjectNode) transferee).put("address", owner.getOwnerDetails().getAddress());
-						((ObjectNode) transferee).put("relationWithDeceased",
-								owner.getOwnerDetails().getGuardianRelation());
-						((ObjectNode) transferee).put("mobileNo", owner.getOwnerDetails().getMobileNumber());
-					}
-				});
+				if (!CollectionUtils.isEmpty(property.getPropertyDetails().getOwners())) {
+					property.getPropertyDetails().getOwners().forEach(owner -> {
+						if (owner.getId().equals(transfereeId)) {
+							((ObjectNode) transferee).put("name", owner.getOwnerDetails().getOwnerName());
+							((ObjectNode) transferee).put("fatherOrHusbandName", owner.getOwnerDetails().getGuardianName());
+							((ObjectNode) transferee).put("relation", owner.getOwnerDetails().getGuardianRelation());
+							((ObjectNode) transferee).put("address", owner.getOwnerDetails().getAddress());
+							((ObjectNode) transferee).put("relationWithDeceased",
+									owner.getOwnerDetails().getGuardianRelation());
+							((ObjectNode) transferee).put("mobileNo", owner.getOwnerDetails().getMobileNumber());
+						}
+					});
+				}
 			}
 		}
 		application.setApplicationDetails(applicationDetails);
 	}
 
 	private void enrichPropertyDetails(Application application) {
-		Property property = propertyRepository.findPropertyById(application.getProperty().getId());
+		Property property=null;
+		if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
+				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)
+				&& application.getProperty() == null) {
+			property = propertyRepository.fetchDummyProperty(
+					PropertyCriteria.builder().fileNumber(PSConstants.BB_NOC_DUMMY_FILENO).limit(1l).build());
+		}else {
+
+			property = propertyRepository.findPropertyById(application.getProperty().getId());
+		}
 		application.setProperty(property);
 	}
 
@@ -149,7 +164,7 @@ public class ApplicationEnrichmentService {
 			request.getApplications().forEach(application -> {
 				if (!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
 						&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application
-								.getProperty().getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO))) {
+						.getProperty().getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO))) {
 					enrichApplicationDetails(application);
 				}
 				AuditDetails modifyAuditDetails = application.getAuditDetails();
@@ -249,8 +264,8 @@ public class ApplicationEnrichmentService {
 				applicationNumberChargesEstimate.setEstimateAmount(applicationNumberCharges);
 				applicationNumberChargesEstimate.setCategory(Category.CHARGES);
 				applicationNumberChargesEstimate
-						.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
-								PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
+				.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
 				estimates.add(applicationNumberChargesEstimate);
 			}
 
@@ -413,7 +428,7 @@ public class ApplicationEnrichmentService {
 					.collect(Collectors.toList());
 			responseEstimateAmount = !feesConfigurationsForCommonCatandSubCat.isEmpty()
 					? new BigDecimal(feesConfigurationsForCommonCatandSubCat.get(0).get("amount").toString())
-					: new BigDecimal("0");
+							: new BigDecimal("0");
 		}
 		return responseEstimateAmount;
 	}
