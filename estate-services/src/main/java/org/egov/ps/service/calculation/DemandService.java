@@ -360,14 +360,8 @@ public class DemandService {
 			ownerPhone = applicationDetails.get("transferor").get("transferorDetails").get("mobileNumber").asText();
 
 		} else if (applicationDetails.get("owner") != null) {
-			if(applicationDetails.get("owner").get("transferorDetails")!=null) {
-				ownerName = applicationDetails.get("owner").get("transferorDetails").get("ownerName").asText();
-				ownerPhone = applicationDetails.get("owner").get("transferorDetails").get("mobileNumber").asText();
-			}
-			else {
-				ownerName = applicationDetails.get("owner").get("name").asText();
-				ownerPhone = applicationDetails.get("owner").get("ownerDetails").get("mobileNumber").asText();
-			}
+			ownerName = applicationDetails.get("owner").get("transferorDetails").get("ownerName").asText();
+			ownerPhone = applicationDetails.get("owner").get("transferorDetails").get("mobileNumber").asText();
 		}
 
 		CollectionPaymentDetail paymentDetail = CollectionPaymentDetail.builder().tenantId(tenantId)
