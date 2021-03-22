@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonpath.JsonPath;
@@ -127,12 +128,37 @@ public class ApplicationsNotificationService {
             
             List<Map<String, Object>> feesConfigurations = mdmsservice
 					.getApplicationFees(application.getMDMSModuleName(), requestInfo, application.getTenantId());
-
+            if(application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
+				&& application.getApplicationType().contentEquals(PSConstants.NOC)) {
+            	JsonNode applicationDetails = application.getApplicationDetails();
+            	
+            	BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").toString());
+            	
+            	BigDecimal conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").toString());
+            	
+            	BigDecimal scrutinyCharges = BigDecimal.ZERO;
+				
+            	if (null != applicationDetails.get("scrutinyCharges")) {
+					scrutinyCharges = new BigDecimal(applicationDetails.get("scrutinyCharges").asText());
+				}
+				BigDecimal transferFee = BigDecimal.ZERO;
+				if (null != applicationDetails.get("transferFee")) {
+					transferFee = new BigDecimal(applicationDetails.get("transferFee").asText());
+				}
+				
+				BigDecimal applicationNumberCharges = BigDecimal.ZERO;
+				if (null != applicationDetails.get("applicationNumberCharges")) {
+					applicationNumberCharges = new BigDecimal(
+							applicationDetails.get("applicationNumberCharges").asText());
+				}
+				application.setTotalDue(developmentCharges.add(conversionCharges).add(scrutinyCharges).add(transferFee).add(applicationNumberCharges));
+            }
+            else {
 			BigDecimal estimateAmount = applicationEnrichmentService.fetchEstimateAmountFromMDMSJson(feesConfigurations, application);
 			BigDecimal gstEstimatePercentage = applicationEnrichmentService.feesGSTOfApplication(application, requestInfo);
 			BigDecimal gstEstimateAmount = (estimateAmount.multiply(gstEstimatePercentage)).divide(new BigDecimal(100));
 			application.setTotalDue(estimateAmount.add(gstEstimateAmount));
-			
+            }
 			/**
 			 * Enrich hearing date
 			 */
