@@ -98,7 +98,7 @@ public class PropertyQueryBuilder {
 	private static final String ESTATE_PAYMENT_COLUMNS = " estp.id as estpid, estp.property_details_id as estpproperty_details_id, "
 			+ " estp.receipt_date as estpreceipt_date, estp.rent_received as estprent_received, estp.receipt_no as estpreceipt_no, "
 			+ " estp.payment_date as estpayment_date, estp.created_by as estpcreated_by, estp.last_modified_by as estplast_modified_by, "
-			+ " estp.created_time as estpcreated_time, estp.last_modified_time as estplast_modified_time, estp.processed as estpprocessed ";
+			+ " estp.created_time as estpcreated_time, estp.last_modified_time as estplast_modified_time, estp.processed as estpprocessed, estp.comments as estpcomments ";
 
 	private static final String MANI_MAJRA_DEMAND_COLUMNS = " mmd.id as mmd_id, mmd.property_details_id as mmd_property_details_id, "
 			+ " mmd.demand_date as mmd_demand_date, mmd.paid as mmd_paid, mmd.rent as mmd_rent, mmd.gst as mmd_gst, mmd.status as mmd_status, "

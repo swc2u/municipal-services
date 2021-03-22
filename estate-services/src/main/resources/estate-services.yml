@@ -670,7 +670,7 @@ serviceMaps:
             
             - jsonPath: $.Properties.*.propertyDetails.estateDemands.*.isBifurcate
 
-        - query: INSERT INTO cs_ep_payment (id, property_details_id, receipt_date, rent_received, receipt_no, payment_date, processed, created_by, last_modified_by, created_time, last_modified_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET receipt_date = ?, rent_received = ?, receipt_no = ?, payment_date = ?, processed = ?, last_modified_by = ?, last_modified_time = ?;
+        - query: INSERT INTO cs_ep_payment (id, property_details_id, receipt_date, rent_received, receipt_no, payment_date, processed, created_by, last_modified_by, created_time, last_modified_time, comments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET receipt_date = ?, rent_received = ?, receipt_no = ?, payment_date = ?, processed = ?, last_modified_by = ?, last_modified_time = ?, comments = ?;
           basePath: $.Properties.*.propertyDetails.estatePayments.*
           jsonMaps:
             - jsonPath: $.Properties.*.propertyDetails.estatePayments.*.id
@@ -694,6 +694,8 @@ serviceMaps:
             - jsonPath: $.Properties.*.propertyDetails.estatePayments.*.auditDetails.createdTime
 
             - jsonPath: $.Properties.*.propertyDetails.estatePayments.*.auditDetails.lastModifiedTime
+            
+            - jsonPath: $.Properties.*.propertyDetails.estatePayments.*.comments
 
             - jsonPath: $.Properties.*.propertyDetails.estatePayments.*.receiptDate
 
@@ -708,6 +710,8 @@ serviceMaps:
             - jsonPath: $.Properties.*.propertyDetails.estatePayments.*.auditDetails.lastModifiedBy
 
             - jsonPath: $.Properties.*.propertyDetails.estatePayments.*.auditDetails.lastModifiedTime
+            
+            - jsonPath: $.Properties.*.propertyDetails.estatePayments.*.comments
 
         - query: INSERT INTO cs_ep_account(id, property_details_id, remainingAmount, remaining_since, created_by, modified_by, created_date, modified_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)ON CONFLICT (id) DO UPDATE SET remainingAmount=?, remaining_since=?, modified_by=?, modified_date=?;
           basePath: Properties.*.propertyDetails.estateAccount

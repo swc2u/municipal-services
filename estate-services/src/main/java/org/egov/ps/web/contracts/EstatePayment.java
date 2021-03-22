@@ -38,7 +38,7 @@ public class EstatePayment implements Comparable<EstatePayment> {
 	 */
 	@JsonProperty("receiptDate")
 	private Long receiptDate;
-	
+
 	/**
 	 * Payment Date of demand.
 	 */
@@ -90,10 +90,14 @@ public class EstatePayment implements Comparable<EstatePayment> {
 	@Builder.Default
 	private boolean processed = false;
 
-	// private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd yy");
+	// private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd
+	// yy");
 
 	public String toString() {
 		return String.format("Amount: %10.2f, isProcessed: %.5s", this.rentReceived, this.isProcessed());
 
 	}
+
+	@JsonProperty("comments")
+	private String comments;
 }
