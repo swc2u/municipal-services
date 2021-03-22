@@ -1,6 +1,7 @@
 package org.egov.ps.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -236,7 +237,7 @@ public class ApplicationEnrichmentService {
 					scrutinyCharges = new BigDecimal(applicationDetails.get("scrutinyCharges").asText());
 				}
 				TaxHeadEstimate scrutinyChargesEstimate = new TaxHeadEstimate();
-				scrutinyChargesEstimate.setEstimateAmount(scrutinyCharges);
+				scrutinyChargesEstimate.setEstimateAmount(scrutinyCharges.setScale(0, RoundingMode.HALF_UP));
 				scrutinyChargesEstimate.setCategory(Category.CHARGES);
 				scrutinyChargesEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
 						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "SCRUTINY", Category.CHARGES));
@@ -338,7 +339,7 @@ public class ApplicationEnrichmentService {
 		}
 
 		developmentCharges = BigDecimal.valueOf(calculateDevelopmentCharges);
-		developmentCharges = developmentCharges.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+		developmentCharges = developmentCharges.setScale(0, RoundingMode.HALF_UP);
 		return developmentCharges;
 	}
 
@@ -374,7 +375,7 @@ public class ApplicationEnrichmentService {
 		}
 
 		conversionCharges = BigDecimal.valueOf(calculateconversionCharges);
-		conversionCharges = conversionCharges.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+		conversionCharges = conversionCharges.setScale(0, RoundingMode.HALF_UP);
 		return conversionCharges;
 	}
 
