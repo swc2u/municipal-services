@@ -174,6 +174,15 @@ public class ApplicationsNotificationService {
 			}
 
 			/**
+			 * Enrich filenumber for dummy property
+			 */
+			if(application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
+					&& application.getApplicationType().contentEquals(PSConstants.NOC) 
+					&& application.getProperty().getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO) ) {
+				application.getProperty().setFileNumber(application.getApplicationDetails().get("property").get("fileNumber").asText());
+			}
+
+			/**
 			 * Enrich content by replacing paths like {createdBy.name}
 			 */
 			String applicationJsonString = mapper.writeValueAsString(application);
