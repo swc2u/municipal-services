@@ -40,6 +40,7 @@ public class EmployeePostDetailMap {
 	private String employeeDesignation;
 	private String employeeEmail;
 	private String orgUnitId;
+	private String orgUnitName;
 
 	@JsonProperty("isActive")
 	private Boolean isActive;
