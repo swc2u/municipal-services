@@ -334,10 +334,10 @@ public class PropertyEnrichmentService {
 						estatePayment.setProcessed(false);
 						estatePayment.setRentReceived(estatePayment.getAmountPaid());
 //						estatePayment.setReceiptNo("");
-//						estatePayment.setReceiptDate(System.currentTimeMillis());
 						if (null == estatePayment.getDateOfPayment()) {
 							estatePayment.setDateOfPayment(System.currentTimeMillis());
 							estatePayment.setPaymentDate(System.currentTimeMillis());
+							estatePayment.setReceiptDate(System.currentTimeMillis());
 						}
 					}
 				}
