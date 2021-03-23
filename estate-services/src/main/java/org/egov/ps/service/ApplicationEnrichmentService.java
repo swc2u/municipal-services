@@ -271,7 +271,8 @@ public class ApplicationEnrichmentService {
 			}
 
 		}
-		if (application.getState().contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
+		
+		else if (application.getState().contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
 
 			try {
 				List<Map<String, Object>> feesConfigurations = mdmsService

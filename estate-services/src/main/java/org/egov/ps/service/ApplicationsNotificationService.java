@@ -174,15 +174,6 @@ public class ApplicationsNotificationService {
 			}
 
 			/**
-			 * Enrich filenumber for dummy property
-			 */
-			if(application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
-					&& application.getApplicationType().contentEquals(PSConstants.NOC) 
-					&& application.getProperty().getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO) ) {
-				application.getProperty().setFileNumber(application.getApplicationDetails().get("property").get("fileNumber").asText());
-			}
-
-			/**
 			 * Enrich content by replacing paths like {createdBy.name}
 			 */
 			String applicationJsonString = mapper.writeValueAsString(application);
@@ -190,6 +181,15 @@ public class ApplicationsNotificationService {
 					applicationJsonString);
 			String enrichedContent = enrichLocalizationPatternsInString(application, requestInfo,
 					contentWithPathsEnriched);
+			
+			
+			if(application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
+					&& application.getApplicationType().contentEquals(PSConstants.NOC) 
+					&& application.getProperty().getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO) ) {
+				if(enrichedContent.contains(PSConstants.BB_NOC_DUMMY_FILENO)) {
+					enrichedContent = enrichedContent.replace(PSConstants.BB_NOC_DUMMY_FILENO, application.getApplicationDetails().get("property").get("fileNumber").asText());
+				}
+			}
 
 			/**
 			 * Send email
@@ -226,6 +226,7 @@ public class ApplicationsNotificationService {
 				if(null != eventRequest)
 					util.sendEventNotification(eventRequest);
 			}
+			
 		} catch (Exception e) {
 			log.error("Could not convert enrichedApplication to JSON", e);
 		}
