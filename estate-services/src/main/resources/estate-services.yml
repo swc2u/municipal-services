@@ -162,7 +162,7 @@ serviceMaps:
           jsonMaps:
             - jsonPath: $.Properties.*.propertyDetails.id
 
-        - query: UPDATE cs_ep_property_details_v1 SET branch_type = ?, property_type = ?, mm_demand_start_year = ?, mm_demand_start_month = ?, tenantid = ?, type_of_allocation = ?, emd_amount = ?,  emd_date = ?, mode_of_auction = ?, scheme_name = ?, date_of_auction = ?, area_sqft = ?, rate_per_sqft = ?, last_noc_date = ?, service_category = ?, is_property_active = ?, trade_type = ?, company_name = ?, company_address = ?, company_registration_number = ?, company_type = ?, decree_date = ?, court_details = ?, civil_titled_as = ?, company_registration_date = ?, company_or_firm = ?, property_registered_to = ?, entity_type = ?, house_number = ?, village = ?, mohalla = ?, street = ?, interest_rate = ?, last_modified_by = ?, last_modified_time = ? WHERE id = ?;
+        - query: UPDATE cs_ep_property_details_v1 SET branch_type = ?, property_type = ?, mm_demand_start_year = ?, mm_demand_start_month = ?, tenantid = ?, type_of_allocation = ?, emd_amount = ?,  emd_date = ?, mode_of_auction = ?, scheme_name = ?, date_of_auction = ?, area_sqft = ?, rate_per_sqft = ?, last_noc_date = ?, service_category = ?, is_property_active = ?, trade_type = ?, company_name = ?, company_address = ?, company_registration_number = ?, company_type = ?, decree_date = ?, court_details = ?, civil_titled_as = ?, company_registration_date = ?, company_or_firm = ?, property_registered_to = ?, entity_type = ?, house_number = ?, village = ?, mohalla = ?, street = ?, interest_rate = ?, last_modified_by = ?, last_modified_time = ?, terms_and_conditions = ? WHERE id = ?;
           basePath: Properties.*.propertyDetails
           jsonMaps:
             - jsonPath: $.Properties.*.propertyDetails.branchType
@@ -234,6 +234,8 @@ serviceMaps:
             - jsonPath: $.Properties.*.propertyDetails.auditDetails.lastModifiedBy
 
             - jsonPath: $.Properties.*.propertyDetails.auditDetails.lastModifiedTime
+            
+            - jsonPath: $.Properties.*.propertyDetails.termsAndConditions
 
             - jsonPath: $.Properties.*.propertyDetails.id
 
@@ -1141,7 +1143,7 @@ serviceMaps:
       fromTopic: update-application-topic
       isTransaction: true
       queryMaps:
-        - query: UPDATE cs_ep_application_v1 SET branch_type = ?, module_type = ?, application_type = ?, comments = ?, hardcopy_received_date = ?, application_details = ?::jsonb, state = ?, action = ?, bank_name = ?, transaction_number = ?, amount = ?, payment_type = ?, date_of_payment = ?,news_paper_advertisement_date = ?,application_submission_date=?, last_modified_by = ?, last_modified_time = ?, book_number = ?, page_number = ?, volume_number = ? WHERE id = ?;
+        - query: UPDATE cs_ep_application_v1 SET branch_type = ?, module_type = ?, application_type = ?, comments = ?, hardcopy_received_date = ?, application_details = ?::jsonb, state = ?, action = ?, bank_name = ?, transaction_number = ?, amount = ?, payment_type = ?, date_of_payment = ?,news_paper_advertisement_date = ?,application_submission_date=?, last_modified_by = ?, last_modified_time = ?, book_number = ?, page_number = ?, volume_number = ?, terms_and_conditions = ? WHERE id = ?;
           basePath: Applications.*
           jsonMaps:
             - jsonPath: $.Applications.*.branchType
@@ -1185,6 +1187,8 @@ serviceMaps:
             - jsonPath: $.Applications.*.pageNumber
 
             - jsonPath: $.Applications.*.volumeNumber
+            
+            - jsonPath: $.Applications.*.termsAndConditions
 
             - jsonPath: $.Applications.*.id
 

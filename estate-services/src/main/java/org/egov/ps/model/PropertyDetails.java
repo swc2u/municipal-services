@@ -391,13 +391,16 @@ public class PropertyDetails {
 
 	@JsonProperty("mmDemandStartYear")
 	private int mmDemandStartYear;
-	
+
 	@JsonProperty("mmDemandStartMonth")
 	private int mmDemandStartMonth;
-	
+
 	@JsonProperty("adhocDemand")
 	private boolean adhocDemand;
-	
+
 	@JsonProperty("adhocPayment")
 	private boolean adhocPayment;
+
+	@JsonProperty("termsAndConditions")
+	private String termsAndConditions;
 }
