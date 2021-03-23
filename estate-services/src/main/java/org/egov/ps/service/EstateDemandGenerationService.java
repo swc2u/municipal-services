@@ -16,8 +16,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 import org.egov.ps.config.Configuration;
 import org.egov.ps.model.EstateDemandCriteria;
 import org.egov.ps.model.PaymentConfig;
@@ -37,6 +35,8 @@ import org.joda.time.DateTimeComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import com.google.common.util.concurrent.AtomicDouble;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -321,14 +321,15 @@ public class EstateDemandGenerationService {
 				if (paymentConfigItem.getGroundRentStartMonth() <= monthsBetween
 						&& monthsBetween <= paymentConfigItem.getGroundRentEndMonth()) {
 					checkLoopIf.incrementAndGet();
-					double securityDeposit = paymentConfigItem.getGroundRentAmount().doubleValue() * paymentConfig.getNoOfMonths();
+					double securityDeposit = paymentConfigItem.getGroundRentAmount().doubleValue()
+							* paymentConfig.getNoOfMonths();
 					return new BigDecimal(securityDeposit);
 				}
 			}
 			if (checkLoopIf.get() == 0) {
 				int paymentConfigCount = paymentConfig.getPaymentConfigItems().size() - 1;
-				double securityDeposit = paymentConfig.getPaymentConfigItems().get(paymentConfigCount).getGroundRentAmount()
-						.doubleValue() * paymentConfig.getNoOfMonths();
+				double securityDeposit = paymentConfig.getPaymentConfigItems().get(paymentConfigCount)
+						.getGroundRentAmount().doubleValue() * paymentConfig.getNoOfMonths();
 				return new BigDecimal(securityDeposit);
 			}
 		}
@@ -599,6 +600,12 @@ public class EstateDemandGenerationService {
 					+ property.getPropertyDetails().getPaymentConfig().getGroundRentAdvanceRent().doubleValue());
 			property.getPropertyDetails().getEstateAccount()
 					.setRemainingSince(property.getPropertyDetails().getPaymentConfig().getGroundRentAdvanceRentDate());
+		}
+
+		if (null != property.getPropertyDetails().getEmdAmount()
+				&& BigDecimal.ZERO != property.getPropertyDetails().getEmdAmount()) {
+			property.getPropertyDetails().getEstateAccount()
+					.setRemainingAmount(property.getPropertyDetails().getEmdAmount().doubleValue());
 		}
 	}
 
