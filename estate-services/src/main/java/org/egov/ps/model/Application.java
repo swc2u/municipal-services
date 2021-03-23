@@ -258,4 +258,7 @@ public class Application {
 	@JsonProperty("volumeNumber")
 	private String volumeNumber;
 	
+	@JsonProperty("termsAndConditions")
+	private String termsAndConditions;
+	
 }
