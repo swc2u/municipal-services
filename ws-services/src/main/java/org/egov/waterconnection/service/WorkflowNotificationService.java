@@ -119,12 +119,22 @@ public class WorkflowNotificationService {
 		String localizationMessage = notificationUtil
 				.getLocalizationMessages(property.getTenantId(), request.getRequestInfo());
 		int reqType = WCConstants.UPDATE_APPLICATION;
-		if ((!request.getWaterConnection().getProcessInstance().getAction().equalsIgnoreCase(WCConstants.ACTIVATE_CONNECTION))
-				&& waterServiceUtil.isModifyConnectionRequest(request)) {
-			reqType = WCConstants.MODIFY_CONNECTION;
+		String message = null;
+		if (WCConstants.ACTION_PAY.equalsIgnoreCase(request.getWaterConnection().getProcessInstance().getAction())
+				|| WCConstants.DOC_CHECK_APP_STATUS_NOTIFY.contains(applicationStatus)) {
+			message = WCConstants.WS_PAYMENT_MESSAGE_NOTIFICATION;
+		} else if (WCConstants.ACTION_REJECT
+				.equalsIgnoreCase(request.getWaterConnection().getProcessInstance().getAction())) {
+			
+			message = WCConstants.WS_REJECT_MESSAGE_NOTIFICATION;
+			
+		} else if (WCConstants.DOCUMENT_PENDING_FROM_CITIZEN_MESSAGE
+				.contains(request.getWaterConnection().getProcessInstance().getAction())) {
+			message = WCConstants.WS_RESUBMIT_MESSAGE_NOTIFICATION;
+		} else if (WCConstants.SUBMIT_ACTION_FROM_CITIZEN_MESSAGE
+				.contains(request.getWaterConnection().getProcessInstance().getAction())) {
+			message = WCConstants.WS_SUBMIT_MESSAGE_NOTIFICATION;
 		}
-		String message = notificationUtil.getCustomizedMsgForInApp(request.getWaterConnection().getProcessInstance().getAction(), applicationStatus,
-				localizationMessage, reqType);
 		if (message == null) {
 			log.info("No message Found For Topic : " + topic);
 			return null;
@@ -248,9 +258,22 @@ public class WorkflowNotificationService {
 				&& waterServiceUtil.isModifyConnectionRequest(waterConnectionRequest)) {
 			reqType = WCConstants.MODIFY_CONNECTION;
 		}
-		String message = notificationUtil.getCustomizedMsgForSMS(
-				waterConnectionRequest.getWaterConnection().getProcessInstance().getAction(), applicationStatus,
-				localizationMessage, reqType);
+		String message = null;
+		if (WCConstants.ACTION_PAY.equalsIgnoreCase(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction())
+				|| WCConstants.DOC_CHECK_APP_STATUS_NOTIFY.contains(applicationStatus)) {
+			message = WCConstants.WS_PAYMENT_MESSAGE_NOTIFICATION;
+		} else if (WCConstants.ACTION_REJECT
+				.equalsIgnoreCase(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction())) {
+			
+			message = WCConstants.WS_REJECT_MESSAGE_NOTIFICATION;
+			
+		} else if (WCConstants.DOCUMENT_PENDING_FROM_CITIZEN_MESSAGE
+				.contains(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction())) {
+			message = WCConstants.WS_RESUBMIT_MESSAGE_NOTIFICATION;
+		} else if (WCConstants.SUBMIT_ACTION_FROM_CITIZEN_MESSAGE
+				.contains(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction())) {
+			message = WCConstants.WS_SUBMIT_MESSAGE_NOTIFICATION;
+		}
 		if (message == null) {
 			log.info("No message Found For Topic : " + topic);
 			return Collections.emptyList();

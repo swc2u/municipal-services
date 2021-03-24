@@ -43,7 +43,7 @@ public class CalculationService {
 	 * 
 	 */
 	public void calculateFeeAndGenerateDemand(SewerageConnectionRequest request, Property property) {
-		if(SWConstants.APPROVE_CONNECTION_CONST.equalsIgnoreCase(request.getSewerageConnection().getProcessInstance().getAction())){
+		if(SWConstants.FORWARD_FOR_PAYMENT_ACTION.equalsIgnoreCase(request.getSewerageConnection().getProcessInstance().getAction())){
 			StringBuilder uri = sewerageServicesUtil.getCalculatorURL();
 			CalculationCriteria criteria = CalculationCriteria.builder()
 					.applicationNo(request.getSewerageConnection().getApplicationNo())
