@@ -48,7 +48,7 @@ public class AccountStatementExcelGenerationService {
 	private static final String RENT = "Rent";
 	private static final String PAYMENT = "Payment";
 	private static String[] headerColumns = { "Date", "Consolidated Demand", "Amount", "Type (Payment)", "Type (Rent)", "Principal due",
-			"GST Due", "Interest Due", "Gst Penalty Due", "Total Due", "Account Balance", "Receipt No." };
+			"GST Due", "Interest Due", "Gst Penalty Due", "Total Due", "Account Balance", "Receipt No.", "Comment" };
 	private static String[] mmHeaderColumns = { "Date", "Rent", "Amount", "Type (Payment)", "Type (Rent)", "Principal Due",
 			"GST Due", "Total Due", "Account Balance", "Receipt No." };
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
@@ -235,6 +235,7 @@ public class AccountStatementExcelGenerationService {
 								.filter(r -> r.getType().name().equals(EstateAccountStatement.Type.C.name()))
 								.ifPresent(o -> row.createCell(11).setCellValue(o.getReceiptNo()));
 					}
+					row.createCell(12).setCellValue(rentAccountStmt.getComment()==null? "-" : rentAccountStmt.getComment());
 				}
 
 				/**
