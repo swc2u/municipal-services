@@ -214,7 +214,7 @@ public class ApplicationEnrichmentService {
 			if (application.getState().contains(PSConstants.BB_NOC_PENDING_AC_APPROVAL)) {
 
 				// Development Charges
-				BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").toString());
+				BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").asText());
 				TaxHeadEstimate developmentChargesEstimate = new TaxHeadEstimate();
 				developmentChargesEstimate.setEstimateAmount(developmentCharges);
 				developmentChargesEstimate.setCategory(Category.CHARGES);
@@ -223,7 +223,7 @@ public class ApplicationEnrichmentService {
 				estimates.add(developmentChargesEstimate);
 
 				// Conversion charges
-				BigDecimal conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").toString());
+				BigDecimal conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").asText());
 				TaxHeadEstimate conversionChargesEstimate = new TaxHeadEstimate();
 				conversionChargesEstimate.setEstimateAmount(conversionCharges);
 				conversionChargesEstimate.setCategory(Category.CHARGES);
