@@ -595,7 +595,7 @@ public class PropertyService {
 			/**
 			 * if offline, create a payment.
 			 */
-			if (propertyFromRequest.getPropertyMasterOrAllotmentOfSite()
+			if (property.getPropertyMasterOrAllotmentOfSite()
 					.equalsIgnoreCase(PSConstants.PROPERTY_MASTER)) {
 				demandService.createCashPaymentProperty(propertyRequest.getRequestInfo(),
 						property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount(),
