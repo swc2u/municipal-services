@@ -243,8 +243,8 @@ public class PropertyService {
 			String roeAction = request.getProperties().get(0).getPropertyDetails().getBidders().get(0).getAction();
 			String addCourtCases = request.getProperties().get(0).getPropertyDetails().getAddCourtCases();
 			if (config.getIsWorkflowEnabled() && !roeAction.contentEquals("")
-					&& (state.contentEquals(PSConstants.PM_APPROVED)
-							|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
+//					&& (state.contentEquals(PSConstants.PM_APPROVED)
+//							|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
 					&& !addCourtCases.contentEquals(PSConstants.EB_ADD_COURT_CASES)
 					&& !request.getProperties().get(0).getPropertyDetails().isAdhocDemand()
 					&& !request.getProperties().get(0).getPropertyDetails().isAdhocPayment()) {
