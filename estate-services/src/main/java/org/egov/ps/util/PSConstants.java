@@ -79,6 +79,25 @@ public class PSConstants {
 	public static final String EM_STATE_PENDING_DA_FEE = "PENDING_DA_FEE";
 
 	public static final String TAX_HEAD_CODE_APPLICATION_CHARGE = "APPLICATION";
+	
+	public static final String TAX_HEAD_CODE_TRANSFER = "TRANSFER";
+	
+	public static final String TAX_HEAD_CODE_GST = "GST";
+	
+	public static final String TAX_HEAD_CODE_INSPECTION = "INSPECTION";
+	
+	public static final String TAX_HEAD_CODE_SECURITY = "SECURITY";
+	
+	public static final String TAX_HEAD_CODE_EXTENSION = "EXTENSION";
+	
+	public static final String TAX_HEAD_CODE_DOCUMENTCOPYING = "DOCUMENTCOPYING";
+	
+	public static final String TAX_HEAD_CODE_ALLOTMENT = "ALLOTMENT";
+	
+	public static final String TAX_HEAD_CODE_CONVERSION = "CONVERSION";
+	
+	public static final String TAX_HEAD_CODE_PROPERTYTRANSFER = "PROPERTYTRANSFER";
+	
 
 	public static final String ESTATE_SERVICE = "ESTATE_SERVICE";
 
