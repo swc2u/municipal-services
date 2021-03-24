@@ -37,8 +37,26 @@ export default ({ config, db }) => {
 
       if(pensionRevisionList && pensionRevisionList.length>0){
         let lastPensionRevision=[];
+        let newPensionRevision = [];
+        let nextPensionRevision = [];
         lastPensionRevision.push(pensionRevisionList[0]);  
         
+        newPensionRevision.push(body.ProcessInstances[0].pensionRevision[0]);
+        if(newPensionRevision[0].effectiveEndMonth != null 
+          && newPensionRevision[0].effectiveEndYear != null){
+            nextPensionRevision.push(lastPensionRevision[0]);
+            let nextPensionRevisionEffectiveStartYear = newPensionRevision[0].effectiveEndMonth==12?newPensionRevision[0].effectiveEndYear+1:newPensionRevision[0].effectiveEndYear;
+            let nextPensionRevisionEffectiveStartMonth = newPensionRevision[0].effectiveEndMonth==12?1:newPensionRevision[0].effectiveEndMonth+1;
+            
+            nextPensionRevision[0].effectiveStartYear = nextPensionRevisionEffectiveStartYear;
+            nextPensionRevision[0].effectiveStartMonth = nextPensionRevisionEffectiveStartMonth;
+
+            nextPensionRevision[0].effectiveEndYear = null;
+            nextPensionRevision[0].effectiveEndMonth = null;
+
+            body.ProcessInstances[0].pensionRevision.push(nextPensionRevision[0]);
+
+          }
 
         body.ProcessInstances[0].lastPensionRevision=lastPensionRevision;     
         body = await addUUIDAndAuditDetailsCloseLastRevisedPension(body);
