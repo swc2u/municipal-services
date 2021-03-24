@@ -226,7 +226,7 @@
         {
           "action": "APPROVE",
           "currentState": "PENDING_SI_APPROVAL",
-          "nextState": "APPROVED",
+          "nextState": "PENDING_SO_APPROVAL",
           "roles": ["ES_EB_SUPERINTENDENT"]
         },
         {
@@ -243,6 +243,29 @@
       "isTerminateState": false,
       "sla": 2,
       "state": "PENDING_SI_APPROVAL"
+    },    
+    {
+      "actions": [
+        {
+          "action": "APPROVE",
+          "currentState": "PENDING_SO_APPROVAL",
+          "nextState": "APPROVED",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        },
+        {
+          "action": "SENDBACK",
+          "currentState": "PENDING_SO_APPROVAL",
+          "nextState": "PENDING_SI_APPROVAL",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        }
+      ],
+      "applicationStatus": "ES_PENDING_SO_APPROVAL",
+      "docUploadRequired": false,
+      "isStartState": false,
+      "isStateUpdatable": true,
+      "isTerminateState": false,
+      "sla": 2,
+      "state": "PENDING_SO_APPROVAL"
     },
     {
       "actions": null,
