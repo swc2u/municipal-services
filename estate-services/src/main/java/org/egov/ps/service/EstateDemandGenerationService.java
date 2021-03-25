@@ -602,11 +602,6 @@ public class EstateDemandGenerationService {
 					.setRemainingSince(property.getPropertyDetails().getPaymentConfig().getGroundRentAdvanceRentDate());
 		}
 
-		if (null != property.getPropertyDetails().getEmdAmount()
-				&& BigDecimal.ZERO != property.getPropertyDetails().getEmdAmount()) {
-			property.getPropertyDetails().getEstateAccount()
-					.setRemainingAmount(property.getPropertyDetails().getEmdAmount().doubleValue());
-		}
 	}
 
 }
