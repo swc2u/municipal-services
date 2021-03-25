@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requestInfoToResponseInfo, searchWorkflow,getFileDetails,searchEmployee, getEmployeeDisability} from "../utils";
-import { mergeWorkflowHeader, mergeWorkflowDocumentSearchResults, mergeWorkflowDocumentAuditSearchResults,mergeLeaveSearchResults, mergeEmployeeOtherDetails, mergePensionCalculationDetails, mergePensionCalculationUpdateDetails,mergeDependentResults, mergeSearchEmployee,mergeAssignmentResults,mergeServiceHistoryResults } from "../utils/search";
+import { mergeWorkflowHeader, mergeWorkflowDocumentSearchResults, mergeWorkflowDocumentAuditSearchResults,mergeLeaveSearchResults, mergeEmployeeOtherDetails, mergePensionCalculationDetails, mergePensionCalculationUpdateDetails,mergeDependentResults, mergePensionArrearDetails } from "../utils/search";
 import isEmpty from "lodash/isEmpty";
 import get from "lodash/get";
 import some from "lodash/some";
@@ -310,7 +310,7 @@ export default ({ config, db }) => {
               });
 
               //pensionCalculationDetails 
-              let txtPensionCalculation ="select basic_pension_sytem, pension_deductions_system, additional_pension_system, commuted_pension_system, commuted_value_system, family_pension_i_system, family_pension_ii_system, dcrg_system, net_deductions_system, final_calculated_pension_system, basic_pension_verified, pension_deductions_verified, additional_pension_verified, commuted_pension_verified, commuted_value_verified, family_pension_i_verified, family_pension_ii_verified, dcrg_verified, net_deductions_verified, final_calculated_pension_verified, interim_relief_system, da_system, interim_relief_verified, da_verified, nqs_year_system, nqs_month_system, nqs_day_system, nqs_year_verified, nqs_month_verified, nqs_day_verified, dues_deductions_system, compassionate_pension_system, compensation_pension_system, terminal_benefit_system, dues_deductions_verified, compassionate_pension_verified, compensation_pension_verified, terminal_benefit_verified, final_calculated_gratuity_system, final_calculated_gratuity_verified, family_pension_i_start_date_system, family_pension_i_start_date_verified, family_pension_i_end_date_system, family_pension_i_end_date_verified, family_pension_ii_start_date_system, family_pension_ii_start_date_verified, ex_gratia_system, ex_gratia_verified, pensioner_family_pension_system, pensioner_family_pension_verified, total_pension_system, total_pension_verified, provisional_pension_system, provisional_pension_verified, interim_relief_applicable, interim_relief_expression, basic_pension_applicable, basic_pension_expression, provisional_pension_applicable, provisional_pension_expression, compassionate_pension_applicable, compassionate_pension_expression, compensation_pension_applicable, compensation_pension_expression, commuted_pension_applicable, commuted_pension_expression, family_pension_i_applicable, family_pension_i_expression, family_pension_ii_applicable, family_pension_ii_expression, da_applicable, da_expression, additional_pension_applicable, additional_pension_expression, total_pension_applicable, total_pension_expression, pension_deductions_applicable, pension_deductions_expression, net_deductions_applicable, net_deductions_expression, final_calculated_pension_applicable, final_calculated_pension_expression, commutation_value_applicable, commutation_value_expression, dcrg_applicable, dcrg_expression, terminal_benefit_applicable, terminal_benefit_expression, dues_deductions_applicable, dues_deductions_expression, final_calculated_gratuity_applicable, final_calculated_gratuity_expression, ex_gratia_applicable, ex_gratia_expression, pensioner_family_pension_applicable, pensioner_family_pension_expression, invalid_pension_system, wound_extraordinary_pension_system, attendant_allowance_system, invalid_pension_verified, wound_extraordinary_pension_verified, attendant_allowance_verified, invalid_pension_applicable, invalid_pension_expression, wound_extraordinary_pension_applicable, wound_extraordinary_pension_expression, attendant_allowance_applicable, attendant_allowance_expression, gqs_year_system, gqs_month_system, gqs_day_system, gqs_year_verified, gqs_month_verified, gqs_day_verified, notification_text_system, notification_text_verified, interim_relief_lpd_system from eg_pension_calculation_details";
+              let txtPensionCalculation ="select basic_pension_sytem, pension_deductions_system, additional_pension_system, commuted_pension_system, commuted_value_system, family_pension_i_system, family_pension_ii_system, dcrg_system, net_deductions_system, final_calculated_pension_system, basic_pension_verified, pension_deductions_verified, additional_pension_verified, commuted_pension_verified, commuted_value_verified, family_pension_i_verified, family_pension_ii_verified, dcrg_verified, net_deductions_verified, final_calculated_pension_verified, interim_relief_system, da_system, interim_relief_verified, da_verified, nqs_year_system, nqs_month_system, nqs_day_system, nqs_year_verified, nqs_month_verified, nqs_day_verified, dues_deductions_system, compassionate_pension_system, compensation_pension_system, terminal_benefit_system, dues_deductions_verified, compassionate_pension_verified, compensation_pension_verified, terminal_benefit_verified, final_calculated_gratuity_system, final_calculated_gratuity_verified, family_pension_i_start_date_system, family_pension_i_start_date_verified, family_pension_i_end_date_system, family_pension_i_end_date_verified, family_pension_ii_start_date_system, family_pension_ii_start_date_verified, ex_gratia_system, ex_gratia_verified, pensioner_family_pension_system, pensioner_family_pension_verified, total_pension_system, total_pension_verified, provisional_pension_system, provisional_pension_verified, interim_relief_applicable, interim_relief_expression, basic_pension_applicable, basic_pension_expression, provisional_pension_applicable, provisional_pension_expression, compassionate_pension_applicable, compassionate_pension_expression, compensation_pension_applicable, compensation_pension_expression, commuted_pension_applicable, commuted_pension_expression, family_pension_i_applicable, family_pension_i_expression, family_pension_ii_applicable, family_pension_ii_expression, da_applicable, da_expression, additional_pension_applicable, additional_pension_expression, total_pension_applicable, total_pension_expression, pension_deductions_applicable, pension_deductions_expression, net_deductions_applicable, net_deductions_expression, final_calculated_pension_applicable, final_calculated_pension_expression, commutation_value_applicable, commutation_value_expression, dcrg_applicable, dcrg_expression, terminal_benefit_applicable, terminal_benefit_expression, dues_deductions_applicable, dues_deductions_expression, final_calculated_gratuity_applicable, final_calculated_gratuity_expression, ex_gratia_applicable, ex_gratia_expression, pensioner_family_pension_applicable, pensioner_family_pension_expression, invalid_pension_system, wound_extraordinary_pension_system, attendant_allowance_system, invalid_pension_verified, wound_extraordinary_pension_verified, attendant_allowance_verified, invalid_pension_applicable, invalid_pension_expression, wound_extraordinary_pension_applicable, wound_extraordinary_pension_expression, attendant_allowance_applicable, attendant_allowance_expression, gqs_year_system, gqs_month_system, gqs_day_system, gqs_year_verified, gqs_month_verified, gqs_day_verified, notification_text_system, notification_text_verified, interim_relief_lpd_system, pension_arrear_system, pension_arrear_verified from eg_pension_calculation_details";
               if (!isEmpty(queryObj)) {
                 txtPensionCalculation = txtPensionCalculation + " where ";
               }               
@@ -323,6 +323,7 @@ export default ({ config, db }) => {
 
               let pensionCalculationDetails={};
               let pensionCalculationUpdateDetails={};
+              let pensionArrears=[];
 
               db.query(sqlPensionCalculation, async (err, dbRes) => {
                 if (err) {
@@ -349,6 +350,38 @@ export default ({ config, db }) => {
                   
                 }
               });
+
+//Pension Arrear
+
+              let txtPensionArrear =" SELECT effective_year,effective_month ,interim_relief,da ,total_pension ,pension_deductions,wound_extraordinary_pension,attendant_allowance,fma,miscellaneous,over_payment,income_tax,cess,basic_pension ,additional_pension,commuted_pension,net_deductions,net_pension from eg_pension_arrear";
+              if (!isEmpty(queryObj)) {
+                txtPensionArrear = txtPensionArrear + " where ";
+              }               
+              if (workflowHeader.workflowHeaderId) {
+                txtPensionArrear = `${txtPensionArrear} workflow_header_id = '${workflowHeader.workflowHeaderId}'`;
+              }             
+                                             
+              let sqlPensionArrear=txtPensionArrear;
+              
+              db.query(sqlPensionArrear, async (err, dbRes) => {
+                if (err) {
+                  logger.error(err.stack);
+                } 
+                else {                  
+                                 
+                  pensionArrears=
+                  dbRes.rows && !isEmpty(dbRes.rows)
+                    ? await mergePensionArrearDetails(
+                        dbRes.rows,
+                        request.query,
+                        request.body.RequestInfo
+                      )
+                    : {};                      
+                                    
+                }
+              });
+
+
 
               //dependents
               let dependents=[];
@@ -555,6 +588,7 @@ export default ({ config, db }) => {
                 //processInstances[i].leaves= leaves;                      
                 processInstances[i].pensionCalculationDetails= pensionCalculationDetails;
                 processInstances[i].pensionCalculationUpdateDetails= pensionCalculationUpdateDetails;
+                processInstances[i].pensionArrears= pensionArrears;                
                 processInstances[i].dependents= dependents;
                 processInstances[i].actorAcccessLevel= actorAcccessLevel;
                 processInstances[i].employeeDisability=employeeDisability; 

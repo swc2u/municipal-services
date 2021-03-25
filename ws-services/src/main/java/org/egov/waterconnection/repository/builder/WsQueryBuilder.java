@@ -34,7 +34,7 @@ public class WsQueryBuilder {
 			"       billtype as billType, name as name, address as address, add1 as add1, add2 as add2, add3  , add4  , add5  , cesscharge , \r\n" + 
 			"       netamount , grossamount , surcharge , totalnetamount  , totalsurcharge  , \r\n" + 
 			"       totalgrossamount , fixchargecode , fixcharge  , duedatecash , duedatecheque  , \r\n" + 
-			"       status , billid , paymentid  , paymentmode, receiptdate, paymentstatus , createdby , lastmodifiedby  , \r\n" + 
+			"       status , billid , paymentid  ,totalamount_paid as totalAmountPaid, paymentmode, receiptdate, paymentstatus , createdby , lastmodifiedby  , \r\n" + 
 			"       createdtime , lastmodifiedtime\r\n" + 
 			"  FROM public.eg_ws_savebilling where status ='PAID';";
 
@@ -67,7 +67,7 @@ public class WsQueryBuilder {
 			+ " plumber.name as plumber_name, plumber.licenseno,"
 			+ " plumber.mobilenumber as plumber_mobileNumber, plumber.gender as plumber_gender, plumber.fatherorhusbandname, plumber.correspondenceaddress,"
 			+ " plumber.relationship, " + holderSelectValues
-			+ " application.id as application_id, application.applicationno as app_applicationno, application.activitytype as app_activitytype, application.applicationstatus as app_applicationstatus, application.action as app_action, application.comments as app_comments, application.is_ferrule_applicable as app_ferrule, application.security_charges as app_securitycharge, "
+			+ " application.id as application_id, application.applicationno as app_applicationno, application.activitytype as app_activitytype, application.applicationstatus as app_applicationstatus, application.action as app_action, application.comments as app_comments, application.is_ferrule_applicable as app_ferrule, application.security_charges as app_securitycharge, application.total_amount_paid,"
 			+ " application.createdBy as app_createdBy, application.lastModifiedBy as app_lastModifiedBy, application.createdTime as app_createdTime, application.lastModifiedTime as app_lastModifiedTime, "
 			+ " property.id as waterpropertyid, property.usagecategory, property.usagesubcategory "
 			+ " FROM eg_ws_connection conn "
