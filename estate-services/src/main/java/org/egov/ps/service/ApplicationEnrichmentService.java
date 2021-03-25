@@ -648,7 +648,7 @@ public class ApplicationEnrichmentService {
 					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
 			estimates.add(applicationNumberChargesEstimate);
 		}
-		else if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_ESTATE_BRANCH) && application.getState().contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
+		else if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_ESTATE_BRANCH)) {
 
 			JsonNode applicationDetails = application.getApplicationDetails();
 
