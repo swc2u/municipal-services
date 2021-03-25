@@ -541,6 +541,7 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 		statement.setAmount(currentPayment.getRentReceived());
 		statement.setType(Type.C);
 		statement.setReceiptNo(currentPayment.getReceiptNo());
+		statement.setComment(currentPayment.getComments());
 		return rentSummary;
 	}
 
