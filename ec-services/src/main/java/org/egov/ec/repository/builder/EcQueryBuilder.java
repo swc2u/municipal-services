@@ -196,7 +196,7 @@ public class EcQueryBuilder {
 			" AND violation.violation_date <= CASE WHEN ?<>'' THEN DATE(?) ELSE violation.violation_date END and (?  ilike '' or violation.si_name ilike ?) \r\n" + 
 			" and(? ilike '' or violation.encroachment_type ilike ?) and (? ilike '' or violation.sector ilike ?)\r\n" + 
 			" and(? ilike '' or (select case when (select store.item_store_deposit_date from egec_store_item_register store where store.challan_uuid=challan.challan_uuid limit 1)< now()- interval '30 days' and challan.challan_status <> 'CLOSED' and violation.encroachment_type <> 'Seizure of Vehicles' then 'PENDING FOR AUCTION'  when challan.challan_status='CLOSED' and ((select count(*) from egec_store_item_register store where store.violation_uuid=violation.violation_uuid) > 0) then 'RELEASED FROM STORE' when challan.challan_status='CLOSED' and ((select count(*) from egec_store_item_register store where store.violation_uuid=violation.violation_uuid) = 0) then 'RELEASED ON GROUND' else challan.challan_status end) ilike ?)\r\n" + 
-			" and violation.tenant_id=? and(? ilike '' or challan.challan_id ilike ?) order by violation.last_modified_time desc";
+			" and violation.tenant_id=? and UPPER(challan.challan_id) like concat('%',case when UPPER(?)<>'' then UPPER(?) else UPPER(challan.challan_id) end,'%') order by violation.last_modified_time desc";
 	
 	public static final String GET_AUCTION_UUID_CHALLAN_MASTER="\n" + 
 			"		select auction.*,violation.si_name,violation.violator_name,violation.encroachment_type,violation.sector,challan.challan_id,violation.violation_date,violation.contact_number from egec_auction_master auction \n" + 
