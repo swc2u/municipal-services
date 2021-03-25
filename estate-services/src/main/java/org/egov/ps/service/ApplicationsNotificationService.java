@@ -156,6 +156,64 @@ public class ApplicationsNotificationService {
 				}
 				application.setTotalDue(developmentCharges.add(conversionCharges).add(scrutinyCharges).add(transferFee).add(applicationNumberCharges));
 			}
+			else if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_ESTATE_BRANCH)) {
+				JsonNode applicationDetails = application.getApplicationDetails();
+				BigDecimal transferCharges= BigDecimal.ZERO,gst= BigDecimal.ZERO,applciationFee= BigDecimal.ZERO,inspectionFee= BigDecimal.ZERO,
+						securityFee= BigDecimal.ZERO,extensionFee= BigDecimal.ZERO,allotmentFee= BigDecimal.ZERO,documentCopyingFee= BigDecimal.ZERO,conversionFee= BigDecimal.ZERO,propertyTransferCharge = BigDecimal.ZERO;
+
+				//Transfer Charges
+				if(!applicationDetails.get("transferCharges").isNull() && applicationDetails.get("transferCharges").asInt()>0) {
+					transferCharges = new BigDecimal(applicationDetails.get("transferCharges").toString());
+				}
+
+				//GST
+				if(!applicationDetails.get("GST").isNull() && applicationDetails.get("GST").asInt()>0) {
+					gst = new BigDecimal(applicationDetails.get("GST").toString());
+				}
+
+				//Processing fees/Application Fee
+				if(!applicationDetails.get("applicationFee").isNull() && applicationDetails.get("applicationFee").asInt()>0) {
+					applciationFee = new BigDecimal(applicationDetails.get("applicationFee").toString());
+				}
+
+				//Inspection Fees
+				if(!applicationDetails.get("inspectionFee").isNull() && applicationDetails.get("inspectionFee").asInt()>0) {
+					inspectionFee = new BigDecimal(applicationDetails.get("inspectionFee").toString());
+				}
+
+				//EMD/Security
+				if(!applicationDetails.get("securityFee").isNull() && applicationDetails.get("securityFee").asInt()>0) {
+					securityFee = new BigDecimal(applicationDetails.get("securityFee").toString());
+				}
+
+				//Extension fees
+				if(!applicationDetails.get("extensionFee").isNull() && applicationDetails.get("extensionFee").asInt()>0) {
+					extensionFee = new BigDecimal(applicationDetails.get("extensionFee").toString());
+				}
+
+				//Certificate/Document Copying Fees
+				if(!applicationDetails.get("DocumentCopyingFee").isNull() && applicationDetails.get("DocumentCopyingFee").asInt()>0) {
+					documentCopyingFee = new BigDecimal(applicationDetails.get("DocumentCopyingFee").toString());
+				}
+
+				//Allotment Fees
+				if(!applicationDetails.get("allotmentFee").isNull() && applicationDetails.get("allotmentFee").asInt()>0) {
+					allotmentFee = new BigDecimal(applicationDetails.get("allotmentFee").toString());
+				}
+
+				//Conversion fees
+				if(!applicationDetails.get("conversionFee").isNull() && applicationDetails.get("conversionFee").asInt()>0) {
+					conversionFee = new BigDecimal(applicationDetails.get("conversionFee").toString());
+				}
+
+				//Property Transfer charges
+				if(!applicationDetails.get("propertyTransferCharge").isNull() && applicationDetails.get("propertyTransferCharge").asInt()>0) {
+					propertyTransferCharge = new BigDecimal(applicationDetails.get("propertyTransferCharge").toString());
+				}
+
+				application.setTotalDue(transferCharges.add(gst).add(applciationFee).add(inspectionFee).add(securityFee).add(extensionFee).add(allotmentFee).add(documentCopyingFee).add(conversionFee).add(propertyTransferCharge));
+			}
+
 			else {
 				BigDecimal estimateAmount = applicationEnrichmentService.fetchEstimateAmountFromMDMSJson(feesConfigurations, application);
 				BigDecimal gstEstimatePercentage = applicationEnrichmentService.feesGSTOfApplication(application, requestInfo);
@@ -181,8 +239,8 @@ public class ApplicationsNotificationService {
 					applicationJsonString);
 			String enrichedContent = enrichLocalizationPatternsInString(application, requestInfo,
 					contentWithPathsEnriched);
-			
-			
+
+
 			if(application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
 					&& application.getApplicationType().contentEquals(PSConstants.NOC) 
 					&& application.getProperty().getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO) ) {
@@ -226,7 +284,7 @@ public class ApplicationsNotificationService {
 				if(null != eventRequest)
 					util.sendEventNotification(eventRequest);
 			}
-			
+
 		} catch (Exception e) {
 			log.error("Could not convert enrichedApplication to JSON", e);
 		}

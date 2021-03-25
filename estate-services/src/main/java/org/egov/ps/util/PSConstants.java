@@ -79,6 +79,25 @@ public class PSConstants {
 	public static final String EM_STATE_PENDING_DA_FEE = "PENDING_DA_FEE";
 
 	public static final String TAX_HEAD_CODE_APPLICATION_CHARGE = "APPLICATION";
+	
+	public static final String TAX_HEAD_CODE_TRANSFER = "TRANSFER";
+	
+	public static final String TAX_HEAD_CODE_GST = "GST";
+	
+	public static final String TAX_HEAD_CODE_INSPECTION = "INSPECTION";
+	
+	public static final String TAX_HEAD_CODE_SECURITY = "SECURITY";
+	
+	public static final String TAX_HEAD_CODE_EXTENSION = "EXTENSION";
+	
+	public static final String TAX_HEAD_CODE_DOCUMENTCOPYING = "DOCUMENTCOPYING";
+	
+	public static final String TAX_HEAD_CODE_ALLOTMENT = "ALLOTMENT";
+	
+	public static final String TAX_HEAD_CODE_CONVERSION = "CONVERSION";
+	
+	public static final String TAX_HEAD_CODE_PROPERTYTRANSFER = "PROPERTYTRANSFER";
+	
 
 	public static final String ESTATE_SERVICE = "ESTATE_SERVICE";
 
@@ -136,7 +155,7 @@ public class PSConstants {
 	public static final String APPLICATION_TYPE_NDC = "NDC";
 	public static final String PENDING_SO_APPROVAL = "ES_PENDING_SO_APPROVAL";
 
-	public static final String ES_EB_PM_PENDING_SO_APPROVAL = "ES_EB_PM_PENDING_SO_APPROVAL";
+	public static final String ES_EB_PM_PENDING_APPROVAL = "ES_EB_PM_PENDING_APPROVAL";
 
 	public static final String PENDING_PM_MM_APPROVAL = "ES_PM_MM_PENDING_APPROVAL";
 	public static final String PENDING_MM_SO_APPROVAL = "ES_MM_PENDING_SO_APPROVAL";

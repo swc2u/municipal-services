@@ -201,7 +201,7 @@ public class PropertyService {
 		/* Approved Property Add Estate Branch Missing Demands */
 		if (null != request.getProperties().get(0).getState()
 				&& (PSConstants.PENDING_SO_APPROVAL.equalsIgnoreCase(property.getState())
-						|| PSConstants.ES_EB_PM_PENDING_SO_APPROVAL.equalsIgnoreCase(property.getState()))
+						|| PSConstants.ES_EB_PM_PENDING_APPROVAL.equalsIgnoreCase(property.getState()))
 				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)
 				&& !action.contentEquals("")
 				&& property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
@@ -209,6 +209,7 @@ public class PropertyService {
 					&& request.getProperties().get(0).getPropertyDetails().getPropertyType()
 							.equalsIgnoreCase(PSConstants.EB_ALLOCATION_TYPE_AUCTION)) {
 				/**
+				 * Adding emd amount to account remaining amount of winning bidder
 				 * This only works if the EMD amounts collect by all the users are same
 				 */
 				request.getProperties().get(0).getPropertyDetails().getEstateAccount()
@@ -243,8 +244,8 @@ public class PropertyService {
 			String roeAction = request.getProperties().get(0).getPropertyDetails().getBidders().get(0).getAction();
 			String addCourtCases = request.getProperties().get(0).getPropertyDetails().getAddCourtCases();
 			if (config.getIsWorkflowEnabled() && !roeAction.contentEquals("")
-					&& (state.contentEquals(PSConstants.PM_APPROVED)
-							|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
+//					&& (state.contentEquals(PSConstants.PM_APPROVED)
+//							|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
 					&& !addCourtCases.contentEquals(PSConstants.EB_ADD_COURT_CASES)
 					&& !request.getProperties().get(0).getPropertyDetails().isAdhocDemand()
 					&& !request.getProperties().get(0).getPropertyDetails().isAdhocPayment()) {
@@ -595,7 +596,7 @@ public class PropertyService {
 			/**
 			 * if offline, create a payment.
 			 */
-			if (propertyFromRequest.getPropertyMasterOrAllotmentOfSite()
+			if (property.getPropertyMasterOrAllotmentOfSite()
 					.equalsIgnoreCase(PSConstants.PROPERTY_MASTER)) {
 				demandService.createCashPaymentProperty(propertyRequest.getRequestInfo(),
 						property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount(),

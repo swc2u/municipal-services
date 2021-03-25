@@ -214,7 +214,7 @@ public class ApplicationEnrichmentService {
 			if (application.getState().contains(PSConstants.BB_NOC_PENDING_AC_APPROVAL)) {
 
 				// Development Charges
-				BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").toString());
+				BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").asText());
 				TaxHeadEstimate developmentChargesEstimate = new TaxHeadEstimate();
 				developmentChargesEstimate.setEstimateAmount(developmentCharges);
 				developmentChargesEstimate.setCategory(Category.CHARGES);
@@ -223,7 +223,7 @@ public class ApplicationEnrichmentService {
 				estimates.add(developmentChargesEstimate);
 
 				// Conversion charges
-				BigDecimal conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").toString());
+				BigDecimal conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").asText());
 				TaxHeadEstimate conversionChargesEstimate = new TaxHeadEstimate();
 				conversionChargesEstimate.setEstimateAmount(conversionCharges);
 				conversionChargesEstimate.setCategory(Category.CHARGES);
@@ -268,6 +268,120 @@ public class ApplicationEnrichmentService {
 				.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
 						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
 				estimates.add(applicationNumberChargesEstimate);
+			}
+
+		}
+		else if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_ESTATE_BRANCH) && application.getState().contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
+
+			JsonNode applicationDetails = application.getApplicationDetails();
+
+			//Transfer Charges
+			if(!applicationDetails.get("transferCharges").isNull() && Integer.valueOf(applicationDetails.get("transferCharges").asText())>0) {
+				BigDecimal transferCharges = new BigDecimal(applicationDetails.get("transferCharges").asText());
+				TaxHeadEstimate transferChargesEstimate = new TaxHeadEstimate();
+				transferChargesEstimate.setEstimateAmount(transferCharges);
+				transferChargesEstimate.setCategory(Category.CHARGES);
+				transferChargesEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_TRANSFER, Category.CHARGES));
+				estimates.add(transferChargesEstimate);
+			}
+			
+			//GST
+			if(!applicationDetails.get("GST").isNull() && Integer.valueOf(applicationDetails.get("GST").asText())>0) {
+				BigDecimal gst = new BigDecimal(applicationDetails.get("GST").asText());
+				TaxHeadEstimate gstEstimate = new TaxHeadEstimate();
+				gstEstimate.setEstimateAmount(gst);
+				gstEstimate.setCategory(Category.TAX);
+				gstEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),PSConstants.TAX_HEAD_CODE_GST, Category.TAX));
+				estimates.add(gstEstimate);
+			}
+			
+			//Processing fees/Application Fee
+			if(!applicationDetails.get("applicationFee").isNull() && Integer.valueOf(applicationDetails.get("applicationFee").asText())>0) {
+				BigDecimal applciationFee = new BigDecimal(applicationDetails.get("applicationFee").asText());
+				TaxHeadEstimate applciationFeeEstimate = new TaxHeadEstimate();
+				applciationFeeEstimate.setEstimateAmount(applciationFee);
+				applciationFeeEstimate.setCategory(Category.FEE);
+				applciationFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
+				estimates.add(applciationFeeEstimate);
+			}
+			
+			//Inspection Fees
+			if(!applicationDetails.get("inspectionFee").isNull() && Integer.valueOf(applicationDetails.get("inspectionFee").asText())>0) {
+				BigDecimal inspectionFee = new BigDecimal(applicationDetails.get("inspectionFee").asText());
+				TaxHeadEstimate inspectionFeeEstimate = new TaxHeadEstimate();
+				inspectionFeeEstimate.setEstimateAmount(inspectionFee);
+				inspectionFeeEstimate.setCategory(Category.FEE);
+				inspectionFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_INSPECTION, Category.FEE));
+				estimates.add(inspectionFeeEstimate);
+			}
+			
+			//EMD/Security
+			if(!applicationDetails.get("securityFee").isNull() && Integer.valueOf(applicationDetails.get("securityFee").asText())>0) {
+				BigDecimal securityFee = new BigDecimal(applicationDetails.get("securityFee").asText());
+				TaxHeadEstimate securityFeeEstimate = new TaxHeadEstimate();
+				securityFeeEstimate.setEstimateAmount(securityFee);
+				securityFeeEstimate.setCategory(Category.FEE);
+				securityFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_SECURITY, Category.FEE));
+				estimates.add(securityFeeEstimate);
+			}
+			
+			//Extension fees
+			if(!applicationDetails.get("extensionFee").isNull() && Integer.valueOf(applicationDetails.get("extensionFee").asText())>0) {
+				BigDecimal extensionFee = new BigDecimal(applicationDetails.get("extensionFee").asText());
+				TaxHeadEstimate extensionFeeEstimate = new TaxHeadEstimate();
+				extensionFeeEstimate.setEstimateAmount(extensionFee);
+				extensionFeeEstimate.setCategory(Category.FEE);
+				extensionFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_EXTENSION, Category.FEE));
+				estimates.add(extensionFeeEstimate);
+			}
+			
+			//Certificate/Document Copying Fees
+			if(!applicationDetails.get("DocumentCopyingFee").isNull() && Integer.valueOf(applicationDetails.get("DocumentCopyingFee").asText())>0) {
+				BigDecimal documentCopyingFee = new BigDecimal(applicationDetails.get("DocumentCopyingFee").asText());
+				TaxHeadEstimate documentCopyingFeeEstimate = new TaxHeadEstimate();
+				documentCopyingFeeEstimate.setEstimateAmount(documentCopyingFee);
+				documentCopyingFeeEstimate.setCategory(Category.FEE);
+				documentCopyingFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_DOCUMENTCOPYING, Category.FEE));
+				estimates.add(documentCopyingFeeEstimate);
+			}
+			
+			//Allotment Fees
+			if(!applicationDetails.get("allotmentFee").isNull() && Integer.valueOf(applicationDetails.get("allotmentFee").asText())>0) {
+				BigDecimal allotmentFee = new BigDecimal(applicationDetails.get("allotmentFee").asText());
+				TaxHeadEstimate allotmentFeeEstimate = new TaxHeadEstimate();
+				allotmentFeeEstimate.setEstimateAmount(allotmentFee);
+				allotmentFeeEstimate.setCategory(Category.FEE);
+				allotmentFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_ALLOTMENT, Category.FEE));
+				estimates.add(allotmentFeeEstimate);
+			}
+			
+			//Conversion fees
+			if(!applicationDetails.get("conversionFee").isNull() && Integer.valueOf(applicationDetails.get("conversionFee").asText())>0) {
+				BigDecimal conversionFee = new BigDecimal(applicationDetails.get("conversionFee").asText());
+				TaxHeadEstimate conversionFeeEstimate = new TaxHeadEstimate();
+				conversionFeeEstimate.setEstimateAmount(conversionFee);
+				conversionFeeEstimate.setCategory(Category.FEE);
+				conversionFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_CONVERSION, Category.FEE));
+				estimates.add(conversionFeeEstimate);
+			}
+			
+			//Property Transfer charges
+			if(!applicationDetails.get("propertyTransferCharge").isNull() && Integer.valueOf(applicationDetails.get("propertyTransferCharge").asText())>0) {
+				BigDecimal propertyTransferCharge = new BigDecimal(applicationDetails.get("propertyTransferCharge").asText());
+				TaxHeadEstimate propertyTransferChargeEstimate = new TaxHeadEstimate();
+				propertyTransferChargeEstimate.setEstimateAmount(propertyTransferCharge);
+				propertyTransferChargeEstimate.setCategory(Category.CHARGES);
+				propertyTransferChargeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_PROPERTYTRANSFER, Category.CHARGES));
+				estimates.add(propertyTransferChargeEstimate);
 			}
 
 		}
@@ -533,7 +647,122 @@ public class ApplicationEnrichmentService {
 			applicationNumberChargesEstimate.setTaxHeadCode(getBbNocTaxHeadCode(application.getBillingBusinessService(),
 					PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, "ALLOTMENT_NUMBER", Category.CHARGES));
 			estimates.add(applicationNumberChargesEstimate);
-		} else {
+		}
+		else if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_ESTATE_BRANCH)) {
+
+			JsonNode applicationDetails = application.getApplicationDetails();
+
+			//Transfer Charges
+			if(!applicationDetails.get("transferCharges").isNull() && Integer.valueOf(applicationDetails.get("transferCharges").asText())>0) {
+				BigDecimal transferCharges = new BigDecimal(applicationDetails.get("transferCharges").asText());
+				TaxHeadEstimate transferChargesEstimate = new TaxHeadEstimate();
+				transferChargesEstimate.setEstimateAmount(transferCharges);
+				transferChargesEstimate.setCategory(Category.CHARGES);
+				transferChargesEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_TRANSFER, Category.CHARGES));
+				estimates.add(transferChargesEstimate);
+			}
+			
+			//GST
+			if(!applicationDetails.get("GST").isNull() && Integer.valueOf(applicationDetails.get("GST").asText())>0) {
+				BigDecimal gst = new BigDecimal(applicationDetails.get("GST").asText());
+				TaxHeadEstimate gstEstimate = new TaxHeadEstimate();
+				gstEstimate.setEstimateAmount(gst);
+				gstEstimate.setCategory(Category.TAX);
+				gstEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),PSConstants.TAX_HEAD_CODE_GST, Category.TAX));
+				estimates.add(gstEstimate);
+			}
+			
+			//Processing fees/Application Fee
+			if(!applicationDetails.get("applicationFee").isNull() && Integer.valueOf(applicationDetails.get("applicationFee").asText())>0) {
+				BigDecimal applciationFee = new BigDecimal(applicationDetails.get("applicationFee").asText());
+				TaxHeadEstimate applciationFeeEstimate = new TaxHeadEstimate();
+				applciationFeeEstimate.setEstimateAmount(applciationFee);
+				applciationFeeEstimate.setCategory(Category.FEE);
+				applciationFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_APPLICATION_CHARGE, Category.FEE));
+				estimates.add(applciationFeeEstimate);
+			}
+			
+			//Inspection Fees
+			if(!applicationDetails.get("inspectionFee").isNull() && Integer.valueOf(applicationDetails.get("inspectionFee").asText())>0) {
+				BigDecimal inspectionFee = new BigDecimal(applicationDetails.get("inspectionFee").asText());
+				TaxHeadEstimate inspectionFeeEstimate = new TaxHeadEstimate();
+				inspectionFeeEstimate.setEstimateAmount(inspectionFee);
+				inspectionFeeEstimate.setCategory(Category.FEE);
+				inspectionFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_INSPECTION, Category.FEE));
+				estimates.add(inspectionFeeEstimate);
+			}
+			
+			//EMD/Security
+			if(!applicationDetails.get("securityFee").isNull() && Integer.valueOf(applicationDetails.get("securityFee").asText())>0) {
+				BigDecimal securityFee = new BigDecimal(applicationDetails.get("securityFee").asText());
+				TaxHeadEstimate securityFeeEstimate = new TaxHeadEstimate();
+				securityFeeEstimate.setEstimateAmount(securityFee);
+				securityFeeEstimate.setCategory(Category.FEE);
+				securityFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_SECURITY, Category.FEE));
+				estimates.add(securityFeeEstimate);
+			}
+			
+			//Extension fees
+			if(!applicationDetails.get("extensionFee").isNull() && Integer.valueOf(applicationDetails.get("extensionFee").asText())>0) {
+				BigDecimal extensionFee = new BigDecimal(applicationDetails.get("extensionFee").asText());
+				TaxHeadEstimate extensionFeeEstimate = new TaxHeadEstimate();
+				extensionFeeEstimate.setEstimateAmount(extensionFee);
+				extensionFeeEstimate.setCategory(Category.FEE);
+				extensionFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_EXTENSION, Category.FEE));
+				estimates.add(extensionFeeEstimate);
+			}
+			
+			//Certificate/Document Copying Fees
+			if(!applicationDetails.get("DocumentCopyingFee").isNull() && Integer.valueOf(applicationDetails.get("DocumentCopyingFee").asText())>0) {
+				BigDecimal documentCopyingFee = new BigDecimal(applicationDetails.get("DocumentCopyingFee").asText());
+				TaxHeadEstimate documentCopyingFeeEstimate = new TaxHeadEstimate();
+				documentCopyingFeeEstimate.setEstimateAmount(documentCopyingFee);
+				documentCopyingFeeEstimate.setCategory(Category.FEE);
+				documentCopyingFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_DOCUMENTCOPYING, Category.FEE));
+				estimates.add(documentCopyingFeeEstimate);
+			}
+			
+			//Allotment Fees
+			if(!applicationDetails.get("allotmentFee").isNull() && Integer.valueOf(applicationDetails.get("allotmentFee").asText())>0) {
+				BigDecimal allotmentFee = new BigDecimal(applicationDetails.get("allotmentFee").asText());
+				TaxHeadEstimate allotmentFeeEstimate = new TaxHeadEstimate();
+				allotmentFeeEstimate.setEstimateAmount(allotmentFee);
+				allotmentFeeEstimate.setCategory(Category.FEE);
+				allotmentFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_ALLOTMENT, Category.FEE));
+				estimates.add(allotmentFeeEstimate);
+			}
+			
+			//Conversion fees
+			if(!applicationDetails.get("conversionFee").isNull() && Integer.valueOf(applicationDetails.get("conversionFee").asText())>0) {
+				BigDecimal conversionFee = new BigDecimal(applicationDetails.get("conversionFee").asText());
+				TaxHeadEstimate conversionFeeEstimate = new TaxHeadEstimate();
+				conversionFeeEstimate.setEstimateAmount(conversionFee);
+				conversionFeeEstimate.setCategory(Category.FEE);
+				conversionFeeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_CONVERSION, Category.FEE));
+				estimates.add(conversionFeeEstimate);
+			}
+			
+			//Property Transfer charges
+			if(!applicationDetails.get("propertyTransferCharge").isNull() && Integer.valueOf(applicationDetails.get("propertyTransferCharge").asText())>0) {
+				BigDecimal propertyTransferCharge = new BigDecimal(applicationDetails.get("propertyTransferCharge").asText());
+				TaxHeadEstimate propertyTransferChargeEstimate = new TaxHeadEstimate();
+				propertyTransferChargeEstimate.setEstimateAmount(propertyTransferCharge);
+				propertyTransferChargeEstimate.setCategory(Category.CHARGES);
+				propertyTransferChargeEstimate.setTaxHeadCode(getTaxHeadCodeWithCharge(application.getBillingBusinessService(),
+						PSConstants.TAX_HEAD_CODE_PROPERTYTRANSFER, Category.CHARGES));
+				estimates.add(propertyTransferChargeEstimate);
+			}
+
+		}
+		else if(application.getState().contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
 
 			TaxHeadEstimate estimateFee = new TaxHeadEstimate();
 			estimateFee.setEstimateAmount(application.getPaymentAmount());
