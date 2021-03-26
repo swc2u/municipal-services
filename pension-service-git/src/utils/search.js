@@ -492,8 +492,38 @@ const pensionCalculationDetailsRowMapper = async (row, mapper = {}) => {
   pensionCalculationDetails.notificationTextSystem =row.notification_text_system;
   pensionCalculationDetails.interimReliefLpdSystem =row.interim_relief_lpd_system!=null? Number(row.interim_relief_lpd_system):null;
 
+  pensionCalculationDetails.pensionArrearSystem = row.pension_arrear_system!=null? Number(row.pension_arrear_system):null;  
   
   return pensionCalculationDetails;
+};
+
+const pensionArrearRowMapper = async (row, mapper = {}) => {  
+
+    let pensionArrear = isEmpty(mapper) ? {} : mapper;    
+  pensionArrear.effectiveYear =row.effective_year!=null? Number(row.effective_year):null;  
+  pensionArrear.effectiveMonth =row.effective_month!=null? Number(row.effective_month):null;  
+
+  pensionArrear.interimRelief =row.interim_relief!=null? Number(row.interim_relief):null; 
+  pensionArrear.da =row.da!=null? Number(row.da):null; 
+  pensionArrear.totalPension =row.total_pension!=null? Number(row.total_pension):null;
+
+  pensionArrear.pensionDeductions =row.pension_deductions!=null? Number(row.pension_deductions):null;  
+  pensionArrear.woundExtraordinaryPension =row.wound_extraordinary_pension!=null? Number(row.wound_extraordinary_pension):null;
+  pensionArrear.attendantAllowance =row.attendant_allowance!=null? Number(row.attendant_allowance):null;
+
+  pensionArrear.fma =row.fma!=null? Number(row.fma):null;
+  pensionArrear.miscellaneous =row.miscellaneous!=null? Number(row.miscellaneous):null;
+  pensionArrear.overPayment =row.over_payment!=null? Number(row.over_payment):null;
+  pensionArrear.incomeTax =row.income_tax!=null? Number(row.income_tax):null;
+  pensionArrear.cess =row.cess!=null? Number(row.cess):null;
+
+  pensionArrear.basicPension =row.basic_pension!=null? Number(row.basic_pension):null;  
+  pensionArrear.additionalPension = row.additional_pension!=null? Number(row.additional_pension):null;  
+  pensionArrear.commutedPension = row.commuted_pension!=null? Number(row.commuted_pension):null;  
+  pensionArrear.netDeductions =row.net_deductions!=null? Number(row.net_deductions):null; 
+  pensionArrear.netPension =row.net_pension!=null? Number(row.net_pension):null; 
+      
+  return pensionArrear;
 };
 
 const pensionCalculationUpdateDetailsRowMapper = async (row, mapper = {}) => {
@@ -538,6 +568,8 @@ const pensionCalculationUpdateDetailsRowMapper = async (row, mapper = {}) => {
   pensionCalculationUpdateDetails.gqsDayVerified =Number(row.gqs_day_verified);
 
   pensionCalculationUpdateDetails.notificationTextVerified =row.notification_text_verified;
+  
+  pensionCalculationUpdateDetails.pensionArrearVerified = row.pension_arrear_verified!=null? Number(row.pension_arrear_verified):null;
   return pensionCalculationUpdateDetails;
 };
 
@@ -830,6 +862,19 @@ export const mergePensionCalculationDetails = async (response, query = {}, reqIn
   return result;
 };
 
+export const mergePensionArrearDetails = async (response, query = {}, reqInfo) => {
+  requestInfo = reqInfo;
+
+  let result = [];
+  for (var i = 0; i < response.length; i++) {
+    let arrear = {};    
+    
+    arrear = await pensionArrearRowMapper(response[i]);
+    result.push(arrear);
+  }  
+  return result;
+};
+
 export const mergePensionCalculationUpdateDetails = async (response, query = {}, reqInfo) => {
   requestInfo = reqInfo;
   let result =await pensionCalculationUpdateDetailsRowMapper(response[0]);;  
@@ -1068,7 +1113,7 @@ const monthlyPensionDrawnRowMapper = async (row, mdms, mapper = {}) => {
   pension.pensionerNumber = row.pensioner_number; 
   pension.name = row.name; 
   pension.finalCalculatedPension = intConversion(Number(row.final_calculated_pension)); 
-  let bankDetailsList=filter(mdmsBankDetails,function(x){return x.code==row.bank_details && row.bank_details!=null && row.bank_details!="";});
+  let bankDetailsList=filter(mdmsBankDetails,function(x){return (x.code ==null?"":x.code.toUpperCase().trim())==(row.bank_details==null?"":row.bank_details.toUpperCase().trim()) && row.bank_details!=null && row.bank_details!="";});
   if(bankDetailsList.length>0){
     pension.bankDetails = bankDetailsList[0].name;  
   }

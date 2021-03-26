@@ -10,6 +10,7 @@ import org.egov.hc.service.ServiceRequestService;
 import org.egov.hc.utils.HCConstants;
 import org.egov.hc.utils.HCUtils;
 import org.json.JSONException;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -153,4 +154,13 @@ public class ServiceController {
 		
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
+	
+	@RequestMapping(value = "/_delectDocument", method = RequestMethod.POST)
+	public ResponseEntity<?> delectDocument(@RequestBody ServiceRequest serviceRequest,
+			@RequestHeader("User-Agent") String requestHeader) throws JSONException, ParseException {
+					
+				return service.delectDocument(serviceRequest, requestHeader);		
+	}
+	
+	
 }

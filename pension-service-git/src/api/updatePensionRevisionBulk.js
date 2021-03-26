@@ -74,20 +74,20 @@ export default ({ config, db }) => {
           //newPensionRevision.fma = updatedFMA;
 
           let mdms = await mdmsData(body.RequestInfo, tenantId);
+          
+          let updatedAdditionalPension = pensionRevision.additionalPension;
+
+          let additionalPensionPercentage=getAdditionalPensionPercentageAfterRetirement(new Date(Number(pensionRevision.dateOfBirth)),effetiveDate,mdms);
+
+          updatedAdditionalPension=Math.ceil((pensionRevision.basicPension)*additionalPensionPercentage/100);
 
           let irPercentage = getIRPercentage(effetiveDate, mdms);
 
           let updatedIR = pensionRevision.interimRelief;
 
           if(modifyIR){
-            updatedIR=Math.round(pensionRevision.basicPension*irPercentage/100);
+            updatedIR=Math.round((pensionRevision.basicPension*updatedAdditionalPension)*irPercentage/100);
           }
-
-          let updatedAdditionalPension = pensionRevision.additionalPension;
-
-          let additionalPensionPercentage=getAdditionalPensionPercentageAfterRetirement(new Date(Number(pensionRevision.dateOfBirth)),effetiveDate,mdms);
-
-          updatedAdditionalPension=Math.ceil((pensionRevision.basicPension+updatedIR)*additionalPensionPercentage/100);
 
           let daPercentage = getDAPercentage(effetiveDate, mdms);
 

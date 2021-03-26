@@ -1,6 +1,6 @@
 {
 	"PETNOC": {
-		"SI-PAID": {
+		"SIHQ-PAID": {
 			"REASSIGN": {
 				"remarks": {
 					"fieldName": "remarks",
@@ -31,7 +31,7 @@
 				}
 			}
 		},
-		"SI-RESENT": {
+		"SIHQ-RESENT": {
 			"REASSIGN": {
 				"remarks": {
 					"fieldName": "remarks",
@@ -62,7 +62,7 @@
 				}
 			}
 		},
-		"SI-REASSIGNTOSI": {
+		"SIHQ-REASSIGNTOSI": {
 			"REASSIGN": {
 				"remarks": {
 					"fieldName": "remarks",
@@ -1485,7 +1485,7 @@
 	},
 	
 	"SELLMEATNOC": {
-		"SI-INITIATED": {
+		"SISM-INITIATED": {
 			"REVIEWOFSUPERINTENDENT": {
 				"remarks": {
 					"fieldName": "remarks",
@@ -1511,7 +1511,7 @@
 				}
 			}
 		},
-		"SI-REASSIGNTOSI": {
+		"SISM-REASSIGNTOSI": {
 			"REVIEWOFSUPERINTENDENT": {
 				"remarks": {
 					"fieldName": "remarks",
@@ -1537,7 +1537,7 @@
 				}
 			}
 		},
-		"SI-RESENT": {
+		"SISM-RESENT": {
 			"REVIEWOFSUPERINTENDENT": {
 				"remarks": {
 					"fieldName": "remarks",

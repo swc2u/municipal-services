@@ -339,5 +339,8 @@ public class ServiceRequestData {
 
   	@JsonProperty("slaDaysElapsed")
   	private int slaDaysElapsed;
-
+  	
+	@JsonProperty("fileStoreId")
+  	private String fileStoreId = null;
+  	
 }

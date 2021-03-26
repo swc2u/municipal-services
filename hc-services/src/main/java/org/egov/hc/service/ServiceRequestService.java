@@ -3,10 +3,8 @@ package org.egov.hc.service;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,67 +14,55 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-
 import java.util.UUID;
-
 import java.util.stream.Collectors;
 
-
 import org.apache.commons.lang3.StringUtils;
-
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
 import org.egov.common.contract.request.User;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.hc.consumer.HCNotificationConsumer;
 import org.egov.hc.contract.AuditDetails;
-
 import org.egov.hc.contract.RequestInfoWrapper;
 import org.egov.hc.contract.ResponseInfoWrapper;
-
 import org.egov.hc.contract.ServiceRequest;
-
 import org.egov.hc.contract.ServiceResponse;
 import org.egov.hc.model.ActionHistory;
 import org.egov.hc.model.ActionInfo;
 import org.egov.hc.model.ProcessInstance;
 import org.egov.hc.model.ProcessInstanceRequest;
+import org.egov.hc.model.RequestData;
 import org.egov.hc.model.ServiceRequestData;
 import org.egov.hc.model.State;
-import org.egov.hc.model.RequestData;
-
 import org.egov.hc.model.user.Citizen;
 import org.egov.hc.model.user.CreateUserRequest;
 import org.egov.hc.model.user.UserResponse;
 import org.egov.hc.model.user.UserSearchRequest;
 import org.egov.hc.model.user.UserType;
-import org.egov.hc.producer.HCProducer;
 import org.egov.hc.producer.HCConfiguration;
-
+import org.egov.hc.producer.HCProducer;
 import org.egov.hc.repository.IdGenRepository;
 import org.egov.hc.repository.ServiceRepository;
-
+import org.egov.hc.repository.builder.HCQueryBuilder;
+import org.egov.hc.repository.rowmapper.HCRowMapper;
 import org.egov.hc.utils.DeviceSource;
-
 import org.egov.hc.utils.HCConstants;
 import org.egov.hc.utils.HCUtils;
 import org.egov.hc.utils.ResponseInfoFactory;
 import org.egov.hc.utils.WorkFlowConfigs;
-
 import org.egov.hc.web.models.Idgen.IdGenerationResponse;
 import org.egov.hc.workflow.Document;
 import org.egov.hc.workflow.WorkflowIntegrator;
-
 import org.egov.tracer.model.CustomException;
 import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -98,7 +84,14 @@ public class ServiceRequestService {
 
 	@Autowired
 	private HCUtils hCUtils;
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
+	
+	@Autowired
+	private HCQueryBuilder queryBuilder;
+	
 	@Autowired
 	private HCProducer hCProducer;
 
@@ -110,7 +103,8 @@ public class ServiceRequestService {
 	
 	@Autowired
 	private NotificationService notificationService;
-
+	@Autowired
+	private HCRowMapper rowMapper;
 	@Autowired
 	private WorkflowIntegrator wfIntegrator;
 
@@ -2782,5 +2776,67 @@ public class ServiceRequestService {
 					HttpStatus.OK);
 
 		}
+
+		
+		
+		public ResponseEntity<ServiceRequest> delectDocument(ServiceRequest serviceRequest, String requestHeader) throws org.json.simple.parser.ParseException {
+			
+			JSONArray actualResult = (JSONArray) jdbcTemplate.query(queryBuilder.SELECT_SERVICE_MEDIA_DETAIL,
+						new Object[] { serviceRequest.getServices().get(0).getService_request_id() }, rowMapper);
+			
+			List<String> documentList =new ArrayList<>();
+			List<String> deletetList =new ArrayList<>();
+			List<String> docList = new ArrayList<>();
+			ServiceRequestData sc=new ServiceRequestData();
+			RequestInfoWrapper infoWrapper = new RequestInfoWrapper();
+			
+			org.json.simple.JSONArray media=serviceRequest.getServices().get(0).getMedia();
+			if(actualResult.size()>0) {
+				JSONObject object = (JSONObject) actualResult.get(0);
+				String doc= (String) object.get("service_request_document");
+				JSONParser parse = new JSONParser();
+			    org.json.simple.JSONObject obj=(org.json.simple.JSONObject)parse.parse(doc);
+			    org.json.simple.JSONArray object2 = (org.json.simple.JSONArray) obj.get("document");
+			    
+				for (int j = 0; j < object2.size(); j++) 
+				{	JSONObject objectMedia = (JSONObject)object2.get(j);
+					String id= (String) objectMedia.get("media");	
+					documentList.add(id);			
+				}
+			
+			
+				deletetList.add(serviceRequest.getServices().get(0).getFileStoreId());		
+				
+			 documentList.removeAll(deletetList);	
+			 docList.addAll(documentList);
+
+				JSONObject documentDetailsJson = new JSONObject();
+				JSONArray jsonArray = new JSONArray();
+
+				for (String document : docList) {
+
+					JSONObject formDetailsJson = new JSONObject();
+					formDetailsJson.put("media", document);
+
+					jsonArray.add(formDetailsJson);
+				}
+				documentDetailsJson.put("document", jsonArray);
+
+				serviceRequest.getServices().get(0).setServiceMedia(documentDetailsJson.toJSONString());
+				serviceRequest.getServices().get(0).setLastModifiedBy(serviceRequest.getRequestInfo().getUserInfo().getId().toString());
+				serviceRequest.getServices().get(0).setLastModifiedTime(new Date().getTime());
+				serviceRequest.getServices().get(0).setTenantId(serviceRequest.getServices().get(0).getTenantId());
+				infoWrapper = RequestInfoWrapper.builder()
+						.requestInfo(serviceRequest.getRequestInfo()).requestBody(serviceRequest.getServices().get(0)).build();
+				
+				log.info("Service request delete document : " + infoWrapper);
+
+				hCProducer.push(hcConfiguration.getDeleteDocTopic(), infoWrapper);
+			}
+			return new ResponseEntity<>(ServiceRequest.builder()
+					.responseInfo(ResponseInfo.builder().status("Success").build()).responseBody(infoWrapper).build(),
+					HttpStatus.OK);
+		}
+		
 
 }

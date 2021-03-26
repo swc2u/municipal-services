@@ -103,7 +103,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 			writer = new PrintWriter(WCConstants.WS_BILLING_FILENAME, "UTF-8");
 			for (BillGeneration billGeneration : bill) {
 				writer.println(billGeneration.getCcCode() + " "  + billGeneration.getDivSdiv()
-						+ billGeneration.getConsumerCode() + " " + billGeneration.getTotalNetAmount() + " "
+						+ billGeneration.getConsumerCode() + " " + billGeneration.getTotalAmountPaid() + " "
 						+ billGeneration.getPaymentMode() + " " + format.format(new Date(billGeneration.getReceiptDate())) + " " + billGeneration.getPaymentId()  + " " + "W"+ " " + billGeneration.getBillCycle() + billGeneration.getBillGroup()  + billGeneration.getSubGroup());
 			}
 

@@ -247,6 +247,7 @@ public class EOfficeService {
 							obj.setPostDetailId(postdetailData.get("postDetailId").toString());
 							obj.setPost(postdetailData.get("repPost").toString());
 							obj.setOrgUnitId(postdetailData.get("orgUnitId").toString());
+							obj.setOrgUnitName(postdetailData.get("orgUnitName").toString());
 							String uuid = UUID.randomUUID().toString();
 							obj.setUuid(uuid);
 							obj.setAuditDetails(auditDetailsUtil.getAuditDetails(request.getRequestInfo(),
@@ -262,6 +263,7 @@ public class EOfficeService {
 								obj.setPostDetailId(jsonData1.get("postDetailId").toString());
 								obj.setPost(jsonData1.get("repPost").toString());
 								obj.setOrgUnitId(jsonData1.get("orgUnitId").toString());
+								obj.setOrgUnitName(jsonData1.get("orgUnitName").toString());
 								String uuid = UUID.randomUUID().toString();
 								obj.setUuid(uuid);
 								obj.setAuditDetails(auditDetailsUtil.getAuditDetails(request.getRequestInfo(),

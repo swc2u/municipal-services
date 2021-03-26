@@ -156,6 +156,20 @@ public class WCConstants {
 	
 	public static final String WS_EDIT_IN_APP = "WS_EDIT_IN_APP_MESSAGE";
 	
+	public static final List<String> DOC_CHECK_APP_STATUS_NOTIFY = Collections
+	.unmodifiableList(Arrays.asList("PENDING_FOR_TUBEWELL_CONNECTION_ACTIVATION", "PENDING_FOR_CONNECTION_TARIFF_CHANGE", "PENDING_FOR_CONNECTION_REACTIVATION", "PENDING_FOR_CONNECTION_HOLDER_CHANGE",
+			"PENDING_FOR_TEMPORARY_CONNECTION_CLOSE", "PENDING_FOR_CONNECTION_CLOSE", "PENDING_FOR_CONNECTION_EXTENSION_REGULAR", "PENDING_FOR_CONNECTION_ACTIVATION", "PENDING_FOR_CONNECTION_ACTIVATION"));
+
+	public static final List<String> SUBMIT_ACTION_FROM_CITIZEN_MESSAGE = Collections
+	.unmodifiableList(Arrays.asList("SUBMIT_APPLICATION", "RESUBMIT_APPLICATION", "SUBMIT_ROADCUT_NOC"));
+
+	public static final List<String> DOCUMENT_PENDING_FROM_CITIZEN_MESSAGE = Collections
+	.unmodifiableList(Arrays.asList("SEND_BACK_TO_CITIZEN_FOR_ROADCUT_NOC", "SEND_BACK_TO_CITIZEN"));
+	
+	public static final String WS_PAYMENT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your payment for New <Service> connection against the application <Application number> has been been succesfully recorded. Please submit previously filled physical copies of document at concerned Public Health Division Office,Chandigarh  <Action Button>Download Application</Action Button>";// Download your receipt using this link <receipt download link>.
+	public static final String WS_REJECT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for New <Service> connection against the application <Application number> has been been rejected.  <Action Button>Download Application</Action Button>";
+	public static final String WS_RESUBMIT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for New <Service> connection against the application <Application number> is incomplete.Please re-submit the documents.  <Action Button>Download Application</Action Button>";
+	public static final String WS_SUBMIT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for New <Service> connection against the application <Application number> has been been succesfully submitted.  <Action Button>Download Application</Action Button>";
     public static final String DEFAULT_OBJECT_MODIFIED_SMS_MSG = "Dear <Owner Name>, Your Application <Application number>  for a New <Service> Connection has been edited. For more details, please log in to <mseva URL> or download <mseva app link>.";
 
     public static final String DEFAULT_OBJECT_MODIFIED_APP_MSG = "Dear <Owner Name>, Your Application <Application number>  for a New <Service> Connection has been edited. Click here for more details <View History Link>.";

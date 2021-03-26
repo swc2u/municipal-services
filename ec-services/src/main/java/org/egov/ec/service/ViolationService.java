@@ -423,6 +423,49 @@ public class ViolationService {
 		}
 	}
 	
+	/**
+	*This method will be used to update challan status
+	* @param RequestInfoWrapper containing violation object
+	* @return HTTP status on success
+	* @throws CustomException VIOLATION_UPDATE_CHALLAN_EXCEPTION
+	*/
+	
+	
+	public ResponseEntity<ResponseInfoWrapper>editChallan(RequestInfoWrapper requestInfoWrapper) {
+		log.info("Violation Service - Edit Contact Challan");
+		
+		try {
+			Violation violationMaster = objectMapper.convertValue(requestInfoWrapper.getRequestBody(), Violation.class);
+			
+			String responseValidate = "";
+			
+			Gson gson = new Gson();
+			String payloadData = gson.toJson(violationMaster, Violation.class);
+			
+			responseValidate = wfIntegrator.validateJsonAddUpdateData(payloadData,EcConstants.CHALLANUPDATE);
+		
+			if(responseValidate.equals("")) 
+			{
+				
+					violationMaster.setContactNumber(violationMaster.getContactNumber());
+					repository.editChallan(violationMaster);
+					return new ResponseEntity<>(
+							ResponseInfoWrapper.builder().responseInfo(ResponseInfo.builder().status(EcConstants.STATUS_SUCCESS).build())
+									.responseBody(violationMaster).build(),
+							HttpStatus.OK);
+			}
+			else
+			{
+				throw new CustomException("VIOLATION_UPDATE_CHALLAN_EXCEPTION", responseValidate);
+			}
+		} catch (Exception e) {
+			log.error("Violation Service - Update Violation Exception"+e.getMessage());
+			throw new CustomException("VIOLATION_UPDATE_CHALLAN_EXCEPTION", e.getMessage());
+		}
+		
+	}
+	
+	
 
 	/**
 	*This method will be used to update payment entries

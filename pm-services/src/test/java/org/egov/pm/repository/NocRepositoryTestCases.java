@@ -109,6 +109,7 @@ public class NocRepositoryTestCases {
 		roles.add(Role.builder().code("CITIZEN").build());
 		JSONObject dataPayload = new JSONObject();
 		dataPayload.put("createdBy", "a14efd6e-ef04-4195-84f3-c5a9c3a11a77");
+		dataPayload.put("idName", "ch.pms");
 		RequestData requestData = RequestData.builder()
 				.requestInfo(RequestInfo.builder()
 						.userInfo(User.builder().userName("Prakash").roles(roles).type("CITIZEN").tenantId("ch")
@@ -173,7 +174,6 @@ public class NocRepositoryTestCases {
 				.tenantId("ch").applicationType("PETNOC").dataPayload(dataPayload).build();
 
 		String sql = "select EA.noc_number \"applicationId\",EA.tenant_id \"tenantId\",replace(cast(ED.application_detail -> 'nameOfPetDog' as VARCHAR),'\"','') as \"nameOfPetDog\",replace(cast(ED.application_detail -> 'color' as VARCHAR),'\"','') as \"color\",replace(cast(ED.application_detail -> 'breed' as VARCHAR),'\"','') as \"breed\",EA.application_status \"applicationStatus\" from egpm_noc_application_detail ED inner join egpm_noc_application EA on ED.application_uuid=EA.application_uuid WHERE EA.application_type='PETNOC' AND EA.created_by='a14efd6e-ef04-4195-84f3-c5a9c3a11a77' AND EA.is_active=TRUE AND ED.is_active=TRUE";
-
 		when(applicationRunnerImpl.getSqlQuery("ch", "CITIZEN", "PETNOC")).thenReturn(sql);
 
 		JSONObject jsonObject = new JSONObject();
@@ -291,7 +291,7 @@ public class NocRepositoryTestCases {
 		JSONObject obj = (JSONObject) parse.parse("{\r\n" + "      \"nameOfPetDog\":\"Rocky\",\r\n"
 				+ "      \"applicantName\":\"Prakash Rao\",\r\n" + "      \"houseNo\":\"14\",\r\n"
 				+ "      \"sector\":\"Akshardham\",\r\n" + "      \"age\":\"4\",\r\n" + "      \"sex\":\"MALE\",\r\n"
-				+ "      \"breed\":\"Indian\",\r\n" + "      \"color\":\"Blue\",\r\n"
+				+ "      \"breed\":\"Indian\",\r\n" + "    \"idName\":\"ch.pms\",   \"color\":\"Blue\",\r\n"
 				+ "      \"identificationMark\":\"aaa\",\r\n"
 				+ "      \"immunizationNameVeterinaryDoctor\":\"Test\",\r\n"
 				+ "      \"veterinaryCouncilRegistrationNo\":\"11\",\r\n"
@@ -326,7 +326,7 @@ public class NocRepositoryTestCases {
 
 		Assert.assertEquals(APPLICATION_ID, nocRepository.saveValidateStatus(requestData, "INITIATED"));
 
-		when(commonService.generateApplicationId(anyString())).thenReturn(APPLICATION_ID);
+		when(commonService.generateApplicationId(anyString(), anyString())).thenReturn(APPLICATION_ID);
 		when(jdbcTemplate.query(anyString(), any(Object[].class), any(ResultSetExtractor.class))).thenReturn(0);
 
 		RequestData requestData2 = RequestData.builder()
