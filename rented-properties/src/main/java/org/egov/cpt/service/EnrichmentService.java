@@ -80,7 +80,9 @@ public class EnrichmentService {
 
 		if (!CollectionUtils.isEmpty(request.getProperties())) {
 			request.getProperties().forEach(property -> {
-
+				
+				property.setTransitNumber(property.getTransitNumber().trim().toUpperCase());
+				
 				String gen_property_id = UUID.randomUUID().toString();
 				PropertyDetails propertyDetail = getPropertyDetail(property, requestInfo, gen_property_id);
 
@@ -141,7 +143,9 @@ public class EnrichmentService {
 				modifyAuditDetails.setLastModifiedTime(auditDetails.getLastModifiedTime());
 				property.setAuditDetails(modifyAuditDetails);
 				property.getPropertyDetails().setAuditDetails(modifyAuditDetails);
-
+				
+				property.setTransitNumber(property.getTransitNumber().trim().toUpperCase());
+				
 				PropertyDetails propertyDetail = updatePropertyDetail(property, requestInfo);
 				property.setPropertyDetails(propertyDetail);
 
