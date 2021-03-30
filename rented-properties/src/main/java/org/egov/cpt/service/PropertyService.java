@@ -210,6 +210,11 @@ public class PropertyService {
 			if (!CollectionUtils.isEmpty(criteria.getState()) && criteria.getState().contains(PTConstants.PM_DRAFTED))
 				criteria.setCreatedBy(requestInfo.getUserInfo().getUuid());
 		}
+		
+		if(criteria.getTransitNumber()!=null) {
+			criteria.setTransitNumber(criteria.getTransitNumber().trim().toUpperCase());
+		}
+		
 		List<Property> properties = repository.getProperties(criteria);
 		if (CollectionUtils.isEmpty(properties))
 			return Collections.emptyList();
