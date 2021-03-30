@@ -136,4 +136,16 @@ public class BillGeneration {
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails;
 	
+	@JsonProperty("createdBy")
+	private String createdBy;
+
+	@JsonProperty("lastModifiedBy")
+	private String lastModifiedBy;
+
+	@JsonProperty("createdTime")
+	private Long createdTime;
+
+	@JsonProperty("lastModifiedTime")
+	private Long lastModifiedTime;
+	
 }
