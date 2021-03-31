@@ -23,13 +23,25 @@
     {
       "actions": [
         {
-          "action": "FORWARD",
+          "action": "FORWARD_TO_DA",
           "currentState": "PENDING_DS_VERIFICATION",
           "nextState": "PENDING_DA_VERIFICATION",
           "roles": ["ES_EB_DISPATCH_OFFICER"]
         },
+		 {
+          "action": "FORWARD_TO_SA",
+          "currentState": "PENDING_DS_VERIFICATION",
+          "nextState": "PENDING_SRA_VERIFICATION",
+          "roles": ["ES_EB_DISPATCH_OFFICER"]
+        },
+		 {
+          "action": "FORWARD_TO_SI",
+          "currentState": "PENDING_DS_VERIFICATION",
+          "nextState": "PENDING_SI_VERIFICATION",
+          "roles": ["ES_EB_DISPATCH_OFFICER"]
+        },
         {
-          "action": "SENDBACK",
+          "action": "SENDBACK_TO_CITIZEN",
           "currentState": "PENDING_DS_VERIFICATION",
           "nextState": "PENDING_CLARIFICATION",
           "roles": ["ES_EB_DISPATCH_OFFICER"]
@@ -69,15 +81,27 @@
     {
       "actions": [
         {
-          "action": "FORWARD",
+          "action": "FORWARD_TO_SA",
           "currentState": "PENDING_DA_VERIFICATION",
           "nextState": "PENDING_SRA_VERIFICATION",
           "roles": ["ES_EB_DEALING_ASSISTANT"]
         },
+		{
+          "action": "FORWARD_TO_SI",
+          "currentState": "PENDING_DA_VERIFICATION",
+          "nextState": "PENDING_SI_VERIFICATION",
+          "roles": ["ES_EB_DEALING_ASSISTANT"]
+        },
         {
-          "action": "SENDBACK",
+          "action": "SENDBACK_TO_DS",
           "currentState": "PENDING_DA_VERIFICATION",
           "nextState": "PENDING_DS_VERIFICATION",
+          "roles": ["ES_EB_DEALING_ASSISTANT"]
+        },
+		{
+          "action": "SENDBACK_TO_CITIZEN",
+          "currentState": "PENDING_DA_VERIFICATION",
+          "nextState": "PENDING_CLARIFICATION",
           "roles": ["ES_EB_DEALING_ASSISTANT"]
         }
       ],
@@ -92,15 +116,27 @@
     {
       "actions": [
         {
-          "action": "FORWARD",
+          "action": "FORWARD_TO_SI",
           "currentState": "PENDING_SRA_VERIFICATION",
-          "nextState": "PENDING_SO_VERIFICATION",
+          "nextState": "PENDING_SI_VERIFICATION",
           "roles": ["ES_EB_SR_ASSISTANT"]
         },
         {
-          "action": "SENDBACK",
+          "action": "SENDBACK_TO_DA",
           "currentState": "PENDING_SRA_VERIFICATION",
           "nextState": "PENDING_DA_VERIFICATION",
+          "roles": ["ES_EB_SR_ASSISTANT"]
+        },
+		{
+          "action": "SENDBACK_TO_DS",
+          "currentState": "PENDING_SRA_VERIFICATION",
+          "nextState": "PENDING_DS_VERIFICATION",
+          "roles": ["ES_EB_SR_ASSISTANT"]
+        },
+		{
+          "action": "SENDBACK_TO_CITIZEN",
+          "currentState": "PENDING_SRA_VERIFICATION",
+          "nextState": "PENDING_CLARIFICATION",
           "roles": ["ES_EB_SR_ASSISTANT"]
         }
       ],
@@ -115,15 +151,86 @@
     {
       "actions": [
         {
-          "action": "FORWARD",
+          "action": "FORWARD_TO_SO",
+          "currentState": "PENDING_SI_VERIFICATION",
+          "nextState": "PENDING_SO_VERIFICATION",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+		 {
+          "action": "FORWARD_TO_AC",
+          "currentState": "PENDING_SI_VERIFICATION",
+          "nextState": "PENDING_AC_APPROVAL",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+        {
+          "action": "SENDBACK_TO_SA",
+          "currentState": "PENDING_SI_VERIFICATION",
+          "nextState": "PENDING_SRA_VERIFICATION",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+		{
+          "action": "SENDBACK_TO_DA",
+          "currentState": "PENDING_SI_VERIFICATION",
+          "nextState": "PENDING_DA_VERIFICATION",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+		{
+          "action": "SENDBACK_TO_DS",
+          "currentState": "PENDING_SI_VERIFICATION",
+          "nextState": "PENDING_DS_VERIFICATION",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+		{
+          "action": "SENDBACK_TO_CITIZEN",
+          "currentState": "PENDING_SI_VERIFICATION",
+          "nextState": "PENDING_CLARIFICATION",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        }
+      ],
+      "applicationStatus": "ES_PENDING_SI_VERIFICATION",
+      "docUploadRequired": false,
+      "isStartState": false,
+      "isStateUpdatable": true,
+      "isTerminateState": false,
+      "sla": 2,
+      "state": "PENDING_SI_VERIFICATION"
+    },
+    {
+      "actions": [
+        {
+          "action": "FORWARD_TO_AC",
           "currentState": "PENDING_SO_VERIFICATION",
           "nextState": "PENDING_AC_APPROVAL",
           "roles": ["ES_EB_SECTION_OFFICER"]
         },
         {
-          "action": "SENDBACK",
+          "action": "SENDBACK_TO_SI",
+          "currentState": "PENDING_SO_VERIFICATION",
+          "nextState": "PENDING_SI_VERIFICATION",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        },
+		{
+          "action": "SENDBACK_TO_SA",
           "currentState": "PENDING_SO_VERIFICATION",
           "nextState": "PENDING_SRA_VERIFICATION",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        },
+		{
+          "action": "SENDBACK_TO_DA",
+          "currentState": "PENDING_SO_VERIFICATION",
+          "nextState": "PENDING_DA_VERIFICATION",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        },
+		{
+          "action": "SENDBACK_TO_DS",
+          "currentState": "PENDING_SO_VERIFICATION",
+          "nextState": "PENDING_DS_VERIFICATION",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        },
+		{
+          "action": "SENDBACK_TO_CITIZEN",
+          "currentState": "PENDING_SO_VERIFICATION",
+          "nextState": "PENDING_CLARIFICATION",
           "roles": ["ES_EB_SECTION_OFFICER"]
         }
       ],
@@ -150,9 +257,39 @@
           "roles": ["ES_ADDITIONAL_COMMISSIONER"]
         },
         {
-          "action": "SENDBACK",
+          "action": "SENDBACK_TO_SO",
           "currentState": "PENDING_AC_APPROVAL",
           "nextState": "PENDING_SO_VERIFICATION",
+          "roles": ["ES_ADDITIONAL_COMMISSIONER"]
+        },
+		{
+          "action": "SENDBACK_TO_SI",
+          "currentState": "PENDING_AC_APPROVAL",
+          "nextState": "PENDING_SI_VERIFICATION",
+          "roles": ["ES_ADDITIONAL_COMMISSIONER"]
+        },
+		{
+          "action": "SENDBACK_TO_SA",
+          "currentState": "PENDING_AC_APPROVAL",
+          "nextState": "PENDING_SRA_VERIFICATION",
+          "roles": ["ES_ADDITIONAL_COMMISSIONER"]
+        },
+		{
+          "action": "SENDBACK_TO_DA",
+          "currentState": "PENDING_AC_APPROVAL",
+          "nextState": "PENDING_DA_VERIFICATION",
+          "roles": ["ES_ADDITIONAL_COMMISSIONER"]
+        },
+		{
+          "action": "SENDBACK_TO_DS",
+          "currentState": "PENDING_AC_APPROVAL",
+          "nextState": "PENDING_DS_VERIFICATION",
+          "roles": ["ES_ADDITIONAL_COMMISSIONER"]
+        },
+		{
+          "action": "SENDBACK_TO_CITIZEN",
+          "currentState": "PENDING_AC_APPROVAL",
+          "nextState": "PENDING_CLARIFICATION",
           "roles": ["ES_ADDITIONAL_COMMISSIONER"]
         }
       ],
@@ -184,15 +321,15 @@
     {
       "actions": [
         {
-          "action": "FORWARD",
+          "action": "FORWARD_TO_DA",
           "currentState": "PENDING_DS_NOTICE_VERIFICATION",
-          "nextState": "PENDING_DA_NOTICE_VERIFICATION",
+          "nextState": "PENDING_DA_FEE",
           "roles": ["ES_EB_DISPATCH_OFFICER"]
         },
         {
-          "action": "SENDBACK",
+          "action": "SENDBACK_TO_CITIZEN",
           "currentState": "PENDING_DS_NOTICE_VERIFICATION",
-          "nextState": "PENDING_CITIZEN_NOTICE_SUBMISSION",
+          "nextState": "PENDING_NOTICE_CLARIFICATION",
           "roles": ["ES_EB_DISPATCH_OFFICER"]
         }
       ],
@@ -204,41 +341,88 @@
       "sla": 2,
       "state": "PENDING_DS_NOTICE_VERIFICATION"
     },
+	{
+      "actions": [
+        {
+          "action": "SUBMIT",
+          "currentState": "PENDING_NOTICE_CLARIFICATION",
+          "nextState": "PENDING_DS_NOTICE_VERIFICATION",
+          "roles": ["CITIZEN"]
+        },
+        {
+          "action": "MODIFY",
+          "currentState": "PENDING_NOTICE_CLARIFICATION",
+          "nextState": "PENDING_NOTICE_CLARIFICATION",
+          "roles": ["CITIZEN"]
+        }
+      ],
+      "sla": 86400000,
+      "state": "PENDING_NOTICE_CLARIFICATION",
+      "applicationStatus": "ES_PENDING_NOTICE_CLARIFICATION",
+      "docUploadRequired": false,
+      "isStartState": false,
+      "isTerminateState": false,
+      "isStateUpdatable": true
+    },
     {
       "actions": [
         {
-          "action": "FORWARD",
-          "currentState": "PENDING_DA_NOTICE_VERIFICATION",
+          "action": "FORWARD_TO_SA",
+          "currentState": "PENDING_DA_FEE",
           "nextState": "PENDING_SRA_NOTICE_VERIFICATION",
           "roles": ["ES_EB_DEALING_ASSISTANT"]
         },
+		{
+          "action": "FORWARD_TO_SI",
+          "currentState": "PENDING_DA_FEE",
+          "nextState": "PENDING_SI_NOTICE_VERIFICATION",
+          "roles": ["ES_EB_DEALING_ASSISTANT"]
+        },
         {
-          "action": "SENDBACK",
-          "currentState": "PENDING_DA_NOTICE_VERIFICATION",
+          "action": "SENDBACK_TO_DS",
+          "currentState": "PENDING_DA_FEE",
           "nextState": "PENDING_DS_NOTICE_VERIFICATION",
+          "roles": ["ES_EB_DEALING_ASSISTANT"]
+        },
+		{
+          "action": "SENDBACK_TO_CITIZEN",
+          "currentState": "PENDING_DA_FEE",
+          "nextState": "PENDING_NOTICE_CLARIFICATION",
           "roles": ["ES_EB_DEALING_ASSISTANT"]
         }
       ],
-      "applicationStatus": "ES_PENDING_DA_NOTICE_VERIFICATION",
+      "applicationStatus": "ES_PENDING_DA_FEE",
       "docUploadRequired": false,
       "isStartState": false,
       "isStateUpdatable": true,
       "isTerminateState": false,
       "sla": 2,
-      "state": "PENDING_DA_NOTICE_VERIFICATION"
+      "state": "PENDING_DA_FEE"
     },
     {
       "actions": [
         {
-          "action": "FORWARD",
+          "action": "FORWARD_TO_SI",
           "currentState": "PENDING_SRA_NOTICE_VERIFICATION",
-          "nextState": "PENDING_SO_NOTICE_VERIFICATION",
+          "nextState": "PENDING_SI_NOTICE_VERIFICATION",
           "roles": ["ES_EB_SR_ASSISTANT"]
         },
         {
-          "action": "SENDBACK",
+          "action": "SENDBACK_TO_DA",
           "currentState": "PENDING_SRA_NOTICE_VERIFICATION",
-          "nextState": "PENDING_DA_NOTICE_VERIFICATION",
+          "nextState": "PENDING_DA_FEE",
+          "roles": ["ES_EB_SR_ASSISTANT"]
+        },
+		{
+          "action": "SENDBACK_TO_DS",
+          "currentState": "PENDING_SRA_NOTICE_VERIFICATION",
+          "nextState": "PENDING_DS_NOTICE_VERIFICATION",
+          "roles": ["ES_EB_SR_ASSISTANT"]
+        },
+		{
+          "action": "SENDBACK_TO_CITIZEN",
+          "currentState": "PENDING_SRA_NOTICE_VERIFICATION",
+          "nextState": "PENDING_NOTICE_CLARIFICATION",
           "roles": ["ES_EB_SR_ASSISTANT"]
         }
       ],
@@ -253,15 +437,87 @@
     {
       "actions": [
         {
-          "action": "FORWARD",
+          "action": "FORWARD_TO_SO",
+          "currentState": "PENDING_SI_NOTICE_VERIFICATION",
+          "nextState": "PENDING_SO_NOTICE_VERIFICATION",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+		{
+          "action": "FORWARD_TO_AC",
+          "currentState": "PENDING_SI_NOTICE_VERIFICATION",
+          "nextState": "PENDING_AC_NOTICE_APPROVAL",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+        {
+          "action": "SENDBACK_TO_SA",
+          "currentState": "PENDING_SI_NOTICE_VERIFICATION",
+          "nextState": "PENDING_SRA_NOTICE_VERIFICATION",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+		{
+          "action": "SENDBACK_TO_DA",
+          "currentState": "PENDING_SI_NOTICE_VERIFICATION",
+          "nextState": "PENDING_DA_FEE",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+		{
+          "action": "SENDBACK_TO_DS",
+          "currentState": "PENDING_SI_NOTICE_VERIFICATION",
+          "nextState": "PENDING_DS_NOTICE_VERIFICATION",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+		{
+          "action": "SENDBACK_TO_CITIZEN",
+          "currentState": "PENDING_SI_NOTICE_VERIFICATION",
+          "nextState": "PENDING_NOTICE_CLARIFICATION",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        }
+		
+      ],
+      "applicationStatus": "ES_PENDING_SI_NOTICE_VERIFICATION",
+      "docUploadRequired": false,
+      "isStartState": false,
+      "isStateUpdatable": true,
+      "isTerminateState": false,
+      "sla": 2,
+      "state": "PENDING_SI_NOTICE_VERIFICATION"
+    },
+    {
+      "actions": [
+        {
+          "action": "FORWARD_TO_AC",
           "currentState": "PENDING_SO_NOTICE_VERIFICATION",
           "nextState": "PENDING_AC_NOTICE_APPROVAL",
           "roles": ["ES_EB_SECTION_OFFICER"]
         },
         {
-          "action": "SENDBACK",
+          "action": "SENDBACK_TO_SI",
+          "currentState": "PENDING_SO_NOTICE_VERIFICATION",
+          "nextState": "PENDING_SI_NOTICE_VERIFICATION",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        },
+		 {
+          "action": "SENDBACK_TO_SA",
           "currentState": "PENDING_SO_NOTICE_VERIFICATION",
           "nextState": "PENDING_SRA_NOTICE_VERIFICATION",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        },
+		{
+          "action": "SENDBACK_TO_DA",
+          "currentState": "PENDING_SO_NOTICE_VERIFICATION",
+          "nextState": "PENDING_DA_FEE",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        },
+		{
+          "action": "SENDBACK_TO_DS",
+          "currentState": "PENDING_SO_NOTICE_VERIFICATION",
+          "nextState": "PENDING_DS_NOTICE_VERIFICATION",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        },
+		{
+          "action": "SENDBACK_TO_CITIZEN",
+          "currentState": "PENDING_SO_NOTICE_VERIFICATION",
+          "nextState": "PENDING_NOTICE_CLARIFICATION",
           "roles": ["ES_EB_SECTION_OFFICER"]
         }
       ],
@@ -284,13 +540,43 @@
         {
           "action": "APPROVE",
           "currentState": "PENDING_AC_NOTICE_APPROVAL",
-          "nextState": "PENDING_DA_FEE",
+          "nextState": "PENDING_PAYMENT",
           "roles": ["ES_ADDITIONAL_COMMISSIONER"]
         },
         {
-          "action": "SENDBACK",
+          "action": "SENDBACK_TO_SO",
           "currentState": "PENDING_AC_NOTICE_APPROVAL",
           "nextState": "PENDING_SO_NOTICE_VERIFICATION",
+          "roles": ["ES_ADDITIONAL_COMMISSIONER"]
+        },
+		{
+          "action": "SENDBACK_TO_SI",
+          "currentState": "PENDING_AC_NOTICE_APPROVAL",
+          "nextState": "PENDING_SI_NOTICE_VERIFICATION",
+          "roles": ["ES_ADDITIONAL_COMMISSIONER"]
+        },
+		 {
+          "action": "SENDBACK_TO_SA",
+          "currentState": "PENDING_AC_NOTICE_APPROVAL",
+          "nextState": "PENDING_SRA_NOTICE_VERIFICATION",
+          "roles": ["ES_ADDITIONAL_COMMISSIONER"]
+        },
+		{
+          "action": "SENDBACK_TO_DA",
+          "currentState": "PENDING_AC_NOTICE_APPROVAL",
+          "nextState": "PENDING_DA_FEE",
+          "roles": ["ES_ADDITIONAL_COMMISSIONER"]
+        },
+		{
+          "action": "SENDBACK_TO_DS",
+          "currentState": "PENDING_AC_NOTICE_APPROVAL",
+          "nextState": "PENDING_DS_NOTICE_VERIFICATION",
+          "roles": ["ES_ADDITIONAL_COMMISSIONER"]
+        },
+		{
+          "action": "SENDBACK_TO_CITIZEN",
+          "currentState": "PENDING_AC_NOTICE_APPROVAL",
+          "nextState": "PENDING_NOTICE_CLARIFICATION",
           "roles": ["ES_ADDITIONAL_COMMISSIONER"]
         }
       ],
@@ -301,29 +587,6 @@
       "isTerminateState": false,
       "sla": 2,
       "state": "PENDING_AC_NOTICE_APPROVAL"
-    },
-    {
-      "actions": [
-        {
-          "action": "FORWARD",
-          "currentState": "PENDING_DA_FEE",
-          "nextState": "PENDING_PAYMENT",
-          "roles": ["ES_EB_DEALING_ASSISTANT"]
-        },
-        {
-          "action": "SENDBACK",
-          "currentState": "PENDING_DA_FEE",
-          "nextState": "PENDING_AC_NOTICE_APPROVAL",
-          "roles": ["ES_EB_DEALING_ASSISTANT"]
-        }
-      ],
-      "applicationStatus": "ES_PENDING_DA_FEE",
-      "docUploadRequired": false,
-      "isStartState": false,
-      "isStateUpdatable": true,
-      "isTerminateState": false,
-      "sla": 2,
-      "state": "PENDING_DA_FEE"
     },
     {
       "actions": [
@@ -345,9 +608,9 @@
     {
       "actions": [
         {
-          "action": "FORWARD",
+          "action": "FORWARD_TO_SI",
           "currentState": "PENDING_DA_PREPARE_LETTER",
-          "nextState": "PENDING_SO_APPROVAL",
+          "nextState": "PENDING_SI_APPROVAL",
           "roles": ["ES_EB_DEALING_ASSISTANT"]
         }
       ],
@@ -362,13 +625,48 @@
     {
       "actions": [
         {
+          "action": "FORWARD_TO_SO",
+          "currentState": "PENDING_SI_APPROVAL",
+          "nextState": "PENDING_SO_APPROVAL",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+		{
+          "action": "APPROVE",
+          "currentState": "PENDING_SI_APPROVAL",
+          "nextState": "APPROVED",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        },
+        {
+          "action": "SENDBACK_TO_DA",
+          "currentState": "PENDING_SI_APPROVAL",
+          "nextState": "PENDING_DA_PREPARE_LETTER",
+          "roles": ["ES_EB_SUPERINTENDENT"]
+        }
+      ],
+      "applicationStatus": "ES_PENDING_SI_APPROVAL",
+      "docUploadRequired": false,
+      "isStartState": false,
+      "isStateUpdatable": true,
+      "isTerminateState": false,
+      "sla": 2,
+      "state": "PENDING_SI_APPROVAL"
+    },
+    {
+      "actions": [
+        {
           "action": "APPROVE",
           "currentState": "PENDING_SO_APPROVAL",
           "nextState": "APPROVED",
           "roles": ["ES_EB_SECTION_OFFICER"]
         },
         {
-          "action": "SENDBACK",
+          "action": "SENDBACK_TO_SI",
+          "currentState": "PENDING_SO_APPROVAL",
+          "nextState": "PENDING_SI_APPROVAL",
+          "roles": ["ES_EB_SECTION_OFFICER"]
+        },
+		{
+          "action": "SENDBACK_TO_DA",
           "currentState": "PENDING_SO_APPROVAL",
           "nextState": "PENDING_DA_PREPARE_LETTER",
           "roles": ["ES_EB_SECTION_OFFICER"]
