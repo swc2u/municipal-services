@@ -61,8 +61,6 @@ public class WorkflowCreationService {
 				ApplicationType.builder().name("ES-EB-OT-RegisteredWill").prefix("ES_EB_RW_").build(),
 				ApplicationType.builder().name("ES-EB-OT-UnRegisteredWill").prefix("ES_EB_URW_").build(),
 				ApplicationType.builder().name("ES-EB-OT-IntestateDeath").prefix("ES_EB_ID_").build()));
-		templateMapping.put("template-mortgage_intimation-estate",
-		Arrays.asList(ApplicationType.builder().name("ES-EB-OCS-MortgageIntimation").prefix("ES_EB_MI_").build()));
 		templateMapping.put("template-lease_deed-estate",
 				Arrays.asList(ApplicationType.builder().name("ES-EB-OCS-LeaseDeed").prefix("ES_EB_LD_").build()));
 		templateMapping.put("template-show_cause_notice-estate", Arrays
