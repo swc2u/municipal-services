@@ -195,6 +195,14 @@ public class PropertyUtil {
 				String formatted = matcher.group();
 				String[] tokens = formatted.split("-");
 				return tokens[1];
+			} else {
+				Pattern pattern2 = Pattern.compile("^SITE-[a-zA-Z//-]*\\d{1,4}?-");
+				Matcher matcher2 = pattern2.matcher(consumerCode);
+				if (matcher2.find()) {
+					String formatted = matcher2.group();
+					String[] tokens = formatted.split("-");
+					return tokens[1] + "-" + tokens[2];
+				}
 			}
 			log.error("Could not match rent consumer code pattern {}", consumerCode);
 		} catch (Exception e) {

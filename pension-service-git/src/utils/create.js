@@ -20,7 +20,11 @@ export const addUUIDAndAuditDetails = async (request, state= "") => {
     lastModifiedBy: null,        
     createdDate: createdDate,        
     lastModifiedDate: null        
-  };        
+  };   
+  
+  
+
+      
 
   switch(businessService)
   {
@@ -764,6 +768,18 @@ export const addUUIDAndAuditDetails = async (request, state= "") => {
                 );       
               } 
             }
+
+            if(ProcessInstances[0].pensionArrears){
+            let pensionArrear = {};
+      for(var i = 0; i<ProcessInstances[0].pensionArrears.length; i++){
+        pensionArrear = ProcessInstances[0].pensionArrears[i];
+        pensionArrear.pensionArrearId = uuidv1();
+        pensionArrear.tenantId = ProcessInstances[0].tenantId;
+        pensionArrear.workflowHeaderId = ProcessInstances[0].workflowHeader.workflowHeaderId;
+        pensionArrear.createdBy = createdBy;
+        pensionArrear.createdDate = createdDate;
+      }
+    }
                     
             ProcessInstances[i].documents=documents;               
             ProcessInstances[i].dependents=dependents;   
@@ -823,8 +839,8 @@ export const addUUIDAndAuditDetailsCreateRevisedPension = async (request) => {
       pensionRevision[j].pensionRevisionId=uuidv1();
       pensionRevision[j].effectiveStartYear=Number(pensionRevision[j].effectiveStartYear);
       pensionRevision[j].effectiveStartMonth=Number(pensionRevision[j].effectiveStartMonth);
-      pensionRevision[j].effectiveEndYear=null;
-      pensionRevision[j].effectiveEndMonth=null;
+      pensionRevision[j].effectiveEndYear=pensionRevision[j].effectiveEndYear==null?null:Number(pensionRevision[j].effectiveEndYear);
+      pensionRevision[j].effectiveEndMonth=pensionRevision[j].effectiveEndMonth==null?null:Number(pensionRevision[j].effectiveEndMonth);
       pensionRevision[j].pensionArrear=Number( pensionRevision[j].pensionArrear);
       //revisedPension[j].medicalRelief=Number( revisedPension[j].medicalRelief);
       pensionRevision[j].fma=Number( pensionRevision[j].fma);

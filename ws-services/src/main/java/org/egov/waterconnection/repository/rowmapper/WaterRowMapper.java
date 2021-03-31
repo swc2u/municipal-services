@@ -116,7 +116,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 					app.setComments(rs.getString("app_comments"));
 					app.setIsFerruleApplicable(rs.getBoolean("app_ferrule"));
 					app.setSecurityCharge(rs.getDouble("app_securitycharge"));
-					
+					app.setTotalAmountPaid(rs.getString("total_amount_paid"));
 					AuditDetails auditdetails1 = AuditDetails.builder()
 		                    .createdBy(rs.getString("app_createdBy"))
 		                    .createdTime(rs.getLong("app_createdTime"))
@@ -165,7 +165,8 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 			app.setComments(rs.getString("app_comments"));
 			app.setIsFerruleApplicable(rs.getBoolean("app_ferrule"));
 			app.setSecurityCharge(rs.getDouble("app_securitycharge"));
-			
+			app.setTotalAmountPaid(rs.getString("total_amount_paid"));
+
 			AuditDetails auditdetails1 = AuditDetails.builder()
                    .createdBy(rs.getString("app_createdBy"))
                    .createdTime(rs.getLong("app_createdTime"))
