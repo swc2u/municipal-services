@@ -499,8 +499,12 @@ public class DemandService {
 	 */
 	private User getEgovUser(Property property, RequestInfo requestInfo) {
 		String url = config.getUserHost().concat(config.getUserSearchEndpoint());
-
-		Owner owner = utils.getCurrentOwnerFromProperty(property);
+		Owner owner=null;
+		if(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getPayerName()!=null) {
+			 owner = utils.getOwnerFromPayerName(property);
+		}else {
+			 owner = utils.getCurrentOwnerFromProperty(property);
+		}
 		String mobileNumber = owner.getOwnerDetails().getMobileNumber();
 
 		String statelevelTenantId = utils.getStateLevelTenantId(property.getTenantId());

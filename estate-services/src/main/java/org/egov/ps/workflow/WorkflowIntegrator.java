@@ -111,9 +111,18 @@ public class WorkflowIntegrator {
 			}
 			obj.put(TENANTIDKEY, wfTenantId);
 			if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)) {
-				if (property.getPropertyMasterOrAllotmentOfSite().equalsIgnoreCase(PSConstants.PROPERTY_MASTER)
-						&& (!property.getState().contentEquals(PSConstants.PM_APPROVED)
-								|| !property.getState().contentEquals(PSConstants.ES_PM_EB_APPROVED))) {
+				if(property.getPropertyDetails().getBidders()!= null && !property.getPropertyDetails().getBidders().isEmpty()
+						&& property.getPropertyDetails().getBidders().get(0).getAuctionId() != null 
+						&& !property.getPropertyDetails().getBidders().get(0).getAction().equalsIgnoreCase("")) {
+					/**
+					 * Estate Branch Refund Of EMD (ROE) Workflow integretor
+					 */
+					obj.put(BUSINESSSERVICEKEY, config.getEbRoeBusinessServiceValue());
+					obj.put(BUSINESSIDKEY, property.getPropertyDetails().getBidders().get(0).getAuctionId());
+					obj.put(ACTIONKEY, property.getPropertyDetails().getBidders().get(0).getAction());
+				}
+				else if (property.getPropertyMasterOrAllotmentOfSite().equalsIgnoreCase(PSConstants.PROPERTY_MASTER)
+						&& !property.getState().contentEquals(PSConstants.ES_PM_EB_APPROVED)) {
 					/**
 					 * Estate Branch PM Workflow integretor
 					 */
@@ -121,8 +130,7 @@ public class WorkflowIntegrator {
 					obj.put(BUSINESSIDKEY, property.getFileNumber());
 					obj.put(ACTIONKEY, property.getAction());
 				} else if (!property.getPropertyMasterOrAllotmentOfSite().equalsIgnoreCase(PSConstants.PROPERTY_MASTER)
-						&& (!property.getState().contentEquals(PSConstants.PM_APPROVED)
-								|| !property.getState().contentEquals(PSConstants.ES_PM_EB_APPROVED))) {
+						&& !property.getState().contentEquals(PSConstants.PM_APPROVED )) {
 					/**
 					 * Estate Branch AOS Workflow integretor
 					 */
@@ -138,17 +146,7 @@ public class WorkflowIntegrator {
 				obj.put(BUSINESSSERVICEKEY, config.getBbPmBusinessServiceValue());
 				obj.put(BUSINESSIDKEY, property.getFileNumber());
 				obj.put(ACTIONKEY, property.getAction());
-			} else if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)
-//					&& (property.getState().contentEquals(PSConstants.PM_APPROVED)
-//							|| property.getState().contentEquals(PSConstants.ES_PM_EB_APPROVED))
-					&& property.getPropertyDetails().getBidders().get(0).getAuctionId() != null) {
-				/**
-				 * Estate Branch Refund Of EMD (ROE) Workflow integretor
-				 */
-				obj.put(BUSINESSSERVICEKEY, config.getEbRoeBusinessServiceValue());
-				obj.put(BUSINESSIDKEY, property.getPropertyDetails().getBidders().get(0).getAuctionId());
-				obj.put(ACTIONKEY, property.getPropertyDetails().getBidders().get(0).getAction());
-			} else if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA)
+			}else if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA)
 					&& !property.getState().contentEquals(PSConstants.ES_PM_MM_APPROVED)) {
 				/**
 				 * Mani Majra PM Workflow integretor
@@ -174,10 +172,9 @@ public class WorkflowIntegrator {
 
 		// setting the status back to Property object from wf response
 		request.getProperties().forEach(property -> {
-			if (!(property.getState().contentEquals(PSConstants.PM_APPROVED)
-					|| property.getState().contentEquals(PSConstants.ES_PM_MM_APPROVED))) {
+			if (idStatusMap.containsKey(property.getFileNumber())) {
 				property.setState(idStatusMap.get(property.getFileNumber()));
-			} else {
+			} else if(idStatusMap.containsKey(property.getPropertyDetails().getBidders().get(0).getAuctionId())){
 				property.getPropertyDetails().getBidders().forEach(bidder -> {
 					bidder.setState(idStatusMap.get(property.getPropertyDetails().getBidders().get(0).getAuctionId()));
 					if (property.getPropertyDetails().getBidders().get(0).getAction()
