@@ -236,13 +236,14 @@ public class PropertyService {
 		}
 
 		if (config.getIsWorkflowEnabled() && !action.contentEquals("") && !action.contentEquals(PSConstants.ES_DRAFT)
-				&& !(state.contentEquals(PSConstants.PM_APPROVED)
-						|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))) {
+//				&& !(state.contentEquals(PSConstants.PM_APPROVED)
+//						|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
+				) {
 			wfIntegrator.callWorkFlow(request);
 		}
-		if (!CollectionUtils.isEmpty(request.getProperties().get(0).getPropertyDetails().getBidders())) {
+		else if (!CollectionUtils.isEmpty(request.getProperties().get(0).getPropertyDetails().getBidders())) {
 			String roeAction = request.getProperties().get(0).getPropertyDetails().getBidders().get(0).getAction();
-			String addCourtCases = request.getProperties().get(0).getPropertyDetails().getAddCourtCases();
+			String addCourtCases = request.getProperties().get(0).getPropertyDetails().getAddCourtCases()!=null?request.getProperties().get(0).getPropertyDetails().getAddCourtCases():"";
 			if (config.getIsWorkflowEnabled() && !roeAction.contentEquals("")
 //					&& (state.contentEquals(PSConstants.PM_APPROVED)
 //							|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
@@ -518,7 +519,11 @@ public class PropertyService {
 		}
 
 		Property property = propertiesFromDB.get(0);
+		property.getPropertyDetails().setOfflinePaymentDetails(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails());
 		Owner owner = null;
+		if (property.getPropertyDetails().getOfflinePaymentDetails().get(0).getPayerName()!=null) {
+			owner = utils.getOwnerFromPayerName(property);
+		}
 		if (null != propertyFromRequest.getPayer() && null != propertyFromRequest.getPayer().getUuid()
 				&& !propertyFromRequest.getPayer().getUuid().isEmpty()) {
 			owner = property.getPropertyDetails().getOwners().stream()
