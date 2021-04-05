@@ -330,23 +330,23 @@ public class NocServiceTestCases {
 		jsonObject.put("uploadDocuments", array);
 		jsonObject.put("remarks", "test junit");
 		List<Role> roles = new ArrayList<Role>();
-		roles.add(Role.builder().code("SI").build());
+		roles.add(Role.builder().code("SISM").build());
 		// roles.add(Role.builder().code("CITIZEN").build());
 
 		RequestData requestData = RequestData.builder().requestInfo(RequestInfo.builder()
 				.userInfo(User.builder().userName("Prakash").emailId("abc@gmail.com").mobileNumber("9898989898")
-						.roles(roles).type("SI").tenantId("ch").uuid("65a14e00-ba5e-4347-be81-08fc04bb0529").build())
+						.roles(roles).type("SISM").tenantId("ch").uuid("65a14e00-ba5e-4347-be81-08fc04bb0529").build())
 				.build()).applicationStatus("REVIEWOFSUPERINTENDENT").applicationType("SELLMEATNOC").tenantId("ch")
-				.applicationId("PMS-12-12-2020-56554").applicationType("SELLMEATNOC").dataPayload(jsonObject).build();
+				.applicationId("PMS-12-12-2020-56554").applicationType("SELLMEATNOC").currentState("INITIATED").dataPayload(jsonObject).build();
 
 		ResponseData reponseData = ResponseData.builder()
 				.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build()).build();
 		when(nocRepository.updateAppStatus(Matchers.any(RequestData.class))).thenReturn(reponseData);
 
 		EmailTemplateModel emailTemplateModel = new EmailTemplateModel("ch", "email tempalte - [:applicationId:]",
-				"REVIEWOFSUPERINTENDENT", "SI", "SELLMEATNOC", "sms tempalte - [:applicationId:]", "Testing Juints");
+				"REVIEWOFSUPERINTENDENT", "SISM", "SELLMEATNOC", "sms tempalte - [:applicationId:]", "Testing Juints");
 		Map<String, EmailTemplateModel> maps = new HashMap<>();
-		maps.put("SI", emailTemplateModel);
+		maps.put("SISM", emailTemplateModel);
 		maps.put("CITIZEN", emailTemplateModel);
 		//when(nocRepository.findTemplate("PMS-12-12-2020-56554", "PMS-12-12-2020-56554","PMS-12-12-2020-56554")).thenReturn(maps);
 
@@ -378,7 +378,7 @@ public class NocServiceTestCases {
 		jsonObject.remove("remarks");
 		RequestData requestData3 = RequestData.builder().requestInfo(RequestInfo.builder()
 				.userInfo(User.builder().userName("Prakash").emailId("abc@gmail.com").mobileNumber("9898989898")
-						.roles(roles).type("SI").tenantId("ch").uuid("65a14e00-ba5e-4347-be81-08fc04bb0529").build())
+						.roles(roles).type("SISM").tenantId("ch").uuid("65a14e00-ba5e-4347-be81-08fc04bb0529").build())
 				.build()).applicationStatus("REVIEWOFSUPERINTENDENT").applicationType("SELLMEATNOC").tenantId("ch")
 				.applicationId("PMS-12-12-2020-56554").applicationType("SELLMEATNOC").dataPayload(jsonObject).build();
 

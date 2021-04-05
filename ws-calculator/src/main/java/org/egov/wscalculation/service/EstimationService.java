@@ -495,14 +495,14 @@ public class EstimationService {
 
 			for (Slab slabs : billingSlabs.get(0).getSlabs()) {
 
-				if (property.getSuperBuiltUpArea() > slabs.getFrom() && property.getSuperBuiltUpArea() < slabs.getTo()
+				if (property.getSuperBuiltUpArea() > slabs.getFrom() && property.getSuperBuiltUpArea() <= slabs.getTo()
 						&& (!property.getUsageCategory().split("\\.")[0]
 								.equalsIgnoreCase(WSCalculationConstant.WS_RESIDENTIAL))
 						&& slabs.getCode().equalsIgnoreCase(property.getUsageCategory())) {
 					multiplier = slabs.getCharge();
 					break;
 				} else if (property.getSuperBuiltUpArea() > slabs.getFrom()
-						&& property.getSuperBuiltUpArea() < slabs.getTo()
+						&& property.getSuperBuiltUpArea() <= slabs.getTo()
 						&& (property.getUsageCategory().split("\\.")[0]
 								.equalsIgnoreCase(WSCalculationConstant.WS_RESIDENTIAL))) {
 					multiplier = slabs.getCharge();
@@ -566,14 +566,14 @@ public class EstimationService {
 			Double multiplier = 0.0;
 			for (Slab slabs : billingSlabs.get(0).getSlabs()) {
 
-				if (property.getSuperBuiltUpArea() > slabs.getFrom() && property.getSuperBuiltUpArea() < slabs.getTo()
+				if (property.getSuperBuiltUpArea() > slabs.getFrom() && property.getSuperBuiltUpArea() <= slabs.getTo()
 						&& (!property.getUsageCategory().split("\\.")[0]
 								.equalsIgnoreCase(WSCalculationConstant.WS_RESIDENTIAL))
 						&& slabs.getCode().equalsIgnoreCase(property.getUsageCategory())) {
 					multiplier = slabs.getCharge();
 					break;
 				} else if (property.getSuperBuiltUpArea() > slabs.getFrom()
-						&& property.getSuperBuiltUpArea() < slabs.getTo()
+						&& property.getSuperBuiltUpArea() <= slabs.getTo()
 						&& (property.getUsageCategory().split("\\.")[0]
 								.equalsIgnoreCase(WSCalculationConstant.WS_RESIDENTIAL))) {
 					multiplier = slabs.getCharge();

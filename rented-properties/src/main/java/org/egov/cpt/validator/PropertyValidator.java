@@ -46,6 +46,8 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class PropertyValidator {
 
+	private static final String COLONY_VIKAS_NAGAR = "COLONY_VIKAS_NAGAR";
+
 	@Autowired
 	private PropertyRepository repository;
 
@@ -197,14 +199,27 @@ public class PropertyValidator {
 		 * numeric and between 1 and 10000
 		 */
 		List<Property> properties = request.getProperties();
-		Optional<Property> propertyWithInvalidTransitNumber = properties.stream().filter(
-				property -> property.getTransitNumber() == null || !property.getTransitNumber().matches("\\d{1,4}"))
-				.findAny();
-		if (propertyWithInvalidTransitNumber.isPresent()) {
-			throw new CustomException(Collections.singletonMap("INVALID TRANSIT NUMBER", String.format(
-					"Invalid transit number '%s' found", propertyWithInvalidTransitNumber.get().getTransitNumber())));
-		}
+		request.getProperties().forEach(propertyCheck -> {
 
+			Optional<Property> propertyWithInvalidTransitNumber = null;
+
+			if (propertyCheck.getColony().equalsIgnoreCase(COLONY_VIKAS_NAGAR)) {
+				String[] transitArray = propertyCheck.getTransitNumber().split("-");
+				propertyWithInvalidTransitNumber = properties.stream()
+						.filter(property -> property.getTransitNumber() == null || !transitArray[1].matches("\\d{1,4}"))
+						.findAny();
+			} else {
+				propertyWithInvalidTransitNumber = properties.stream()
+						.filter(property -> property.getTransitNumber() == null
+								|| !property.getTransitNumber().matches("\\d{1,4}"))
+						.findAny();
+			}
+			if (propertyWithInvalidTransitNumber.isPresent()) {
+				throw new CustomException(Collections.singletonMap("INVALID TRANSIT NUMBER",
+						String.format("Invalid transit number '%s' found",
+								propertyWithInvalidTransitNumber.get().getTransitNumber())));
+			}
+		});
 		/**
 		 * Search for existing properties with the same transit number.
 		 */
@@ -252,11 +267,15 @@ public class PropertyValidator {
 
 		List<Property> properties = request.getProperties();
 		properties.forEach(property -> {
-			if (!property.getTransitNumber().matches("\\d{1,4}")) {
+			if (!property.getColony().equalsIgnoreCase(COLONY_VIKAS_NAGAR) && !property.getTransitNumber().matches("\\d{1,4}")) {
 				errorMap.put("INVALID TRANSIT NUMBER", "Transit number is not valid ");
+			} else if(property.getColony().equalsIgnoreCase(COLONY_VIKAS_NAGAR)) {
+				String [] transitArray = property.getTransitNumber().split("-");
+				if(!transitArray[1].matches("\\d{1,4}")) {
+					errorMap.put("INVALID TRANSIT NUMBER", "Transit number is not valid ");
+				}
 			}
 		});
-
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
 
@@ -1117,6 +1136,24 @@ public class PropertyValidator {
 			return false;
 		}
 		return true;
+	}
+
+	public void validatePaymentRequest(String applicationNumber, Double paymentAmount) {
+		/**
+		 * Validate that this is a valid application number.
+		 */
+		if (applicationNumber == null) {
+			throw new CustomException(Collections.singletonMap("NO_APPLICATION_NUMBER_FOUND",
+					"No application number found to process payment"));
+		}
+		/**
+		 * Validate payment amount
+		 */
+		if(paymentAmount== null || paymentAmount == 0) {
+			throw new CustomException(Collections.singletonMap("INVALID_PAYMENT_AMOUNT",
+					"Payment amount should valid"));
+		}
+		
 	}
 
 }

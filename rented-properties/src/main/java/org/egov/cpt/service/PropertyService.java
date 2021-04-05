@@ -210,6 +210,11 @@ public class PropertyService {
 			if (!CollectionUtils.isEmpty(criteria.getState()) && criteria.getState().contains(PTConstants.PM_DRAFTED))
 				criteria.setCreatedBy(requestInfo.getUserInfo().getUuid());
 		}
+		
+		if(criteria.getTransitNumber()!=null) {
+			criteria.setTransitNumber(criteria.getTransitNumber().trim().toUpperCase());
+		}
+		
 		List<Property> properties = repository.getProperties(criteria);
 		if (CollectionUtils.isEmpty(properties))
 			return Collections.emptyList();
@@ -283,6 +288,8 @@ public class PropertyService {
 		property.setPaymentAmount(propertyFromRequest.getPaymentAmount());
 		property.setTransactionId(propertyFromRequest.getTransactionId());
 		property.setBankName(propertyFromRequest.getBankName());
+		property.setPaymentMode(propertyFromRequest.getPaymentMode());
+		
 		Owner owner = utils.getCurrentOwnerFromProperty(property);
 
 		/**
@@ -322,8 +329,8 @@ public class PropertyService {
 			/**
 			 * if offline, create a payment.
 			 */
-			demandService.createCashPayment(propertyRequest.getRequestInfo(), property.getPaymentAmount(),
-					bills.get(0).getId(), owner, property.getBillingBusinessService());
+			demandService.createCashPayment(propertyRequest.getRequestInfo(), property.getPaymentAmount(),property.getTransactionId(),
+					bills.get(0).getId(), owner, property.getBillingBusinessService(),property.getPaymentMode());
 
 			AuditDetails auditDetails = utils.getAuditDetails(propertyRequest.getRequestInfo().getUserInfo().getUuid(),
 					true);

@@ -1,6 +1,6 @@
 {
    "PETNOC":{
-      "SI":{
+      "SIHQ":{
          "REASSIGN":{
             "remarks":{
                "fieldName":"remarks",
@@ -394,7 +394,7 @@
       }
    },
    "SELLMEATNOC":{
-      "SI":{
+      "SISM-INITIATED":{
          "REVIEWOFSUPERINTENDENT":{
             "remarks":{
                "fieldName":"remarks",

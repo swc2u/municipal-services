@@ -9,7 +9,10 @@ import set from "lodash/set";
 import get from "lodash/get";
 import orderBy from "lodash/orderBy";
 import { intConversion} from "../utils/search";
+import { getYearOfService,getDAPercentage,getCommutationPercentage,getCommutationMultiplier,getIRPercentage,getAdditionalPensionPercentage,getPensionConfigurationValue,getDOJ, getMonthsDaysInRange,getAge,isEldestDependent,getAdditionalPensionPercentageForFamily,getHalfYearOfService, getAdditionalPensionPercentageAfterRetirement, getYearDifference } from "../utils/calculationHelper";
+
 const asyncHandler = require("express-async-handler");
+
 
 import logger from "../config/logger";
 
@@ -46,8 +49,10 @@ export default ({ config, db }) => {
 
         let employee ={
           dob : epochToYmd(intConversion(processInstance.employee.user.dob)),
+          //dob : new Date("1955-11-30"),
           employeeType: processInstance.employee.employeeType,
           dateOfRetirement: epochToYmd(intConversion(processInstance.employee.dateOfRetirement)),  
+          //dateOfRetirement: new Date("2015-11-30"),  
           dateOfDeath : processInstance.employee.dateOfDeath && processInstance.employee.dateOfDeath!=0?epochToYmd(intConversion(processInstance.employee.dateOfDeath)):null,
           reasonForRetirement : reasonForRetirement,//processInstance.employeeOtherDetails.reasonForRetirement, 
           lastDesignation : "",
@@ -302,8 +307,156 @@ export default ({ config, db }) => {
         }
         */
 
-        let processInstances=[];
+        
+
+        let monthlyPension = {
+          
+            fma:employee.fma,
+            miscellaneous:employee.miscellaneous,
+            overPayment:employee.overPayment,
+            incomeTax:employee.incomeTax,
+            cess:employee.cess,
+            basicPension: businessService==envVariables.EGOV_PENSION_RRP_BUSINESS_SERVICE? pensionCalculationDetails.basicPensionSystem:pensionCalculationDetails.familyPensionISystem,
+            commutedPension:pensionCalculationDetails.commutedPensionSystem,
+            additionalPension:pensionCalculationDetails.additionalPensionSystem,
+            netDeductions:pensionCalculationDetails.netDeductionsSystem,
+            interimRelief:pensionCalculationDetails.interimReliefSystem,
+            da:pensionCalculationDetails.daSystem,
+            totalPension:pensionCalculationDetails.totalPensionSystem,
+            pensionDeductions:pensionCalculationDetails.pensionDeductionsSystem,
+            woundExtraOrdinaryPension:pensionCalculationDetails.woundExtraordinaryPensionSystem,
+            attendantAllowance:pensionCalculationDetails.attendantAllowanceSystem
+        }
+
+        let todaysDate = new Date();
+        let dateOfRetirement = new Date(employee.dateOfRetirement);
+        let totalArrear = 0;
+        let pensionArrears = [];
+
+        if(dateOfRetirement < todaysDate){
+          
+          let calculationDate = new Date(dateOfRetirement);
+          calculationDate = new Date((calculationDate.getMonth()==11?calculationDate.getFullYear()+1:calculationDate.getFullYear()).toString()+"-"+(calculationDate.getMonth()==11?1: calculationDate.getMonth()+2).toString()+"-01");
+          //calculationDate.setMonth(calculationDate.getMonth() + 1);
+          //calculationDate = new Date("2016-12-29");
+
+          let updatedNetPension = 0;
+          while(calculationDate < todaysDate){
+
+          /* let updatedFMA = monthlyPension.fma;
+
+          if(modifyFMA){
+            updatedFMA=FMA;
+          } */
+
+          //newPensionRevision.fma = updatedFMA;
+
+          let mdms = await mdmsData(body.RequestInfo, tenantId);
+         
+
+          let updatedAdditionalPension = monthlyPension.additionalPension;
+
+          let additionalPensionPercentage=getAdditionalPensionPercentageAfterRetirement(new Date(employee.dob),calculationDate,mdms);
+
+          updatedAdditionalPension=Math.ceil((monthlyPension.basicPension)*additionalPensionPercentage/100);
+
+          let irPercentage = getIRPercentage(calculationDate, mdms);
+
+          let updatedIR = monthlyPension.interimRelief;
+
+          
+            updatedIR=Math.round((monthlyPension.basicPension+updatedAdditionalPension)*irPercentage/100);
+          
+
+          let daPercentage = getDAPercentage(calculationDate, mdms);
+
+          let updatedDA = monthlyPension.da;
+
+          
+            updatedDA=Math.round((monthlyPension.basicPension+updatedIR+updatedAdditionalPension)*daPercentage/100);
+          
+
+          let updatedCommutedPension = monthlyPension.commutedPension;
+
+          if(monthlyPension.commutedPension > 0){
+
+            let retirementStartedYear = getYearDifference(new Date(employee.dateOfRetirement), calculationDate)
+
+            if (retirementStartedYear>15){
+              updatedCommutedPension=0;
+
+            }
+
+          }          
+
+          /* if(updatedFMA!=monthlyPension.fma || updatedDA!=monthlyPension.da
+            || updatedIR!=monthlyPension.interimRelief || updatedAdditionalPension!=monthlyPension.additionalPension
+            || updatedCommutedPension!=monthlyPension.commutedPension
+            || (monthlyPension.effectiveStartYear==effectiveYear 
+              && monthlyPension.effectiveStartMonth==effectiveMonth)) */
+              {
+              
+          let updatedTotalPension = monthlyPension.basicPension+updatedDA-updatedCommutedPension+updatedAdditionalPension+updatedIR+monthlyPension.fma+monthlyPension.miscellaneous+monthlyPension.woundExtraOrdinaryPension+monthlyPension.attendantAllowance;
+
+          updatedNetPension = updatedTotalPension-monthlyPension.netDeductions;
+
+          monthlyPension = {
+            effectiveYear: calculationDate.getFullYear(),
+            effectiveMonth:calculationDate.getMonth() + 1,            
+            fma:monthlyPension.fma,
+            miscellaneous:monthlyPension.miscellaneous,
+            overPayment:monthlyPension.overPayment,
+            incomeTax:monthlyPension.incomeTax,
+            cess:monthlyPension.cess,
+            basicPension:monthlyPension.basicPension,
+            commutedPension:updatedCommutedPension,
+            additionalPension:updatedAdditionalPension,
+            netDeductions:monthlyPension.netDeductions,
+            netPension:updatedNetPension,
+            active:true,
+            interimRelief:updatedIR,
+            da:updatedDA,
+            totalPension:updatedTotalPension,
+            pensionDeductions:monthlyPension.pensionDeductions,
+            woundExtraOrdinaryPension:monthlyPension.woundExtraOrdinaryPension,
+            attendantAllowance:monthlyPension.attendantAllowance
+          };
+
+          pensionArrears.push(monthlyPension);
+        }
+      
+      
+        //calculationDate.setMonth(calculationDate.getMonth() + 1);
+        //calculationDate.setMonth(calculationDate.getMonth() == 11? 0: calculationDate.getMonth()+ 1);
+        calculationDate = new Date((calculationDate.getMonth()==11?calculationDate.getFullYear()+1:calculationDate.getFullYear()).toString()+"-"+(calculationDate.getMonth()==11?1: calculationDate.getMonth()+2).toString()+"-"+calculationDate.getDate().toString());
+        totalArrear = totalArrear+updatedNetPension;   
+      }
+           
+      }
+
+          
+        pensionCalculationDetails.fma=monthlyPension.fma;
+        pensionCalculationDetails.miscellaneous=monthlyPension.miscellaneous;
+        pensionCalculationDetails.overayment=monthlyPension.overPayment;
+        pensionCalculationDetails.incomeTax=monthlyPension.incomeTax;
+        pensionCalculationDetails.cess=monthlyPension.cess;
+        pensionCalculationDetails.basicPensionSystem=monthlyPension.basicPension;
+        pensionCalculationDetails.commutedPensionSystem=monthlyPension.commutedPension;
+        pensionCalculationDetails.additionalPensionSystem=monthlyPension.additionalPension;
+        pensionCalculationDetails.netDeductionsSystem=monthlyPension.netDeductions;
+        pensionCalculationDetails.totalPensionSystem=monthlyPension.totalPension;
+        pensionCalculationDetails.interimReliefSystem=monthlyPension.interimRelief;
+        pensionCalculationDetails.daSystem=monthlyPension.da;
+        pensionCalculationDetails.finalCalculatedPensionSystem=monthlyPension.netPension;
+        pensionCalculationDetails.pensionDeductionsSystem=monthlyPension.pensionDeductions;
+        pensionCalculationDetails.woundExtraordinaryPensionSystem=monthlyPension.woundExtraOrdinaryPension;
+        pensionCalculationDetails.attendantAllowanceSystem=monthlyPension.attendantAllowance;
+        pensionCalculationDetails.pensionArrearSystem=totalArrear;
+    
+        
+      let processInstances=[];
         processInstances.push({
+          pensionArrears: pensionArrears,
             pensionCalculationDetails: pensionCalculationDetails,
             pensionCalculationUpdateDetails: {
                 nqsYearVerified: pensionCalculationDetails.nqsYearSystem,
@@ -341,7 +494,8 @@ export default ({ config, db }) => {
                 gqsDayVerified: pensionCalculationDetails.gqsDaySystem,
                 notificationTextVerified: pensionCalculationDetails.notificationTextSystem,
                 interimReliefLpdVerified: pensionCalculationDetails.interimReliefLpdSystem,
-                daLpdVerified: pensionCalculationDetails.daLpdSystem
+                daLpdVerified: pensionCalculationDetails.daLpdSystem,
+                pensionArrearVerified: pensionCalculationDetails.pensionArrearSystem,
             }//,
             //notifications: {
             //  notificationText: notificationText

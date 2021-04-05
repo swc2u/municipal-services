@@ -451,13 +451,16 @@ public class NonIndentMaterialIssueService extends DomainService {
 		List<FifoEntity> listOfFifoEntity = new ArrayList<>();
 		if (materialIssue.getIssuePurpose().equals(IssuePurposeEnum.WRITEOFFORSCRAP)) {
 			listOfFifoEntity = materialIssueReceiptFifoLogic.implementFifoLogic(store, material, issueDate, tenantId);
+			
 		} else {
 			listOfFifoEntity = materialIssueReceiptFifoLogic.implementFifoLogicForReturnMaterial(store, material,
 					issueDate, tenantId, materialIssueDetail.getMrnNumber());
 		}
+//		listOfFifoEntity.stream().filter(detail->detail.getMrnNumber().equals(anObject));
 		BigDecimal unitRate = BigDecimal.ZERO;
 		BigDecimal quantityIssued = materialIssueDetail.getQuantityIssued();
 		for (FifoEntity fifoEntity : listOfFifoEntity) {
+			if(materialIssueDetail.getMrnNumber().equals(fifoEntity.getMrnNumber())) {
 			MaterialIssuedFromReceipt materialIssuedFromReceipt = new MaterialIssuedFromReceipt();
 			MaterialReceiptDetail materialReceiptDetail = new MaterialReceiptDetail();
 			materialReceiptDetail.setId(fifoEntity.getReceiptDetailId());
@@ -482,6 +485,7 @@ public class NonIndentMaterialIssueService extends DomainService {
 			materialIssuedFromReceipts.add(materialIssuedFromReceipt);
 			if (quantityIssued.compareTo(BigDecimal.ZERO) == 0)
 				break;
+			}
 		}
 		materialIssueDetail.setMaterialIssuedFromReceipts(materialIssuedFromReceipts);
 		return unitRate;

@@ -1,5 +1,6 @@
 package org.egov.cpt.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,8 +8,12 @@ import java.util.List;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.cpt.config.PropertyConfiguration;
+import org.egov.cpt.models.Applicant;
+import org.egov.cpt.models.BillV2;
 import org.egov.cpt.models.DuplicateCopy;
 import org.egov.cpt.models.DuplicateCopySearchCriteria;
+import org.egov.cpt.models.Owner;
+import org.egov.cpt.models.OwnerDetails;
 import org.egov.cpt.models.Property;
 import org.egov.cpt.models.PropertyCriteria;
 import org.egov.cpt.models.RentAccount;
@@ -18,6 +23,7 @@ import org.egov.cpt.models.calculation.BusinessService;
 import org.egov.cpt.models.calculation.State;
 import org.egov.cpt.producer.Producer;
 import org.egov.cpt.repository.PropertyRepository;
+import org.egov.cpt.service.calculation.DemandRepository;
 import org.egov.cpt.service.calculation.DemandService;
 import org.egov.cpt.service.notification.DuplicateCopyNotificationService;
 import org.egov.cpt.util.PTConstants;
@@ -62,12 +68,18 @@ public class DuplicateCopyService {
 
 	@Autowired
 	private WorkflowService workflowService;
-	
+
 	@Autowired
 	private IRentCollectionService rentCollectionService;
-	
+
 	@Autowired
 	private PropertyUtil propertyUtil;
+
+	@Autowired
+	private DemandRepository demandRepository;
+
+	@Autowired
+	private UserService userService;
 
 	public List<DuplicateCopy> createApplication(DuplicateCopyRequest duplicateCopyRequest) {
 		propertyValidator.isPropertyExist(duplicateCopyRequest);
@@ -81,10 +93,10 @@ public class DuplicateCopyService {
 		/**
 		 * calling Rent summary
 		 */
-		
+
 		addRentSummary(duplicateCopyRequest.getDuplicateCopyApplications());
-		
-		
+
+
 		return duplicateCopyRequest.getDuplicateCopyApplications();
 	}
 
@@ -121,9 +133,9 @@ public class DuplicateCopyService {
 			else
 				return Collections.emptyList();
 		}
-		
+
 		addRentSummary(applications);
-		
+
 		return applications;
 	}
 
@@ -144,26 +156,26 @@ public class DuplicateCopyService {
 		}
 		producer.push(config.getUpdateDuplicateCopyTopic(), duplicateCopyRequest);
 		notificationService.process(duplicateCopyRequest);
-		
+
 		/**
 		 * calling Rent summary
 		 */
 		addRentSummary(duplicateCopyRequest.getDuplicateCopyApplications());
-		
+
 		return duplicateCopyRequest.getDuplicateCopyApplications();
 	}
-	
+
 	private void addRentSummary(List<DuplicateCopy> duplicateCopyApplications) {
 		duplicateCopyApplications.stream().filter(application -> application.getProperty().getId() != null)
 		.forEach(application -> {
-			
+
 			PropertyCriteria propertyCriteria = PropertyCriteria.builder().relations(Arrays.asList("owner"))
 					.propertyId(application.getProperty().getId()).build();
 
 			List<Property> propertiesFromDB = repository.getProperties(propertyCriteria);
 			List<RentDemand> demands = repository
 					.getPropertyRentDemandDetails(propertyCriteria);
-			
+
 			RentAccount rentAccount = repository
 					.getPropertyRentAccountDetails(propertyCriteria);
 			if (!CollectionUtils.isEmpty(demands) && null != rentAccount && !CollectionUtils.isEmpty(propertiesFromDB)) {
@@ -174,6 +186,85 @@ public class DuplicateCopyService {
 			else 
 				application.getProperty().setRentSummary(new RentSummary());
 		});
+	}
+
+	public List<DuplicateCopy> collectPayment(DuplicateCopyRequest dcRequest) {
+		/**
+		 * Validate not empty
+		 */
+		if (CollectionUtils.isEmpty(dcRequest.getDuplicateCopyApplications())) {
+			return Collections.emptyList();
+		}
+		DuplicateCopy dcApplicationFromRequest = dcRequest.getDuplicateCopyApplications().get(0);
+
+		propertyValidator.validatePaymentRequest(dcApplicationFromRequest.getApplicationNumber(),dcApplicationFromRequest.getPaymentAmount());
+
+
+		DuplicateCopySearchCriteria dcCriteria = DuplicateCopySearchCriteria.builder()
+				.applicationNumber(dcApplicationFromRequest.getApplicationNumber()).status(Collections.singletonList(PTConstants.DC_PENDINGPAYMENT))
+				.build();
+
+		/**
+		 * Retrieve owner from db with the given ids.
+		 */
+		List<DuplicateCopy> dcApplicationsFromDB = repository.getDuplicateCopyProperties(dcCriteria);
+		if (CollectionUtils.isEmpty(dcApplicationsFromDB)) {
+			throw new CustomException(
+					Collections.singletonMap("APPLICATION_NOT_FOUND", String.format("Could not find any valid application %s with pending payment state",
+							dcApplicationFromRequest.getApplicationNumber())));
+		}
+
+		DuplicateCopy dcApplicationFromDB = dcApplicationsFromDB.get(0);
+		BigDecimal totalDue=dcApplicationFromDB.getApplicant().get(0).getFeeAmount();
+
+		/**
+		 * Validate payment amount
+		 */
+		if(dcApplicationFromRequest.getPaymentAmount() < totalDue.doubleValue()) {
+			throw new CustomException(Collections.singletonMap("INVALID_PAYMENT_AMOUNT",
+					"Payment amount should be equal to due amount"));
+		}
+
+		dcApplicationFromDB.setTransactionId(dcApplicationFromRequest.getTransactionId());
+		dcApplicationFromDB.setBankName(dcApplicationFromRequest.getBankName());
+		dcApplicationFromDB.setPaymentAmount(dcApplicationFromRequest.getPaymentAmount());
+		dcApplicationFromDB.setPaymentMode(dcApplicationFromRequest.getPaymentMode());
+
+		/**
+		 * Create egov user if not already present.
+		 */
+		userService.createUser(dcRequest.getRequestInfo(), dcApplicationFromDB.getApplicant().get(0).getPhone(),
+				dcApplicationFromDB.getApplicant().get(0).getName(), dcApplicationFromDB.getApplicant().get(0).getTenantId());
+
+		/**
+		 * Get the bill generated.
+		 */
+		List<BillV2> bills = demandRepository.fetchBill(dcRequest.getRequestInfo(), dcApplicationFromDB.getTenantId(),
+				dcApplicationFromDB.getApplicationNumber(), dcApplicationFromDB.getBillingBusinessService());
+		if (CollectionUtils.isEmpty(bills)) {
+			throw new CustomException("BILL_NOT_GENERATED", "No bills were found for the consumer code "
+					+ dcApplicationFromDB.getApplicationNumber());
+		}
+
+		if (dcRequest.getRequestInfo().getUserInfo().getType().equalsIgnoreCase(PTConstants.ROLE_EMPLOYEE)) {
+			/**
+			 * if offline, create a payment.
+			 */
+			Applicant applicant = dcApplicationFromDB.getApplicant().get(0);
+
+			OwnerDetails ownerDetail = OwnerDetails.builder().name(applicant.getName()).phone(applicant.getPhone()).build();
+
+			Owner owner = Owner.builder().ownerDetails(ownerDetail).tenantId(applicant.getTenantId()).build();
+
+			demandService.createCashPayment(dcRequest.getRequestInfo(), dcApplicationFromDB.getPaymentAmount(),dcApplicationFromDB.getTransactionId(),
+					bills.get(0).getId(), owner, dcApplicationFromDB.getBillingBusinessService(),dcApplicationFromDB.getPaymentMode());
+
+			dcRequest.setDuplicateCopyApplications(Collections.singletonList(dcApplicationFromDB));
+			producer.push(config.getOwnershipTransferUpdateTopic(), dcRequest);
+
+		}
+		return Collections.singletonList(dcApplicationFromDB);
+
 	}
 
 }

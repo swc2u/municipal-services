@@ -87,5 +87,15 @@ public class DuplicateCopyController {
 				.responseInfo(resInfo).build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	@PostMapping("/_pay-fee")
+	public ResponseEntity<DuplicateCopyResponse> rentPayment(@Valid @RequestBody DuplicateCopyRequest otRequest) {
+		List<DuplicateCopy> applications= duplicateCopyService.collectPayment(otRequest);
+		ResponseInfo resInfo = responseInfoFactory.createResponseInfoFromRequestInfo(otRequest.getRequestInfo(),
+				true);
+		DuplicateCopyResponse response = DuplicateCopyResponse.builder().duplicateCopyApplications(applications).responseInfo(resInfo)
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
 
 }

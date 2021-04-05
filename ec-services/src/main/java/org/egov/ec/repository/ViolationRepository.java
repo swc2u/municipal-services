@@ -208,10 +208,10 @@ public class ViolationRepository {
 		List<Violation> violationDetailList;
 		
 		violationDetailList = jdbcTemplate.query(EcQueryBuilder.SEARCH_VIOLATION_MASTER,
-				new Object[] { violation.getFromDate(), violation.getToDate(), violation.getSiName(),
+				new Object[] { violation.getFromDate(), violation.getFromDate(),violation.getToDate(),violation.getToDate(), violation.getSiName(),
 						violation.getSiName(), violation.getEncroachmentType(), violation.getEncroachmentType(),
 						violation.getSector(), violation.getSector(),violation.getStatus(), violation.getStatus(),
-						violation.getTenantId() },
+						violation.getTenantId(),violation.getChallanId(),violation.getChallanId() },
 				rowMapper);
 		
 			return violationDetailList;
@@ -262,5 +262,9 @@ public class ViolationRepository {
 
 	public JSONArray getdatViolationMaster(ChallanDataBckUp bck) {
 		return  jdbcTemplate.query(EcQueryBuilder.SEARCH_VIOLATION_MASTER_DETAILS,new Object[] {   },columnsRowMapper);
+	}
+	public void editChallan(Violation violationMaster) {
+		RequestInfoWrapper infoWrapper = RequestInfoWrapper.builder().requestBody(violationMaster).build();
+		producer.push(config.getEditChallanTopic(), infoWrapper);
 	}
 }

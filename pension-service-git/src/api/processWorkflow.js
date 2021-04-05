@@ -46,10 +46,11 @@ export default ({ config, db }) => {
         //parallel application checking
         let searchApplicationResponse = await searchApplication(body.RequestInfo,body.ProcessInstances[0].tenantId,body.ProcessInstances[0].employee.code);   
         let applicationList=searchApplicationResponse.Applications;
-        
-        if(applicationList.length>0)   {
+        if(applicationList.length>0)
+           {
           applicationList=filter(applicationList,function(x){return x.state!="CLOSED" && x.state!="REJECTED" ;});          
-          if(applicationList.length>0)   {
+          if(applicationList.length>0)   
+          {
             let errorMessage=message.PARALLEL_WORLFLOW_EXIST_INITIATE_NA;
             errorMessage=errorMessage.replace(/\{0}/g,String(applicationList[0].businessId));
             let errors = errorMessage;
@@ -477,6 +478,8 @@ export default ({ config, db }) => {
         break;
 
       }
+
+      
       
 
       payloads.push({

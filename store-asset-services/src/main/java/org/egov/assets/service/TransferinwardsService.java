@@ -315,7 +315,7 @@ public class TransferinwardsService extends DomainService {
 						 */
 
 						for (MaterialReceiptDetailAddnlinfo info : detail.getReceiptDetailsAddnInfo()) {
-							if (info.getReceivedDate() <= issueDate) {
+							if (info.getReceivedDate() < issueDate) {
 								errors.addDataError(ErrorCode.DATE1_GT_DATE2.getCode(), "Receive Date", "Issue ", null);
 							}
 							info.setSerialNo(setDetailAddinfoFromIssueDetail(matIssues).getSerialNo());
@@ -446,7 +446,8 @@ public class TransferinwardsService extends DomainService {
 				indent.put("indentingStoreDept", in.getReceivingStore().getDepartment().getName());
 				indent.put("inwardStatus", in.getMrnStatus());
 
-				indent.put("remark", in.getDescription());
+//				indent.put("remark", in.getDescription());
+				indent.put("remark", in.getInspectionRemarks());
 				indent.put("createdBy", in.getReceivedBy());
 				indent.put("designation", in.getDesignation());
 

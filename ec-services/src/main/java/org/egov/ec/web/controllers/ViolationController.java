@@ -82,6 +82,22 @@ public class ViolationController {
 	}
 	
 	/**
+	* edit ContactNumber violation  controller
+	* 
+	* @param RequestInfoWrapper object of ViolationDetail
+	* @return HTTP status 200 on success
+	*/
+	@PostMapping(value = "/_EditChallan")
+	public ResponseEntity<ResponseInfoWrapper> EditChallan(
+			@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
+		log.info("Entering: " + Thread.currentThread().getStackTrace()[1].getClassName()
+				+ "."+ Thread.currentThread().getStackTrace()[1].getMethodName());
+		return genearateChallanService.editChallan(requestInfoWrapper);
+	}
+
+	
+	
+	/**
 	* update  violationPayment  controller
 	* 
 	* @param RequestInfoWrapper List of ViolationDetail
@@ -137,5 +153,4 @@ public class ViolationController {
 				+ "."+ Thread.currentThread().getStackTrace()[1].getMethodName());
 		return genearateChallanService.sendMessage(requestInfoWrapper,requestHeader);
 	}
-
 }

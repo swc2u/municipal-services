@@ -45,7 +45,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 		List<BillGeneration> listOfBills = new ArrayList<BillGeneration>();
 		try {
  
-			input = new URL(billGenerationRequest.getBillGeneration().getDocument().getFileStoreUrl()).openStream();
+			input = new URL(billGenerationRequest.getBillGeneration().getDocument().getFileStoreUrl().replaceAll(" ", "%20")).openStream();
 
 			AuditDetails auditDetails = waterServicesUtil
 					.getAuditDetails(billGenerationRequest.getRequestInfo().getUserInfo().getUuid(), true);
@@ -89,6 +89,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 	public List<BillGenerationFile> generateBillFile(BillGenerationRequest billGenerationRequest) {
 		PrintWriter writer;
 		List<BillGenerationFile> billFileList = new ArrayList<BillGenerationFile>();
+		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
 		try {
 			String timeStamp = new SimpleDateFormat("hh:mm:ss a").format(new Date());
 
@@ -101,9 +102,9 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 
 			writer = new PrintWriter(WCConstants.WS_BILLING_FILENAME, "UTF-8");
 			for (BillGeneration billGeneration : bill) {
-				writer.println(billGeneration.getCcCode() + " " + timeStamp + " " + billGeneration.getDivSdiv()
-						+ billGeneration.getConsumerCode() + " " + billGeneration.getTotalNetAmount() + " "
-						+ billGeneration.getBillId());
+				writer.println(billGeneration.getCcCode() + " "  + billGeneration.getDivSdiv()
+						+ billGeneration.getConsumerCode() + " " + billGeneration.getTotalAmountPaid() + " "
+						+ billGeneration.getPaymentMode() + " " + format.format(new Date(billGeneration.getReceiptDate())) + " " + billGeneration.getPaymentId()  + " " + "W"+ " " + billGeneration.getBillCycle() + billGeneration.getBillGroup()  + billGeneration.getSubGroup());
 			}
 
 			writer.close();

@@ -91,6 +91,20 @@ public class SWConstants {
 					VERIFY_AND_FORWARD_PENDING_APPROVAL_FOR_CONNECTION, APPROVE_FOR_CONNECTION_PENDING_FOR_PAYMENT,
 					PAY_PENDING_FOR_CONNECTION_ACTIVATION, ACTIVATE_CONNECTION_CONNECTION_ACTIVATED,
 					EDIT_PENDING_FOR_DOCUMENT_VERIFICATION, EDIT_PENDING_FOR_FIELD_INSPECTION));
+	
+	public static final String DOC_CHECK_APP_STATUS_NOTIFY = "PENDING_FOR_SEWERAGE_CONNECTION_ACTIVATION";
+
+			public static final List<String> SUBMIT_ACTION_FROM_CITIZEN_MESSAGE = Collections
+			.unmodifiableList(Arrays.asList("SUBMIT_APPLICATION", "RESUBMIT_APPLICATION", "SUBMIT_ROADCUT_NOC"));
+
+			public static final List<String> DOCUMENT_PENDING_FROM_CITIZEN_MESSAGE = Collections
+			.unmodifiableList(Arrays.asList("SEND_BACK_TO_CITIZEN_FOR_ROADCUT_NOC", "SEND_BACK_TO_CITIZEN"));
+			
+			public static final String SW_PAYMENT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your payment for New <Service> connection against the application <Application number> has been been succesfully recorded. Please submit previously filled physical copies of document at concerned Public Health Division Office,Chandigarh  <Action Button>Download Application</Action Button>";// Download your receipt using this link <receipt download link>.
+			public static final String SW_REJECT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for New <Service> connection against the application <Application number> has been been rejected.  <Action Button>Download Application</Action Button>";
+			public static final String SW_RESUBMIT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for New <Service> connection against the application <Application number> is incomplete.Please re-submit the documents.  <Action Button>Download Application</Action Button>";
+			public static final String SW_SUBMIT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for New <Service> connection against the application <Application number> has been been succesfully submitted.  <Action Button>Download Application</Action Button>";
+
 
 	public static final String USREVENTS_EVENT_TYPE = "SYSTEMGENERATED";
 
@@ -106,6 +120,8 @@ public class SWConstants {
 			.unmodifiableList(Arrays.asList(VARIABLE_WFDOCUMENTS, VARIABLE_PLUMBER));
 
 	public static final String APPROVE_CONNECTION_CONST = "APPROVE_FOR_CONNECTION";
+	
+	public static final String FORWARD_FOR_PAYMENT_ACTION = "VERIFY_AND_FORWARD_FOR_PAYMENT";
 	
 	public static final String APPROVE_BY_JE_BR = "APPROVE_BY_JE_BR";
 

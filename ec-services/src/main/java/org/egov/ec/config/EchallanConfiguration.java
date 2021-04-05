@@ -99,6 +99,9 @@ public class EchallanConfiguration {
 	@Value("${persister.update.itemmaster.item.topic}")
 	private String itemMasterUpdateTopic;
 
+	@Value("${persister.edit.challan.topic}")
+	private String editChallanTopic;
+	
 	// Fine Master Topic
 	@Value("${persister.save.finemaster.fine.topic}")
 	private String FineMasterSaveTopic;
@@ -167,5 +170,11 @@ public class EchallanConfiguration {
 	
 	@Value("${echallan.notification.flag}")
 	public String echallanNotificationFlag;
-	
+
+	@Value("${integration.service.host}")
+	private String urlShortnerHost;
+
+	@Value("${integration.service.path}")
+	private String urlShortnerPath;
+
 }
