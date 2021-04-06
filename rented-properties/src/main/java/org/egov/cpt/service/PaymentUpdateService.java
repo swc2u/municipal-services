@@ -51,6 +51,8 @@ public class PaymentUpdateService {
 	private PropertyUtil util;
 
 	private RentEnrichmentService rentEnrichmentService;
+	
+	private PropertyService propertyService;
 
 	@Value("${egov.allowed.businessServices}")
 	private String allowedBusinessServices;
@@ -68,6 +70,7 @@ public class PaymentUpdateService {
 		this.workflowService = workflowService;
 		this.util = util;
 		this.rentEnrichmentService = rentEnrichmentService;
+		this.propertyService = propertyService;
 	}
 
 	final String tenantId = "tenantId";
@@ -174,8 +177,7 @@ public class PaymentUpdateService {
 							PropertyCriteria searchCriteria = new PropertyCriteria();
 							searchCriteria.setTransitNumber(util.getTransitNumberFromConsumerCode(consumerCode));
 							
-							List<Property> properties = propertyRepository.getProperties(searchCriteria);
-//							List<Property> properties = propertyService.searchProperty(searchCriteria, requestInfo);
+							List<Property> properties = propertyService.searchProperty(searchCriteria, requestInfo);
 							
 							Property property = properties.get(0);
 							property.setRentPaymentConsumerCode(consumerCode);
