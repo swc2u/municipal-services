@@ -154,9 +154,12 @@ public class EstateDemandGenerationService {
 		relations.add("owner");
 		relations.add("paymentconfig");
 		AtomicInteger counter = new AtomicInteger(0);
+		List<String> states = new ArrayList<>();
+		states.add(PSConstants.PM_APPROVED);
+		states.add(PSConstants.ES_PM_EB_APPROVED);
 		PropertyCriteria propertyCriteria = new PropertyCriteria();
 		propertyCriteria.setRelations(relations);
-		propertyCriteria.setState(Arrays.asList(PSConstants.PM_APPROVED));
+		propertyCriteria.setState(states);
 		List<Property> propertyList = propertyRepository.getProperties(propertyCriteria);
 
 		propertyList.forEach(property -> {
@@ -318,14 +321,15 @@ public class EstateDemandGenerationService {
 				if (paymentConfigItem.getGroundRentStartMonth() <= monthsBetween
 						&& monthsBetween <= paymentConfigItem.getGroundRentEndMonth()) {
 					checkLoopIf.incrementAndGet();
-					double securityDeposit = paymentConfigItem.getGroundRentAmount().doubleValue() * paymentConfig.getNoOfMonths();
+					double securityDeposit = paymentConfigItem.getGroundRentAmount().doubleValue()
+							* paymentConfig.getNoOfMonths();
 					return new BigDecimal(securityDeposit);
 				}
 			}
 			if (checkLoopIf.get() == 0) {
 				int paymentConfigCount = paymentConfig.getPaymentConfigItems().size() - 1;
-				double securityDeposit = paymentConfig.getPaymentConfigItems().get(paymentConfigCount).getGroundRentAmount()
-						.doubleValue() * paymentConfig.getNoOfMonths();
+				double securityDeposit = paymentConfig.getPaymentConfigItems().get(paymentConfigCount)
+						.getGroundRentAmount().doubleValue() * paymentConfig.getNoOfMonths();
 				return new BigDecimal(securityDeposit);
 			}
 		}
@@ -597,6 +601,7 @@ public class EstateDemandGenerationService {
 			property.getPropertyDetails().getEstateAccount()
 					.setRemainingSince(property.getPropertyDetails().getPaymentConfig().getGroundRentAdvanceRentDate());
 		}
+
 	}
 
 }

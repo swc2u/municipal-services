@@ -39,6 +39,10 @@ public class OfflinePaymentDetails {
 
 	@JsonProperty("amount")
 	private BigDecimal amount;
+	
+	@Size(max = 100)
+	@JsonProperty("payerName")
+	private String payerName;
 
 	@Size(max = 100)
 	@JsonProperty("bankName")
@@ -99,4 +103,10 @@ public class OfflinePaymentDetails {
 
 	@JsonProperty("mmPaymentTillDate")
 	private Long mmPaymentTillDate;
+	
+	@JsonProperty("fromDate")
+	private String fromDate;
+
+	@JsonProperty("toDate")
+	private String toDate;
 }

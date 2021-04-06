@@ -12,6 +12,8 @@ public class PSConstants {
 
 	public static final String ES_PM_MM_APPROVED = "ES_PM_MM_APPROVED";
 
+	public static final String ES_PM_EB_APPROVED = "ES_PM_EB_APPROVED";
+
 	public static final String ES_PM_LEASEHOLD = "PROPERTY_TYPE.LEASEHOLD";
 
 	public static final String ES_WF_DOCS = "WF_DOCS";
@@ -77,6 +79,25 @@ public class PSConstants {
 	public static final String EM_STATE_PENDING_DA_FEE = "PENDING_DA_FEE";
 
 	public static final String TAX_HEAD_CODE_APPLICATION_CHARGE = "APPLICATION";
+	
+	public static final String TAX_HEAD_CODE_TRANSFER = "TRANSFER";
+	
+	public static final String TAX_HEAD_CODE_GST = "GST";
+	
+	public static final String TAX_HEAD_CODE_INSPECTION = "INSPECTION";
+	
+	public static final String TAX_HEAD_CODE_SECURITY = "SECURITY";
+	
+	public static final String TAX_HEAD_CODE_EXTENSION = "EXTENSION";
+	
+	public static final String TAX_HEAD_CODE_DOCUMENTCOPYING = "DOCUMENTCOPYING";
+	
+	public static final String TAX_HEAD_CODE_ALLOTMENT = "ALLOTMENT";
+	
+	public static final String TAX_HEAD_CODE_CONVERSION = "CONVERSION";
+	
+	public static final String TAX_HEAD_CODE_PROPERTYTRANSFER = "PROPERTYTRANSFER";
+	
 
 	public static final String ESTATE_SERVICE = "ESTATE_SERVICE";
 
@@ -134,6 +155,8 @@ public class PSConstants {
 	public static final String APPLICATION_TYPE_NDC = "NDC";
 	public static final String PENDING_SO_APPROVAL = "ES_PENDING_SO_APPROVAL";
 
+	public static final String ES_EB_PM_PENDING_APPROVAL = "ES_EB_PM_PENDING_APPROVAL";
+
 	public static final String PENDING_PM_MM_APPROVAL = "ES_PM_MM_PENDING_APPROVAL";
 	public static final String PENDING_MM_SO_APPROVAL = "ES_MM_PENDING_SO_APPROVAL";
 
@@ -160,11 +183,21 @@ public class PSConstants {
 
 	public static final String OWNERSHIP_TRANSFER = "OwnershipTransfer";
 	public static final String MODE_OF_TRANSFER = "MODE_OF_TRANSFER";
-	
+
 	public static final double GST_INTEREST_RATE = 18.0;
-	
+
 	public static final String RELATION_BIDDER = "bidder";
-	
+
 	public static final String ACTION_SUBMIT = "SUBMIT";
+
+	public static final String NOC = "NOC";
+
+	public static final String BB_NOC_PENDING_JE_VERIFICATION = "PENDING_JE_VERIFICATION";
+
+	public static final String BB_NOC_PENDING_DRAFSMAN_CALCULATION = "PENDING_DRAFSMAN_CALCULATION";
+
+	public static final String BB_NOC_PENDING_AC_APPROVAL = "PENDING_AC_APPROVAL";
+
+	public static final String BB_NOC_DUMMY_FILENO = "BBNOC-1";
 
 }

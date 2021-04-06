@@ -315,7 +315,7 @@ public class TransferinwardsService extends DomainService {
 						 */
 
 						for (MaterialReceiptDetailAddnlinfo info : detail.getReceiptDetailsAddnInfo()) {
-							if (info.getReceivedDate() <= issueDate) {
+							if (info.getReceivedDate() < issueDate) {
 								errors.addDataError(ErrorCode.DATE1_GT_DATE2.getCode(), "Receive Date", "Issue ", null);
 							}
 							info.setSerialNo(setDetailAddinfoFromIssueDetail(matIssues).getSerialNo());

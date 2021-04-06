@@ -100,7 +100,8 @@ public class PropertyRowMapper implements ResultSetExtractor<List<Property>> {
 							.companyOrFirm(rs.getString("company_or_firm")).interestRate(rs.getDouble("interest_rate"))
 							.mmDemandStartYear(rs.getInt("mm_demand_start_year"))
 							.mmDemandStartMonth(rs.getInt("mm_demand_start_month")).paymentConfig(paymentConfig)
-							.auditDetails(pdAuditdetails).build();
+							.termsAndConditions(rs.getString("terms_and_conditions")).auditDetails(pdAuditdetails)
+							.build();
 
 					currentProperty = Property.builder().id(propertyId).fileNumber(rs.getString("file_number"))
 							.tenantId(tenantId).category(rs.getString("category"))
