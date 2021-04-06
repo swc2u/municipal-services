@@ -675,7 +675,7 @@ public class PropertyValidator {
 		if (!CollectionUtils.isEmpty(noticeGenerationRequest.getNoticeApplications())) {
 			noticeGenerationRequest.getNoticeApplications().forEach(application -> {
 				if (application.getProperty().getTransitNumber() != null)
-					propertyCriteria.setTransitNumber(application.getProperty().getTransitNumber());
+					propertyCriteria.setTransitNumber(application.getProperty().getTransitNumber().trim().toUpperCase());
 				if (application.getProperty().getId() != null)
 					propertyCriteria.setPropertyId(application.getProperty().getId());
 			});
@@ -689,7 +689,7 @@ public class PropertyValidator {
 		if (!CollectionUtils.isEmpty(request.getDuplicateCopyApplications())) {
 			request.getDuplicateCopyApplications().forEach(application -> {
 				if (application.getProperty().getTransitNumber() != null)
-					propertyCriteria.setTransitNumber(application.getProperty().getTransitNumber());
+					propertyCriteria.setTransitNumber(application.getProperty().getTransitNumber().trim().toUpperCase());
 				if (application.getProperty().getColony() != null)
 					propertyCriteria.setColony(application.getProperty().getColony());
 				if (application.getProperty().getId() != null)
@@ -720,7 +720,7 @@ public class PropertyValidator {
 		if (!CollectionUtils.isEmpty(propertyImagesRequest.getPropertyImagesApplications())) {
 			propertyImagesRequest.getPropertyImagesApplications().forEach(application -> {
 				if (application.getProperty().getTransitNumber() != null)
-					propertyCriteria.setTransitNumber(application.getProperty().getTransitNumber());
+					propertyCriteria.setTransitNumber(application.getProperty().getTransitNumber().trim().toUpperCase());
 				if (application.getProperty().getColony() != null)
 					propertyCriteria.setColony(application.getProperty().getColony());
 				if (application.getProperty().getId() != null)
@@ -758,7 +758,7 @@ public class PropertyValidator {
 		if (!CollectionUtils.isEmpty(request.getMortgageApplications())) {
 			request.getMortgageApplications().forEach(application -> {
 				if (application.getProperty().getTransitNumber() != null)
-					propertyCriteria.setTransitNumber(application.getProperty().getTransitNumber());
+					propertyCriteria.setTransitNumber(application.getProperty().getTransitNumber().trim().toUpperCase());
 				if (application.getProperty().getColony() != null)
 					propertyCriteria.setColony(application.getProperty().getColony());
 				if (application.getProperty().getId() != null)
