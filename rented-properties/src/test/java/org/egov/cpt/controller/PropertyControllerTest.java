@@ -76,7 +76,7 @@ public class PropertyControllerTest {
 		ResponseEntity<PropertyResponse> response = propertyController.create(propertyRequest);
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		assertEquals("1", response.getBody().getProperties().get(0).getId());
-		assertEquals("trns001", response.getBody().getProperties().get(0).getTransitNumber());
+		assertEquals("trns001", response.getBody().getProperties().get(0).getTransitNumber().trim().toUpperCase());
 		assertEquals("ch.chandigarh", response.getBody().getProperties().get(0).getTenantId());
 		assertEquals("colony", response.getBody().getProperties().get(0).getColony());
 		assertEquals("masterDataState", response.getBody().getProperties().get(0).getMasterDataState());

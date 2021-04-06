@@ -52,7 +52,7 @@ public class PropertyServiceValidationTest {
 		List<Property> propertyList = propertyService.createProperty(propertyRequest);
 		assertFalse(propertyList.isEmpty());
 		assertEquals(propertyList.get(0).getTenantId(), "ch.chandigarh");
-		assertEquals(propertyList.get(0).getTransitNumber(), propertyRequest.getProperties().get(0).getTransitNumber());
+		assertEquals(propertyList.get(0).getTransitNumber(), propertyRequest.getProperties().get(0).getTransitNumber().trim().toUpperCase());
 	}
 
 	/**
