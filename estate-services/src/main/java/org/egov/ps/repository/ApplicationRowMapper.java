@@ -61,6 +61,7 @@ public class ApplicationRowMapper implements ResultSetExtractor<List<Application
 							.applicationSubmissionDate(rs.getLong("appapplication_submission_date"))
 							.auditDetails(auditdetails).bookNumber(rs.getString("appbook_number"))
 							.pageNumber(rs.getString("apppage_number")).volumeNumber(rs.getString("appvolume_number"))
+							.termsAndConditions(rs.getString("terms_and_conditions"))
 							.build();
 
 					PGobject applicationDetailsPgObject = (PGobject) rs.getObject("appapplication_details");

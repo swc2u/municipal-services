@@ -27,7 +27,8 @@ public class EstatePaymentRowMapper implements ResultSetExtractor<List<EstatePay
 			EstatePayment estatePayment = EstatePayment.builder().id(rs.getString("estpid"))
 					.propertyDetailsId(rs.getString("estpproperty_details_id"))
 					.receiptDate(rs.getLong("estpreceipt_date")).rentReceived(rs.getDouble("estprent_received"))
-					.receiptNo(rs.getString("estpreceipt_no")).paymentDate(rs.getLong("estpayment_date")).processed(rs.getBoolean("estpprocessed"))
+					.receiptNo(rs.getString("estpreceipt_no")).paymentDate(rs.getLong("estpayment_date"))
+					.processed(rs.getBoolean("estpprocessed")).comments(rs.getString("estpcomments"))
 					.auditDetails(auditdetails).build();
 			estatePayments.add(estatePayment);
 		}
