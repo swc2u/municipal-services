@@ -134,6 +134,7 @@ public class PropertyQueryBuilder {
 			+ " offline.property_details_id as offlineproperty_details_id, offline.demand_id as offlinedemand_id, "
 			+ " offline.amount as offlineamount, offline.bank_name as offlinebank_name, offline.type as offline_type, "
 			+ " offline.transaction_number as offlinetransaction_number, offline.date_of_payment as offlinedate_of_payment, "
+			+ " offline.from_date as offline_from_date,offline.to_date as offline_to_date, "
 			+ " offline.created_by as offline_created_by, offline.last_modified_by as offline_last_modified_by, "
 			+ " offline.created_time as offline_created_time, offline.last_modified_time as offline_last_modified_time ";
 
