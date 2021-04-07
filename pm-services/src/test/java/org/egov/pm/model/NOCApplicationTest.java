@@ -66,7 +66,7 @@ public class NOCApplicationTest {
 		NOCApplicationDetail nocApplicationDetails = new NOCApplicationDetail();
 		NOCApplicationRemark nocApplicationRemark = new NOCApplicationRemark();
 
-		NOCApplication result = new NOCApplication(applicationUuid, tenantId, nocNumber, appliedBy, appliedDate, applicationType, applicationStatus, isActive, createdBy, lastModifiedBy, createdTime, lastModifiedTime, applicantName, houseNo, sector, amount, gstAmount, performanceBankGuarantee, badgeNumber, totalamount, nocApplicationDetails, nocApplicationRemark);
+		NOCApplication result = new NOCApplication(applicationUuid, tenantId, nocNumber, appliedBy, appliedDate, applicationType, applicationStatus, isActive, createdBy, lastModifiedBy, createdTime, lastModifiedTime, applicantName, houseNo, sector, amount, gstAmount, performanceBankGuarantee, badgeNumber, totalamount, nocApplicationDetails, nocApplicationRemark, badgeNumber);
 
 		// add additional test code here
 		assertNotNull(result);
@@ -103,7 +103,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetAmount_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		BigDecimal result = fixture.getAmount();
 
@@ -131,7 +131,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetApplicantName_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getApplicantName();
 
@@ -143,7 +143,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetApplicationStatus_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getApplicationStatus();
 
@@ -155,7 +155,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetApplicationType_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getApplicationType();
 
@@ -167,7 +167,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetApplicationUuid_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getApplicationUuid();
 
@@ -179,7 +179,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetAppliedBy_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getAppliedBy();
 
@@ -191,7 +191,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetAppliedDate_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getAppliedDate();
 
@@ -203,7 +203,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetBadgeNumber_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getBadgeNumber();
 
@@ -215,7 +215,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetCreatedBy_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getCreatedBy();
 
@@ -227,7 +227,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetCreatedTime_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		Long result = fixture.getCreatedTime();
 
@@ -246,7 +246,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetGstAmount_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		BigDecimal result = fixture.getGstAmount();
 
@@ -274,7 +274,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetHouseNo_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getHouseNo();
 
@@ -286,7 +286,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetIsActive_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		Boolean result = fixture.getIsActive();
 
@@ -300,7 +300,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetLastModifiedBy_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getLastModifiedBy();
 
@@ -311,7 +311,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetLastModifiedTime_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		Long result = fixture.getLastModifiedTime();
 
@@ -330,7 +330,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetNocApplicationDetails_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		NOCApplicationDetail result = fixture.getNocApplicationDetails();
 
@@ -351,7 +351,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetNocApplicationRemark_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		NOCApplicationRemark result = fixture.getNocApplicationRemark();
 
@@ -375,7 +375,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetNocNumber_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getNocNumber();
 
@@ -387,7 +387,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetPerformanceBankGuarantee_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		BigDecimal result = fixture.getPerformanceBankGuarantee();
 
@@ -414,7 +414,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetSector_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getSector();
 
@@ -426,7 +426,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetTenantId_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		String result = fixture.getTenantId();
 
@@ -437,7 +437,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testGetTotalamount_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 
 		BigDecimal result = fixture.getTotalamount();
 
@@ -465,7 +465,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetAmount_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		BigDecimal amount = new BigDecimal(1.0);
 
 		fixture.setAmount(amount);
@@ -477,7 +477,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetApplicantName_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String applicantName = "";
 
 		fixture.setApplicantName(applicantName);
@@ -489,7 +489,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetApplicationStatus_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String applicationStatus = "";
 
 		fixture.setApplicationStatus(applicationStatus);
@@ -501,7 +501,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetApplicationType_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String applicationType = "";
 
 		fixture.setApplicationType(applicationType);
@@ -513,7 +513,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetApplicationUuid_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String applicationUuid = "";
 
 		fixture.setApplicationUuid(applicationUuid);
@@ -525,7 +525,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetAppliedBy_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String appliedBy = "";
 
 		fixture.setAppliedBy(appliedBy);
@@ -536,7 +536,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetAppliedDate_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String appliedDate = "";
 
 		fixture.setAppliedDate(appliedDate);
@@ -548,7 +548,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetBadgeNumber_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String badgeNumber = "";
 
 		fixture.setBadgeNumber(badgeNumber);
@@ -559,7 +559,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetCreatedBy_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String createdBy = "";
 
 		fixture.setCreatedBy(createdBy);
@@ -571,7 +571,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetCreatedTime_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		Long createdTime = new Long(1L);
 
 		fixture.setCreatedTime(createdTime);
@@ -583,7 +583,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetGstAmount_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		BigDecimal gstAmount = new BigDecimal(1.0);
 
 		fixture.setGstAmount(gstAmount);
@@ -595,7 +595,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetHouseNo_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String houseNo = "";
 
 		fixture.setHouseNo(houseNo);
@@ -607,7 +607,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetIsActive_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		Boolean isActive = new Boolean(true);
 
 		fixture.setIsActive(isActive);
@@ -619,7 +619,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetLastModifiedBy_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String lastModifiedBy = "";
 
 		fixture.setLastModifiedBy(lastModifiedBy);
@@ -631,7 +631,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetLastModifiedTime_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		Long lastModifiedTime = new Long(1L);
 
 		fixture.setLastModifiedTime(lastModifiedTime);
@@ -643,7 +643,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetNocApplicationDetails_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		NOCApplicationDetail nocApplicationDetails = new NOCApplicationDetail();
 
 		fixture.setNocApplicationDetails(nocApplicationDetails);
@@ -655,7 +655,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetNocApplicationRemark_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		NOCApplicationRemark nocApplicationRemark = new NOCApplicationRemark();
 
 		fixture.setNocApplicationRemark(nocApplicationRemark);
@@ -667,7 +667,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetNocNumber_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String nocNumber = "";
 
 		fixture.setNocNumber(nocNumber);
@@ -679,7 +679,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetPerformanceBankGuarantee_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		BigDecimal performanceBankGuarantee = new BigDecimal(1.0);
 
 		fixture.setPerformanceBankGuarantee(performanceBankGuarantee);
@@ -691,7 +691,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetSector_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String sector = "";
 
 		fixture.setSector(sector);
@@ -703,7 +703,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetTenantId_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		String tenantId = "";
 
 		fixture.setTenantId(tenantId);
@@ -715,7 +715,7 @@ public class NOCApplicationTest {
 	@Test
 	public void testSetTotalamount_1()
 		throws Exception {
-		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark());
+		NOCApplication fixture = new NOCApplication("", "", "", "", "", "", "", new Boolean(true), "", "", new Long(1L), new Long(1L), "", "", "", new BigDecimal(1.0), new BigDecimal(1.0), new BigDecimal(1.0), "", new BigDecimal(1.0), new NOCApplicationDetail(), new NOCApplicationRemark(),"");
 		BigDecimal totalamount = new BigDecimal(1.0);
 
 		fixture.setTotalamount(totalamount);
