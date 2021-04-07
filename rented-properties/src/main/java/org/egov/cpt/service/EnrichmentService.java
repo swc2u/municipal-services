@@ -97,7 +97,7 @@ public class EnrichmentService {
 					property.getOwners().forEach(owner -> {
 						Property ownerProperty = property;
 						ownerProperty.setId(gen_property_id);
-						ownerProperty.setTransitNumber(property.getTransitNumber());
+						ownerProperty.setTransitNumber(property.getTransitNumber().trim().toUpperCase());
 						String gen_owner_id = UUID.randomUUID().toString();
 						owner.setId(gen_owner_id);
 						owner.setProperty(ownerProperty);
@@ -172,7 +172,7 @@ public class EnrichmentService {
 		AuditDetails propertyAuditDetails = propertyutil.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		propertyDetail.setId(gen_property_details_id);
 		propertyDetail.setPropertyId(gen_property_id);
-		propertyDetail.setTransitNumber(property.getTransitNumber());
+		propertyDetail.setTransitNumber(property.getTransitNumber().trim().toUpperCase());
 		propertyDetail.setTenantId(property.getTenantId());
 
 		Address address = getAddress(property, requestInfo, gen_property_id);
@@ -216,7 +216,7 @@ public class EnrichmentService {
 			String gen_address_id = UUID.randomUUID().toString();
 			address.setId(gen_address_id);
 			address.setPropertyId(gen_property_id);
-			address.setTransitNumber(property.getTransitNumber());
+			address.setTransitNumber(property.getTransitNumber().trim().toUpperCase());
 			address.setTenantId(property.getTenantId());
 			address.setColony(property.getColony());
 			address.setAuditDetails(propertyAuditDetails);

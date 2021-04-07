@@ -9,10 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
-
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.ps.model.Document;
@@ -34,6 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -93,9 +93,9 @@ public class PropertyValidator {
 		// requestProperty.getSubCategory().trim().isEmpty()) {
 		// errorMap.put("INVALID_SUB_CATEGORY", "Sub category can not be empty");
 		// }
-		if (requestProperty.getSiteNumber() == null || requestProperty.getSiteNumber().trim().isEmpty()) {
-			errorMap.put("INVALID_SITE_NUMBER", "Site number can not be empty");
-		}
+//		if (requestProperty.getSiteNumber() == null || requestProperty.getSiteNumber().trim().isEmpty()) {
+//			errorMap.put("INVALID_SITE_NUMBER", "Site number can not be empty");
+//		}
 		if (requestProperty.getPropertyDetails().getBranchType() == PSConstants.ESTATE_BRANCH) {
 			if (requestProperty.getPropertyDetails().getPropertyType() == null
 					|| requestProperty.getPropertyDetails().getPropertyType().trim().isEmpty()) {
@@ -105,9 +105,9 @@ public class PropertyValidator {
 					|| requestProperty.getPropertyDetails().getTypeOfAllocation().trim().isEmpty()) {
 				errorMap.put("INVALID_TYPE_OF_ALLOCATION", "Type of allocation can not be empty");
 			}
-			if (requestProperty.getPropertyDetails().getAreaSqft() < 1) {
-				errorMap.put("INVALID_AREA_SQFT", "Area per sq.ft can not be empty");
-			}
+//			if (requestProperty.getPropertyDetails().getAreaSqft() < 1) {
+//				errorMap.put("INVALID_AREA_SQFT", "Area per sq.ft can not be empty");
+//			}
 			if (requestProperty.getPropertyDetails().getRatePerSqft() == null
 					|| requestProperty.getPropertyDetails().getRatePerSqft().signum() < 1) {
 				errorMap.put("INVALID_RATE_PER_SQFT", "Rate per sq.ft can not be less than or equals to zero");
@@ -177,11 +177,11 @@ public class PropertyValidator {
 		Optional<Property> property_Optional = request.getProperties().stream()
 				.filter(p -> !CollectionUtils.isEmpty(p.getPropertyDetails().getOwners())).findAny();
 		if (property_Optional.isPresent()) {
-			double ownerTotalShare = (request.getProperties().get(0).getPropertyDetails().getOwners().stream().filter(owner -> owner.getOwnerDetails().getIsCurrentOwner())
-					.mapToDouble(Owner::getShare)).sum();
-			if (ownerTotalShare != 100) {
-				errorMap.put("INVALID_OWNER_SHARE", "Owner(s) Share can't be less than or greater than 100%");
-			}
+//			double ownerTotalShare = (request.getProperties().get(0).getPropertyDetails().getOwners().stream().filter(owner -> owner.getOwnerDetails().getIsCurrentOwner())
+//					.mapToDouble(Owner::getShare)).sum();
+//			if (ownerTotalShare != 100) {
+//				errorMap.put("INVALID_OWNER_SHARE", "Owner(s) Share can't be less than or greater than 100%");
+//			}
 			property_Optional.get().getPropertyDetails().getOwners().stream().forEach(o -> {
 				if (!isMobileNumberValid(o.getOwnerDetails().getMobileNumber())) {
 					throw new CustomException(Collections.singletonMap("INVALID MOBILE NUMBER",
@@ -200,9 +200,9 @@ public class PropertyValidator {
 				}
 				if (property_Optional.get().getPropertyDetails().getBranchType() == PSConstants.ESTATE_BRANCH) {
 
-					if (o.getShare() < 1) {
-						errorMap.put("INVALID_SHARE", "Share can not be less than or equals to zero");
-					}
+//					if (o.getShare() < 1) {
+//						errorMap.put("INVALID_SHARE", "Share can not be less than or equals to zero");
+//					}
 					if (o.getOwnerDetails().getGuardianRelation() == null
 							|| o.getOwnerDetails().getGuardianRelation().trim().isEmpty()) {
 						errorMap.put("INVALID_GUARDIAN_RELATION", "Owner relation with guardian can not be empty");

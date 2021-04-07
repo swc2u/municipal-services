@@ -38,7 +38,8 @@ public class PostMortgageEnrichmentService {
 		if (!CollectionUtils.isEmpty(request.getApplications())) {
 			request.getApplications().forEach(application -> {
 				if (null != application && null != application.getProperty()
-						&& application.getState().equalsIgnoreCase(PSConstants.PM_APPROVED)
+						&& (application.getState().equalsIgnoreCase(PSConstants.PM_APPROVED)
+								|| application.getState().equalsIgnoreCase(PSConstants.ES_PM_EB_APPROVED))
 						&& application.getProperty().getId() != null
 						&& application.getProperty().getPropertyDetails() != null
 						&& application.getProperty().getPropertyDetails().getOwners() != null

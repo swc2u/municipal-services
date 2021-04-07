@@ -131,6 +131,23 @@ public class Util {
 
 		return currentOwnerOptional.get();
 	}
+	public Owner getOwnerFromPayerName(Property property) {
+		/**
+		 * Validate that there is an existing active owner.
+		 */
+		String payerName = property.getPropertyDetails().getOfflinePaymentDetails().get(0).getPayerName();
+		Optional<Owner> currentOwnerOptional = property.getPropertyDetails().getOwners().stream()
+				.filter(owner ->  owner.getOwnerDetails().getOwnerName().equalsIgnoreCase(payerName) && 
+						owner.getOwnerDetails().getIsCurrentOwner()).findFirst();
+
+		if (!currentOwnerOptional.isPresent()) {
+			throw new CustomException(Collections.singletonMap("PROPERTY_OWNER_NOT_FOUND",
+					"Could not find current owner for property with id " + property.getId()));
+		}
+
+		return currentOwnerOptional.get();
+	}
+	
 
 	/**
 	 * Generates a new consumer code from a transit number to be sent while creating

@@ -154,9 +154,15 @@ public class ApplicationService {
 		String action = application.getAction();
 		String state = application.getState();
 
-		if (state.contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
+		if (application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
+				&& application.getApplicationType().contentEquals(PSConstants.NOC)) {
+			if (application.getState().contains(PSConstants.BB_NOC_PENDING_AC_APPROVAL)) {
+				demandService.generateDemand(requestInfo, Collections.singletonList(application));
+			}
+		} else if (state.contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {
 			demandService.generateDemand(requestInfo, Collections.singletonList(application));
 		}
+
 		if (config.getIsWorkflowEnabled() && !action.contentEquals("")) {
 			wfIntegrator.callApplicationWorkFlow(requestInfo, application);
 		}
