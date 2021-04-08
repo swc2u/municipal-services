@@ -92,6 +92,13 @@ ColumnMaps:
      template: Dear Applicant,<br/><p>Please visit to the respective Road division with the original Bank Guarantee document for Road cut Permission letter of your application ID - [:applicationId:] .</p><br/>Regards,<br/>Portal Administrator (MCC Chandigarh)
      smsTemplate: Dear Applicant,Please visit to the respective Road division with the original Bank Guarantee document for Road cut Permission letter of your application ID - [:applicationId:].
  
+   - applicationType: ROADCUTNOC
+     status: [REVIEWSDE L1,REVIEWOFJE,REVIEWSDE L2,REVIEWOFEE L2,VERIFYHDMEE L1,VERIFYHDMEE L2,VERIFYDMEE,REVIEWOFEE L3,REVIEWOFSE L1,VERIFYCHDSE L1,VERIFYCHDSE L2,VERIFYDMSE,REVIEWOFSE L2,REVIEWOFCE L1,VERIFYDMCE,VERIFYCHDCE L1,VERIFYCHDCE L2,REVIEWOFSDEHQ,REVIEWOFWD,PENDINGAPPROVAL,VERIFY AFTER APPROVAL L1,VERIFY AFTER APPROVAL L2]
+     roles: [JE]
+     emailSubject: Road cutt Application
+     template: Dear Employee,<br/><p> This is inform you that application ID - [:applicationId:] has been forwarded to you. Kindly take necessary action.</p><br/>Regards,<br/>Roads department,<br/> Chandigarh Smart City Ltd.
+     smsTemplate: Dear Employee,<br/><p> This is inform you that application ID - [:applicationId:] has been forwarded to you. Kindly take necessary action.</p><br/>Regards,<br/>Roads department,<br/> Chandigarh Smart City Ltd.
+ 
    - applicationType: ADVERTISEMENTNOC
      status: [UPDATE]
      roles: [JEX,SUPERINTENDENT,CA]

@@ -764,6 +764,7 @@ public class NocRepository {
 					JSONObject object = new JSONObject();
 					object.put("NOCApplicationDetail", details);
 					producer.push(updateNOCApplicationDetailsTopic, object);
+					apps.setAssignee(requestData.getDataPayload().get(CommonConstants.ASSIGNEE).toString());
 				}
 			} else if (dataPayLoad.get(CommonConstants.WITHDRAWAPPROVALAMOUNT) != null
 					&& dataPayLoad.get(CommonConstants.WITHDRAWAPPROVALTAXAMOUNT) != null) {
@@ -800,7 +801,7 @@ public class NocRepository {
 					producer.push(updateNOCApplicationDetailsTopic, object);
 				}
 			}
-
+		
 			List<NOCApplication> applists = Arrays.asList(apps);
 			NOCRequestData dataApp = new NOCRequestData();
 			dataApp.setRequestInfo(requestInfo);
