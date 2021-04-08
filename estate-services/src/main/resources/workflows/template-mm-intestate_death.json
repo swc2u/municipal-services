@@ -337,7 +337,7 @@
       ],
       "sla": 2,
       "state": "PENDING_DA_NOTICE_VERIFICATION",
-      "applicationStatus": "ES_MM_PENDING_DS_NOTICE_VERIFICATION",
+      "applicationStatus": "ES_MM_PENDING_DA_NOTICE_VERIFICATION",
       "docUploadRequired": false,
       "isStartState": false,
       "isTerminateState": false,

@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.io.IOUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.util.Util;
@@ -22,6 +20,8 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -48,9 +48,6 @@ public class WorkflowCreationService {
 		templateMapping.put("template-ownership_transfer-estate", Arrays.asList(
 				// ES_EB_SD_ = Estate Service Estate Branch Sale Deed
 				ApplicationType.builder().name("ES-EB-OT-SaleDeed").prefix("ES_EB_SD_").build(),
-				ApplicationType.builder().name("ES-EB-OT-RegisteredWill").prefix("ES_EB_RW_").build(),
-				ApplicationType.builder().name("ES-EB-OT-UnRegisteredWill").prefix("ES_EB_URW_").build(),
-				ApplicationType.builder().name("ES-EB-OT-IntestateDeath").prefix("ES_EB_ID_").build(),
 				ApplicationType.builder().name("ES-EB-OT-PartnershipDeed").prefix("ES_EB_PD_").build(),
 				ApplicationType.builder().name("ES-EB-OT-FamilySettlement").prefix("ES_EB_FS_").build(),
 
@@ -60,8 +57,10 @@ public class WorkflowCreationService {
 				ApplicationType.builder().name("ES-EB-OCS-DuplicateCopy").prefix("ES_EB_DC_").build(),
 				ApplicationType.builder().name("ES-EB-OCS-ScfToSco").prefix("ES_EB_RTC_").build(),
 				ApplicationType.builder().name("ES-EB-OCS-ChangeInTrade").prefix("ES_EB_CIT_").build()));
-		templateMapping.put("template-mortgage_intimation-estate",
-		Arrays.asList(ApplicationType.builder().name("ES-EB-OCS-MortgageIntimation").prefix("ES_EB_MI_").build()));
+		templateMapping.put("template-ownership_transfer_reg_unreg_inte-estate", Arrays.asList(
+				ApplicationType.builder().name("ES-EB-OT-RegisteredWill").prefix("ES_EB_RW_").build(),
+				ApplicationType.builder().name("ES-EB-OT-UnRegisteredWill").prefix("ES_EB_URW_").build(),
+				ApplicationType.builder().name("ES-EB-OT-IntestateDeath").prefix("ES_EB_ID_").build()));
 		templateMapping.put("template-lease_deed-estate",
 				Arrays.asList(ApplicationType.builder().name("ES-EB-OCS-LeaseDeed").prefix("ES_EB_LD_").build()));
 		templateMapping.put("template-show_cause_notice-estate", Arrays
@@ -72,6 +71,8 @@ public class WorkflowCreationService {
 				Arrays.asList(ApplicationType.builder().name("ES-EB-IS-RefundOfEmd").prefix("ES_EB_ROE_").build()));
 		templateMapping.put("template-allotment_of_site-estate",
 				Arrays.asList(ApplicationType.builder().name("ES-EB-AllotmentOfSite").prefix("ES_").build()));
+		templateMapping.put("template-property_master-estate",
+				Arrays.asList(ApplicationType.builder().name("ES-EB-PropertyMaster").prefix("ES_EB_PM_").build()));
 		// Building Branch
 		templateMapping.put("template-bb-property_master",
 				Arrays.asList(ApplicationType.builder().name("ES-BB-PropertyMaster").prefix("ES_BB_PM_").build()));
