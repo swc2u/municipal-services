@@ -31,7 +31,7 @@ public class ApplicationQueryBuilder {
 			+ " app.bank_name as appbank_name, app.transaction_number as apptransaction_number, "
 			+ " app.amount as appamount,  app.payment_type as apppayment_type, app.date_of_payment as appdate_of_payment,"
 			+ " app.news_paper_advertisement_date as appnews_paper_advertisement_date,app.application_submission_date as appapplication_submission_date, "
-			+ " app.book_number as appbook_number, app.page_number as apppage_number, app.volume_number as appvolume_number, "
+			+ " app.book_number as appbook_number, app.page_number as apppage_number, app.volume_number as appvolume_number, app.terms_and_conditions, "
 			
 			+ " pt.id, pt.file_number, ptdl.id as ptdlid, "
 

@@ -43,4 +43,5 @@ public class NOCApplication {
 	private BigDecimal totalamount;
 	private NOCApplicationDetail nocApplicationDetails;
 	private NOCApplicationRemark nocApplicationRemark;
+	private String assignee;
 }

@@ -34,7 +34,7 @@ public class PropertyQueryBuilder {
 			+ " ptdl.area_sqft, ptdl.rate_per_sqft, ptdl.last_noc_date, ptdl.service_category, ptdl.street, "
 			+ " ptdl.is_property_active, ptdl.trade_type, ptdl.company_name, ptdl.company_address, ptdl.company_registration_number, "
 			+ " ptdl.company_registration_date, ptdl.decree_date, ptdl.court_details, ptdl.civil_titled_as, ptdl.company_or_firm, "
-			+ " ptdl.company_type, ptdl.emd_amount, ptdl.emd_date , ptdl.property_registered_to, ptdl.entity_type, "
+			+ " ptdl.company_type, ptdl.emd_amount, ptdl.emd_date , ptdl.property_registered_to, ptdl.entity_type, ptdl.terms_and_conditions, "
 			+ " ptdl.house_number, ptdl.mohalla, ptdl.village, ptdl.interest_rate, ptdl.mm_demand_start_year, ptdl.mm_demand_start_month, "
 
 			+ " pc.id as pc_id, pc.tenant_id as pc_tenant_id, pc.property_details_id as pc_property_details_id, "
@@ -98,7 +98,7 @@ public class PropertyQueryBuilder {
 	private static final String ESTATE_PAYMENT_COLUMNS = " estp.id as estpid, estp.property_details_id as estpproperty_details_id, "
 			+ " estp.receipt_date as estpreceipt_date, estp.rent_received as estprent_received, estp.receipt_no as estpreceipt_no, "
 			+ " estp.payment_date as estpayment_date, estp.created_by as estpcreated_by, estp.last_modified_by as estplast_modified_by, "
-			+ " estp.created_time as estpcreated_time, estp.last_modified_time as estplast_modified_time, estp.processed as estpprocessed ";
+			+ " estp.created_time as estpcreated_time, estp.last_modified_time as estplast_modified_time, estp.processed as estpprocessed, estp.comments as estpcomments ";
 
 	private static final String MANI_MAJRA_DEMAND_COLUMNS = " mmd.id as mmd_id, mmd.property_details_id as mmd_property_details_id, "
 			+ " mmd.demand_date as mmd_demand_date, mmd.paid as mmd_paid, mmd.rent as mmd_rent, mmd.gst as mmd_gst, mmd.status as mmd_status, "
@@ -466,6 +466,23 @@ public class PropertyQueryBuilder {
 		sb.append(" FROM " + MANI_MAJRA_PAYMENT_TABLE);
 		sb.append(" where mmp.property_details_id IN (:propertyDetailIds)");
 		params.put("propertyDetailIds", propertyDetailIds);
+		return sb.toString();
+	}
+
+	public String getDummyPropertySearchQuery(PropertyCriteria criteria, Map<String, Object> paramMap) {
+		StringBuilder sb = new StringBuilder(SELECT);
+		sb.append(PT_COLUMNS);
+
+		sb.append(PT_TABLE);
+		
+		if (!ObjectUtils.isEmpty(criteria.getFileNumber())) {
+			addClauseIfRequired(paramMap, sb);
+			sb.append(" pt.file_number=:fileNumber ");
+			paramMap.put("fileNumber", criteria.getFileNumber());
+		}
+		
+		sb.append(" and pt.is_dummy_property= true");
+		
 		return sb.toString();
 	}
 }

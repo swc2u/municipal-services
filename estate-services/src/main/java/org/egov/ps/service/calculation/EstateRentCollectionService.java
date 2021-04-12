@@ -541,6 +541,7 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 		statement.setAmount(currentPayment.getRentReceived());
 		statement.setType(Type.C);
 		statement.setReceiptNo(currentPayment.getReceiptNo());
+		statement.setComment(currentPayment.getComments());
 		return rentSummary;
 	}
 
@@ -564,7 +565,8 @@ public class EstateRentCollectionService implements IEstateRentCollectionService
 	private EstatePayment clonePayment(EstatePayment rentPayment) {
 		return EstatePayment.builder().rentReceived(rentPayment.getRentReceived())
 				.receiptDate(rentPayment.getReceiptDate()).receiptNo(rentPayment.getReceiptNo())
-				.paymentDate(rentPayment.getPaymentDate()).processed(false).build();
+				.paymentDate(rentPayment.getPaymentDate()).processed(false)
+				.comments(rentPayment.getComments()).build();
 	}
 
 	@Override
