@@ -100,6 +100,13 @@ ColumnMaps:
      smsTemplate: Dear Employee,This is inform you that application ID - [:applicationId:] has been forwarded to you. Kindly take necessary action.Regards,Roads department,Chandigarh Smart City Ltd.
 
    - applicationType: ROADCUTNOC
+     status: [REASSIGNTOJE,REASSIGNTOSDE L2,REASSIGNTODMEE,REASSIGNTOHDMEE,REASSIGNTOEE L3,REASSIGNTOCHDSE,REASSIGNTODMSE,REASSIGNTOSE L2,REASSIGNTOWD,REASSIGNTOCHDCE,REASSIGNTODMCE,REASSIGNTOSDEHQ]
+     roles: [JE]
+     emailSubject: Road cut Application
+     template: Dear Employee,<br/><p> This is inform you that application ID - [:applicationId:] has been reassigned to you. Kindly take necessary action.</p><br/>Regards,<br/>Roads department,<br/> Chandigarh Smart City Ltd.
+     smsTemplate: Dear Employee,This is inform you that application ID - [:applicationId:] has been reassigned to you. Kindly take necessary action.Regards,Roads department,Chandigarh Smart City Ltd.
+
+   - applicationType: ROADCUTNOC
      status: [INITIATED]
      roles: [EE]
      emailSubject: Road cut Application
