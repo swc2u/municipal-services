@@ -48,24 +48,28 @@
          "mandatory":"true",
          "validateRegularExp":"\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
       },
+      "ownerIdProof":{
+         "mandatory":"true",
+         "validateRegularExp":"\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+      },
       "immunizationNameVeterinaryDoctor":{
-         "mandatory":"false",
+         "mandatory":"true",
          "validateRegularExp":"^[a-zA-Z. ]{1,50}$"
       },
       "veterinaryCouncilRegistrationNo":{
-         "mandatory":"false",
+         "mandatory":"true",
          "validateRegularExp":"[a-zA-Z0-9-\/ ]++$"
       },
       "immunizationContactDetail":{
-         "mandatory":"false",
+         "mandatory":"true",
          "validateRegularExp":"(0/91)?[1-9][0-9]{9}"
       },
       "immunizationClinicNo":{
-         "mandatory":"false",
+         "mandatory":"true",
          "validateRegularExp":"^[a-zA-Z0-9-\/, ]{1,100}$"
       },
       "immunizationSector":{
-         "mandatory":"false",
+         "mandatory":"true",
          "validateRegularExp":"^[a-zA-Z0-9-\/,()_'&.\" ]*$"
       },
       "remarks":{
