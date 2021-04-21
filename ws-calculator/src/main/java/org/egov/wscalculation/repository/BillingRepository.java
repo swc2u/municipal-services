@@ -6,6 +6,7 @@ import org.egov.wscalculation.builder.WSCalculatorQueryBuilder;
 import org.egov.wscalculation.model.BillGeneration;
 import org.egov.wscalculation.producer.WSCalculationProducer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -52,11 +53,15 @@ public class BillingRepository {
 	}
 
 	public BillGeneration getBillingEstimation(String connectionNumber) {
-		BillGeneration billingDetails;
-
+		BillGeneration billingDetails = new BillGeneration();
+try {
 		billingDetails = jdbcTemplate.queryForObject(queryBuilder.getBillingDataForConnection,
 				new Object[] {connectionNumber},
 				new BeanPropertyRowMapper<BillGeneration>(BillGeneration.class));
+}
+catch (EmptyResultDataAccessException e) {
+    return null;
+}	
 		return billingDetails;
 	}
 
