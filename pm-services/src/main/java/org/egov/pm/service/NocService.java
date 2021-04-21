@@ -75,8 +75,8 @@ public class NocService {
 		if (nocs == null || nocs.isEmpty()) {
 			return new ResponseEntity(NocResponse.builder()
 					.resposneInfo(
-							ResponseInfo.builder().msgId("Invalid role or application type or blank data").build())
-					.nocApplicationDetail(nocs).build(), HttpStatus.BAD_REQUEST);
+							ResponseInfo.builder().msgId("No Record Found").status(CommonConstants.SUCCESSFUL).build())
+					.nocApplicationDetail(nocs).build(), HttpStatus.OK);
 		} else {
 			return new ResponseEntity(
 					NocResponse.builder().resposneInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
