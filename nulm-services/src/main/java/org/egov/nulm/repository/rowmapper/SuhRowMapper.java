@@ -99,7 +99,7 @@ public class SuhRowMapper implements ResultSetExtractor<List<SuhApplication>> {
 							.socialAuditRemark(rs.getString("social_audit_remark")).suhId(rs.getString("suh_id"))
 							.suhUuid(rs.getString("suh_uuid")).tenantId(rs.getString("tenant_id"))
 							.userChargesRemark(rs.getString("user_charges_remark"))
-							.visitsRemark(rs.getString("created_by")).addressPicture(addressPicture)
+							.visitsRemark(rs.getString("visits_remark")).addressPicture(addressPicture)
 							.programPicture(programPicture).documentAttachment(documentAttachment)
 							.assignedTo(rs.getString("assigned_to"))
 							.assignedToName(rs.getString("organization_name"))
