@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.waterconnection.config.WSConfiguration;
+import org.egov.waterconnection.constants.WCConstants;
 import org.egov.waterconnection.model.Property;
 import org.egov.waterconnection.model.SearchCriteria;
 import org.egov.waterconnection.service.UserService;
@@ -56,7 +57,7 @@ public class WsQueryBuilder {
 	private static final String WATER_SEARCH_QUERY = "SELECT "
 			/* + " conn.*, wc.*, document.*, plumber.*, application.*, property.*, " */
 			+ " wc.connectionCategory, wc.connectionType, wc.waterSource, wc.meterCount, wc.meterRentCode, wc.mfrCode, wc.meterDigits, wc.meterUnit, wc.sanctionedCapacity,"
-			+ " wc.meterId, wc.meterInstallationDate, wc.pipeSize, wc.noOfTaps, wc.proposedPipeSize, wc.proposedTaps, wc.connection_id as connection_Id, wc.connectionExecutionDate, wc.initialmeterreading, wc.appCreatedDate,"
+			+ " wc.meterId, wc.meterInstallationDate, wc.pipeSize, wc.noOfTaps, wc.proposedPipeSize, wc.proposedTaps, wc.connection_id as connection_Id, wc.connectionExecutionDate, wc.initialmeterreading, wc.appCreatedDate,wc.proposed_meterid, wc.proposed_meterinstallationdate,wc.proposed_initialmeterreading,wc.proposed_metercount,wc.proposed_meterrentcode,wc.proposed_mfrcode,wc.proposed_meterdigits,  wc.proposed_sanctionedcapacity,wc.proposed_meterunit,"
 			+ " wc.detailsprovidedby, wc.estimationfileStoreId , wc.sanctionfileStoreId , wc.estimationLetterDate, "
 			+ " conn.id as conn_id, conn.tenantid, conn.applicationNo, conn.applicationStatus, conn.status, conn.connectionNo, conn.oldConnectionNo, conn.property_id, conn.roadcuttingarea,"
 			+ " conn.aadharNo, conn.ferruleSize, conn.action, conn.adhocpenalty, conn.adhocrebate, conn.adhocpenaltyreason, conn.applicationType, conn.dateEffectiveFrom,"
@@ -197,6 +198,21 @@ public class WsQueryBuilder {
 			addClauseIfRequired(preparedStatement, query);
 			query.append("  wc.appCreatedDate <= ? ");
 			preparedStatement.add(criteria.getToDate());
+		}
+		if (criteria.getAppFromDate() != null) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append("  application.lastModifiedTime >= ?  ");
+			preparedStatement.add(criteria.getAppFromDate());
+		}
+		if (criteria.getAppToDate() != null) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append("  application.lastModifiedTime <= ? ");
+			preparedStatement.add(criteria.getAppToDate());
+		}
+		if (criteria.getAppFromDate() != null || criteria.getAppToDate() != null) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append("  application.applicationStatus in (" ).append(createQuery(WCConstants.APPROVED_ACTIONS)).append(" )");
+			addToPreparedStatement(preparedStatement, WCConstants.APPROVED_ACTIONS);
 		}
 		if(!StringUtils.isEmpty(criteria.getApplicationType())) {
 			addClauseIfRequired(preparedStatement, query);

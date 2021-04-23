@@ -72,12 +72,12 @@ public class BillGenerationDaoImpl implements BillGenerationDao {
 	}
 
 	@Override
-	public BillGenerationFile getFilesStoreUrl() {
+	public BillGenerationFile getFilesStoreUrl(String fileName) {
 		HttpHeaders http = new HttpHeaders();
 		http.setContentType(MediaType.MULTIPART_FORM_DATA);
 		MultiValueMap<String, Object> mmap = new LinkedMultiValueMap<String, Object>();
 		try {
-			mmap.add("file", getFile());
+			mmap.add("file", getFile(fileName));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -94,8 +94,8 @@ public class BillGenerationDaoImpl implements BillGenerationDao {
 	return billFile;
 	}
 	
-	public static Resource getFile() throws IOException {
-		File report = new File(WCConstants.WS_BILLING_FILENAME);
+	public static Resource getFile(String fileName) throws IOException {
+		File report = new File(fileName);
 		Path filePath = report.toPath();
 		Files.write(report.toPath(), Files.readAllBytes(report.toPath()));
 		return new FileSystemResource(filePath.toFile());
