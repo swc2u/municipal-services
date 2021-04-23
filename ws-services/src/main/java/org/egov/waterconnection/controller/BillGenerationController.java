@@ -55,6 +55,17 @@ public class BillGenerationController {
 	}
 	
 
+	@RequestMapping(value = "/_getDataExchangeFile", method = RequestMethod.POST, produces = "application/json")
+	public ResponseEntity<BillGenerationResponse> getDataExchangeFile(
+			@Valid @RequestBody BillGenerationRequest billGenerationRequest) {
+		List<BillGenerationFile> billGeneration = billingService.getDataExchangeFile(billGenerationRequest);
+		BillGenerationResponse response = BillGenerationResponse.builder().billGenerationFile(billGeneration)
+				.responseInfo(responseInfoFactory
+						.createResponseInfoFromRequestInfo(billGenerationRequest.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/_getBillingFiles", method = RequestMethod.POST)
 	public ResponseEntity<BillGenerationResponse> getBillingFiles(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper) {
 		List<BillGenerationFile> billingFileList = billingService.getBillingFiles();

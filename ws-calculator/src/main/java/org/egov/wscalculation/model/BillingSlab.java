@@ -64,6 +64,15 @@ public class BillingSlab {
 	private List<Slab> slabs = new ArrayList<>();
 	private List<Charges> charges ;
 
+	private List<Charges> MeterUpdateCharges ;
+	public List<Charges> getMeterUpdateCharges() {
+		return MeterUpdateCharges;
+	}
+
+	public void setMeterUpdateCharges(List<Charges> meterUpdateCharges) {
+		MeterUpdateCharges = meterUpdateCharges;
+	}
+
 	public List<Charges> getCharges() {
 		return charges;
 	}

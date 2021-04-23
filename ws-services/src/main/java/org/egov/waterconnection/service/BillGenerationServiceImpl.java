@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,10 +21,18 @@ import org.egov.waterconnection.model.AuditDetails;
 import org.egov.waterconnection.model.BillGeneration;
 import org.egov.waterconnection.model.BillGenerationFile;
 import org.egov.waterconnection.model.BillGenerationRequest;
+import org.egov.waterconnection.model.Property;
+import org.egov.waterconnection.model.SearchCriteria;
+import org.egov.waterconnection.model.WaterApplication;
+import org.egov.waterconnection.model.WaterConnection;
+import org.egov.waterconnection.model.WaterConnectionRequest;
 import org.egov.waterconnection.repository.BillGenerationDao;
 import org.egov.waterconnection.util.WaterServicesUtil;
+import org.egov.waterconnection.validator.ValidateProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class BillGenerationServiceImpl implements BillGenerationService {
@@ -32,8 +41,17 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 	private BillGenerationDao billRepository;
 
 	@Autowired
+	private ObjectMapper mapper;
+	
+	@Autowired
 	private WaterServicesUtil waterServicesUtil;
 
+	@Autowired
+	private WaterServiceImpl waterServiceImpl;
+
+	@Autowired
+	private ValidateProperty validateProperty;
+	
 	@Override
 	public List<BillGeneration> saveBillingData(BillGenerationRequest billGenerationRequest) {
 		DateFormat dateParser = new SimpleDateFormat("dd/MMM/yy");
@@ -84,7 +102,55 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 		}
 
 	}
+	
+	@Override
+	public List<BillGenerationFile> getDataExchangeFile(BillGenerationRequest billGenerationRequest) {
+		PrintWriter writer;
+		SearchCriteria criteria = new SearchCriteria();
+		criteria.setAppFromDate(billGenerationRequest.getBillGeneration().getFromDate());
+		criteria.setAppToDate(billGenerationRequest.getBillGeneration().getToDate());
+		List<WaterConnection> connections = waterServiceImpl.getWaterConnectionsList(criteria,
+				billGenerationRequest.getRequestInfo());
+		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+		List<BillGenerationFile> billFileList = new ArrayList<BillGenerationFile>();
+		try {
+			
+			if (connections.isEmpty()) {
+				throw new CustomException("FILE_GENERATION_FAILED", "Data may not present");
+			}
 
+			writer = new PrintWriter(WCConstants.WS_CONNECTION_FILENAME, "UTF-8");
+			for (WaterConnection application : connections) {
+				WaterConnectionRequest waterConnectionRequest = WaterConnectionRequest.builder()
+						.requestInfo(billGenerationRequest.getRequestInfo()).waterConnection(application).build();
+				Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
+				HashMap<String, Object> addDetail = mapper
+						.convertValue(application.getAdditionalDetails(), HashMap.class);
+				for (WaterApplication applicationList : application.getWaterApplicationList()) {
+
+					writer.println(application.getDiv() + "," + application.getSubdiv() + "," + application.getCcCode()
+							+ "," + application.getLedgerGroup() + "," + application.getConnectionNo() + "," +applicationList.getApplicationNo()+","+applicationList.getActivityType()+","
+							+ property.getAddress().getLocality().getCode() + "," + application.getBillGroup() + ","
+							+ property.getAddress().getDoorNo() + "," + property.getAddress().getFloorNo() + ","
+							+ application.getConnectionHolders().get(0).getName() + ","
+							+ application.getWaterProperty().getUsageCategory() + "," +format.format(new Date(applicationList.getAuditDetails().getLastModifiedTime()))
+							+"," +application.getProposedPipeSize()+","+
+							application.getMeterRentCode()+","+application.getMeterId()+","+application.getMfrCode()+","+application.getMeterDigits()+","+"NA"+","+String.valueOf(addDetail.get(WCConstants.INITIAL_METER_READING_CONST))+","+application.getSanctionedCapacity()+",NA,NA,NA"+
+							","+applicationList.getActivityType());
+				}
+			}
+			writer.close();
+			BillGenerationFile billFile = billRepository.getFilesStoreUrl(WCConstants.WS_CONNECTION_FILENAME);
+
+			// billRepository.savefileHistory(billFile, bill);
+			billFileList.add(billFile);
+
+		} catch (Exception e) {
+			throw new CustomException("FILE_GENERATION_FAILED", e.getMessage());
+		}
+		return billFileList;
+	}
+	
 	@Override
 	public List<BillGenerationFile> generateBillFile(BillGenerationRequest billGenerationRequest) {
 		PrintWriter writer;
@@ -108,9 +174,9 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 			}
 
 			writer.close();
-			BillGenerationFile billFile = billRepository.getFilesStoreUrl();
+			BillGenerationFile billFile = billRepository.getFilesStoreUrl(WCConstants.WS_BILLING_FILENAME);
 
-			billRepository.savefileHistory(billFile, bill);
+		//	billRepository.savefileHistory(billFile, bill);
 			billFileList.add(billFile);
 
 		} catch (Exception e) {

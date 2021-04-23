@@ -14,6 +14,8 @@ public interface BillGenerationService {
 
 	public List<BillGenerationFile> generateBillFile(BillGenerationRequest billGenerationRequest);
 
+	public List<BillGenerationFile> getDataExchangeFile(BillGenerationRequest billGenerationRequest);
+	
 	public List<BillGenerationFile> getBillingFiles();
 
 	public List<BillGeneration> getBillData(BillGenerationRequest billGenerationRequest);

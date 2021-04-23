@@ -189,7 +189,7 @@ public class EnrichmentService {
 	 * @param sewerageConnectionrequest 
 	 */
 	public void postStatusEnrichment(SewerageConnectionRequest sewerageConnectionRequest) {
-		if (SWConstants.ACTIVATE_CONNECTION
+		if (SWConstants.ACTIVATE_SEWERAGE_CONNECTION_CONST
 				.equalsIgnoreCase(sewerageConnectionRequest.getSewerageConnection().getProcessInstance().getAction())) {
 			setConnectionNO(sewerageConnectionRequest);
 		}
