@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BillingSlab {
@@ -64,6 +65,7 @@ public class BillingSlab {
 	private List<Slab> slabs = new ArrayList<>();
 	private List<Charges> charges ;
 
+	@JsonProperty("MeterUpdateCharges")
 	private List<Charges> MeterUpdateCharges ;
 	public List<Charges> getMeterUpdateCharges() {
 		return MeterUpdateCharges;
