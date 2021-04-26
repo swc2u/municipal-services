@@ -1,5 +1,6 @@
 package org.egov.wscalculation.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import javax.validation.constraints.Size;
@@ -103,6 +104,33 @@ public class WaterConnection extends Connection {
 	
 	@JsonProperty("activityType")
 	private String activityType = null;
+	
+	@JsonProperty("proposedMeterId")
+	private String proposedMeterId = null;
+
+	@JsonProperty("proposedMeterInstallationDate")
+	private Long proposedMeterInstallationDate = null;
+	
+	@JsonProperty("proposedMeterCount")
+	private String proposedMeterCount = null;
+
+	@JsonProperty("proposedMeterRentCode")
+	private String proposedMeterRentCode = null;
+
+	@JsonProperty("proposedMfrCode")
+	private String proposedMfrCode = null;
+
+	@JsonProperty("proposedMeterDigits")
+	private String proposedMeterDigits = null;
+
+	@JsonProperty("proposedMeterUnit")
+	private String proposedMeterUnit = null;
+
+	@JsonProperty("proposedSanctionedCapacity")
+	private String proposedSanctionedCapacity = null;
+	
+	@JsonProperty("proposedInitialMeterReading")
+	private BigDecimal proposedInitialMeterReading = null;
 
 	public WaterConnection waterSource(String waterSource) {
 		this.waterSource = waterSource;
@@ -458,5 +486,77 @@ public class WaterConnection extends Connection {
 
 	public void setFerruleSize(String ferruleSize) {
 		this.ferruleSize = ferruleSize;
+	}
+
+	public String getProposedMeterId() {
+		return proposedMeterId;
+	}
+
+	public void setProposedMeterId(String proposedMeterId) {
+		this.proposedMeterId = proposedMeterId;
+	}
+
+	public Long getProposedMeterInstallationDate() {
+		return proposedMeterInstallationDate;
+	}
+
+	public void setProposedMeterInstallationDate(Long proposedMeterInstallationDate) {
+		this.proposedMeterInstallationDate = proposedMeterInstallationDate;
+	}
+
+	public String getProposedMeterCount() {
+		return proposedMeterCount;
+	}
+
+	public void setProposedMeterCount(String proposedMeterCount) {
+		this.proposedMeterCount = proposedMeterCount;
+	}
+
+	public String getProposedMeterRentCode() {
+		return proposedMeterRentCode;
+	}
+
+	public void setProposedMeterRentCode(String proposedMeterRentCode) {
+		this.proposedMeterRentCode = proposedMeterRentCode;
+	}
+
+	public String getProposedMfrCode() {
+		return proposedMfrCode;
+	}
+
+	public void setProposedMfrCode(String proposedMfrCode) {
+		this.proposedMfrCode = proposedMfrCode;
+	}
+
+	public String getProposedMeterDigits() {
+		return proposedMeterDigits;
+	}
+
+	public void setProposedMeterDigits(String proposedMeterDigits) {
+		this.proposedMeterDigits = proposedMeterDigits;
+	}
+
+	public String getProposedMeterUnit() {
+		return proposedMeterUnit;
+	}
+
+	public void setProposedMeterUnit(String proposedMeterUnit) {
+		this.proposedMeterUnit = proposedMeterUnit;
+	}
+
+	public String getProposedSanctionedCapacity() {
+		return proposedSanctionedCapacity;
+	}
+
+	public void setProposedSanctionedCapacity(String proposedSanctionedCapacity) {
+		this.proposedSanctionedCapacity = proposedSanctionedCapacity;
+	}
+
+	public BigDecimal getProposedInitialMeterReading() {
+		return proposedInitialMeterReading;
+	}
+
+	public void setProposedInitialMeterReading(BigDecimal proposedInitialMeterReading) {
+		this.proposedInitialMeterReading = proposedInitialMeterReading;
 	}
 }

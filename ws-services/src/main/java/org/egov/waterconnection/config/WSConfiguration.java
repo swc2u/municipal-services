@@ -182,6 +182,9 @@ public class WSConfiguration {
 	@Value("${egov.user.update.path}")
 	private String userUpdateEndPoint;
 
+	@Value("${create.ws.updatemeterinfo.workflow.name}")
+	private String businessServiceupdateMeterValue;
+	
 	@Value("${create.ws.disconnection.workflow.name}")
 	private String businessServiceDisconnectionValue;
 

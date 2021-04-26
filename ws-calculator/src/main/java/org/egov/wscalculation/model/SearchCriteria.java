@@ -57,6 +57,12 @@ public class SearchCriteria {
 	@JsonProperty("toDate")
 	private Long toDate = null;
 
+	@JsonProperty("appFromDate")
+	private Long appFromDate = null;
+
+	@JsonProperty("appToDate")
+	private Long appToDate = null;
+
 	@JsonProperty("offset")
 	private Integer offset;
 

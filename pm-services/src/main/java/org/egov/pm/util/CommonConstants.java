@@ -93,4 +93,7 @@ public class CommonConstants {
 	public static final String FAIL = "Fail";
 	public static final String SUCCESSFUL = "successful";
 	public static final String UNABLETOPROCESSREQUEST = "Unable to Process request : ";
+	public static final String APPLICANTNAMEFROMDB = "applicantname";
+	public static final String APPLICANTNAMETEMPLATE = "Applicant";
+
 }
