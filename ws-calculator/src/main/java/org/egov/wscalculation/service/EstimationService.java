@@ -384,7 +384,8 @@ public class EstimationService {
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_TEMPORARY_DISCONNECTION)
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_REACTIVATE)
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_CHANGE_OWNER_INFO)
-				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_CONVERSION)) {
+				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_CONVERSION)
+				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)) {
 			taxHeadEstimates = getTaxHeadForwaterActivity(criteria, masterData, requestInfo);
 		} else {
 			if (criteria.getWaterConnection().getWaterApplicationType()
@@ -405,6 +406,51 @@ public class EstimationService {
 			Map<String, Object> masterData, RequestInfo requestInfo) {
 		List<TaxHeadEstimate> estimates = new ArrayList<>();
 
+		if(criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)) {
+
+			JSONArray regularSlab = (JSONArray) masterData.getOrDefault(WSCalculationConstant.WS_REGULAR_CHARGES, null);
+			JSONObject masterSlab = new JSONObject();
+
+			if (regularSlab != null) {
+				masterSlab.put("PipeSize", regularSlab);
+				JSONArray filteredMasters = JsonPath.read(masterSlab,
+						"$.PipeSize[?(@.size=='" + criteria.getWaterConnection().getProposedPipeSize() + "')]");
+				JSONObject chargesSlab = new JSONObject();
+
+				chargesSlab.put("Charges", filteredMasters.get(0));
+				ObjectMapper mapper = new ObjectMapper();
+				List<BillingSlab> mappingBillingSlab;
+				try {
+					mappingBillingSlab = mapper.readValue(filteredMasters.toJSONString(),
+							mapper.getTypeFactory().constructCollectionType(List.class, BillingSlab.class));
+				} catch (IOException e) {
+					throw new CustomException("Parsing Exception", " Billing Slab can not be parsed!");
+				}
+ 
+				BigDecimal meterTestingFee = BigDecimal.ZERO;
+				BigDecimal meterFittingFee = BigDecimal.ZERO;
+
+				if (mappingBillingSlab != null) {
+
+					 
+					meterTestingFee = new BigDecimal(mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getMetertesting());
+
+					meterFittingFee = new BigDecimal(mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getMeterfitting());
+
+				}
+
+				 
+				if (!(meterTestingFee.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_METER_TESTING_CHARGE)
+							.estimateAmount(meterTestingFee.setScale(2, 2)).build());
+				if (!(meterFittingFee.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_METER_CHARGE)
+							.estimateAmount(meterFittingFee.setScale(2, 2)).build());
+
+			}
+			addAdhocPenalityAndRebate(estimates, criteria.getWaterConnection());
+			return estimates;
+		}else {
 		JSONArray regularSlab = (JSONArray) masterData.getOrDefault(WSCalculationConstant.WS_WATER_ACTIVITY, null);
 		JSONObject masterSlab = new JSONObject();
 
@@ -453,6 +499,7 @@ public class EstimationService {
 		}
 
 		return estimates;
+		}
 	}
 
 	private List<TaxHeadEstimate> getTaxHeadForFeeEstimationForTempAppCon(CalculationCriteria criteria,

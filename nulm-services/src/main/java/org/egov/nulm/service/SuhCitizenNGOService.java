@@ -49,7 +49,7 @@ public class SuhCitizenNGOService {
 			suhapplication.setAuditDetails(
 					auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_CREATE));
 
-			if (suhapplication.getDob().isEmpty())
+			if (suhapplication.getDob()!=null && suhapplication.getDob().isEmpty())
 				suhapplication.setDob(null);
 
 			repository.createSuhApplication(suhapplication);
@@ -70,7 +70,7 @@ public class SuhCitizenNGOService {
 			suhapplication.setAuditDetails(
 					auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_UPDATE));
 
-			if (suhapplication.getDob().isEmpty())
+			if (suhapplication.getDob()!=null && suhapplication.getDob().isEmpty())
 				suhapplication.setDob(null);
 
 			repository.updateSuhApplication(suhapplication);

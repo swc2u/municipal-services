@@ -60,6 +60,12 @@ public class SearchCriteria {
 	@JsonProperty("toDate")
 	private Long toDate = null;
 
+	@JsonProperty("appFromDate")
+	private Long appFromDate = null;
+
+	@JsonProperty("appToDate")
+	private Long appToDate = null;
+
 	@JsonProperty("offset")
 	private Integer offset;
 
@@ -80,7 +86,8 @@ public class SearchCriteria {
 				&& StringUtils.isEmpty(this.propertyId) && CollectionUtils.isEmpty(this.ids)
 				&& StringUtils.isEmpty(this.oldConnectionNumber) && StringUtils.isEmpty(this.connectionNumber)
 				&& StringUtils.isEmpty(this.status) && StringUtils.isEmpty(this.applicationNumber)
-				&& StringUtils.isEmpty(this.applicationStatus) && StringUtils.isEmpty(this.fromDate)
+				&& StringUtils.isEmpty(this.applicationStatus) && StringUtils.isEmpty(this.appFromDate)
+				&& StringUtils.isEmpty(this.appToDate) && StringUtils.isEmpty(this.fromDate)
 				&& StringUtils.isEmpty(this.toDate)) && StringUtils.isEmpty(this.applicationType);
 	}
 

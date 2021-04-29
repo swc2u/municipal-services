@@ -3,6 +3,9 @@ package org.egov.waterconnection.constants;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class WCConstants {
 
@@ -276,6 +279,8 @@ public class WCConstants {
 	
 	public static final String WS_NEW_TUBEWELL_CONNECTION = "NEW_TUBEWELL_CONNECTION";
 
+	public static final String WS_UPDATE_METER_INFO = "UPDATE_METER_INFO";
+	
 	public static final String STATUS_PENDING_FOR_REGULAR = "PENDING_FOR_REGULAR_CONNECTION";
 	
 	public static final String WS_ACTION_REACTIVATION = "APPLY_CONNECTION_REACTIVATION";
@@ -284,6 +289,8 @@ public class WCConstants {
 
 	public static final String WS_BILLING_FILENAME = "billingData.txt";
 
+	public static final String WS_CONNECTION_FILENAME = "connectionData.csv";
+	
 	public static final String WS_APPLY_FOR_TEMPORARY_CON = "APPLY_FOR_TEMPORARY_CONNECTION";
 
 	public static final String WS_APPLY_FOR_TEMP_TEMP_CON = "APPLY_FOR_TEMPORARY_TEMPORARY_CONNECTION";
@@ -291,4 +298,6 @@ public class WCConstants {
 	public static final String WS_APPLY_FOR_TEMP_REGULAR_CON = "APPLY_FOR_TEMPORARY_REGULAR_CONNECTION";
 
 	public static final String ACTION_VERIFY_AND_FORWARD_PAYMENT = "VERIFY_AND_FORWARD_FOR_PAYMENT";
+
+	public static final Set<String> APPROVED_ACTIONS =  Stream.of("TUBEWELL_CONNECTION_ACTIVATED", "CONNECTION_TARIFF_CHANGED","CONNECTION_REACTIVATED","CONNECTION_UPDATED","TEMPORARY_CONNECTION_CLOSED","CONNECTION_CLOSED","CONNECTION_EXTENDED","CONNECTION_TYPE_CHANGED","CONNECTION_ACTIVATED").collect(Collectors.toSet());
 }

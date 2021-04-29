@@ -118,7 +118,7 @@ public class SusvService {
 
 			}
 
-			if (susvApplication.getDob().isEmpty())
+			if (susvApplication.getDob()!=null &&  susvApplication.getDob().isEmpty())
 				susvApplication.setDob(null);
 
 			repository.createSusvApplication(susvApplication);
@@ -229,7 +229,7 @@ public class SusvService {
 
 			}
 
-			if (susvApplication.getDob().isEmpty())
+			if (susvApplication.getDob()!=null && susvApplication.getDob().isEmpty())
 				susvApplication.setDob(null);
 
 			repository.updateSusvApplication(susvApplication);

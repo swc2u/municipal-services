@@ -85,7 +85,7 @@ public class SepService {
 				sepdoc.add(documnet);
 
 			}
-			if (sepapplication.getDob().isEmpty())
+			if (sepapplication.getDob()!=null && sepapplication.getDob().isEmpty())
 				sepapplication.setDob(null);
 
 			sepapplication.setApplicationDocument(sepdoc);
@@ -168,7 +168,7 @@ public class SepService {
 			}
 			sepapplication.setApplicationDocument(sepdoc);
 			
-			if (sepapplication.getDob().isEmpty())
+			if (sepapplication.getDob()!=null && sepapplication.getDob().isEmpty())
 				sepapplication.setDob(null);
 
 			repository.updateSEPApplication(sepapplication);
