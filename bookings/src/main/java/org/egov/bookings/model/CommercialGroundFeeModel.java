@@ -57,4 +57,7 @@ public class CommercialGroundFeeModel {
 	/** The to date. */
 	@Column(name = "TO_DATE")
 	private Date toDate;
+	
+	@Column(name = "RefundabelSecurity")
+	private String refundabelSecurity;
 }

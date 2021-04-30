@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.egov.bookings.contract.TaxHeadMasterFields;
+import org.egov.bookings.model.CommercialGroundFeeModel;
 import org.egov.bookings.models.demand.Demand;
 import org.egov.bookings.models.demand.TaxHeadEstimate;
 import org.egov.bookings.web.models.BookingsRequest;
@@ -76,7 +77,7 @@ public interface BookingsCalculatorService {
 	 * @param bookingsRequest the bookings request
 	 * @return the commercial amount
 	 */
-	public BigDecimal getCommercialAmount(BookingsRequest bookingsRequest);
+	public CommercialGroundFeeModel getCommercialAmount(BookingsRequest bookingsRequest);
 
 	
 	/**

@@ -218,7 +218,9 @@ public class BookingsCalculatorServiceImpl implements BookingsCalculatorService 
 			}
 			break;
 		case BookingsConstants.BUSINESS_SERVICE_GFCP:
-			BigDecimal commercialAmount = getCommercialAmount(bookingsRequest);
+			CommercialGroundFeeModel commercialGroundFeeModel = getCommercialAmount(bookingsRequest);
+			BigDecimal commercialDays = enrichmentService.extractDaysBetweenTwoDates(bookingsRequest);
+			BigDecimal commercialAmount = commercialDays.multiply(BigDecimal.valueOf(commercialGroundFeeModel.getRatePerDay()));
 			for (TaxHeadMasterFields taxHeadEstimate : taxHeadMasterFieldList) {
 				if (taxHeadEstimate.getCode().equals(taxHeadCode1)) {
 					taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(), commercialAmount,
@@ -231,7 +233,7 @@ public class BookingsCalculatorServiceImpl implements BookingsCalculatorService 
 							taxHeadEstimate.getCategory()));
 				}
 				if (taxHeadEstimate.getCode().equals(taxHeadCode3)) {
-					taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(), BigDecimal.ZERO,
+					taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(), BigDecimal.valueOf(Long.valueOf(commercialGroundFeeModel.getRefundabelSecurity())),
 							taxHeadEstimate.getCategory()));
 				}
 				if (taxHeadEstimate.getCode().equals(taxHeadCode4)) {
@@ -446,9 +448,9 @@ public class BookingsCalculatorServiceImpl implements BookingsCalculatorService 
 	 * @param bookingsRequest the bookings request
 	 * @return the commercial amount
 	 */
-	public BigDecimal getCommercialAmount(BookingsRequest bookingsRequest) {
+	public CommercialGroundFeeModel getCommercialAmount(BookingsRequest bookingsRequest) {
 		CommercialGroundFeeModel commercialGroundFeeModel = null;
-		BigDecimal finalAmount = null;
+		//BigDecimal finalAmount = null;
 		try {
 			String category = bookingsRequest.getBookingsModel().getBkCategory();
 			String bookingVenue = bookingsRequest.getBookingsModel().getBkBookingVenue();
@@ -459,13 +461,10 @@ public class BookingsCalculatorServiceImpl implements BookingsCalculatorService 
 			if(BookingsFieldsValidator.isNullOrEmpty(commercialGroundFeeModel)) {
 				throw new CustomException("DATA_NOT_FOUND","There is not any amount for this commercial ground criteria in database");
 			}
-			BigDecimal days = enrichmentService.extractDaysBetweenTwoDates(bookingsRequest);
-			 finalAmount = days.multiply(BigDecimal.valueOf(commercialGroundFeeModel.getRatePerDay())); 
-			
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e.getLocalizedMessage());
 		}
-		return finalAmount;
+		return commercialGroundFeeModel;
 	}
 	
 	

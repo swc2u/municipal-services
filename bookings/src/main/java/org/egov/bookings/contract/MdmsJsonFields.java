@@ -119,6 +119,7 @@ public class MdmsJsonFields implements Serializable
 	public void setActive(boolean active) {
 		this.active = active;
 	}
+
 	
 	/**
 	 * Gets the modified name.
