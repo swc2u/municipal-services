@@ -164,6 +164,8 @@ public class SWConstants {
 	
 	public static final String ACTIVATE_CONNECTION_CONST = "ACTIVATE_CONNECTION";
 	
+	public static final String ACTIVATE_SEWERAGE_CONNECTION_CONST = "ACTIVATE_SEWERAGE_CONNECTION";
+	
 	public static final String SERVICE_FIELD_VALUE_NOTIFICATION = "Sewerage";
 
 	public static final List<String> FIELDS_TO_CHECK = Collections

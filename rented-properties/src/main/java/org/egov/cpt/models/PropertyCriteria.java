@@ -1,5 +1,6 @@
 package org.egov.cpt.models;
 
+import java.util.Arrays;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -40,7 +41,7 @@ public class PropertyCriteria {
 	private List<String> relations;
 
 	@Builder.Default
-	private String createdBy = "";
+	private List<String> createdBy=Arrays.asList("");
 
 	public boolean isEmpty() {
 		return (this.transitNumber == null && this.colony == null && this.phone == null && this.name == null

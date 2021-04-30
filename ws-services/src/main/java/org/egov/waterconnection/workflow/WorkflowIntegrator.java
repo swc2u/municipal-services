@@ -161,6 +161,8 @@ public class WorkflowIntegrator {
 				return config.getBusinessServiceConversionValue();
 			case WCConstants.WS_NEW_TUBEWELL_CONNECTION:
 				return config.getBusinessServiceTubewellValue();
+			case WCConstants.WS_UPDATE_METER_INFO:
+				return config.getBusinessServiceupdateMeterValue();
 		}
 		return "";
 	}
