@@ -161,11 +161,11 @@
          "validateRegularExp":"^[a-zA-Z0-9-\/,()_'&.\" ]*$"
       },
       "ward":{
-         "mandatory":"true",
+         "mandatory":"false",
          "validateRegularExp":"^[a-zA-Z0-9-\/,()_'&.\" ]*$"
       },
       "division":{
-         "mandatory":"true",
+         "mandatory":"false",
          "validateRegularExp":"^[a-zA-Z0-9-\/,()_'&.\" ]*$"
       },
       "nocSought":{
@@ -173,6 +173,10 @@
          "validateRegularExp":"^[a-zA-Z0-9-_\/,() ]*$"
       },
       "uploadDocuments":{
+         "mandatory":"true",
+         "validateRegularExp":"\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+      },
+      "idProof":{
          "mandatory":"true",
          "validateRegularExp":"\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
       },
