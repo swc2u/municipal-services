@@ -40,5 +40,4 @@ public class PayslipClient extends WebServiceGatewaySupport {
 				.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
 				.responseBody(xmlJSONObj.toMap()).build(), HttpStatus.OK);
     }
-	
 }
