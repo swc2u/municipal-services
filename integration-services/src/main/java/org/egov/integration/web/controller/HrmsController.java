@@ -100,5 +100,4 @@ public class HrmsController {
 	public ResponseEntity<ResponseInfoWrapper> getEmployeeJoiningDetails(@Valid @RequestBody HrmsRequestInfoWrapper request) {
 		return service.getEmployeeJoiningDetails(request);
 	}
-
 }
