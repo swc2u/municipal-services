@@ -7,6 +7,7 @@ import org.egov.integration.config.ApiConfiguration;
 import org.egov.integration.model.HrmsRequestInfoWrapper;
 import org.egov.integration.model.ResponseInfoWrapper;
 import org.egov.integration.util.AES128Bit;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class PayslipClient extends WebServiceGatewaySupport {
 	@Autowired
 	private ApiConfiguration config;
 
-	public ResponseEntity<ResponseInfoWrapper> fetchPayslip(HrmsRequestInfoWrapper request){
+	public ResponseEntity<ResponseInfoWrapper> fetchPayslip(HrmsRequestInfoWrapper request) throws JSONException{
 
 		String empCode = AES128Bit.doEncryptedAES(request.getHrmsRequest().getEmpCode(), config.getEncrptionKey());
 
@@ -35,10 +36,10 @@ public class PayslipClient extends WebServiceGatewaySupport {
         Payslip payslip = new Payslip();
         PayslipSoap payslipsoap =  payslip.getPayslipSoap();
         String response  = payslipsoap.getPaySlip(empCode, month, year);
-        JSONObject xmlJSONObj = XML.toJSONObject(AES128Bit.doDecryptedAES(response, config.getEncrptionKey()));
+        JSONObject xmlJSONObj = XML.toJSONObject(AES128Bit.doDecryptedAES(response, "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"));
         return new ResponseEntity<>(ResponseInfoWrapper.builder()
 				.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-				.responseBody(xmlJSONObj.toMap()).build(), HttpStatus.OK);
+				.responseBody(xmlJSONObj).build(), HttpStatus.OK);
     }
 	
 }

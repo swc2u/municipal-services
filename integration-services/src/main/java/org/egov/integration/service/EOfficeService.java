@@ -203,10 +203,10 @@ public class EOfficeService {
 				+ builder.toUriString().toString());
 
 	
-		 ResponseEntity<String> xml = restTemplate.exchange((new
+		/* ResponseEntity<String> xml = restTemplate.exchange((new
 		  StringBuilder(builder.toUriString())).toString(),HttpMethod.GET, entity,
-		  String.class);
-		 
+		  String.class);*/
+		 ResponseEntity<String> xml = new ResponseEntity<String>("<DETAIL><EMP_DETAIL><appellation>Mrs.</appellation><fullnameEn>HARSHARAN KAUR</fullnameEn><fullnameHi></fullnameHi><dateOfBirth>01-11-1974</dateOfBirth><employeeCode>11783</employeeCode><globalOrgName>MUNICIPAL CORPORATION</globalOrgName><govtServiceJoiningDate></govtServiceJoiningDate><orgJoiningDate></orgJoiningDate><superannuationDate>31-10-2034</superannuationDate><designationId>12</designationId><designationCode>13</designationCode><designationName>JUNIOR ASSISTANT</designationName><designationNameHi></designationNameHi><workStatus></workStatus><emdStatus>true</emdStatus><email>harsharan.k111@chd.nic.in</email><mobile></mobile><employeeId>1494</employeeId><emdUserId>1490</emdUserId><post><postCount>1</postCount><postDetail><postDetailId>1887</postDetailId><post>JUNIOR ASSISTANT</post><markingAbbr>JA(HK)-PH DIV 2</markingAbbr><isPrimary>true</isPrimary><isOuHead>false</isOuHead><orgUnitId>424</orgUnitId><orgUnitName>PUBLIC HEALTH DIV 2</orgUnitName><orgUnitCode>MCC-PH DIV 2</orgUnitCode><ouGlobalOrgName>MUNICIPAL CORPORATION</ouGlobalOrgName><empGlobalOrgName>MUNICIPAL CORPORATION</empGlobalOrgName><departmentId>37</departmentId><sectionId>424</sectionId><parentPostDetailId>1767</parentPostDetailId><repEmployeeId>1373</repEmployeeId><repEmployeeCode>1981010012S</repEmployeeCode><repPost>EXECUTIVE ENGINEER</repPost><repMarkingAbbr>EE PH 2(SKG)-PUBLIC HEALTH DIV 2</repMarkingAbbr><repOrgUnitId>424</repOrgUnitId><repOrgUnitCode>MCC-PH DIV 2</repOrgUnitCode><repSectionId>424</repSectionId></postDetail></post></EMP_DETAIL></DETAIL>", HttpStatus.CREATED);
 			
 		 log. info("integration-services logs :: process() :: after calling eOffice APi-response,{}",xml );
 		 

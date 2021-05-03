@@ -7,6 +7,7 @@ import org.egov.integration.model.ResponseInfoWrapper;
 import org.egov.integration.model.RtiRequestInfoWrapper;
 import org.egov.integration.service.HrmsService;
 import org.egov.integration.service.PayslipClient;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,9 +64,10 @@ public class HrmsController {
 	 * 
 	 * @param requestInfoWrapper
 	 * @return ResponseInfoWrapper
+	 * @throws JSONException 
 	 */
 	@PostMapping(value = "/_getpayslip")
-	public ResponseEntity<ResponseInfoWrapper> getpayslip(@Valid @RequestBody HrmsRequestInfoWrapper request) {
+	public ResponseEntity<ResponseInfoWrapper> getpayslip(@Valid @RequestBody HrmsRequestInfoWrapper request) throws JSONException {
 		return client.fetchPayslip(request);
 	}
 	
