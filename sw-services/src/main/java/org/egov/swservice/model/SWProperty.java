@@ -17,6 +17,11 @@ public class SWProperty {
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
 
+	@JsonProperty("plotNo")
+	private String plotNo = null;
+
+	@JsonProperty("sectorNo")
+	private String sectorNo = null;
 	@Override
 	public boolean equals(java.lang.Object o) {
 		if (this == o) {
@@ -88,5 +93,21 @@ public class SWProperty {
 
 	public void setAuditDetails(AuditDetails auditDetails) {
 		this.auditDetails = auditDetails;
+	}
+
+	public String getPlotNo() {
+		return plotNo;
+	}
+
+	public void setPlotNo(String plotNo) {
+		this.plotNo = plotNo;
+	}
+
+	public String getSectorNo() {
+		return sectorNo;
+	}
+
+	public void setSectorNo(String sectorNo) {
+		this.sectorNo = sectorNo;
 	}
 }

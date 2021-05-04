@@ -27,8 +27,9 @@ public class fireRepository {
 	@Autowired
 	private FireConfiguration config;
 
-	public void saveFireData(FireNoc data) {
-		FireRequest infoWrapper = FireRequest.builder().fireNocRequest(data).build();
+	public void saveFireData(FireNoc fire) {
+	
+		FireRequest infoWrapper = FireRequest.builder().fireNocRequest(fire).build();
 		producer.push(config.getFireDataSaveTopic(), infoWrapper);
 	}
 
@@ -40,7 +41,7 @@ public class fireRepository {
 	}
 
 	public void saveFireExecutionDetailsData(FireNoc data) {
-        data.setData("");
+       
 		FireRequest infoWrapper = FireRequest.builder().fireNocRequest(data).build();
 		producer.push(config.getFireExecutionDataSaveTopic(), infoWrapper);
 
