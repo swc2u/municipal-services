@@ -66,6 +66,15 @@ public class SearchCriteria {
 	@JsonProperty("limit")
 	private Integer limit;
 
+	@JsonProperty("plotNo")
+	private String plotNo;
+	
+	@JsonProperty("sectorNo")
+	private String sectorNo;
+	
+	@JsonProperty("groupNo")
+	private String groupNo;
+
 	@JsonIgnore
 	private List<String> ownerIds;
 
@@ -74,6 +83,8 @@ public class SearchCriteria {
 				&& StringUtils.isEmpty(this.propertyId) && CollectionUtils.isEmpty(this.ids)
 				&& StringUtils.isEmpty(this.oldConnectionNumber) && StringUtils.isEmpty(this.connectionNumber)
 				&& StringUtils.isEmpty(this.status) && StringUtils.isEmpty(this.applicationNumber)
+				 && StringUtils.isEmpty(this.plotNo)
+				 && StringUtils.isEmpty(this.sectorNo) && StringUtils.isEmpty(this.groupNo)
 				&& StringUtils.isEmpty(this.applicationStatus) && StringUtils.isEmpty(this.fromDate)
 				&& StringUtils.isEmpty(this.toDate));
 	}

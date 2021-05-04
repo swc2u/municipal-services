@@ -18,6 +18,12 @@ public class WaterProperty {
 	@JsonProperty("usageSubCategory")
 	private String usageSubCategory = null;
 
+	@JsonProperty("plotNo")
+	private String plotNo = null;
+
+	@JsonProperty("sectorNo")
+	private String sectorNo = null;
+	
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
 
@@ -92,6 +98,22 @@ public class WaterProperty {
 
 	public void setAuditDetails(AuditDetails auditDetails) {
 		this.auditDetails = auditDetails;
+	}
+
+	public String getPlotNo() {
+		return plotNo;
+	}
+
+	public void setPlotNo(String plotNo) {
+		this.plotNo = plotNo;
+	}
+
+	public String getSectorNo() {
+		return sectorNo;
+	}
+
+	public void setSectorNo(String sectorNo) {
+		this.sectorNo = sectorNo;
 	}
 
 }
