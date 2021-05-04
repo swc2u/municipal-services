@@ -96,6 +96,10 @@ public class SewerageRowMapper implements ResultSetExtractor<List<SewerageConnec
 					property.setId(rs.getString("seweragepropertyid"));
 					property.setUsageCategory(rs.getString("usagecategory"));
 					property.setUsageSubCategory(rs.getString("usagesubcategory"));
+
+					property.setPlotNo(rs.getString("propertyplotno"));
+
+					property.setSectorNo(rs.getString("propertysectorno"));
 					property.setAuditDetails(auditdetails);
 					sewarageConnection.setSwProperty(property);
 				}

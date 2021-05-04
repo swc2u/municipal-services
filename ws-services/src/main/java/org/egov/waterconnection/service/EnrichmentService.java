@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -266,18 +267,10 @@ public class EnrichmentService {
 		
 		WaterConnection connection = request.getWaterConnection();
 		String connectionId = connection.getDiv().concat(connection.getSubdiv()).concat(property.getAddress().getLocality().getCode()).concat(connection.getLedgerNo()).concat(property.getAddress().getDoorNo()).concat(property.getAddress().getFloorNo()).concat("0");
-		int n = 0;
-		int sum = 0;
-		char ch;
-		for(int i=0; i<connectionId.length(); i++) {
-	         ch = connectionId.charAt(i);
-	         if(Character.isDigit(ch)) {
-	             n = Character.getNumericValue(ch);
-	             sum += n;
-	          }
-	         }
 		
-		request.getWaterConnection().setConnectionNo(connectionId.concat(((char)(sum%26 + 'A'))+""));
+		Random r = new Random();
+		char c = (char)(r.nextInt(26) + 'A');
+		request.getWaterConnection().setConnectionNo(connectionId.concat((c)+""));
 	}
 	/**
 	 * Enrich fileStoreIds
