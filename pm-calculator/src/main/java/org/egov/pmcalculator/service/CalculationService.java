@@ -170,7 +170,19 @@ public class CalculationService {
 				taxHeadEstimates.add(taxHeadEstimate);
 			}
 		}
-
+		else if (calulationCriteria.getOpmsDetail().getApplicationType().equals("SELLMEATNOC")) {
+			BigDecimal amount = getNocFee(calulationCriteria.getOpmsDetail());
+			estimate.setTaxHeadCode(config.getBaseSellMeatFeeHead());
+			estimate.setEstimateAmount(amount.setScale(0, BigDecimal.ROUND_UP));
+			/*for (TaxHeadEstimate taxHeadEstimate : tax) {
+				BigDecimal taxValue = taxHeadEstimate.getEstimateAmount();
+				taxValue = taxValue.compareTo(BigDecimal.ZERO) < -1 ? BigDecimal.valueOf(1) : taxValue;
+				taxHeadEstimate.setCategory(Category.CHARGES);
+				taxHeadEstimate.setEstimateAmount(taxValue.setScale(0, BigDecimal.ROUND_UP));
+				taxHeadEstimates.add(taxHeadEstimate);
+			}*/
+			
+		}
 		taxHeadEstimates.add(estimate);
 		estimatesAndSlabs.setEstimates(taxHeadEstimates);
 
@@ -201,7 +213,10 @@ public class CalculationService {
 			estimate.setTaxHeadCode(config.getBasePetTaxHead());
 			estimate.setEstimateAmount(totalTax);
 		}
-
+		/* else if (calulationCriteria.getOpmsDetail().getApplicationType().equals("SELLMEATNOC")) {
+				estimate.setTaxHeadCode(config.getBaseSellMeatTaxHead());
+				estimate.setEstimateAmount(totalTax);
+			}*/
 		estimate.setCategory(Category.TAX);
 
 		estimatesAndSlabs.setEstimates(Collections.singletonList(estimate));
@@ -371,6 +386,18 @@ public class CalculationService {
 					"", dateString, "false", pMDetail.getTenantId());
 
 			log.info("pm-calculator logs :: PETNOC NOC Fee Details : {}", calData);
+
+			if (!calData.isEmpty() && calData.size() == 1) {
+				results = new BigDecimal(calData.get(0).get("fixed_price").toString());
+			}
+		} else if (pMDetail.getApplicationType().equals("SELLMEATNOC")) {
+			LocalDate date = LocalDate.now();
+			String dateString = date.getYear() + "-" + date.getMonthValue() + "-" + date.getDayOfMonth();
+
+			SortedMap<Integer, JSONObject> calData = calculationRepository.getPriceList(pMDetail.getApplicationType(),
+					"", dateString, "false", pMDetail.getTenantId());
+
+			log.info("pm-calculator logs :: SELLMEATNOC NOC Fee Details : {}", calData);
 
 			if (!calData.isEmpty() && calData.size() == 1) {
 				results = new BigDecimal(calData.get(0).get("fixed_price").toString());
