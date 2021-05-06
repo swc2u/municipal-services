@@ -86,7 +86,7 @@ public class OwnerInfo extends User {
 		this.setUserName(user.getUserName());
 		this.setPassword(user.getPassword());
 		this.setSalutation(user.getSalutation());
-		this.setName(user.getName());
+	//	this.setName(user.getName());
 		this.setGender(user.getGender());
 		this.setMobileNumber(user.getMobileNumber());
 		this.setEmailId(user.getEmailId());
@@ -96,7 +96,7 @@ public class OwnerInfo extends User {
 		this.setPermanentAddress(user.getPermanentAddress());
 		this.setPermanentCity(user.getPermanentCity());
 		this.setPermanentPincode(user.getPermanentPincode());
-		this.setCorrespondenceAddress(user.getCorrespondenceAddress());
+		//this.setCorrespondenceAddress(user.getCorrespondenceAddress());
 		this.setCorrespondenceCity(user.getCorrespondenceCity());
 		this.setCorrespondencePincode(user.getCorrespondencePincode());
 		this.setActive(user.getActive());
@@ -133,7 +133,7 @@ public class OwnerInfo extends User {
 		mobileNumber = mobileNumber2;
 		gender = gender2;
 		fatherOrHusbandName = fatherOrHusbandName2;
-		correspondenceAddress = correspondenceAddress2;
+		this.correspondenceAddress = correspondenceAddress;
 		this.isPrimaryOwner = isPrimaryOwner;
 		this.ownerShipPercentage = ownerShipPercentage;
 		this.ownerType = ownerType;
