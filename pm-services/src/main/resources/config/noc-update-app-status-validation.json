@@ -1485,7 +1485,7 @@
 	},
 	
 	"SELLMEATNOC": {
-		"SISM-INITIATED": {
+		"SISM-PAID": {
 			"REVIEWOFSUPERINTENDENT": {
 				"remarks": {
 					"fieldName": "remarks",
@@ -1648,9 +1648,24 @@
 				}
 			}
 		},
+		
 		"CITIZEN-DRAFT": {
 			"INITIATED": {
 				
+			}
+		},
+			"CITIZEN-INITIATED": {
+			"PAID": {
+				"amount": {
+					"fieldName": "amount",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9 ]+$"
+				},
+				"gstAmount": {
+					"fieldName": "gstAmount",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9 ]+$"
+				}
 			}
 		},
 		"CITIZEN-REASSIGN": {

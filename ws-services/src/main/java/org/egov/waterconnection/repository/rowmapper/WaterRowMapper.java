@@ -80,6 +80,17 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
                 currentWaterConnection.setMeterDigits(rs.getString("meterDigits"));
                 currentWaterConnection.setMeterUnit(rs.getString("meterUnit"));
                 currentWaterConnection.setSanctionedCapacity(rs.getString("sanctionedCapacity"));
+
+                currentWaterConnection.setProposedInitialMeterReading(rs.getBigDecimal("proposed_initialmeterreading"));
+				currentWaterConnection.setProposedMeterInstallationDate(rs.getLong("proposed_meterinstallationdate"));
+
+                currentWaterConnection.setProposedMeterId(rs.getString("proposed_meterid"));
+                currentWaterConnection.setProposedMeterCount(rs.getString("proposed_metercount"));
+                currentWaterConnection.setProposedMeterRentCode(rs.getString("proposed_meterrentcode"));
+                currentWaterConnection.setProposedMfrCode(rs.getString("proposed_mfrcode"));
+                currentWaterConnection.setProposedMeterDigits(rs.getString("proposed_meterdigits"));
+                currentWaterConnection.setProposedMeterUnit(rs.getString("proposed_meterunit"));
+                currentWaterConnection.setProposedSanctionedCapacity(rs.getString("proposed_sanctionedcapacity"));
                 
 				HashMap<String, Object> additionalDetails = new HashMap<>();
 				additionalDetails.put(WCConstants.ADHOC_PENALTY, rs.getBigDecimal("adhocpenalty"));
@@ -134,6 +145,11 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 					property.setId(rs.getString("waterpropertyid"));
 					property.setUsageCategory(rs.getString("usagecategory"));
 					property.setUsageSubCategory(rs.getString("usagesubcategory"));
+
+					property.setPlotNo(rs.getString("propertyplotno"));
+
+					property.setSectorNo(rs.getString("propertysectorno"));
+					
 					currentWaterConnection.setWaterProperty(property);
 				}
 				 

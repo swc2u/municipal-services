@@ -11,7 +11,7 @@ public interface BillGenerationDao {
 
 	List<BillGeneration> getBillingEstimation();
 
-	BillGenerationFile getFilesStoreUrl();
+	BillGenerationFile getFilesStoreUrl(String wsBillingFilename);
 
 	void savefileHistory(BillGenerationFile billFile, List<BillGeneration> bill);
 

@@ -95,4 +95,15 @@ public class WaterController {
 
 	}
 
+	@RequestMapping(value = "/_deactivateConnection", method = RequestMethod.POST, produces = "application/json")
+	public ResponseEntity<WaterConnectionResponse> deactivateConnection(
+			@Valid @RequestBody WaterConnectionRequest waterConnectionRequest) {
+		List<WaterConnection> waterConnection = waterService.deactivateConnection(waterConnectionRequest);
+		WaterConnectionResponse response = WaterConnectionResponse.builder().waterConnection(waterConnection)
+				.responseInfo(responseInfoFactory
+						.createResponseInfoFromRequestInfo(waterConnectionRequest.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+
+	}
 }

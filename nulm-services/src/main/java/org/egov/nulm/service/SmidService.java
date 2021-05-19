@@ -68,7 +68,7 @@ public class SmidService {
 			else
 				throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR.toString(), CommonConstants.ID_GENERATION);
 
-			if (smidapplication.getDob().isEmpty())
+			if (smidapplication.getDob()!=null && smidapplication.getDob().isEmpty())
 				smidapplication.setDob(null);
 
 			repository.createSMIDApplication(smidapplication);
@@ -91,7 +91,7 @@ public class SmidService {
 			smidapplication.setIsActive(true);
 			smidapplication.setAuditDetails(
 					auditDetailsUtil.getAuditDetails(smidrequest.getRequestInfo(), CommonConstants.ACTION_UPDATE));
-			if (smidapplication.getDob().isEmpty())
+			if (smidapplication.getDob()!=null && smidapplication.getDob().isEmpty())
 				smidapplication.setDob(null);
 
 			repository.updateSMIDApplication(smidapplication);

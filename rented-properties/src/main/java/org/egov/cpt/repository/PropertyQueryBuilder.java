@@ -233,14 +233,14 @@ public class PropertyQueryBuilder {
 				builder.append("pt.master_data_state IN (:states)");
 				preparedStmtList.put("states", criteria.getState());
 				builder.append(" AND ");
-				builder.append("pt.created_by =:createdBy");
+				builder.append("pt.created_by IN (:createdBy)");
 				preparedStmtList.put("createdBy", criteria.getCreatedBy());
 			} else {
 				addClauseIfRequired(preparedStmtList, builder);
 				builder.append("pt.master_data_state IN (:states)");
 				preparedStmtList.put("states", criteria.getState());
 				builder.append(" OR ");
-				builder.append("pt.created_by =:createdBy");
+				builder.append("pt.created_by IN (:createdBy)");
 				preparedStmtList.put("createdBy", criteria.getCreatedBy());
 			}
 		}

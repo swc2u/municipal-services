@@ -12,11 +12,16 @@ import org.egov.pm.model.SMSRequest;
 import org.egov.pm.model.User;
 import org.egov.pm.producer.Producer;
 import org.egov.pm.repository.NocRepository;
+import org.egov.pm.repository.querybuilder.QueryBuilder;
+import org.egov.pm.repository.rowmapper.ColumnsNocRowMapper;
 import org.egov.pm.util.CommonConstants;
 import org.egov.pm.util.UserUtil;
 import org.egov.tracer.model.CustomException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +44,10 @@ public class EmailSmsNotificationListener {
 	private NocRepository nocRepository;
 	private UserUtil userUtil;
 	private Producer producer;
+	@Autowired
+	private ColumnsNocRowMapper columnsNocRowMapper;
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
 	@Autowired
 	public EmailSmsNotificationListener(ObjectMapper objectMapper, NocRepository nocRepository, UserUtil userUtil,
@@ -68,7 +77,10 @@ public class EmailSmsNotificationListener {
 
 					if (role.equals("CITIZEN")) {
 						enrichCitizenNotification(map, role, application, app1);
-					} else {
+					} else if(application.getAssignee()!=null && !application.getAssignee().isEmpty())  {
+						enrichEmployeeNotificationWithAssignee(map, role, application, app1);
+					}
+					else   {
 						enrichEmployeeNotification(map, role, application, app1);
 					}
 				}
@@ -113,6 +125,43 @@ public class EmailSmsNotificationListener {
 		}
 
 	}
+	private void enrichEmployeeNotificationWithAssignee(Map<String, EmailTemplateModel> map, String role,
+			NOCApplication application, NOCRequestData app1) throws IOException {
+		log.info("Users will be fetched for role {}", role);
+		JsonNode userResponse = userUtil.getUser(app1.getRequestInfo(), application.getAssignee());
+		log.info("Response {}", userResponse);
+
+		if (userResponse != null) {
+			for (JsonNode userInfo : userResponse.get("user")) {
+
+					User user = objectMapper.readValue(objectMapper.writeValueAsString(userInfo), User.class);
+					log.info("user found{}", user);
+					String queryString = map.get(role).getTemplate().replace(CommonConstants.EMAILAPPID,
+							application.getNocNumber());
+					log.info("queryString :{} ", queryString);
+					if (user != null && user.getEmailId() != null && !user.getEmailId().isEmpty()) {
+						log.info("Email Sent To Id :{} ", user.getEmailId());
+
+						EmailRequest email = EmailRequest.builder().email(user.getEmailId())
+								.subject(map.get(role).getEmailSubject()).isHTML(true).body(queryString).build();
+						producer.push(emailtopic, email);
+						log.info("email sent to kafka");
+					
+				}
+					if (user != null && user.getMobileNumber() != null && !user.getMobileNumber().isEmpty()) {
+						String smsTemplate = map.get(role).getSmsTemplate().replace(CommonConstants.EMAILAPPID,
+								application.getNocNumber());
+
+						
+						SMSRequest smsRequest = new SMSRequest(user.getMobileNumber(), smsTemplate);
+						producer.push(smstopic, smsRequest);
+						log.info("sms data pushed to kafka");
+					}
+			}
+			
+		}
+
+	}
 
 	private void enrichCitizenNotification(Map<String, EmailTemplateModel> map, String role, NOCApplication application,
 			NOCRequestData app1) throws IOException {
@@ -129,8 +178,19 @@ public class EmailSmsNotificationListener {
 		log.info("Is Role Present in Map {}", map);
 		log.info("Is Role Present in Map {}", map.get(role));
 		log.info("Template Got {}", map.get(role).getTemplate());
+		JSONArray actualResult = jdbcTemplate.query(QueryBuilder.SELECT_NOC_BY_NOCNUMBER,
+				new Object[] { application.getNocNumber() }, columnsNocRowMapper);
+		JSONObject jsonObject1 = (JSONObject) actualResult.get(0);
+
+		String applicantName = jsonObject1.get(CommonConstants.APPLICANTNAMEFROMDB)!=null ?
+				jsonObject1.get(CommonConstants.APPLICANTNAMEFROMDB).toString()
+				:CommonConstants.APPLICANTNAMETEMPLATE;
+
+	
 		String queryString = map.get(role).getTemplate().replace(CommonConstants.EMAILAPPID,
 				application.getNocNumber());
+		queryString = queryString.replace("[:applicantName:]", applicantName);
+
 		if (application.getTotalamount() != null)
 			queryString = queryString.replace("[:fees:]", application.getTotalamount().toString());
 		log.info("emailTemplate is {}", queryString);
@@ -145,6 +205,7 @@ public class EmailSmsNotificationListener {
 		if (user != null && user.getMobileNumber() != null && !user.getMobileNumber().isEmpty()) {
 			String smsTemplate = map.get(role).getSmsTemplate().replace(CommonConstants.EMAILAPPID,
 					application.getNocNumber());
+			smsTemplate = smsTemplate.replace("[:applicantName:]", applicantName);
 
 			if (application.getTotalamount() != null)
 				smsTemplate = smsTemplate.replace("[:fees:]", application.getTotalamount().toString());

@@ -260,7 +260,7 @@ public class DuplicateCopyService {
 					bills.get(0).getId(), owner, dcApplicationFromDB.getBillingBusinessService(),dcApplicationFromDB.getPaymentMode());
 
 			dcRequest.setDuplicateCopyApplications(Collections.singletonList(dcApplicationFromDB));
-			producer.push(config.getOwnershipTransferUpdateTopic(), dcRequest);
+			producer.push(config.getUpdateDuplicateCopyTopic(), dcRequest);
 
 		}
 		return Collections.singletonList(dcApplicationFromDB);

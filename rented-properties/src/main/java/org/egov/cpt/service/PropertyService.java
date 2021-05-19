@@ -205,16 +205,27 @@ public class PropertyService {
 			states.remove(PTConstants.PM_DRAFTED);
 			log.info("states:" + states);
 			criteria.setState(states);
-			criteria.setCreatedBy(requestInfo.getUserInfo().getUuid());
+			if(requestInfo.getUserInfo().getRoles().stream().anyMatch(role->role.getCode().equalsIgnoreCase(PTConstants.CLERK_ROLE)|| role.getCode().equalsIgnoreCase(PTConstants.JA_ROLE))) {
+				criteria.setCreatedBy(Arrays.asList(requestInfo.getUserInfo().getUuid(),"system"));
+			}
+			else {
+				criteria.setCreatedBy(Arrays.asList(requestInfo.getUserInfo().getUuid()));
+			}
 		} else {
-			if (!CollectionUtils.isEmpty(criteria.getState()) && criteria.getState().contains(PTConstants.PM_DRAFTED))
-				criteria.setCreatedBy(requestInfo.getUserInfo().getUuid());
+			if (!CollectionUtils.isEmpty(criteria.getState()) && criteria.getState().contains(PTConstants.PM_DRAFTED)) {
+				if(requestInfo.getUserInfo().getRoles().stream().anyMatch(role->role.getCode().equalsIgnoreCase(PTConstants.CLERK_ROLE)|| role.getCode().equalsIgnoreCase(PTConstants.JA_ROLE))) {
+					criteria.setCreatedBy(Arrays.asList(requestInfo.getUserInfo().getUuid(),"system"));
+				}
+				else {
+					criteria.setCreatedBy(Arrays.asList(requestInfo.getUserInfo().getUuid()));
+				}
+			}
 		}
-		
+
 		if(criteria.getTransitNumber()!=null) {
 			criteria.setTransitNumber(criteria.getTransitNumber().trim().toUpperCase());
 		}
-		
+
 		List<Property> properties = repository.getProperties(criteria);
 		if (CollectionUtils.isEmpty(properties))
 			return Collections.emptyList();
@@ -289,7 +300,7 @@ public class PropertyService {
 		property.setTransactionId(propertyFromRequest.getTransactionId());
 		property.setBankName(propertyFromRequest.getBankName());
 		property.setPaymentMode(propertyFromRequest.getPaymentMode());
-		
+
 		Owner owner = utils.getCurrentOwnerFromProperty(property);
 
 		/**

@@ -191,6 +191,15 @@ public class WaterServiceImpl implements WaterService {
 		return Arrays.asList(waterConnectionRequest.getWaterConnection());
 	}
 	
+
+	@Override
+	public List<WaterConnection> deactivateConnection(WaterConnectionRequest waterConnectionRequest) {
+
+		waterDao.updateWaterConnection(waterConnectionRequest, false);
+		
+		return  Arrays.asList(waterConnectionRequest.getWaterConnection());
+	}
+	
 	/**
 	 * Search Water connection to be update
 	 * 

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.waterconnection.config.WSConfiguration;
+import org.egov.waterconnection.constants.WCConstants;
 import org.egov.waterconnection.model.Property;
 import org.egov.waterconnection.model.SearchCriteria;
 import org.egov.waterconnection.service.UserService;
@@ -56,7 +57,7 @@ public class WsQueryBuilder {
 	private static final String WATER_SEARCH_QUERY = "SELECT "
 			/* + " conn.*, wc.*, document.*, plumber.*, application.*, property.*, " */
 			+ " wc.connectionCategory, wc.connectionType, wc.waterSource, wc.meterCount, wc.meterRentCode, wc.mfrCode, wc.meterDigits, wc.meterUnit, wc.sanctionedCapacity,"
-			+ " wc.meterId, wc.meterInstallationDate, wc.pipeSize, wc.noOfTaps, wc.proposedPipeSize, wc.proposedTaps, wc.connection_id as connection_Id, wc.connectionExecutionDate, wc.initialmeterreading, wc.appCreatedDate,"
+			+ " wc.meterId, wc.meterInstallationDate, wc.pipeSize, wc.noOfTaps, wc.proposedPipeSize, wc.proposedTaps, wc.connection_id as connection_Id, wc.connectionExecutionDate, wc.initialmeterreading, wc.appCreatedDate,wc.proposed_meterid, wc.proposed_meterinstallationdate,wc.proposed_initialmeterreading,wc.proposed_metercount,wc.proposed_meterrentcode,wc.proposed_mfrcode,wc.proposed_meterdigits,  wc.proposed_sanctionedcapacity,wc.proposed_meterunit,"
 			+ " wc.detailsprovidedby, wc.estimationfileStoreId , wc.sanctionfileStoreId , wc.estimationLetterDate, "
 			+ " conn.id as conn_id, conn.tenantid, conn.applicationNo, conn.applicationStatus, conn.status, conn.connectionNo, conn.oldConnectionNo, conn.property_id, conn.roadcuttingarea,"
 			+ " conn.aadharNo, conn.ferruleSize, conn.action, conn.adhocpenalty, conn.adhocrebate, conn.adhocpenaltyreason, conn.applicationType, conn.dateEffectiveFrom,"
@@ -69,10 +70,12 @@ public class WsQueryBuilder {
 			+ " plumber.relationship, " + holderSelectValues
 			+ " application.id as application_id, application.applicationno as app_applicationno, application.activitytype as app_activitytype, application.applicationstatus as app_applicationstatus, application.action as app_action, application.comments as app_comments, application.is_ferrule_applicable as app_ferrule, application.security_charges as app_securitycharge, application.total_amount_paid,"
 			+ " application.createdBy as app_createdBy, application.lastModifiedBy as app_lastModifiedBy, application.createdTime as app_createdTime, application.lastModifiedTime as app_lastModifiedTime, "
-			+ " property.id as waterpropertyid, property.usagecategory, property.usagesubcategory "
+			+ " property.id as waterpropertyid, property.usagecategory, property.usagesubcategory,pta.doorno as propertyplotno,pta.locality as propertysectorno "
 			+ " FROM eg_ws_connection conn "
 			+  INNER_JOIN_STRING 
 			+ "eg_ws_service wc ON wc.connection_id = conn.id"
+					+  INNER_JOIN_STRING 
+			+ "eg_pt_address pta ON conn.property_id = pta.propertyid"
 			+  INNER_JOIN_STRING
 			+ "eg_ws_application application ON application.wsid = conn.id"
 			+  INNER_JOIN_STRING
@@ -167,6 +170,21 @@ public class WsQueryBuilder {
 			query.append(" conn.oldconnectionno = ? ");
 			preparedStatement.add(criteria.getOldConnectionNumber());
 		}
+		if (!StringUtils.isEmpty(criteria.getPlotNo())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" pta.doorno = ? ");
+			preparedStatement.add(criteria.getPlotNo());
+		}
+		if (!StringUtils.isEmpty(criteria.getSectorNo())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" pta.locality = ? ");
+			preparedStatement.add(criteria.getSectorNo());
+		}
+		if (!StringUtils.isEmpty(criteria.getGroupNo())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" conn.billgroup = ? ");
+			preparedStatement.add(criteria.getGroupNo());
+		}
 
 		if (!StringUtils.isEmpty(criteria.getConnectionNumber())) {
 			addClauseIfRequired(preparedStatement, query);
@@ -198,9 +216,24 @@ public class WsQueryBuilder {
 			query.append("  wc.appCreatedDate <= ? ");
 			preparedStatement.add(criteria.getToDate());
 		}
+		if (criteria.getAppFromDate() != null) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append("  application.lastModifiedTime >= ?  ");
+			preparedStatement.add(criteria.getAppFromDate());
+		}
+		if (criteria.getAppToDate() != null) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append("  application.lastModifiedTime <= ? ");
+			preparedStatement.add(criteria.getAppToDate());
+		}
+		if (criteria.getAppFromDate() != null || criteria.getAppToDate() != null) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append("  application.applicationStatus in (" ).append(createQuery(WCConstants.APPROVED_ACTIONS)).append(" )");
+			addToPreparedStatement(preparedStatement, WCConstants.APPROVED_ACTIONS);
+		}
 		if(!StringUtils.isEmpty(criteria.getApplicationType())) {
 			addClauseIfRequired(preparedStatement, query);
-			query.append(" conn.applicationType = ? ");
+			query.append(" application.activitytype = ? ");
 			preparedStatement.add(criteria.getApplicationType());
 		}
 		/*
