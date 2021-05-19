@@ -671,7 +671,11 @@ public class PropertyService {
 			throw new CustomException("NO_PROPERTY_FOUND", "No approved property found");
 
 		List<PropertyDueAmount> PropertyDueAmounts = new ArrayList<>();
-		properties.stream().forEach(property -> {
+		for(Property property:properties) {
+//		properties.stream().forEach(property -> {
+			if(property.getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO)) {
+				continue;
+			}
 			Optional<OwnerDetails> currentOwnerDetails = property.getPropertyDetails().getOwners().stream()
 					.map(owner -> owner.getOwnerDetails())
 					.filter(ownerDetail -> ownerDetail.getIsCurrentOwner() == true).findFirst();
@@ -709,7 +713,7 @@ public class PropertyService {
 						property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue()));
 			}
 			PropertyDueAmounts.add(propertyDueAmount);
-		});
+		}
 		PropertyDueRequest propertyDueRequest = PropertyDueRequest.builder().requestInfo(requestInfo)
 				.propertyDueAmounts(PropertyDueAmounts).build();
 		producer.push(config.getDueAmountTopic(), propertyDueRequest);
