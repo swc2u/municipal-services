@@ -32,6 +32,8 @@ public class OfflinePaymentRowMapper implements ResultSetExtractor<List<OfflineP
 					.bankName(rs.getString("offlinebank_name")).comments(rs.getString("offline_comments"))
 					.transactionNumber(rs.getString("offlinetransaction_number"))
 					.dateOfPayment(rs.getLong("offlinedate_of_payment"))
+					.fromDate(rs.getString("offline_from_date"))
+					.toDate(rs.getString("offline_to_date"))
 					.type(OfflinePaymentType.fromValue(rs.getString("offline_type"))).auditDetails(auditDetails)
 					.build();
 			estatePayments.add(estatePayment);

@@ -140,39 +140,39 @@ public class PropertyService {
 				&& property.getPropertyDetails().getEstateAccount() != null
 				&& property.getPropertyDetails().getPaymentConfig() != null
 				&& property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD))
-				.forEach(property -> {
-					estateRentCollectionService.settle(property.getPropertyDetails().getEstateDemands(),
-							property.getPropertyDetails().getEstatePayments(),
+		.forEach(property -> {
+			estateRentCollectionService.settle(property.getPropertyDetails().getEstateDemands(),
+					property.getPropertyDetails().getEstatePayments(),
+					property.getPropertyDetails().getEstateAccount(), PSConstants.GST_INTEREST_RATE,
+					property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
+					property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue());
+			property.setEstateRentSummary(
+
+					estateRentCollectionService.calculateRentSummary(
+							property.getPropertyDetails().getEstateDemands(),
 							property.getPropertyDetails().getEstateAccount(), PSConstants.GST_INTEREST_RATE,
 							property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
-							property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue());
-					property.setEstateRentSummary(
-
-							estateRentCollectionService.calculateRentSummary(
-									property.getPropertyDetails().getEstateDemands(),
-									property.getPropertyDetails().getEstateAccount(), PSConstants.GST_INTEREST_RATE,
-									property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
-									property.getPropertyDetails().getPaymentConfig().getRateOfInterest()
-											.doubleValue()));
-				});
+							property.getPropertyDetails().getPaymentConfig().getRateOfInterest()
+							.doubleValue()));
+		});
 	}
 
 	private void processRentHistory(PropertyRequest request) {
 		if (!CollectionUtils.isEmpty(request.getProperties())) {
 			request.getProperties().stream()
-					.filter(property -> property.getPropertyDetails().getEstateDemands() != null
-							&& property.getPropertyDetails().getEstatePayments() != null
-							&& property.getPropertyDetails().getEstateAccount() != null
-							&& property.getPropertyDetails().getPaymentConfig() != null && property.getPropertyDetails()
-									.getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD))
-					.forEach(property -> {
-						property.getPropertyDetails().setEstateRentCollections(estateRentCollectionService.settle(
-								property.getPropertyDetails().getEstateDemands(),
-								property.getPropertyDetails().getEstatePayments(),
-								property.getPropertyDetails().getEstateAccount(), PSConstants.GST_INTEREST_RATE,
-								property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
-								property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue()));
-					});
+			.filter(property -> property.getPropertyDetails().getEstateDemands() != null
+			&& property.getPropertyDetails().getEstatePayments() != null
+			&& property.getPropertyDetails().getEstateAccount() != null
+			&& property.getPropertyDetails().getPaymentConfig() != null && property.getPropertyDetails()
+			.getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD))
+			.forEach(property -> {
+				property.getPropertyDetails().setEstateRentCollections(estateRentCollectionService.settle(
+						property.getPropertyDetails().getEstateDemands(),
+						property.getPropertyDetails().getEstatePayments(),
+						property.getPropertyDetails().getEstateAccount(), PSConstants.GST_INTEREST_RATE,
+						property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
+						property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue()));
+			});
 		}
 		enrichmentService.enrichCollection(request);
 
@@ -195,7 +195,7 @@ public class PropertyService {
 		if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstateDemands())
 				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.ESTATE_BRANCH)
 				&& property.getPropertyDetails().getPaymentConfig().getGroundRentGenerationType()
-						.equalsIgnoreCase(PSConstants.MONTHLY)) {
+				.equalsIgnoreCase(PSConstants.MONTHLY)) {
 			estateDemandGenerationService.bifurcateDemand(property);
 		}
 		/* Approved Property Add Estate Branch Missing Demands */
@@ -207,14 +207,14 @@ public class PropertyService {
 				&& property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
 			if (null != request.getProperties().get(0).getPropertyDetails().getBidders()
 					&& request.getProperties().get(0).getPropertyDetails().getPropertyType()
-							.equalsIgnoreCase(PSConstants.EB_ALLOCATION_TYPE_AUCTION)) {
+					.equalsIgnoreCase(PSConstants.EB_ALLOCATION_TYPE_AUCTION)) {
 				/**
 				 * Adding emd amount to account remaining amount of winning bidder
 				 * This only works if the EMD amounts collect by all the users are same
 				 */
 				request.getProperties().get(0).getPropertyDetails().getEstateAccount()
-						.setRemainingAmount(request.getProperties().get(0).getPropertyDetails().getBidders().get(0)
-								.getDepositedEMDAmount().doubleValue());
+				.setRemainingAmount(request.getProperties().get(0).getPropertyDetails().getBidders().get(0)
+						.getDepositedEMDAmount().doubleValue());
 			}
 			estateDemandGenerationService.createMissingDemands(property);
 			estateDemandGenerationService.addCredit(property);
@@ -236,8 +236,8 @@ public class PropertyService {
 		}
 
 		if (config.getIsWorkflowEnabled() && !action.contentEquals("") && !action.contentEquals(PSConstants.ES_DRAFT)
-//				&& !(state.contentEquals(PSConstants.PM_APPROVED)
-//						|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
+				//				&& !(state.contentEquals(PSConstants.PM_APPROVED)
+				//						|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
 				) {
 			wfIntegrator.callWorkFlow(request);
 		}
@@ -245,8 +245,8 @@ public class PropertyService {
 			String roeAction = request.getProperties().get(0).getPropertyDetails().getBidders().get(0).getAction();
 			String addCourtCases = request.getProperties().get(0).getPropertyDetails().getAddCourtCases()!=null?request.getProperties().get(0).getPropertyDetails().getAddCourtCases():"";
 			if (config.getIsWorkflowEnabled() && !roeAction.contentEquals("")
-//					&& (state.contentEquals(PSConstants.PM_APPROVED)
-//							|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
+					//					&& (state.contentEquals(PSConstants.PM_APPROVED)
+					//							|| state.contentEquals(PSConstants.ES_PM_EB_APPROVED))
 					&& !addCourtCases.contentEquals(PSConstants.EB_ADD_COURT_CASES)
 					&& !request.getProperties().get(0).getPropertyDetails().isAdhocDemand()
 					&& !request.getProperties().get(0).getPropertyDetails().isAdhocPayment()) {
@@ -311,22 +311,22 @@ public class PropertyService {
 			String businessServiceName = null;
 			String ebPmBusinessServiceName = null;
 			requestInfo.getUserInfo().getRoles().stream().filter(role -> role.getCode() != PSConstants.ROLE_EMPLOYEE)
-					.map(role -> role.getCode()).forEach(rolecode -> {
-						if (rolecode.startsWith("ES_EB")) {
-							employeeBranches.add(PSConstants.ESTATE_BRANCH);
-						}
-						if (rolecode.startsWith("ES_BB")) {
-							employeeBranches.add(PSConstants.BUILDING_BRANCH);
-						}
-						if (rolecode.startsWith("ES_MM")) {
-							employeeBranches.add(PSConstants.MANI_MAJRA);
-						}
-						if (rolecode.equalsIgnoreCase("ES_ADDITIONAL_COMMISSIONER")) {
-							employeeBranches.add(PSConstants.ESTATE_BRANCH);
-							employeeBranches.add(PSConstants.BUILDING_BRANCH);
-							employeeBranches.add(PSConstants.MANI_MAJRA);
-						}
-					});
+			.map(role -> role.getCode()).forEach(rolecode -> {
+				if (rolecode.startsWith("ES_EB")) {
+					employeeBranches.add(PSConstants.ESTATE_BRANCH);
+				}
+				if (rolecode.startsWith("ES_BB")) {
+					employeeBranches.add(PSConstants.BUILDING_BRANCH);
+				}
+				if (rolecode.startsWith("ES_MM")) {
+					employeeBranches.add(PSConstants.MANI_MAJRA);
+				}
+				if (rolecode.equalsIgnoreCase("ES_ADDITIONAL_COMMISSIONER")) {
+					employeeBranches.add(PSConstants.ESTATE_BRANCH);
+					employeeBranches.add(PSConstants.BUILDING_BRANCH);
+					employeeBranches.add(PSConstants.MANI_MAJRA);
+				}
+			});
 			if ((criteria.getBranchType() != null && !criteria.getBranchType().isEmpty())) {
 				if (!criteria.getBranchType().stream().filter(branch -> employeeBranches.contains(branch)).findAny()
 						.isPresent())
@@ -385,7 +385,7 @@ public class PropertyService {
 
 				if (!CollectionUtils.isEmpty(demands) && property.getPropertyDetails().getPaymentConfig() != null
 						&& property.getPropertyDetails().getPropertyType()
-								.equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
+						.equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
 					property.setEstateRentSummary(estateRentCollectionService.calculateRentSummary(demands,
 							estateAccount, PSConstants.GST_INTEREST_RATE,
 							property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
@@ -424,7 +424,7 @@ public class PropertyService {
 		 */
 		if (accountStatementCriteria.getFromDate() != null)
 			fromLocalDate = Instant.ofEpochMilli(accountStatementCriteria.getFromDate()).atZone(ZoneId.systemDefault())
-					.toLocalDate();
+			.toLocalDate();
 
 		LocalDate toLocalDate = Instant.ofEpochMilli(accountStatementCriteria.getToDate())
 				.atZone(ZoneId.systemDefault()).toLocalDate();
@@ -553,7 +553,7 @@ public class PropertyService {
 				List<ManiMajraPayment> payments = repository.getManiMajraPaymentsDetails(propertyDetailsIds);
 				maniMajraRentCollectionService.settle(demands, payments, account);
 				property.getPropertyDetails()
-						.setOfflinePaymentDetails(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails());
+				.setOfflinePaymentDetails(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails());
 				enrichmentService.enrichMmRentDemand(property);
 			}
 
@@ -577,7 +577,7 @@ public class PropertyService {
 						property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
 						property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue());
 				property.getPropertyDetails()
-						.setOfflinePaymentDetails(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails());
+				.setOfflinePaymentDetails(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails());
 				enrichmentService.enrichRentDemand(property, rentSummary);
 			}
 		}
@@ -597,6 +597,9 @@ public class PropertyService {
 					"No bills were found for the consumer code " + property.getRentPaymentConsumerCode());
 		}
 
+		AuditDetails auditDetails = util.getAuditDetails(propertyRequest.getRequestInfo().getUserInfo().getUuid(),
+				true);
+
 		if (propertyRequest.getRequestInfo().getUserInfo().getType().equalsIgnoreCase(PSConstants.ROLE_EMPLOYEE)) {
 			/**
 			 * if offline, create a payment.
@@ -612,26 +615,7 @@ public class PropertyService {
 						bills.get(0).getId(), owner, config.getAosBusinessServiceValue());
 			}
 
-			AuditDetails auditDetails = util.getAuditDetails(propertyRequest.getRequestInfo().getUserInfo().getUuid(),
-					true);
-
-			if (property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)) {
-				OfflinePaymentDetails offlinePaymentDetails = OfflinePaymentDetails.builder()
-						.id(UUID.randomUUID().toString()).propertyDetailsId(property.getPropertyDetails().getId())
-						.demandId(bills.get(0).getBillDetails().get(0).getDemandId())
-						.amount(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount())
-						.bankName(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getBankName())
-						.transactionNumber(
-								property.getPropertyDetails().getOfflinePaymentDetails().get(0).getTransactionNumber())
-						.dateOfPayment(
-								property.getPropertyDetails().getOfflinePaymentDetails().get(0).getDateOfPayment())
-						.fromDate(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails().get(0)
-								.getFromDate())
-						.toDate(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails().get(0).getToDate())
-						.auditDetails(auditDetails).build();
-				property.getPropertyDetails()
-						.setOfflinePaymentDetails(Collections.singletonList(offlinePaymentDetails));
-			} else {
+			if (!property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)) {
 				OfflinePaymentDetails offlinePaymentDetails = OfflinePaymentDetails.builder()
 						.id(UUID.randomUUID().toString()).propertyDetailsId(property.getPropertyDetails().getId())
 						.demandId(bills.get(0).getBillDetails().get(0).getDemandId())
@@ -643,19 +627,36 @@ public class PropertyService {
 								property.getPropertyDetails().getOfflinePaymentDetails().get(0).getDateOfPayment())
 						.auditDetails(auditDetails).build();
 				property.getPropertyDetails()
-						.setOfflinePaymentDetails(Collections.singletonList(offlinePaymentDetails));
+				.setOfflinePaymentDetails(Collections.singletonList(offlinePaymentDetails));
 			}
-			propertyRequest.setProperties(Collections.singletonList(property));
-			producer.push(config.getUpdatePropertyTopic(), propertyRequest);
 
-		} else {
-			/**
-			 * We return the property along with the consumerCode that we set earlier. Also
-			 * save it so the consumer code gets persisted.
-			 */
-			propertyRequest.setProperties(Collections.singletonList(property));
-			producer.push(config.getUpdatePropertyTopic(), propertyRequest);
+		} 
+		if (property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)) {
+			OfflinePaymentDetails offlinePaymentDetails = OfflinePaymentDetails.builder()
+					.id(UUID.randomUUID().toString()).propertyDetailsId(property.getPropertyDetails().getId())
+					.demandId(bills.get(0).getBillDetails().get(0).getDemandId())
+					.amount(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getAmount())
+					.bankName(property.getPropertyDetails().getOfflinePaymentDetails().get(0).getBankName())
+					.transactionNumber(
+							property.getPropertyDetails().getOfflinePaymentDetails().get(0).getTransactionNumber())
+					.dateOfPayment(
+							property.getPropertyDetails().getOfflinePaymentDetails().get(0).getDateOfPayment())
+					.fromDate(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails().get(0)
+							.getFromDate())
+					.toDate(propertyFromRequest.getPropertyDetails().getOfflinePaymentDetails().get(0).getToDate())
+					.auditDetails(auditDetails).build();
+			property.getPropertyDetails()
+			.setOfflinePaymentDetails(Collections.singletonList(offlinePaymentDetails));
 		}
+
+		/**
+		 * We return the property along with the consumerCode that we set earlier. Also
+		 * save it so the consumer code gets persisted.
+		 */
+		propertyRequest.setProperties(Collections.singletonList(property));
+		producer.push(config.getUpdatePropertyTopic(), propertyRequest);
+
+
 		return Collections.singletonList(property);
 	}
 
@@ -670,7 +671,11 @@ public class PropertyService {
 			throw new CustomException("NO_PROPERTY_FOUND", "No approved property found");
 
 		List<PropertyDueAmount> PropertyDueAmounts = new ArrayList<>();
-		properties.stream().forEach(property -> {
+		for(Property property:properties) {
+//		properties.stream().forEach(property -> {
+			if(property.getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO)) {
+				continue;
+			}
 			Optional<OwnerDetails> currentOwnerDetails = property.getPropertyDetails().getOwners().stream()
 					.map(owner -> owner.getOwnerDetails())
 					.filter(ownerDetail -> ownerDetail.getIsCurrentOwner() == true).findFirst();
@@ -687,13 +692,13 @@ public class PropertyService {
 					.mobileNumber(currentOwnerDetails.get().getMobileNumber()).build();
 
 			propertyTypeConfigurations.stream()
-					.filter(propertyType -> property.getPropertyDetails().getPropertyType()
-							.equalsIgnoreCase(propertyType.get("code").toString()))
-					.forEach(propertyType -> propertyDueAmount.setPropertyType(propertyType.get("name").toString()));
+			.filter(propertyType -> property.getPropertyDetails().getPropertyType()
+					.equalsIgnoreCase(propertyType.get("code").toString()))
+			.forEach(propertyType -> propertyDueAmount.setPropertyType(propertyType.get("name").toString()));
 
 			sectorConfigurations.stream()
-					.filter(sector -> property.getSectorNumber().equalsIgnoreCase(sector.get("code").toString()))
-					.forEach(sector -> propertyDueAmount.setSectorNumber(sector.get("name").toString()));
+			.filter(sector -> property.getSectorNumber().equalsIgnoreCase(sector.get("code").toString()))
+			.forEach(sector -> propertyDueAmount.setSectorNumber(sector.get("name").toString()));
 
 			List<String> propertyDetailsIds = new ArrayList<>();
 			propertyDetailsIds.add(property.getPropertyDetails().getId());
@@ -708,7 +713,7 @@ public class PropertyService {
 						property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue()));
 			}
 			PropertyDueAmounts.add(propertyDueAmount);
-		});
+		}
 		PropertyDueRequest propertyDueRequest = PropertyDueRequest.builder().requestInfo(requestInfo)
 				.propertyDueAmounts(PropertyDueAmounts).build();
 		producer.push(config.getDueAmountTopic(), propertyDueRequest);
