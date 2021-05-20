@@ -1,31 +1,42 @@
 package org.egov.tlcalculator.service;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.egov.tlcalculator.utils.TLCalculatorConstants.businessService_TL;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tlcalculator.config.TLCalculatorConfigs;
 import org.egov.tlcalculator.kafka.broker.TLCalculatorProducer;
-import org.egov.tlcalculator.repository.builder.BillingslabQueryBuilder;
 import org.egov.tlcalculator.repository.BillingslabRepository;
-import org.egov.tlcalculator.repository.ServiceRequestRepository;
+import org.egov.tlcalculator.repository.builder.BillingslabQueryBuilder;
 import org.egov.tlcalculator.utils.CalculationUtils;
 import org.egov.tlcalculator.utils.TLCalculatorConstants;
-import org.egov.tlcalculator.web.models.*;
-import org.egov.tlcalculator.web.models.enums.CalculationType;
+import org.egov.tlcalculator.web.models.Accessory;
+import org.egov.tlcalculator.web.models.BillingSlab;
+import org.egov.tlcalculator.web.models.BillingSlabSearchCriteria;
+import org.egov.tlcalculator.web.models.Calculation;
+import org.egov.tlcalculator.web.models.CalculationReq;
+import org.egov.tlcalculator.web.models.CalculationRes;
+import org.egov.tlcalculator.web.models.CalulationCriteria;
 import org.egov.tlcalculator.web.models.FeeAndBillingSlabIds;
-import org.egov.tlcalculator.web.models.tradelicense.TradeLicense;
 import org.egov.tlcalculator.web.models.demand.Category;
 import org.egov.tlcalculator.web.models.demand.TaxHeadEstimate;
-import org.egov.tlcalculator.web.models.tradelicense.TradeUnit;
+import org.egov.tlcalculator.web.models.enums.CalculationType;
 import org.egov.tlcalculator.web.models.tradelicense.EstimatesAndSlabs;
+import org.egov.tlcalculator.web.models.tradelicense.TradeLicense;
+import org.egov.tlcalculator.web.models.tradelicense.TradeUnit;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
-import java.util.*;
-
-import static org.egov.tlcalculator.utils.TLCalculatorConstants.businessService_TL;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Service
@@ -41,9 +52,6 @@ public class CalculationService {
 
     @Autowired
     private TLCalculatorConfigs config;
-
-    @Autowired
-    private ServiceRequestRepository serviceRequestRepository;
 
     @Autowired
     private CalculationUtils utils;

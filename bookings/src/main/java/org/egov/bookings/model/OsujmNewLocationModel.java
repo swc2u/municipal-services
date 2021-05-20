@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "OsujmNewLocationModel")
-@Table(name = "TT_OSUJM_NEW_LOCATION")
+@Table(name = "BK_OSUJM_NEW_LOCATION")
 public class OsujmNewLocationModel {
 
 	@Id
@@ -95,5 +95,11 @@ public class OsujmNewLocationModel {
 	
 	@Column(name = "UUID")
 	private String uuid;
+	
+	@Column(name = "created_date")
+	private String createdDate;
+
+	@Column(name = "last_modified_date")
+	private String lastModifiedDate;
 	
 }

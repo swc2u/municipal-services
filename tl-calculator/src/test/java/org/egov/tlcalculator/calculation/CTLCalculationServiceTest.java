@@ -1,51 +1,39 @@
 package org.egov.tlcalculator.calculation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.io.IOUtils;
 import org.egov.TLCalculatorApp;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tlcalculator.config.TLCalculatorConfigs;
-import org.egov.tlcalculator.kafka.broker.TLCalculatorProducer;
-import org.egov.tlcalculator.repository.CTLBillingslabRepository;
-import org.egov.tlcalculator.repository.builder.CTLBillingslabQueryBuilder;
 import org.egov.tlcalculator.service.CTLCalculationService;
 import org.egov.tlcalculator.service.DemandService;
 import org.egov.tlcalculator.service.MDMSService;
-import org.egov.tlcalculator.utils.CalculationUtils;
 import org.egov.tlcalculator.utils.TLCalculatorConstants;
 import org.egov.tlcalculator.web.models.Calculation;
 import org.egov.tlcalculator.web.models.CalculationReq;
-import org.egov.tlcalculator.web.models.FeeAndBillingSlabIds;
-import org.egov.tlcalculator.web.models.demand.Category;
-import org.egov.tlcalculator.web.models.demand.TaxHeadEstimate;
 import org.egov.tlcalculator.web.models.tradelicense.TradeLicense;
 import org.egov.tracer.model.CustomException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Matchers;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ActiveProfiles("test")
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -60,9 +48,6 @@ public class CTLCalculationServiceTest {
 
 	@Autowired
 	private DemandService demandService;
-
-	@Autowired
-	private TLCalculatorProducer producer;
 
 	@Autowired
 	private MDMSService mdmsService;
@@ -201,7 +186,7 @@ public class CTLCalculationServiceTest {
 	@Test(expected= CustomException.class) 
 	public void testBadRequestCalculation() throws Exception {
 		CalculationReq calculationReq = this.objectMapper.readValue(getFileContents("badRequest.json"), CalculationReq.class);
-		List<Calculation> calculationList = ctlCalculationService.calculate(calculationReq);
+		ctlCalculationService.calculate(calculationReq);
 	}
 	
 
@@ -214,8 +199,8 @@ public class CTLCalculationServiceTest {
 		}
 	}
 
-	private Map defaultMap(){
-		Map defaultMap = new HashMap();
+	private Map<String, String> defaultMap(){
+		Map<String, String> defaultMap = new HashMap<String, String>();
 		defaultMap.put(TLCalculatorConstants.MDMS_CALCULATIONTYPE_TRADETYPE,config.getDefaultTradeUnitCalculationType());
 		defaultMap.put(TLCalculatorConstants.MDMS_CALCULATIONTYPE_ACCESSORY,config.getDefaultAccessoryCalculationType());
 		return defaultMap;

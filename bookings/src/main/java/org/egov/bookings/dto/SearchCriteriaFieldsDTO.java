@@ -59,6 +59,15 @@ public class SearchCriteriaFieldsDTO implements Serializable {
 	/** The business service. */
 	private String businessService;
 	
+	/** The type of room. */
+	private String typeOfRoom;
+	
+	/** The str from date. */
+	private String strFromDate;
+	
+	/** The str to date. */
+	private String strToDate;
+	
 	/**
 	 * Gets the tenant id.
 	 *
@@ -312,4 +321,59 @@ public class SearchCriteriaFieldsDTO implements Serializable {
 		this.businessService = businessService;
 	}
 
+	/**
+	 * Gets the type of room.
+	 *
+	 * @return the type of room
+	 */
+	public String getTypeOfRoom() {
+		return typeOfRoom;
+	}
+
+	/**
+	 * Sets the type of room.
+	 *
+	 * @param typeOfRoom the new type of room
+	 */
+	public void setTypeOfRoom(String typeOfRoom) {
+		this.typeOfRoom = typeOfRoom;
+	}
+
+	/**
+	 * Gets the str from date.
+	 *
+	 * @return the str from date
+	 */
+	public String getStrFromDate() {
+		return strFromDate;
+	}
+
+	/**
+	 * Sets the str from date.
+	 *
+	 * @param strFromDate the new str from date
+	 */
+	public void setStrFromDate(String strFromDate) {
+		this.strFromDate = strFromDate;
+	}
+
+	/**
+	 * Gets the str to date.
+	 *
+	 * @return the str to date
+	 */
+	public String getStrToDate() {
+		return strToDate;
+	}
+
+	/**
+	 * Sets the str to date.
+	 *
+	 * @param strToDate the new str to date
+	 */
+	public void setStrToDate(String strToDate) {
+		this.strToDate = strToDate;
+	}
+
+	
 }

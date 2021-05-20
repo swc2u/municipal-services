@@ -173,8 +173,7 @@ public class PaymentNotificationService {
                 }
         }
         catch (Exception e){
-        	log.error("Failed to notify the payment information to payer");
-            e.printStackTrace();
+        	log.error("Failed to notify the payment information to payer ",e);
         }
     }
     /**
@@ -233,7 +232,7 @@ public class PaymentNotificationService {
 		                           .build());
 		   }
 
-		   String message = util.getCTLPayerPaymentMsg(license,valMap,localizationMessages);
+		   String message = util.getCTLPayerPaymentMsg(license,valMap,localizationMessages,CTLConstants.MAIL_NOTIFICATION);
 	        
 		   String subject = util.getMessageTemplate(CTLConstants.CTL_PAYMENT_EMAIL_SUBJECT, localizationMessages);
 		   if (subject == null) {
@@ -298,7 +297,7 @@ public class PaymentNotificationService {
      * @return
      */
     private SMSRequest getCTLPayerSMSRequest(TradeLicense license,Map<String,String> valMap,String localizationMessages){
-        String message = util.getCTLPayerPaymentMsg(license,valMap,localizationMessages);
+        String message = util.getCTLPayerPaymentMsg(license,valMap,localizationMessages,CTLConstants.SMS_NOTIFICATION);
         String customizedMsg = message.replace("<1>",valMap.get(paidByKey));
         SMSRequest smsRequest = new SMSRequest(valMap.get(payerMobileNumberKey),customizedMsg);
         return smsRequest;
@@ -329,7 +328,7 @@ public class PaymentNotificationService {
             valMap.put(payerName,context.read("$.Payment.payerName"));
         }
         catch (Exception e){
-            e.printStackTrace();
+        	log.error("Error while fetching payment reciept values ",e);
             throw new CustomException("RECEIPT ERROR","Unable to fetch values from receipt");
         }
         return valMap;

@@ -1,26 +1,31 @@
 package org.egov.tl.repository.rowmapper;
 
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.egov.tl.web.models.*;
+
+import org.egov.tl.web.models.Accessory;
+import org.egov.tl.web.models.Address;
+import org.egov.tl.web.models.AuditDetails;
+import org.egov.tl.web.models.Boundary;
+import org.egov.tl.web.models.Document;
+import org.egov.tl.web.models.Institution;
+import org.egov.tl.web.models.OwnerInfo;
+import org.egov.tl.web.models.TradeLicense;
+import org.egov.tl.web.models.TradeLicenseDetail;
+import org.egov.tl.web.models.TradeUnit;
 import org.egov.tracer.model.CustomException;
 import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.egov.tl.util.TLConstants.*;
 
 
 @Component

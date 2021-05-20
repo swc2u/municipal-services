@@ -1,18 +1,15 @@
 package org.egov.tlcalculator.web.models;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.Builder;
 
 /**
  * Collection of audit related fields used by most models
@@ -28,16 +25,16 @@ import lombok.Builder;
 @Builder
 public class AuditDetails   {
         @JsonProperty("createdBy")
-        private String createdBy = null;
+        private String createdBy;
 
         @JsonProperty("lastModifiedBy")
-        private String lastModifiedBy = null;
+        private String lastModifiedBy;
 
         @JsonProperty("createdTime")
-        private Long createdTime = null;
+        private Long createdTime;
 
         @JsonProperty("lastModifiedTime")
-        private Long lastModifiedTime = null;
+        private Long lastModifiedTime;
 
 
 }

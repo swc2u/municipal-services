@@ -1,5 +1,7 @@
 package org.egov.bookings.model;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -13,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "ParkCommunityHallV1MasterModel")
-@Table(name = "TM_PARK_COMMUNITY_HALL_v1")
+@Table(name = "BK_PARK_COMMUNITY_HALL_v1")
 public class ParkCommunityHallV1MasterModel {
 
 	@Id
@@ -94,5 +96,21 @@ public class ParkCommunityHallV1MasterModel {
 	
 	@Column(name = "Sector")
 	private String sector;
+	
+	/** The last modified date. */
+	@Column(name = "LAST_MODIFIED_DATE")
+	private Date lastModifiedDate;
+	
+	/** The created date. */
+	@Column(name = "CREATED_DATE")
+	private Date createdDate;
+	
+	/** The from date. */
+	@Column(name = "FROM_DATE")
+	private Date fromDate;
+	
+	/** The to date. */
+	@Column(name = "TO_DATE")
+	private Date toDate;
 
 }

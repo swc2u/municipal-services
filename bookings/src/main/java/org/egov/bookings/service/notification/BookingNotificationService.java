@@ -5,6 +5,7 @@ import static org.egov.bookings.utils.BookingsConstants.BUSINESS_SERVICE_GFCP;
 import static org.egov.bookings.utils.BookingsConstants.BUSINESS_SERVICE_OSBM;
 import static org.egov.bookings.utils.BookingsConstants.BUSINESS_SERVICE_OSUJM;
 import static org.egov.bookings.utils.BookingsConstants.BUSINESS_SERVICE_PACC;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,9 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.egov.bookings.config.BookingsConfiguration;
 import org.egov.bookings.contract.Action;
 import org.egov.bookings.contract.ActionItem;
+import org.egov.bookings.contract.EmailAttachment;
 import org.egov.bookings.contract.EmailRequest;
 import org.egov.bookings.contract.Event;
 import org.egov.bookings.contract.EventRequest;
@@ -26,6 +29,7 @@ import org.egov.bookings.model.Source;
 import org.egov.bookings.repository.impl.ServiceRequestRepository;
 import org.egov.bookings.utils.BookingsConstants;
 import org.egov.bookings.utils.NotificationUtil;
+import org.egov.bookings.validator.BookingsFieldsValidator;
 import org.egov.bookings.web.models.BookingsRequest;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +86,7 @@ public class BookingNotificationService {
 			case BUSINESS_SERVICE_BWT:
 			case BUSINESS_SERVICE_GFCP:
 			case BUSINESS_SERVICE_OSUJM:
-			case BUSINESS_SERVICE_PACC:	
+			case BUSINESS_SERVICE_PACC:
 				List<SMSRequest> smsRequestsTL = new LinkedList<>();
 				List<EmailRequest> emailRequestsTL = new LinkedList<>();
 
@@ -100,14 +104,6 @@ public class BookingNotificationService {
 							util.sendEMAIL(emailRequestsTL,true);
 					}
 				}
-//				if(null != config.getIsUserEventsNotificationEnabledForTL()) {
-//					if(config.getIsUserEventsNotificationEnabledForTL()) {
-//						EventRequest eventRequest = getEventsForBK(request);
-//						if(null != eventRequest)
-//							util.sendEventNotification(eventRequest);
-//					}
-//				}
-//				break;
 		}
     }
 
@@ -122,7 +118,7 @@ public class BookingNotificationService {
 		BookingsModel bookingsModel = request.getBookingsModel();
 		String businessService = bookingsModel.getBusinessService();
 		String message = null;
-		String localizationMessages;
+		String localizationMessages = "";
 		switch (businessService) {
 		case BUSINESS_SERVICE_OSBM:
 		case BUSINESS_SERVICE_BWT:
@@ -132,11 +128,28 @@ public class BookingNotificationService {
 			localizationMessages = util.getLocalizationMessages(tenantId, request.getRequestInfo());
 			message = util.getCustomizedMsg(request.getRequestInfo(), bookingsModel, localizationMessages);
 		}
+		
 		Map<String, String> mobileNumberToOwner = new HashMap<>();
 		if (bookingsModel.getBkMobileNumber() != null)
 			mobileNumberToOwner.put(bookingsModel.getBkMobileNumber(), bookingsModel.getBkApplicantName());
-
+		
 		smsRequests.addAll(util.createSMSRequest(message, mobileNumberToOwner));
+		mobileNumberToOwner.remove(bookingsModel.getBkMobileNumber());
+		if(BookingsConstants.BUSINESS_SERVICE_BWT.equals(bookingsModel.getBusinessService()) 
+				&& BookingsConstants.ACTION_STATUS_PENDINGUPDATE.equals((bookingsModel.getBkAction() + "_" + bookingsModel.getBkApplicationStatus()))) {
+			message = util.getCustomizedMsgForDriver(bookingsModel, localizationMessages);
+			mobileNumberToOwner.put(bookingsModel.getBkContactNo(), bookingsModel.getBkDriverName());
+			smsRequests.addAll(util.createSMSRequest(message, mobileNumberToOwner));
+		}
+		
+		// When Applicant submit application of OSBM/OSUJM booking, then SMS notification send to approver of OSBM/OSUJM.
+		if(!BookingsFieldsValidator.isNullOrEmpty(request.getUser())) {
+			mobileNumberToOwner.remove(bookingsModel.getBkMobileNumber());
+			mobileNumberToOwner.put(request.getUser().getMobileNumber(), request.getUser().getUserName());
+			message = util.getCustomizedMsgForApprover(bookingsModel.getBkApplicationNumber(), bookingsModel.getBkBookingType(), localizationMessages, request.getUser().getUserName());
+			smsRequests.addAll(util.createSMSRequest(message, mobileNumberToOwner));
+		}
+		
 	}
     
 	/**
@@ -149,11 +162,12 @@ public class BookingNotificationService {
 		String tenantId = request.getBookingsModel().getTenantId();
 		BookingsModel bookingsModel = request.getBookingsModel();
 		Map<String, String> emailIdToOwner = new HashMap<>();
+		List<EmailAttachment> attachments = new ArrayList<>();
 		if (bookingsModel.getBkEmail() != null)
 			emailIdToOwner.put(bookingsModel.getBkEmail(), bookingsModel.getBkApplicantName());
 		String businessService = bookingsModel.getBusinessService();
 		String message = null;
-		String localizationMessages;
+		String localizationMessages = "";
 		switch (businessService) {
 		case BUSINESS_SERVICE_OSBM:
 		case BUSINESS_SERVICE_BWT:
@@ -161,11 +175,35 @@ public class BookingNotificationService {
 		case BUSINESS_SERVICE_OSUJM:
 		case BUSINESS_SERVICE_PACC:
 			localizationMessages = util.getLocalizationMessages(tenantId, request.getRequestInfo());
-			message = util.getCustomizedMsg(request.getRequestInfo(), bookingsModel, localizationMessages);
+			message = util.getMailCustomizedMsg(request.getRequestInfo(), bookingsModel, localizationMessages);
 			break;
 		}
+		Map<String, String> receiptURLMap = new HashMap<>();
+		if (!BookingsFieldsValidator.isNullOrEmpty(request.getUrlData())) {
+			receiptURLMap = request.getUrlData();
+		}
+		String paymentReceiptURL = "";
+		String permissionLetterURL = "";
+		if (!BookingsFieldsValidator.isNullOrEmpty(receiptURLMap)){
+			paymentReceiptURL = receiptURLMap.get(BookingsConstants.PAYMENT_RECEIPT);
+			permissionLetterURL = receiptURLMap.get(BookingsConstants.PERMISSION_LETTER);
+		}
 		message = message.replace("\\n", "\n");
-		emailRequests.addAll(util.createEMAILRequest(message, emailIdToOwner));
+		if (!BookingsFieldsValidator.isNullOrEmpty(paymentReceiptURL) || !BookingsFieldsValidator.isNullOrEmpty(permissionLetterURL)) {
+			attachments = util.prepareEmailAttachment(paymentReceiptURL, permissionLetterURL);
+			emailRequests.addAll(util.createEMAILRequest(message, emailIdToOwner, attachments));
+		}
+		else {
+			emailRequests.addAll(util.createEMAILRequest(message, emailIdToOwner));
+		}
+		
+		// When Applicant submit application of OSBM booking, then mail notification send to approver of OSBM.
+		if(!BookingsFieldsValidator.isNullOrEmpty(request.getUser())) {
+			emailIdToOwner.remove(bookingsModel.getBkEmail());
+			emailIdToOwner.put(request.getUser().getEmailId(), request.getUser().getUserName());
+			message = util.getMailCustomizedMsgForApprover(bookingsModel.getBkApplicationNumber(), bookingsModel.getBkBookingType(), localizationMessages, request.getUser().getUserName());
+			emailRequests.addAll(util.createEMAILRequest(message, emailIdToOwner));
+		}
 	}
     
 	/**

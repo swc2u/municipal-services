@@ -1,16 +1,13 @@
 package org.egov.tlcalculator.repository.builder;
 
-import org.egov.tlcalculator.web.models.BillingSlabSearchCriteria;
+import java.util.List;
+
 import org.egov.tlcalculator.web.models.CalculationSearchCriteria;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class CalculationQueryBuilder {
 
-
-    private static final String INNER_JOIN_STRING = " INNER JOIN ";
     private static final String LEFT_OUTER_JOIN_STRING = " LEFT OUTER JOIN ";
 
     private static final String QUERY = "SELECT tp.*,acc.*,tp.consumercode as tp_consumercode FROM eg_tl_calculator_tradetype tp " +

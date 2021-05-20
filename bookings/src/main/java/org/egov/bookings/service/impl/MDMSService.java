@@ -71,16 +71,11 @@ public class MDMSService {
     }
 
 
-    /**
-     * Gets the startDate and the endDate of the financialYear
-     * @param requestInfo The RequestInfo of the calculationRequest
-     * @param license The tradeLicense for which calculation is done
-     * @return Map containing the startDate and endDate
-     */
-    public Map<String,Long> getTaxPeriods(RequestInfo requestInfo,BookingsModel license,Object mdmsData){
+    
+    public Map<String,Long> getTaxPeriods(RequestInfo requestInfo,BookingsModel bookingsModel,Object mdmsData){
         Map<String,Long> taxPeriods = new HashMap<>();
         try {
-        	 String jsonPath = BookingsCalculatorConstants.MDMS_FINACIALYEAR_PATH.replace("{}",license.getFinancialYear());
+        	 String jsonPath = BookingsCalculatorConstants.MDMS_FINACIALYEAR_PATH.replace("{}",bookingsModel.getFinancialYear());
              List<Map<String,Object>> jsonOutput =  JsonPath.read(mdmsData, jsonPath);
              Map<String,Object> financialYearProperties = jsonOutput.get(0);
              Object startDate = financialYearProperties.get(BookingsCalculatorConstants.MDMS_STARTDATE);
@@ -90,7 +85,7 @@ public class MDMSService {
 
         } catch (Exception e) {
             log.error("Error while fetvhing MDMS data", e);
-            throw new CustomException("INVALID FINANCIALYEAR", "No data found for the financialYear: "+license.getFinancialYear());
+            throw new CustomException("INVALID FINANCIALYEAR", "No data found for the financialYear: "+bookingsModel.getFinancialYear());
         }
         return taxPeriods;
     }

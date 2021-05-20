@@ -1,15 +1,14 @@
 package org.egov.tl.workflow;
 
+import static org.egov.tl.util.TLConstants.ACTION_APPROVE;
+
+import java.util.Map;
+
 import org.egov.tl.config.TLConfiguration;
 import org.egov.tl.producer.Producer;
-import org.egov.tl.web.models.TradeLicense;
 import org.egov.tl.web.models.TradeLicenseRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import static org.egov.tl.util.TLConstants.*;
 
 
 @Service

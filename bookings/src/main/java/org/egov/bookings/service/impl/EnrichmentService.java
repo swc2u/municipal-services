@@ -2,14 +2,17 @@ package org.egov.bookings.service.impl;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.text.DateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -18,22 +21,38 @@ import org.egov.bookings.contract.BookingsRequestKafka;
 import org.egov.bookings.contract.IdResponse;
 import org.egov.bookings.contract.NewLocationKafkaRequest;
 import org.egov.bookings.contract.ParkCommunityFeeMasterResponse;
+import org.egov.bookings.contract.TaxHeadMasterFields;
 import org.egov.bookings.contract.UserDetails;
 import org.egov.bookings.dto.SearchCriteriaFieldsDTO;
 import org.egov.bookings.model.BookingsModel;
+import org.egov.bookings.model.CommercialGrndAvailabilityModel;
+import org.egov.bookings.model.OsbmApproverModel;
 import org.egov.bookings.model.OsujmNewLocationModel;
 import org.egov.bookings.model.ParkCommunityHallV1MasterModel;
+import org.egov.bookings.model.RoomsModel;
+import org.egov.bookings.model.user.OwnerInfo;
+import org.egov.bookings.model.user.UserDetailResponse;
+import org.egov.bookings.models.demand.Demand;
+import org.egov.bookings.models.demand.DemandDetail;
+import org.egov.bookings.models.demand.TaxHeadEstimate;
+import org.egov.bookings.producer.BookingsProducer;
 import org.egov.bookings.repository.BookingsRepository;
+import org.egov.bookings.repository.CommonRepository;
+import org.egov.bookings.repository.OsbmApproverRepository;
 import org.egov.bookings.repository.OsujmNewLocationRepository;
+import org.egov.bookings.repository.RoomsRepository;
 import org.egov.bookings.repository.impl.IdGenRepository;
-import org.egov.bookings.service.BookingsCalculatorService;
 import org.egov.bookings.service.BookingsService;
+import org.egov.bookings.service.DemandService;
+import org.egov.bookings.service.RoomsService;
+import org.egov.bookings.utils.BookingsCalculatorConstants;
 import org.egov.bookings.utils.BookingsConstants;
 import org.egov.bookings.utils.BookingsUtils;
 import org.egov.bookings.validator.BookingsFieldsValidator;
 import org.egov.bookings.web.models.BookingsRequest;
 import org.egov.bookings.web.models.NewLocationRequest;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.Role;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,25 +77,50 @@ public class EnrichmentService {
 	@Autowired
 	private IdGenRepository idGenRepository;
 	
-	/** The bookings calculator service. */
-	@Autowired
-	BookingsCalculatorService bookingsCalculatorService;
 	
 	/** The bookings service. */
 	@Autowired
-	BookingsService bookingsService;
+	private BookingsService bookingsService;
 	
 	/** The demand service. */
 	@Autowired
-	DemandServiceImpl demandService;
+	private DemandService demandService;
 	
 	/** The bookings repository. */
 	@Autowired
 	private BookingsRepository bookingsRepository;
 	
+	/** The osujm new location repository. */
 	@Autowired
 	private OsujmNewLocationRepository osujmNewLocationRepository;
+	
+	/** The common repository. */
+	@Autowired
+	CommonRepository commonRepository;
 
+	/** The bookings service impl. */
+	@Autowired
+	private BookingsServiceImpl bookingsServiceImpl;
+	
+	/** The user service. */
+	@Autowired
+	private UserService userService;
+	
+	/** The osbm approver repository. */
+	@Autowired
+	private OsbmApproverRepository osbmApproverRepository;
+
+	
+	@Autowired
+	private RoomsService roomsService;
+	
+	@Autowired
+	private RoomsRepository roomsRepository;
+	
+	@Autowired
+	private BookingsProducer bookingsProducer;
+	
+	
 	/**
 	 * Enrich bookings create request.
 	 *
@@ -126,6 +170,11 @@ public class EnrichmentService {
 	}
 	
 	
+	/**
+	 * Enrich new location create request.
+	 *
+	 * @param newLocationRequest the new location request
+	 */
 	public void enrichNewLocationCreateRequest(NewLocationRequest newLocationRequest) {
 		RequestInfo requestInfo = newLocationRequest.getRequestInfo();
 		/*
@@ -140,6 +189,11 @@ public class EnrichmentService {
 
 	
 
+	/**
+	 * Sets the idgen ids for new location.
+	 *
+	 * @param newLocationRequest the new idgen ids for new location
+	 */
 	private void setIdgenIdsForNewLocation(NewLocationRequest newLocationRequest) {
 		RequestInfo requestInfo = newLocationRequest.getRequestInfo();
 		String tenantId = newLocationRequest.getNewLocationModel().getTenantId();
@@ -191,10 +245,21 @@ public class EnrichmentService {
 	 */
 	public void enrichBookingsDetails(BookingsRequest bookingsRequest) {
 		try {
-		bookingsRequest.getBookingsModel().setUuid(bookingsRequest.getRequestInfo().getUserInfo().getUuid());
-		java.sql.Date date = bookingsUtils.getCurrentSqlDate();
-		bookingsRequest.getBookingsModel().setBkDateCreated(date);
-		}catch (Exception e) {
+			if (!BookingsConstants.PACC_RE_INITIATED_ACTION.equals(bookingsRequest.getBookingsModel().getBkAction())) {
+				if(!BookingsConstants.EMPLOYEE.equals(bookingsRequest.getRequestInfo().getUserInfo().getType()))
+				bookingsRequest.getBookingsModel().setUuid(bookingsRequest.getRequestInfo().getUserInfo().getUuid());
+				java.sql.Date date = bookingsUtils.getCurrentSqlDate();
+				bookingsRequest.getBookingsModel().setBkDateCreated(date);
+				DateFormat formatter = bookingsUtils.getSimpleDateFormat();
+				bookingsRequest.getBookingsModel().setCreatedDate(formatter.format(new java.util.Date()));
+				bookingsRequest.getBookingsModel().setLastModifiedDate(formatter.format(new java.util.Date()));
+			}
+			else {
+				BookingsModel bookingsModel = bookingsRepository
+						.findByBkApplicationNumber(bookingsRequest.getBookingsModel().getBkApplicationNumber());
+				bookingsRequest.getBookingsModel().setBkDateCreated(bookingsModel.getBkDateCreated());
+			}
+		} catch (Exception e) {
 			throw new CustomException("INVALID_BOOKING_REQUEST", e.getMessage());
 		}
 	}
@@ -281,7 +346,20 @@ public class EnrichmentService {
 
 
 
-	public void enrichNewLocationDetails(NewLocationRequest newLocationRequest) {
+	/**
+	 * Enrich new location details.
+	 *
+	 * @param newLocationRequest the new location request
+	 */
+	public void enrichNewLocationDetails(NewLocationRequest newLocationRequest, boolean flag) {
+		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
+		if (!flag) {
+
+			newLocationRequest.getNewLocationModel().setCreatedDate(formatter.format(new java.util.Date()));
+			newLocationRequest.getNewLocationModel().setLastModifiedDate(formatter.format(new java.util.Date()));
+		} else {
+			newLocationRequest.getNewLocationModel().setLastModifiedDate(formatter.format(new java.util.Date()));
+		}
 		newLocationRequest.getNewLocationModel().setUuid(newLocationRequest.getRequestInfo().getUserInfo().getUuid());
 		java.sql.Date date = bookingsUtils.getCurrentSqlDate();
 		newLocationRequest.getNewLocationModel().setDateCreated(date);
@@ -289,6 +367,12 @@ public class EnrichmentService {
 
 
 
+	/**
+	 * Enrich nlujm details.
+	 *
+	 * @param newLocationRequest the new location request
+	 * @return the osujm new location model
+	 */
 	public OsujmNewLocationModel enrichNlujmDetails(NewLocationRequest newLocationRequest) {
 		OsujmNewLocationModel osujmNewLocationModel = null;
 		try {
@@ -305,10 +389,23 @@ public class EnrichmentService {
 
 
 
+	/**
+	 * Extract days between two dates.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @return the big decimal
+	 */
 	public BigDecimal extractDaysBetweenTwoDates(BookingsRequest bookingsRequest) {
 			try {
-				LocalDate dateBefore = LocalDate.parse(bookingsRequest.getBookingsModel().getBkFromDate()+"");
-				LocalDate dateAfter = LocalDate.parse(bookingsRequest.getBookingsModel().getBkToDate()+"");
+				LocalDate dateBefore = null;
+				LocalDate dateAfter = null;
+				if(BookingsConstants.PACC_RE_INITIATED_ACTION.equals(bookingsRequest.getBookingsModel().getBkAction())) {
+				 dateBefore = LocalDate.parse(bookingsRequest.getBookingsModel().getBkStartingDate()+"");
+				 dateAfter = LocalDate.parse(bookingsRequest.getBookingsModel().getBkEndingDate()+"");
+				}else {
+					dateBefore = LocalDate.parse(bookingsRequest.getBookingsModel().getBkFromDate()+"");
+					dateAfter = LocalDate.parse(bookingsRequest.getBookingsModel().getBkToDate()+"");	
+				}
 				long noOfDaysBetween = ChronoUnit.DAYS.between(dateBefore, dateAfter);
 				long totalDays = noOfDaysBetween+1;
 				BigDecimal finalAmount = BigDecimal.valueOf(totalDays);
@@ -320,6 +417,12 @@ public class EnrichmentService {
 
 
 
+	/**
+	 * Enrich osujm details.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @return the bookings model
+	 */
 	public BookingsModel enrichOsujmDetails(BookingsRequest bookingsRequest) {
 		BookingsModel bookingsModel = null;
 		try {
@@ -340,23 +443,37 @@ public class EnrichmentService {
 
 
 
+	/**
+	 * Enrich booked dates.
+	 *
+	 * @param bookingsModel the bookings model
+	 * @return the list
+	 */
 	public List<LocalDate> enrichBookedDates(Set<BookingsModel> bookingsModel) {
 		List<LocalDate> listOfDates = new ArrayList<>();
 
-			for (BookingsModel bookingsModel1 : bookingsModel) {
+		for (BookingsModel bookingsModel1 : bookingsModel) {
+			if (!BookingsConstants.PACC_ACTION_APPROVE_CLERK_DEO.equals(bookingsModel1.getBkAction())) {
 				LocalDate startDate = LocalDate.parse(bookingsModel1.getBkFromDate() + "");
 				LocalDate endDate = LocalDate.parse(bookingsModel1.getBkToDate() + "");
 				long numOfDays = ChronoUnit.DAYS.between(startDate, endDate);
 
-				List<LocalDate>listOfDates2 = LongStream.range(0, numOfDays).mapToObj(startDate::plusDays)
+				List<LocalDate> listOfDates2 = LongStream.range(0, numOfDays).mapToObj(startDate::plusDays)
 						.collect(Collectors.toList());
 				listOfDates.addAll(listOfDates2);
 				listOfDates.add(endDate);
 			}
+		}
 
 		return listOfDates;
 	}
 
+	/**
+	 * Extract all dates between two dates.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @return the list
+	 */
 	public List<LocalDate> extractAllDatesBetweenTwoDates(BookingsRequest bookingsRequest) {
 		LocalDate startDate = LocalDate.parse(bookingsRequest.getBookingsModel().getBkFromDate() + "");
 		LocalDate endDate = LocalDate.parse(bookingsRequest.getBookingsModel().getBkToDate() + "");
@@ -371,6 +488,12 @@ public class EnrichmentService {
 
 
 
+	/**
+	 * Enrich pacc details.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @return the bookings model
+	 */
 	public BookingsModel enrichPaccDetails(BookingsRequest bookingsRequest) {
 		BookingsModel bookingsModel = null;
 		try {
@@ -379,6 +502,12 @@ public class EnrichmentService {
 			bookingsModel.setBkApplicationStatus(bookingsRequest.getBookingsModel().getBkApplicationStatus());
 			bookingsModel.setBkAction(bookingsRequest.getBookingsModel().getBkAction());
 			bookingsModel.setBkRemarks(bookingsRequest.getBookingsModel().getBkRemarks());
+			bookingsModel.setTimeslots(bookingsRequest.getBookingsModel().getTimeslots());
+			bookingsModel.setRefundableSecurityMoney(bookingsRequest.getBookingsModel().getRefundableSecurityMoney());
+			bookingsRequest.getBookingsModel().setBkDateCreated(bookingsModel.getBkDateCreated());
+			if(!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel().getBkPaymentStatus())) {
+				bookingsModel.setBkPaymentStatus(bookingsRequest.getBookingsModel().getBkPaymentStatus());
+			}
 		} catch (Exception e) {
 			throw new CustomException("PACC UPDATE ERROR", "ERROR WHILE UPDATING PACC DETAILS ");
 		}
@@ -387,6 +516,12 @@ public class EnrichmentService {
 
 
 
+	/**
+	 * Enrich park community amount.
+	 *
+	 * @param parkCommunityHallFee the park community hall fee
+	 * @return the park community fee master response
+	 */
 	public ParkCommunityFeeMasterResponse enrichParkCommunityAmount(
 			ParkCommunityHallV1MasterModel parkCommunityHallFee) {
 		ParkCommunityFeeMasterResponse parkCommunityFeeMasterResponse = new ParkCommunityFeeMasterResponse();
@@ -416,6 +551,11 @@ public class EnrichmentService {
 
 
 
+	/**
+	 * Enrich bookings assignee.
+	 *
+	 * @param bookingsRequest the bookings request
+	 */
 	public void enrichBookingsAssignee(BookingsRequest bookingsRequest) {
 		String businessService = bookingsRequest.getBookingsModel().getBusinessService();
 		SearchCriteriaFieldsDTO searchCriteriaFieldsDTO = new SearchCriteriaFieldsDTO();
@@ -429,8 +569,64 @@ public class EnrichmentService {
 		 bookingsRequest.getBookingsModel().setAssignee(userdetailsList.get(0).getUuid());
 	}
 
+	/**
+	 * Enrich assignee.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @param bookingsModel the bookings model
+	 */
+	public void enrichAssignee(BookingsRequest bookingsRequest, BookingsModel bookingsModel) {
+		List<String> roleCodes = new ArrayList<>();
+		UserDetailResponse userDetailResponse = new UserDetailResponse();
+		String applicationNumber = bookingsModel.getBkApplicationNumber();
+		String action = bookingsModel.getBkAction();
+		String approverName = "";
+		OsbmApproverModel osbmApproverModel = new OsbmApproverModel();
+		List<Role> rolesList = new ArrayList<>();
+		if(!BookingsFieldsValidator.isNullOrEmpty(applicationNumber) && !BookingsFieldsValidator.isNullOrEmpty(action)) {
+			List<String> nextState = commonRepository.findNextState(applicationNumber, action);
+			if (!BookingsFieldsValidator.isNullOrEmpty(nextState)) {
+				approverName = commonRepository.findApproverName(nextState.get(0));
+			}
+			String[] approverArray = approverName.split(",");
+			if (!BookingsFieldsValidator.isNullOrEmpty(approverArray)) {
+				for (String approver : approverArray) {
+					if (!BookingsConstants.CITIZEN.equals(approver)) {
+						roleCodes.add(approver);
+					}
+				}
+				if (!BookingsFieldsValidator.isNullOrEmpty(roleCodes)) {
+					StringBuilder url = bookingsServiceImpl.prepareUrlForUserList();
+					userDetailResponse = userService.getUserSearchDetails(roleCodes, url,
+							bookingsRequest.getRequestInfo());
+				}
+				if (!BookingsFieldsValidator.isNullOrEmpty(userDetailResponse)) {
+					List<OwnerInfo> userList = userDetailResponse.getUser();
+					if (!BookingsFieldsValidator.isNullOrEmpty(userList)) {
+						for (int i=0; i< userList.size(); i++) {
+							rolesList = userList.get(i).getRoles();
+							for(Role role : rolesList) {
+								osbmApproverModel = osbmApproverRepository.findBySectorAndUuidAndRoleCodeAndUserId(bookingsModel.getBkSector(), userList.get(i).getUuid(), role.getCode(), userList.get(i).getId());
+							}
+							if (!BookingsFieldsValidator.isNullOrEmpty(osbmApproverModel)) {
+								bookingsRequest.setUser(userList.get(i));
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 
+
+	/**
+	 * Enrich for kafka.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @return the bookings request kafka
+	 */
 	public BookingsRequestKafka enrichForKafka(BookingsRequest bookingsRequest) {
 		List<BookingsModel> bModel = new ArrayList<>();
 		bModel.add(bookingsRequest.getBookingsModel());
@@ -440,11 +636,444 @@ public class EnrichmentService {
 
 
 
+	/**
+	 * Enrich kafka for new location.
+	 *
+	 * @param newLocationRequest the new location request
+	 * @return the new location kafka request
+	 */
 	public NewLocationKafkaRequest enrichKafkaForNewLocation(NewLocationRequest newLocationRequest) {
 		List<OsujmNewLocationModel> sujmNewLocationModelList = new ArrayList<>();
 		sujmNewLocationModelList.add(newLocationRequest.getNewLocationModel());
 		NewLocationKafkaRequest kafkaNewLocationRequest =  NewLocationKafkaRequest.builder().newLocationModel(sujmNewLocationModelList).requestInfo(newLocationRequest.getRequestInfo()).build();
 		return kafkaNewLocationRequest;
 	}
+
+
+
+	/**
+	 * Enrich park community create request.
+	 *
+	 * @param bookingsRequest the bookings request
+	 */
+	public void enrichParkCommunityCreateRequest(BookingsRequest bookingsRequest) {
+		// TODO Auto-generated method stub
+
+		RequestInfo requestInfo = bookingsRequest.getRequestInfo();
+		String tenantId = bookingsRequest.getBookingsModel().getTenantId();
+
+		BookingsModel bookingsModel = bookingsRequest.getBookingsModel();
+
+		List<String> applicationNumbers = getIdList(requestInfo, tenantId, config.getApplicationNumberIdgenName(),
+				config.getApplicationNumberIdgenFormat());
+		ListIterator<String> itr = applicationNumbers.listIterator();
+
+		Map<String, String> errorMap = new HashMap<>();
+	
+		if (!errorMap.isEmpty())
+			throw new CustomException(errorMap);
+		bookingsModel.setBkApplicationNumber(itr.next());
+		if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel().getTimeslots())) {
+			bookingsRequest.getBookingsModel().getTimeslots().forEach(slots -> {
+				slots.setId(UUID.randomUUID().toString());
+				slots.setApplicationNumber(bookingsModel.getBkApplicationNumber());
+			});
+		}
+	}
+
+
+
+	/**
+	 * Enrich pacc payment details.
+	 *
+	 * @param bookingsRequest the bookings request
+	 */
+	public void enrichPaccPaymentDetails(BookingsRequest bookingsRequest) {
+		String businessService = bookingsRequest.getBookingsModel().getBusinessService();
+		
+		if(BookingsConstants.PACC_ACTION_CANCEL.equals(bookingsRequest.getBookingsModel().getBkAction())) {
+			List<RoomsModel> roomsList = roomsRepository
+					.findByCommunityApplicationNumber(bookingsRequest.getBookingsModel().getBkApplicationNumber());
+			roomsList.forEach(room->{
+				room.setRoomStatus(BookingsConstants.PACC_ACTION_CANCEL);
+			});
+			BookingsRequestKafka kafkaBookingRequest = enrichForKafka(bookingsRequest);
+			bookingsProducer.push(config.getUpdateRoomStatus(), kafkaBookingRequest);
+		}
+		
+		BookingsModel bookingsModel = bookingsRepository
+				.findByBkApplicationNumber(bookingsRequest.getBookingsModel().getBkApplicationNumber());
+		bookingsRequest.getBookingsModel().setBkDateCreated(bookingsModel.getBkDateCreated());
+		if (BookingsConstants.APPLY.equals(bookingsRequest.getBookingsModel().getBkAction())
+				&& BookingsConstants.BUSINESS_SERVICE_PACC.equals(businessService) &&
+				BookingsConstants.PACC_ACTION_MODIFY.equals(bookingsRequest.getBookingsModel().getBkAction())) {
+			config.setParkAndCommunityLock(true);
+			if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel().getBkPaymentStatus())) {
+				bookingsRequest.getBookingsModel()
+						.setBkPaymentStatus(bookingsRequest.getBookingsModel().getBkPaymentStatus());
+			}
+		}
+		if (BookingsConstants.PACC_ACTION_OFFLINE_MODIFY.equals(bookingsRequest.getBookingsModel().getBkAction())
+				&& BookingsConstants.BUSINESS_SERVICE_PACC.equals(businessService) &&
+				BookingsConstants.EMPLOYEE.equals(bookingsRequest.getRequestInfo().getUserInfo().getType())) {
+			config.setParkAndCommunityLock(true);
+			if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel().getBkPaymentStatus())) {
+				bookingsRequest.getBookingsModel()
+						.setBkPaymentStatus(bookingsRequest.getBookingsModel().getBkPaymentStatus());
+			}
+		}
+	}
+
+	/**
+	 * Enrich tax head estimate for PACC.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @param finalAmount the final amount
+	 * @param taxHeadCode1 the tax head code 1
+	 * @param taxHeadCode2 the tax head code 2
+	 * @param taxHeadMasterFieldList the tax head master field list
+	 * @param parkCommunityHallV1FeeMaster the park community hall V 1 fee master
+	 * @return the list
+	 */
+	private List<TaxHeadEstimate> enrichTaxHeadEstimateForPACC(BookingsRequest bookingsRequest, BigDecimal rent, BigDecimal cleaningCharges, String taxHeadCode1, String taxHeadCode2,
+			String taxHeadCode3, String taxHeadCode4, String taxHeadCode5, List<TaxHeadMasterFields> taxHeadMasterFieldList,
+			ParkCommunityHallV1MasterModel parkCommunityHallV1FeeMaster) {
+
+		List<TaxHeadEstimate> taxHeadEstimate1 = new ArrayList<>();
+		for (TaxHeadMasterFields taxHeadEstimate : taxHeadMasterFieldList) {
+			if (taxHeadEstimate.getCode().equals(taxHeadCode1)) {
+				taxHeadEstimate1.add(
+						new TaxHeadEstimate(taxHeadEstimate.getCode(), rent, taxHeadEstimate.getCategory()));
+				continue;
+			}
+			if(BookingsConstants.PAYMENT_SUCCESS_STATUS
+					.equals(bookingsRequest.getBookingsModel().getBkPaymentStatus())) {
+				if (taxHeadEstimate.getCode().equals(taxHeadCode2)) {
+					rent = rent
+							.add(BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getLocationChangeAmount())));
+					BigDecimal rentPlusLocChangePlusCleansingAmnt = rent.add(BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getCleaningCharges())));
+					BigDecimal paccTax = BookingsUtils.roundOffToNearest(rentPlusLocChangePlusCleansingAmnt
+							.multiply((BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getSurcharge()))
+									.divide(new BigDecimal(100)))));
+					taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+							paccTax,
+							taxHeadEstimate.getCategory()));
+					continue;
+				}
+			}
+			else {
+				if (taxHeadEstimate.getCode().equals(taxHeadCode2)) {
+					BigDecimal rentPlusCleansingAmount = rent.add(cleaningCharges);
+					BigDecimal paccTax = BookingsUtils.roundOffToNearest(rentPlusCleansingAmount
+							.multiply((BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getSurcharge()))
+									.divide(new BigDecimal(100)))));
+					taxHeadEstimate1
+							.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+									paccTax,
+									taxHeadEstimate.getCategory()));
+					continue;
+				}
+			}
+			
+			if (taxHeadEstimate.getCode().equals(taxHeadCode3)) {
+				taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+						cleaningCharges,
+						taxHeadEstimate.getCategory()));
+				continue;
+			}
+			/*if (taxHeadEstimate.getCode().equals(BookingsConstants.PACC_TAXHEAD_CODE_LUXURY_TAX)) {
+				taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+						BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getLuxuryTax())),
+						taxHeadEstimate.getCategory()));
+				continue;
+			}*/
+			if (taxHeadEstimate.getCode().equals(taxHeadCode4)) {
+				taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+						BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getRefundabelSecurity())),
+						taxHeadEstimate.getCategory()));
+				continue;
+			}
+			
+			if(bookingsRequest.getRequestInfo().getUserInfo().getType().equals(BookingsConstants.EMPLOYEE)) {
+			if (taxHeadEstimate.getCode().equals(taxHeadCode5)) {
+				taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+						BookingsCalculatorConstants.FACILATION_CHARGE,
+						taxHeadEstimate.getCategory()));
+				}
+			continue;
+			}
+			if (BookingsConstants.PAYMENT_SUCCESS_STATUS
+					.equals(bookingsRequest.getBookingsModel().getBkPaymentStatus())) {
+				if (taxHeadEstimate.getCode().equals(BookingsConstants.PACC_TAXHEAD_CODE_3)) {
+					taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+							BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getLocationChangeAmount())),
+							taxHeadEstimate.getCategory()));
+				}
+				if (taxHeadEstimate.getCode().equals(BookingsConstants.PACC_TAXHEAD_CODE_COMM_LOC_CHANGE)) {
+					taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+							BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getLocationChangeAmount())),
+							taxHeadEstimate.getCategory()));
+				}
+			continue;
+			}
+		}
+		return taxHeadEstimate1;
+	}
+
+
+	/**
+	 * Enrich pacc amount for booking change.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @param finalAmount the final amount
+	 * @param taxHeadCode1 the tax head code 1
+	 * @param taxHeadCode2 the tax head code 2
+	 * @param taxHeadMasterFieldList the tax head master field list
+	 * @param parkCommunityHallV1FeeMaster the park community hall V 1 fee master
+	 * @return the list
+	 */
+	public List<TaxHeadEstimate> enrichPaccAmountForBookingChange(BookingsRequest bookingsRequest,
+			BigDecimal rent, BigDecimal cleaningCharges, String taxHeadCode1, String taxHeadCode2, String taxHeadCode3, String taxHeadCode4, String taxHeadCode5,
+			List<TaxHeadMasterFields> taxHeadMasterFieldList,
+			ParkCommunityHallV1MasterModel parkCommunityHallV1FeeMaster) {
+
+		BigDecimal demandDetailsAmount = BigDecimal.ZERO;
+		List<TaxHeadEstimate> taxHeadEstimate1 = new ArrayList<>();
+		
+		if (BookingsConstants.PAYMENT_SUCCESS_STATUS.equals(bookingsRequest.getBookingsModel().getBkPaymentStatus())) {
+			List<DemandDetail> demandDetails = null;
+			if (bookingsService.isBookingExists(bookingsRequest.getBookingsModel().getBkApplicationNumber())) {
+				List<Demand> searchResult = demandService.searchDemand(bookingsRequest.getBookingsModel().getTenantId(),
+						Collections.singleton(bookingsRequest.getBookingsModel().getBkApplicationNumber()), bookingsRequest.getRequestInfo(),
+						bookingsRequest.getBookingsModel().getFinanceBusinessService());
+
+				Demand demand = searchResult.get(0);
+				 demandDetails = demand.getDemandDetails();
+			}
+			for(DemandDetail demandDetail :demandDetails) {
+				if(BookingsCalculatorConstants.OSBM_TAXHEAD_CODE_1.equals(demandDetail.getTaxHeadMasterCode())) {
+					demandDetailsAmount = demandDetail.getTaxAmount();
+					continue;
+				}
+				if (BookingsCalculatorConstants.PACC_TAX_CODE_1.equals(demandDetail.getTaxHeadMasterCode())) {
+					demandDetailsAmount = demandDetail.getTaxAmount();
+					continue;
+				}
+			}
+			if (rent.compareTo(demandDetailsAmount) < 1
+					|| rent.compareTo(demandDetailsAmount) == 0) {
+				//config.setDemandFlag(false);
+				BigDecimal rentAfterVenueOrLocationChange = BigDecimal.ZERO;
+				BigDecimal cleansingChargeAfterVenueOrLocationChange = BigDecimal.ZERO;
+				BigDecimal totalPACCTaxAmount = BigDecimal.ZERO;
+				boolean paccTaxFlag = true;
+				BigDecimal locationChangeTax = BigDecimal
+						.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getLocationChangeAmount()))
+						.multiply((BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getSurcharge()))
+								.divide(new BigDecimal(100))));
+				for(DemandDetail demandDetail : demandDetails) {
+					if(demandDetail.getTaxHeadMasterCode().equals(taxHeadCode1)) {
+						rentAfterVenueOrLocationChange = rentAfterVenueOrLocationChange.add(demandDetail.getTaxAmount());
+					}
+					if(demandDetail.getTaxHeadMasterCode().equals(taxHeadCode2)) {
+						totalPACCTaxAmount = totalPACCTaxAmount.add(demandDetail.getTaxAmount());
+					}
+					if(demandDetail.getTaxHeadMasterCode().equals(taxHeadCode2)
+							&& demandDetail.getTaxAmount().compareTo(locationChangeTax) == 0) {
+						paccTaxFlag = false;
+					}
+					if(demandDetail.getTaxHeadMasterCode().equals(taxHeadCode3)) {
+						cleansingChargeAfterVenueOrLocationChange = cleansingChargeAfterVenueOrLocationChange.add(demandDetail.getTaxAmount());
+					}
+				}
+				if(paccTaxFlag)
+				totalPACCTaxAmount = totalPACCTaxAmount.add(locationChangeTax);
+				for (TaxHeadMasterFields taxHeadEstimate : taxHeadMasterFieldList) {
+					if (BookingsConstants.PAYMENT_SUCCESS_STATUS
+							.equals(bookingsRequest.getBookingsModel().getBkPaymentStatus())) {
+						
+						if (taxHeadEstimate.getCode().equals(taxHeadCode1)) {
+							taxHeadEstimate1.add(
+									new TaxHeadEstimate(taxHeadEstimate.getCode(), rentAfterVenueOrLocationChange, taxHeadEstimate.getCategory()));
+							continue;
+						}
+						
+						if (taxHeadEstimate.getCode().equals(BookingsConstants.PACC_TAXHEAD_CODE_3)) {
+							taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+									BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getLocationChangeAmount())),
+									taxHeadEstimate.getCategory()));
+							continue;
+						}
+						if (taxHeadEstimate.getCode().equals(BookingsConstants.PACC_TAXHEAD_CODE_COMM_LOC_CHANGE)) {
+							taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+									BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getLocationChangeAmount())),
+									taxHeadEstimate.getCategory()));
+							continue;
+						}
+						
+						if (taxHeadEstimate.getCode().equals(taxHeadCode2)) {
+							taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
+									totalPACCTaxAmount,
+									taxHeadEstimate.getCategory()));
+							continue;
+						}
+						if (taxHeadEstimate.getCode().equals(taxHeadCode3)) {
+							taxHeadEstimate1.add(
+									new TaxHeadEstimate(taxHeadEstimate.getCode(), cleansingChargeAfterVenueOrLocationChange, taxHeadEstimate.getCategory()));
+							continue;
+						}
+						
+					}
+				}
+				
+				/*taxHeadEstimate1 = enrichTaxHeadEstimateForPACC(bookingsRequest, BigDecimal.ZERO, taxHeadCode1, taxHeadCode2,
+						taxHeadMasterFieldList, parkCommunityHallV1FeeMaster);*/
+			}
+
+			else {
+				taxHeadEstimate1 = enrichTaxHeadEstimateForPACC(bookingsRequest, rent, cleaningCharges, taxHeadCode1, taxHeadCode2, taxHeadCode3, taxHeadCode4, taxHeadCode5,
+						taxHeadMasterFieldList, parkCommunityHallV1FeeMaster);
+			}
+		} else {
+
+			taxHeadEstimate1 = enrichTaxHeadEstimateForPACC(bookingsRequest, rent, cleaningCharges, taxHeadCode1, taxHeadCode2, taxHeadCode3, taxHeadCode4, taxHeadCode5,
+					taxHeadMasterFieldList, parkCommunityHallV1FeeMaster);
+
+		}
+		return taxHeadEstimate1;
+	}
+
+
+
+	/**
+	 * Enrich re initiated request. setting BkStartingDate and BkEndingDate from
+	 * requestBody and setting BkFromDate and BkToDate from db in case of action
+	 * RE_INITIATED
+	 * @param bookingsRequest the bookings request
+	 * @param flag 
+	 */
+	public void enrichReInitiatedRequest(BookingsRequest bookingsRequest, boolean flag) {
+		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
+		if (!flag) {
+			bookingsRequest.getBookingsModel().setCreatedDate(formatter.format(new java.util.Date()));
+			bookingsRequest.getBookingsModel().setLastModifiedDate(formatter.format(new java.util.Date()));
+		} else {
+			bookingsRequest.getBookingsModel().setLastModifiedDate(formatter.format(new java.util.Date()));
+		}
+		if (BookingsConstants.PACC_RE_INITIATED_ACTION.equals(bookingsRequest.getBookingsModel().getBkAction()) && flag
+				&& BookingsConstants.BUSINESS_SERVICE_PACC
+						.equals(bookingsRequest.getBookingsModel().getBusinessService())) {
+			BookingsModel findByBkApplicationNumber = bookingsRepository
+					.findByBkApplicationNumber(bookingsRequest.getBookingsModel().getBkApplicationNumber());
+			bookingsRequest.getBookingsModel().setBkStartingDate(bookingsRequest.getBookingsModel().getBkFromDate());
+			bookingsRequest.getBookingsModel().setBkEndingDate(bookingsRequest.getBookingsModel().getBkToDate());
+			bookingsRequest.getBookingsModel().setBkFromDate(findByBkApplicationNumber.getBkFromDate());
+			bookingsRequest.getBookingsModel().setBkToDate(findByBkApplicationNumber.getBkToDate());
+			bookingsRequest.getBookingsModel().setBkBookingVenue(findByBkApplicationNumber.getBkBookingVenue());
+			bookingsRequest.getBookingsModel().setBkType(bookingsRequest.getBookingsModel().getBkBookingVenue());
+		
+			List<RoomsModel> roomsList = roomsRepository
+					.findByCommunityApplicationNumber(bookingsRequest.getBookingsModel().getBkApplicationNumber());
+			roomsList.forEach(room->{
+				room.setRoomStatus(BookingsConstants.PACC_ACTION_CANCEL);
+			});
+			BookingsRequestKafka kafkaBookingRequest = enrichForKafka(bookingsRequest);
+			bookingsProducer.push(config.getUpdateRoomStatus(), kafkaBookingRequest);
+		}
+	}
+
+	
+	
+	public void enrichRoomForCommunityBookingRequest(BookingsRequest bookingsRequest) {
+		// TODO Auto-generated method stub
+
+		RequestInfo requestInfo = bookingsRequest.getRequestInfo();
+		String tenantId = bookingsRequest.getBookingsModel().getTenantId();
+
+		BookingsModel bookingsModel = bookingsRequest.getBookingsModel();
+
+		List<String> applicationNumbers = getIdList(requestInfo, tenantId, config.getApplicationNumberIdgenName(),
+				config.getApplicationNumberIdgenRoomFormat());
+		ListIterator<String> itr = applicationNumbers.listIterator();
+
+		Map<String, String> errorMap = new HashMap<>();
+
+		if (!errorMap.isEmpty())
+			throw new CustomException(errorMap);
+		bookingsModel.getRoomsModel().get(0).setRoomApplicationNumber(itr.next());
+		if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel().getRoomsModel())) {
+		
+			bookingsRequest.getBookingsModel().getRoomsModel().forEach(roomModel -> {
+				roomModel.setRoomApplicationNumber(bookingsModel.getRoomsModel().get(0).getRoomApplicationNumber());
+				roomModel.setCommunityApplicationNumber(bookingsModel.getBkApplicationNumber());
+				roomModel.setId(UUID.randomUUID().toString());
+			});
+			
+			/*bookingsRequest.getBookingsModel().getRoomsModel().get(0)
+					.setRoomApplicationNumber(bookingsModel.getRoomsModel().get(0).getRoomApplicationNumber());
+			bookingsRequest.getBookingsModel().getRoomsModel().get(0)
+					.setCommunityApplicationNumber(bookingsModel.getBkApplicationNumber());*/
+		}
+	}
+
+
+
+	public void generateDemandForRoom(BookingsRequest bookingsRequest) {
+
+		if (!roomsService.isRoomBookingExists(bookingsRequest.getBookingsModel().getRoomsModel().get(0).getRoomApplicationNumber())) {
+			demandService.createDemandForRoom(bookingsRequest);
+		} else
+			demandService.updateDemandForRoom(bookingsRequest);
+
+	}
+
+
+
+	public void enrichRoomDetails(BookingsRequest bookingsRequest, boolean flag) {
+		LocalDate date = LocalDate.now();
+		Date date1 = Date.valueOf(date);
+		
+		for(RoomsModel roomModel : bookingsRequest.getBookingsModel().getRoomsModel()) {
+			if(!flag)
+			roomModel.setCreatedDate(date1);
+			roomModel.setLastModifiedDate(date1);
+		}
+		List<RoomsModel> roomsModelList = roomsRepository.findByRoomApplicationNumber(
+				bookingsRequest.getBookingsModel().getRoomsModel().get(0).getRoomApplicationNumber());
+		List<RoomsModel> bkRoomList = bookingsRequest.getBookingsModel().getRoomsModel();
+		if (!BookingsFieldsValidator.isNullOrEmpty(roomsModelList)) {
+			/*bookingsRequest.getBookingsModel().getRoomsModel().get(0)
+					.setRoomBusinessService(bookingsRequest.getBookingsModel().getRoomBusinessService());*/
+			for(RoomsModel roomModel : roomsModelList) {
+			 date = LocalDate.now();
+			 date1 = Date.valueOf(date);
+			for(RoomsModel bkRoomModel : bkRoomList) {
+				bkRoomModel.setLastModifiedDate(date1);
+				bkRoomModel
+					.setCommunityApplicationNumber((roomModel.getCommunityApplicationNumber()));
+				bkRoomModel.setDiscount(bookingsRequest.getBookingsModel().getDiscount());
+			}
+			}
+		}
+
+	}
+	
+	
+	
+	public BigDecimal extractDaysBetweenTwoDates(java.sql.Date fromDate, java.sql.Date toDate) {
+		try {
+			LocalDate dateBefore = null;
+			LocalDate dateAfter = null;
+			dateBefore = LocalDate.parse(fromDate + "");
+			dateAfter = LocalDate.parse(toDate + "");
+			long noOfDaysBetween = ChronoUnit.DAYS.between(dateBefore, dateAfter);
+			long totalDays = noOfDaysBetween + 1;
+			BigDecimal finalDays = BigDecimal.valueOf(totalDays);
+			return finalDays;
+		} catch (Exception e) {
+			throw new CustomException("INVALID_REQUEST", e.getLocalizedMessage());
+		}
+	}
+
 
 }

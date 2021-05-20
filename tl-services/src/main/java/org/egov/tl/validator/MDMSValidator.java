@@ -1,46 +1,27 @@
 package org.egov.tl.validator;
 
+import static org.egov.tl.util.TLConstants.businessService_BPA;
+import static org.egov.tl.util.TLConstants.businessService_TL;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.jayway.jsonpath.JsonPath;
-import lombok.extern.slf4j.Slf4j;
-import org.egov.common.contract.request.RequestInfo;
-import org.egov.mdms.model.MdmsCriteriaReq;
-import org.egov.tl.repository.ServiceRequestRepository;
+
 import org.egov.tl.util.TLConstants;
-import org.egov.tl.util.TradeUtil;
 import org.egov.tl.web.models.TradeLicenseRequest;
 import org.egov.tracer.model.CustomException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
-
-import static org.egov.tl.util.TLConstants.businessService_BPA;
-import static org.egov.tl.util.TLConstants.businessService_TL;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Component
 @Slf4j
 public class MDMSValidator {
-
-
-    private ServiceRequestRepository requestRepository;
-
-    private TradeUtil util;
-
-    private ServiceRequestRepository serviceRequestRepository;
-
-
-    @Autowired
-    public MDMSValidator(ServiceRequestRepository requestRepository, TradeUtil util,
-                         ServiceRequestRepository serviceRequestRepository) {
-        this.requestRepository = requestRepository;
-        this.util = util;
-        this.serviceRequestRepository = serviceRequestRepository;
-    }
-
-
-
 
 
     /**
@@ -186,31 +167,6 @@ public class MDMSValidator {
         System.err.println(" the mdms response is : " + mdmsResMap);
         return mdmsResMap;
     }
-
-
-    /**
-     * Fetches map of UOM to UOMValues
-     * @param mdmsData The MDMS data
-     * @return
-     */
-    private Map<String, List<String>> getUomMap(Object mdmsData) {
-
-        List<String> modulepaths = Arrays.asList(TLConstants.TL_JSONPATH_CODE);
-        final Map<String, List<String>> mdmsResMap = new HashMap<>();
-
-        modulepaths.forEach( modulepath -> {
-            try {
-                mdmsResMap.putAll(JsonPath.read(mdmsData, modulepath));
-            } catch (Exception e) {
-                log.error("Error while fetvhing MDMS data", e);
-                throw new CustomException(TLConstants.INVALID_TENANT_ID_MDMS_KEY, TLConstants.INVALID_TENANT_ID_MDMS_MSG);
-            }
-        });
-
-        System.err.println(" the mdms response is : " + mdmsResMap);
-        return mdmsResMap;
-    }
-
 
     private Map getTradeTypeUomMap(Object mdmsData){
 

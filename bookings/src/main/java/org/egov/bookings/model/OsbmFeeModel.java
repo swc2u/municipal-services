@@ -1,9 +1,9 @@
 package org.egov.bookings.model;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// TODO: Auto-generated Javadoc
 /* (non-Javadoc)
  * @see java.lang.Object#toString()
  */
@@ -35,14 +34,13 @@ import lombok.NoArgsConstructor;
  */
 @AllArgsConstructor
 @Entity(name = "OsbmFeeModel")
-@Table(name = "TM_OSBM_FEE")
+@Table(name = "BK_OSBM_FEE")
 public class OsbmFeeModel {
 
 	/** The id. */
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	@Column(name = "ID")
-	private Long id;
+	private String id;
 
 	/** The village city. */
 	@Column(name = "VILLAGE_CITY")
@@ -67,5 +65,21 @@ public class OsbmFeeModel {
 	/** The amount. */
 	@Column(name = "AMOUNT")
 	private Long amount;
+	
+	/** The last modified date. */
+	@Column(name = "LAST_MODIFIED_DATE")
+	private Date lastModifiedDate;
+	
+	/** The created date. */
+	@Column(name = "CREATED_DATE")
+	private Date createdDate;
+	
+	/** The from date. */
+	@Column(name = "FROM_DATE")
+	private Date fromDate;
+	
+	/** The to date. */
+	@Column(name = "TO_DATE")
+	private Date toDate;
 
 }

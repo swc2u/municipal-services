@@ -1,18 +1,15 @@
 package org.egov.tlcalculator.web.models;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.Builder;
 
 /**
  * Representation of a address. Indiavidual APIs may choose to extend from this using allOf if more details needed to be added in their case.
@@ -32,52 +29,52 @@ public class Address   {
         private String id;
 
         @JsonProperty("tenantId")
-        private String tenantId = null;
+        private String tenantId;
 
         @JsonProperty("doorNo")
-        private String doorNo = null;
+        private String doorNo;
 
         @JsonProperty("latitude")
-        private Double latitude = null;
+        private Double latitude;
 
         @JsonProperty("longitude")
-        private Double longitude = null;
+        private Double longitude;
 
         @JsonProperty("addressId")
-        private String addressId = null;
+        private String addressId;
 
         @JsonProperty("addressNumber")
-        private String addressNumber = null;
+        private String addressNumber;
 
         @JsonProperty("type")
-        private String type = null;
+        private String type;
 
         @JsonProperty("addressLine1")
-        private String addressLine1 = null;
+        private String addressLine1;
 
         @JsonProperty("addressLine2")
-        private String addressLine2 = null;
+        private String addressLine2;
 
         @JsonProperty("landmark")
-        private String landmark = null;
+        private String landmark;
 
         @JsonProperty("city")
-        private String city = null;
+        private String city;
 
         @JsonProperty("pincode")
-        private String pincode = null;
+        private String pincode;
 
         @JsonProperty("detail")
-        private String detail = null;
+        private String detail;
 
         @JsonProperty("buildingName")
-        private String buildingName = null;
+        private String buildingName;
 
         @JsonProperty("street")
-        private String street = null;
+        private String street;
 
         @JsonProperty("locality")
-        private Boundary locality = null;
+        private Boundary locality;
 
 
 }

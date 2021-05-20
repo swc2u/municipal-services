@@ -120,35 +120,60 @@ public class NotificationUtil {
 	 *            The messages from localization
 	 * @return customized message based on tradelicense
 	 */
-	public String getCustomizedCTLMessage(RequestInfo requestInfo, TradeLicense license, String localizationMessage) {
-		String message = null, messageTemplate;
+	public String getCustomizedCTLMessage(RequestInfo requestInfo, TradeLicense license, String localizationMessage,String notificationType) {
+		String message = null, messageTemplate,messageCode;
 		String ACTION_STATUS = license.getAction() + "_" + license.getStatus();
 		switch (ACTION_STATUS) {
 		
 			case ACTION_FORWARD_CLERK:
-				messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_SUBMITTED, localizationMessage);
+				if(notificationType.equalsIgnoreCase(CTLConstants.MAIL_NOTIFICATION)){
+					messageCode=CTLConstants.NOTIFICATION_SUBMITTED_EMAIL;
+				}else{
+					messageCode=TLConstants.NOTIFICATION_SUBMITTED;
+				}
+				messageTemplate = getMessageTemplate(messageCode, localizationMessage);
 				message = getSubittedMsg(license, messageTemplate, localizationMessage);
 				break;
 				
 			case ACTION_SENDFORCLARIFICATION_CLERK:
-				messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_SENDBACK_CITIZEN, localizationMessage);
+				if(notificationType.equalsIgnoreCase(CTLConstants.MAIL_NOTIFICATION)){
+					messageCode=CTLConstants.NOTIFICATION_SENDBACK_CITIZEN_EMAIL;
+				}else{
+					messageCode=TLConstants.NOTIFICATION_SENDBACK_CITIZEN;
+				}
+				messageTemplate = getMessageTemplate(messageCode, localizationMessage);
 				message = getSendBackToCitizen(license, messageTemplate, localizationMessage);
 				break;
 				
 			case ACTION_STATUS_REJECTED:
-				messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_REJECTED, localizationMessage);
+				if(notificationType.equalsIgnoreCase(CTLConstants.MAIL_NOTIFICATION)){
+					messageCode=CTLConstants.NOTIFICATION_REJECTED_EMAIL;
+				}else{
+					messageCode=TLConstants.NOTIFICATION_REJECTED;
+				}
+				messageTemplate = getMessageTemplate(messageCode, localizationMessage);
 				message = getRejectedMsgForCitizen(license, messageTemplate, localizationMessage);
 				break;
 				
 			case ACTION_STATUS_APPROVED:
+				if(notificationType.equalsIgnoreCase(CTLConstants.MAIL_NOTIFICATION)){
+					messageCode=CTLConstants.NOTIFICATION_APRROVED_AND_PAYMENT_PENDING_EMAIL;
+				}else{
+					messageCode=TLConstants.NOTIFICATION_APRROVED_AND_PAYMENT_PENDING;
+				}
 				BigDecimal amountToBePaid = getAmountToBePaid(requestInfo, license);
-				messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APRROVED_AND_PAYMENT_PENDING, localizationMessage);
+				messageTemplate = getMessageTemplate(messageCode, localizationMessage);
 				message = getApprovedAndPaymentPendingMsg(license,messageTemplate, localizationMessage, amountToBePaid);
 				break;
 				
 			case ACTION_STATUS_PAY:
+				if(notificationType.equalsIgnoreCase(CTLConstants.MAIL_NOTIFICATION)){
+					messageCode=CTLConstants.NOTIFICATION_APPROVED_EMAIL;
+				}else{
+					messageCode=TLConstants.NOTIFICATION_APPROVED;
+				}
 				BigDecimal amountToBePaid1 = getAmountToBePaid(requestInfo, license);
-				messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPROVED, localizationMessage);
+				messageTemplate = getMessageTemplate(messageCode, localizationMessage);
 				message = getApprovedMsg(license, localizationMessage, messageTemplate);
 				break;
 		}
@@ -325,6 +350,7 @@ public class NotificationUtil {
 		// message = message.replace("<1>",);
 		//message = message.replace("<2>", license.getTradeName());
 		message = message.replace("<2>", getMessageTemplate(license.getBusinessService(), localizationMessage));
+		message = message.replace("<3>", license.getApplicationNumber());
 		return message;
 	}
 
@@ -425,8 +451,13 @@ public class NotificationUtil {
 	 *            Message from localization
 	 * @return message for completed payment for owners
 	 */
-	public String getCTLOwnerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages) {
-		String messageTemplate = getMessageTemplate(CTLConstants.CTL_NOTIFICATION_PAYMENT_OWNER, localizationMessages);
+	public String getCTLOwnerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages,String notificationType) {
+		String messageTemplate=null;
+		if(notificationType.equalsIgnoreCase(CTLConstants.MAIL_NOTIFICATION)){
+			 messageTemplate = getMessageTemplate(CTLConstants.CTL_NOTIFICATION_PAYMENT_OWNER_EMAIL, localizationMessages);
+		}else{
+			 messageTemplate = getMessageTemplate(CTLConstants.CTL_NOTIFICATION_PAYMENT_OWNER, localizationMessages);
+		}
 		messageTemplate = messageTemplate.replace("<3>", getMessageTemplate(license.getBusinessService(), localizationMessages));
 		messageTemplate = messageTemplate.replace("<2>", license.getApplicationNumber());
 		messageTemplate = messageTemplate.replace("<4>", license.getLicenseNumber());
@@ -460,8 +491,13 @@ public class NotificationUtil {
 	 *            Message from localization
 	 * @return message for completed payment for payer
 	 */
-	public String getCTLPayerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages) {
-		String messageTemplate = getMessageTemplate(CTLConstants.CTL_NOTIFICATION_PAYMENT_PAYER, localizationMessages);
+	public String getCTLPayerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages,String notificationMode) {
+		String messageTemplate=null;
+		if(notificationMode.equalsIgnoreCase(CTLConstants.MAIL_NOTIFICATION)){
+			 messageTemplate = getMessageTemplate(CTLConstants.CTL_NOTIFICATION_PAYMENT_PAYER_EMAIL, localizationMessages);
+		}else{
+		     messageTemplate = getMessageTemplate(CTLConstants.CTL_NOTIFICATION_PAYMENT_PAYER, localizationMessages);
+		}
 		messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));
 		messageTemplate = messageTemplate.replace("<3>", license.getApplicationNumber());
 		messageTemplate = messageTemplate.replace("<4>", valMap.get(receiptNumberKey));
@@ -509,8 +545,7 @@ public class NotificationUtil {
 		if (isEMAILEnabled) {
 			this.sendEMAIL(emailRequestList.stream().map(
 				request -> {
-					String body = new StringBuilder(request.getBody()).append(emailSignature).toString();
-					body = body.replace("\\n", "<br/>");
+					String body = request.getBody();
 					return EmailRequest.builder()
 						.isHTML(true)
 						.attachments(request.getAttachments())
@@ -611,7 +646,7 @@ public class NotificationUtil {
 					.email(entryset.getKey())
 					.subject(TLConstants.EMAIL_SUBJECT)
 					.body(customizedMsg)
-					.isHTML(false)
+					.isHTML(true)
 					.build());
 		}
 		return emailRequest;
@@ -658,12 +693,6 @@ public class NotificationUtil {
 	 *            Message from localization for field change
 	 * @return customized message for field change
 	 */
-	private String getEditMsg(TradeLicense license, List<String> list, String message) {
-		message = message.replace("<APPLICATION_NUMBER>", license.getApplicationNumber());
-		message = message.replace("<FIELDS>", StringUtils.join(list, ","));
-		return message;
-	}
-
 	private String getEditMsg(TradeLicense license, String message) {
 		message = message.replace("<APPLICATION_NUMBER>", license.getApplicationNumber());
 		return message;

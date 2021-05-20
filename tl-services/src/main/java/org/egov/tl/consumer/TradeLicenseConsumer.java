@@ -1,21 +1,22 @@
 package org.egov.tl.consumer;
 
+import static org.egov.tl.util.TLConstants.businessService_BPA;
+import static org.egov.tl.util.TLConstants.businessService_TL;
+
+import java.util.HashMap;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+
 import org.egov.tl.service.TradeLicenseService;
 import org.egov.tl.service.notification.TLNotificationService;
-import org.egov.tl.util.TradeUtil;
 import org.egov.tl.web.models.TradeLicenseRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import java.util.HashMap;
 
-import static org.egov.tl.util.TLConstants.businessService_BPA;
-import static org.egov.tl.util.TLConstants.businessService_TL;
-
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -31,7 +32,8 @@ public class TradeLicenseConsumer {
         this.tradeLicenseService = tradeLicenseService;
     }
 
-    @KafkaListener(topics = {"${persister.update.tradelicense.topic}","${persister.save.tradelicense.topic}","${persister.update.tradelicense.workflow.topic}"})
+    @KafkaListener(topics = { "${persister.update.tradelicense.topic}", "${persister.save.tradelicense.topic}",
+            "${persister.update.tradelicense.workflow.topic}" })
     public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         ObjectMapper mapper = new ObjectMapper();
         TradeLicenseRequest tradeLicenseRequest = new TradeLicenseRequest();
@@ -41,7 +43,7 @@ public class TradeLicenseConsumer {
         } catch (final Exception e) {
             log.error("Error while listening to value: " + record + " on topic: " + topic + ": " + e);
         }
-        log.info("TradeLicense Received: "+tradeLicenseRequest.getLicenses().get(0).getApplicationNumber());
+        log.info("TradeLicense Received: " + tradeLicenseRequest.getLicenses().get(0).getApplicationNumber());
         if (!tradeLicenseRequest.getLicenses().isEmpty()) {
             String businessService = tradeLicenseRequest.getLicenses().get(0).getBusinessService();
             if (businessService == null)

@@ -1,43 +1,39 @@
 package org.egov.tl.web.controllers;
 
 
-import org.egov.tl.service.PaymentUpdateService;
+import java.util.List;
+
+import javax.validation.Valid;
+
 import org.egov.tl.service.TradeLicenseService;
-import org.egov.tl.service.notification.PaymentNotificationService;
 import org.egov.tl.util.ResponseInfoFactory;
-import org.egov.tl.web.models.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
+import org.egov.tl.web.models.RequestInfoWrapper;
+import org.egov.tl.web.models.TradeLicense;
+import org.egov.tl.web.models.TradeLicenseCountResponse;
+import org.egov.tl.web.models.TradeLicenseRequest;
+import org.egov.tl.web.models.TradeLicenseResponse;
+import org.egov.tl.web.models.TradeLicenseSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.util.*;
-
-import javax.validation.constraints.*;
-import javax.validation.Valid;
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
     @RequestMapping("/v1")
     public class TradeLicenseController {
-
-        private final ObjectMapper objectMapper;
-
-        private final HttpServletRequest request;
 
         private final TradeLicenseService tradeLicenseService;
 
         private final ResponseInfoFactory responseInfoFactory;
 
     @Autowired
-    public TradeLicenseController(ObjectMapper objectMapper, HttpServletRequest request,
-                                  TradeLicenseService tradeLicenseService, ResponseInfoFactory responseInfoFactory) {
-        this.objectMapper = objectMapper;
-        this.request = request;
+    public TradeLicenseController(TradeLicenseService tradeLicenseService, ResponseInfoFactory responseInfoFactory) {
         this.tradeLicenseService = tradeLicenseService;
         this.responseInfoFactory = responseInfoFactory;
     }

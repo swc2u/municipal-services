@@ -6,7 +6,6 @@ import static org.egov.tlcalculator.utils.TLCalculatorConstants.businessService_
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.egov.tlcalculator.service.BPACalculationService;
@@ -30,18 +29,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-
 @javax.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2018-09-27T14:56:03.454+05:30")
 
 @Controller
 @RequestMapping("/v1")
 public class CalculatorController {
-
-	private ObjectMapper objectMapper;
-
-	private HttpServletRequest request;
 
 	private CalculationService calculationService;
 
@@ -52,10 +44,8 @@ public class CalculatorController {
 	private CTLCalculationService ctlCalculationService;
 	
 	@Autowired
-	public CalculatorController(ObjectMapper objectMapper, HttpServletRequest request, CTLCalculationService ctlCalculationService,
+	public CalculatorController(CTLCalculationService ctlCalculationService,
 								CalculationService calculationService, DemandService demandService, BPACalculationService bpaCalculationService) {
-		this.objectMapper = objectMapper;
-		this.request = request;
 		this.calculationService = calculationService;
 		this.demandService = demandService;
 		this.bpaCalculationService = bpaCalculationService;

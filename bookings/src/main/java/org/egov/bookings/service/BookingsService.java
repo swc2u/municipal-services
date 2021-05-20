@@ -6,14 +6,13 @@ import java.util.Map;
 import org.egov.bookings.contract.Booking;
 import org.egov.bookings.contract.BookingApprover;
 import org.egov.bookings.contract.ProcessInstanceSearchCriteria;
+import org.egov.bookings.contract.RefundTransactionRequest;
 import org.egov.bookings.contract.RequestInfoWrapper;
 import org.egov.bookings.contract.UserDetails;
 import org.egov.bookings.dto.SearchCriteriaFieldsDTO;
 import org.egov.bookings.model.BookingsModel;
 import org.egov.bookings.web.models.BookingsRequest;
-import org.egov.common.contract.request.RequestInfo;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Interface BookingsService.
  */
@@ -104,4 +103,35 @@ public interface BookingsService {
 	 * @return the assignee
 	 */
 	public List<UserDetails> getAssignee(SearchCriteriaFieldsDTO searchCriteriaFieldsDTO);
+
+	/**
+	 * Persist refund status.
+	 *
+	 * @param refundTransactionRequest the refund transaction request
+	 */
+	public void persistRefundStatus(RefundTransactionRequest refundTransactionRequest);
+	
+	/**
+	 * Gets the community center booking search.
+	 *
+	 * @param searchCriteriaFieldsDTO the search criteria fields DTO
+	 * @return the community center booking search
+	 */
+	public Booking getCommunityCenterBookingSearch(SearchCriteriaFieldsDTO searchCriteriaFieldsDTO);
+	
+	/**
+	 * Gets the citizen community center room booking search.
+	 *
+	 * @param searchCriteriaFieldsDTO the search criteria fields DTO
+	 * @return the citizen community center room booking search
+	 */
+	public Booking getCitizenCommunityCenterRoomBookingSearch(SearchCriteriaFieldsDTO searchCriteriaFieldsDTO);
+	
+	/**
+	 * Gets the employee community center room booking search.
+	 *
+	 * @param searchCriteriaFieldsDTO the search criteria fields DTO
+	 * @return the employee community center room booking search
+	 */
+	public Booking getEmployeeCommunityCenterRoomBookingSearch(SearchCriteriaFieldsDTO searchCriteriaFieldsDTO);
 }

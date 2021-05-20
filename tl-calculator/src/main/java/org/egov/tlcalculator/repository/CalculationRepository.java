@@ -1,17 +1,14 @@
 package org.egov.tlcalculator.repository;
 
-import lombok.extern.slf4j.Slf4j;
-import org.egov.tlcalculator.repository.rowmapper.BillingSlabRowMapper;
+import java.util.List;
+
 import org.egov.tlcalculator.repository.rowmapper.CalculationRowMapper;
-import org.egov.tlcalculator.web.models.BillingSlab;
 import org.egov.tlcalculator.web.models.BillingSlabIds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j

@@ -265,7 +265,6 @@ private EstimatesAndSlabs getBaseFee(CalulationCriteria calulationCriteria, Requ
 
       Map calculationTypeMap = mdmsService.getCalculationType(requestInfo,license,mdmsData);
       String tradeUnitCalculationType = (String)calculationTypeMap.get(TLCalculatorConstants.MDMS_CALCULATIONTYPE_TRADETYPE);
-      String accessoryCalculationType  = (String)calculationTypeMap.get(TLCalculatorConstants.MDMS_CALCULATIONTYPE_ACCESSORY);
 
       FeeAndBillingSlabIds tradeTypeFeeAndBillingSlabIds = getTradeUnitFeeAndBillingSlabIds(license,CalculationType
               .fromValue(tradeUnitCalculationType));
@@ -302,13 +301,13 @@ private EstimatesAndSlabs getBaseFee(CalulationCriteria calulationCriteria, Requ
       int i = 0;
       for(TradeUnit tradeUnit : tradeUnits) { 
     	  if(tradeUnit.getActive()) {
-              BigDecimal tradeUnitTotalFee = new BigDecimal(0);
+            //   BigDecimal tradeUnitTotalFee = new BigDecimal(0);
     		  
     		  //Calculate Fee
     		  CTLBillingSlab billingSlab = this.getBillingSlabForCategory(license, Category.FEE.toString(), tradeUnit.getUom(), tradeUnit.getUomValue());
     		  billingSlabIds.add(billingSlab.getId()+"|"+i+"|"+tradeUnit.getId());
 			  tradeUnitFees.add(billingSlab.getRate());
-			  tradeUnitTotalFee = tradeUnitTotalFee.add(billingSlab.getRate());
+			//   tradeUnitTotalFee = tradeUnitTotalFee.add(billingSlab.getRate());
     		  i++;
     	  }
       }

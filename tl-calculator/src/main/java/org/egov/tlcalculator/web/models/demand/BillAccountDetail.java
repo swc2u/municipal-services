@@ -1,13 +1,15 @@
 package org.egov.tlcalculator.web.models.demand;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.*;
-import org.egov.tlcalculator.web.models.AuditDetails;
-import org.egov.tlcalculator.web.models.enums.Purpose;
-
 import java.math.BigDecimal;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.egov.tlcalculator.web.models.AuditDetails;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * BillAccountDetail

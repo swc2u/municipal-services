@@ -1,5 +1,16 @@
 package org.egov.tl.service.notification;
 
+import static org.egov.tl.util.CTLConstants.businessService_BOOK_SHOP;
+import static org.egov.tl.util.CTLConstants.businessService_DHOBI_GHAT;
+import static org.egov.tl.util.CTLConstants.businessService_REHRI_DL;
+import static org.egov.tl.util.CTLConstants.businessService_REHRI_RC;
+import static org.egov.tl.util.TLConstants.businessService_TL;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.egov.tl.config.TLConfiguration;
 import org.egov.tl.util.NotificationUtil;
@@ -9,18 +20,6 @@ import org.egov.tl.web.models.TradeLicense;
 import org.egov.tl.web.models.TradeLicenseRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import static org.egov.tl.util.TLConstants.businessService_BPA;
-import static org.egov.tl.util.TLConstants.businessService_TL;
-import static org.egov.tl.util.CTLConstants.businessService_REHRI_RC;
-import static org.egov.tl.util.CTLConstants.businessService_REHRI_DL;
-import static org.egov.tl.util.CTLConstants.businessService_DHOBI_GHAT;
-import static org.egov.tl.util.CTLConstants.businessService_BOOK_SHOP;
 
 @Service
 public class EditNotificationService {

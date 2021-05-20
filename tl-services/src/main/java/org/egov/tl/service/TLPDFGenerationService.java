@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.jayway.jsonpath.DocumentContext;
+
 import org.egov.tl.config.TLConfiguration;
 import org.egov.tl.repository.ServiceRequestRepository;
 import org.egov.tl.util.CTLConstants;
@@ -16,9 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.DocumentContext;
 
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
@@ -38,8 +37,6 @@ public class TLPDFGenerationService {
     @Value("${egov.filestore.path}")
     private String fileStorePath;
 
-	private ObjectMapper mapper;
-
     private ServiceRequestRepository serviceRequestRepository;
 
     private TLConfiguration config;
@@ -47,8 +44,7 @@ public class TLPDFGenerationService {
     private RestTemplate restTemplate;
 
     @Autowired
-    public TLPDFGenerationService(ObjectMapper mapper, ServiceRequestRepository serviceRequestRepository, TLConfiguration config, RestTemplate restTemplate) {
-    	this.mapper = mapper;
+    public TLPDFGenerationService(ServiceRequestRepository serviceRequestRepository, TLConfiguration config, RestTemplate restTemplate) {
     	this.serviceRequestRepository = serviceRequestRepository;
     	this.config = config;
     	this.restTemplate = restTemplate;
@@ -64,7 +60,7 @@ public class TLPDFGenerationService {
 		);
 		
 		//Transform the tax head codes that start with TL_ for localisation.
-        JSONArray lineItems = documentContext.read("$.Payment.paymentDetails[?(@.businessService=='CTL.REHRI_REGISTRATION')].bill.billDetails[0].billAccountDetails[?(@.order >= 0)]");
+        JSONArray lineItems = documentContext.read("$.Payment.paymentDetails[?(@.businessService=='"+license.getBusinessService()+"')].bill.billDetails[0].billAccountDetails[?(@.order >= 0)]");
         
         for (int i = 0; i < lineItems.size(); i++) {
         	Map<String, Object> map = (Map<String, Object>) lineItems.get(i);

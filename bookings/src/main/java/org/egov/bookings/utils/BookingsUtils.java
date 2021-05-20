@@ -1,165 +1,95 @@
 package org.egov.bookings.utils;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.egov.bookings.config.BookingsConfiguration;
+import org.egov.bookings.contract.RefundTransactionRequest;
+import org.egov.bookings.contract.RequestInfoWrapper;
+import org.egov.bookings.contract.Transaction;
+import org.egov.bookings.contract.TransactionResponse;
+import org.egov.bookings.model.ActionHistory;
+import org.egov.bookings.model.ActionInfo;
+import org.egov.bookings.model.AuditDetails;
+import org.egov.bookings.models.demand.DemandResponse;
+import org.egov.bookings.repository.impl.ServiceRequestRepository;
+import org.egov.bookings.web.models.BookingsRequest;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MasterDetail;
 import org.egov.mdms.model.MdmsCriteria;
 import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.mdms.model.ModuleDetail;
-import org.egov.bookings.config.BookingsConfiguration;
-import org.egov.bookings.contract.CountResponse;
-import org.egov.bookings.contract.RequestInfoWrapper;
-import org.egov.bookings.contract.SearcherRequest;
-import org.egov.bookings.contract.ServiceReqSearchCriteria;
-import org.egov.bookings.contract.ServiceResponse;
-import org.egov.bookings.model.ActionHistory;
-import org.egov.bookings.model.ActionInfo;
-import org.egov.bookings.model.AuditDetails;
-import org.egov.bookings.model.Service;
-import org.egov.bookings.repository.impl.ServiceRequestRepository;
-import org.egov.bookings.web.models.BookingsRequest;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.jayway.jsonpath.JsonPath;
 
 import lombok.extern.slf4j.Slf4j;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class BookingsUtils.
+ */
 @Component
+
+/** The Constant log. */
 @Slf4j
 public class BookingsUtils {
 
-	private static Map<Integer, String> employeeRolesPrecedenceMap = prepareEmployeeRolesPrecedenceMap();
-
-	@Value("${egov.infra.searcher.host}")
-	private String searcherHost;
-
-	@Value("${egov.infra.searcher.endpoint}")
-	private String searcherEndpoint;
-
+	/** The mdms host. */
 	@Value("${egov.mdms.host}")
 	private String mdmsHost;
 
+	/** The mdms endpoint. */
 	@Value("${egov.mdms.search.endpoint}")
 	private String mdmsEndpoint;
 
-	@Value("${egov.hr.employee.v2.host}")
-	private String hrEmployeeV2Host;
-
-	@Value("${egov.hr.employee.v2.search.endpoint}")
-	private String hrEmployeeSearchEndpoint;
-
-	@Value("${egov.common.masters.host}")
-	private String commonMasterHost;
-
-	@Value("${egov.common.masters.search.endpoint}")
-	private String commonMasterSearchEndpoint;
-
+	/** The localization host. */
 	@Value("${egov.localization.host}")
 	private String localizationHost;
 
+	/** The localization search endpoint. */
 	@Value("${egov.localization.search.endpoint}")
 	private String localizationSearchEndpoint;
 
-	@Value("${egov.user.host}")
-	private String egovUserHost;
-
-	@Value("${egov.user.search.endpoint}")
-	private String egovUserSearchEndpoint;
-	
-	@Value("${egov.location.host}")
-	private String locationHost;
-
-	@Value("${egov.location.search.endpoint}")
-	private String locationSearchEndpoint;
-	
-	@Value("${egov.hrms.host}")
-	private String egovHRMShost;
-
-	@Value("${egov.hrms.search.endpoint}")
-	private String egovHRMSSearchEndpoint;
-	
-	@Value("${are.inactive.complaintcategories.enabled}")
-	private Boolean areInactiveComplaintCategoriesEnabled;	
-
+	/** The factory. */
 	@Autowired
 	private ResponseInfoFactory factory;
 
+	/** The service request repository. */
 	@Autowired
 	private ServiceRequestRepository serviceRequestRepository;
 
+	/** The config. */
 	@Autowired
 	private BookingsConfiguration config;
 	
-	private static final String MODULE_NAME = "{moduleName}";
-
-	private static final String SEARCH_NAME = "{searchName}";
-
-	/**
-	 * Prepares request and uri for service code search from MDMS
-	 * 
-	 * @param uri
-	 * @param tenantId
-	 * @param department
-	 * @param requestInfo
-	 * @return MdmsCriteriaReq
-	 * @author vishal
-	 */
-	public MdmsCriteriaReq prepareSearchRequestForServiceCodes(StringBuilder uri, String tenantId, List<String> departments,
-			RequestInfo requestInfo) {
-		uri.append(mdmsHost).append(mdmsEndpoint);
-		StringBuilder depts = new StringBuilder();
-		depts.append("[");
-		for(int i = 0; i < departments.size() ; i++) {
-			depts.append("'" + departments.get(i) + "'");
-			if(i < departments.size() - 1)
-				depts.append(",");
-		}
-		depts.append("]");
-		MasterDetail masterDetail = org.egov.mdms.model.MasterDetail.builder()
-				.name(BookingsConstants.MDMS_SERVICETYPE_MASTER_NAME)
-				.filter("[?(@.department IN " + depts.toString() + ")]").build();
-		if(!areInactiveComplaintCategoriesEnabled) {
-			masterDetail.setFilter("[?((@.department IN " + depts.toString() + ") && (@.active == true))]");
-		}
-		List<MasterDetail> masterDetails = new ArrayList<>();
-		masterDetails.add(masterDetail);
-		ModuleDetail moduleDetail = ModuleDetail.builder().moduleName(BookingsConstants.MDMS_PGR_MOD_NAME)
-				.masterDetails(masterDetails).build();
-		List<ModuleDetail> moduleDetails = new ArrayList<>();
-		moduleDetails.add(moduleDetail);
-		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().tenantId(tenantId).moduleDetails(moduleDetails).build();
-		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
-	}
+	/** The mapper. */
+	@Autowired
+	private ObjectMapper mapper;
 
 	/**
-	 * Util method to return Auditdetails for create and update processes
-	 * 
-	 * @param by
-	 * @param isCreate
-	 * @return
+	 * Util method to return Auditdetails for create and update processes.
+	 *
+	 * @param by       the by
+	 * @param isCreate the is create
+	 * @return the audit details
 	 */
 	public AuditDetails getAuditDetails(String by, Boolean isCreate) {
 
@@ -171,213 +101,15 @@ public class BookingsUtils {
 	}
 
 	/**
-	 * Prepares request and uri for service type search from MDMS
-	 * 
-	 * @param uri
-	 * @param tenantId
-	 * @param department
-	 * @param requestInfo
-	 * @return MdmsCriteriaReq
-	 * @author vishal
+	 * Prepare request for localization.
+	 *
+	 * @param uri         the uri
+	 * @param requestInfo the request info
+	 * @param locale      the locale
+	 * @param tenantId    the tenant id
+	 * @param module      the module
+	 * @return the request info wrapper
 	 */
-	public MdmsCriteriaReq prepareSearchRequestForServiceType(StringBuilder uri, String tenantId, String serviceCode,
-			RequestInfo requestInfo) {
-		uri.append(mdmsHost).append(mdmsEndpoint);
-		MasterDetail masterDetail = org.egov.mdms.model.MasterDetail.builder()
-				.name(BookingsConstants.MDMS_SERVICETYPE_MASTER_NAME)
-				.filter("[?(@.serviceCode=='" + serviceCode + "')]").build();
-		if(!areInactiveComplaintCategoriesEnabled) {
-			masterDetail.setFilter("[?((@.serviceCode=='" + serviceCode + "') && (@.active == true))]");
-		}
-		List<MasterDetail> masterDetails = new ArrayList<>();
-		masterDetails.add(masterDetail);
-		ModuleDetail moduleDetail = ModuleDetail.builder().moduleName(BookingsConstants.MDMS_PGR_MOD_NAME)
-				.masterDetails(masterDetails).build();
-		List<ModuleDetail> moduleDetails = new ArrayList<>();
-		moduleDetails.add(moduleDetail);
-		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().tenantId(tenantId).moduleDetails(moduleDetails).build();
-		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
-	}
-
-	/**
-	 * Prepares request and uri for service type search from MDMS
-	 * 
-	 * @param uri
-	 * @param tenantId
-	 * @param department
-	 * @param requestInfo
-	 * @return MdmsCriteriaReq
-	 * @author vishal
-	 */
-	public MdmsCriteriaReq prepareMdMsRequest(String tenantId, String fieldName, String values,
-			RequestInfo requestInfo) {
-
-		MasterDetail masterDetail = org.egov.mdms.model.MasterDetail.builder()
-				.name(BookingsConstants.MDMS_SERVICETYPE_MASTER_NAME)
-				.filter("[?(@." + fieldName + " IN " + values + ")]." + BookingsConstants.SERVICE_CODES).build();
-		if(!areInactiveComplaintCategoriesEnabled) {
-			masterDetail.setFilter("[?((@." + fieldName + " IN " + values + ") && (@.active == true))]." + BookingsConstants.SERVICE_CODES);
-		}
-		List<MasterDetail> masterDetails = new ArrayList<>();
-		masterDetails.add(masterDetail);
-		ModuleDetail moduleDetail = ModuleDetail.builder().moduleName(BookingsConstants.MDMS_PGR_MOD_NAME)
-				.masterDetails(masterDetails).build();
-		List<ModuleDetail> moduleDetails = new ArrayList<>();
-		moduleDetails.add(moduleDetail);
-		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().tenantId(tenantId).moduleDetails(moduleDetails).build();
-		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
-	}
-
-	public MdmsCriteriaReq prepareMdMsRequestForDept(StringBuilder uri, String tenantId, List<String> codes,
-			RequestInfo requestInfo) {
-		uri.append(mdmsHost).append(mdmsEndpoint);
-		MasterDetail masterDetail = org.egov.mdms.model.MasterDetail.builder()
-				.name(BookingsConstants.MDMS_DEPT_MASTERS_MASTER_NAME).filter("[?(@.code IN " + codes + ")].name").build();
-		List<MasterDetail> masterDetails = new ArrayList<>();
-		masterDetails.add(masterDetail);
-		ModuleDetail moduleDetail = ModuleDetail.builder().moduleName(BookingsConstants.MDMS_COMMON_MASTERS_MODULE_NAME)
-				.masterDetails(masterDetails).build();
-		List<ModuleDetail> moduleDetails = new ArrayList<>();
-		moduleDetails.add(moduleDetail);
-		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().tenantId(tenantId).moduleDetails(moduleDetails).build();
-		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
-	}
-
-	public MdmsCriteriaReq prepareMdMsRequestForDesignation(StringBuilder uri, String tenantId, String code,
-			RequestInfo requestInfo) {
-		uri.append(mdmsHost).append(mdmsEndpoint);
-		MasterDetail masterDetail = org.egov.mdms.model.MasterDetail.builder()
-				.name(BookingsConstants.MDMS_DESIGNATION_MASTERS_MASTER_NAME).filter("[?(@.code=='" + code + "')].name")
-				.build();
-		List<MasterDetail> masterDetails = new ArrayList<>();
-		masterDetails.add(masterDetail);
-		ModuleDetail moduleDetail = ModuleDetail.builder().moduleName(BookingsConstants.MDMS_COMMON_MASTERS_MODULE_NAME)
-				.masterDetails(masterDetails).build();
-		List<ModuleDetail> moduleDetails = new ArrayList<>();
-		moduleDetails.add(moduleDetail);
-		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().tenantId(tenantId).moduleDetails(moduleDetails).build();
-		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
-	}
-
-	/**
-	 * Prepares request and uri for service request search
-	 * 
-	 * @param uri
-	 * @param serviceReqSearchCriteria
-	 * @param requestInfo
-	 * @return SearcherRequest
-	 * @author vishal
-	 * @throws JsonProcessingException 
-	 */
-	public SearcherRequest prepareSearchRequestWithDetails(StringBuilder uri,
-			ServiceReqSearchCriteria serviceReqSearchCriteria, RequestInfo requestInfo){
-		uri.append(searcherHost);
-		String endPoint = searcherEndpoint.replace(MODULE_NAME, BookingsConstants.SEARCHER_PGR_MOD_NAME).replace(SEARCH_NAME,
-				BookingsConstants.SEARCHER_SRSEARCH_DEF_NAME);
-		uri.append(endPoint);
-		serviceReqSearchCriteria.setNoOfRecords(null == serviceReqSearchCriteria.getNoOfRecords() ? 200L : serviceReqSearchCriteria.getNoOfRecords()); //be default we retrieve 200 records.
-		serviceReqSearchCriteria.setOffset(null == serviceReqSearchCriteria.getOffset() ? 0L : serviceReqSearchCriteria.getOffset());
-		/**
-		 * This if block is to support substring search on servicerequestid without changing the contract. 
-		 * Query uses an IN clause which doesn't support substring search, therefore a new temp variable is added.
-		 */		
-		if(!CollectionUtils.isEmpty(serviceReqSearchCriteria.getServiceRequestId()) &&
-				serviceReqSearchCriteria.getServiceRequestId().size() == 1) {
-			ObjectMapper mapper = getObjectMapper();
-			Map<String, Object> mapOfValues = mapper.convertValue(serviceReqSearchCriteria, Map.class);
-			mapOfValues.put("complaintId", serviceReqSearchCriteria.getServiceRequestId().get(0));
-			mapOfValues.put("serviceRequestId", null);
-			return SearcherRequest.builder().requestInfo(requestInfo).searchCriteria(mapOfValues).build();
-		}else {
-			return SearcherRequest.builder().requestInfo(requestInfo).searchCriteria(serviceReqSearchCriteria).build();
-		}
-	}
-	
-	
-	/**
-	 * Prepares request and uri for service request search
-	 * 
-	 * @param uri
-	 * @param serviceReqSearchCriteria
-	 * @param requestInfo
-	 * @return SearcherRequest
-	 * @author vishal
-	 * @throws JsonProcessingException 
-	 */
-	public SearcherRequest preparePlainSearchReq(StringBuilder uri, ServiceReqSearchCriteria serviceReqSearchCriteria, RequestInfo requestInfo){
-		uri.append(searcherHost);
-		String endPoint = searcherEndpoint.replace(MODULE_NAME, BookingsConstants.SEARCHER_PGR_MOD_NAME).replace(SEARCH_NAME,
-				BookingsConstants.SEARCHER_PLAINSEARCH_DEF_NAME);
-		uri.append(endPoint);
-		serviceReqSearchCriteria.setNoOfRecords(null == serviceReqSearchCriteria.getNoOfRecords() ? 200L : serviceReqSearchCriteria.getNoOfRecords()); //be default we retrieve 200 records.
-		serviceReqSearchCriteria.setOffset(null == serviceReqSearchCriteria.getOffset() ? 0L : serviceReqSearchCriteria.getOffset());
-		return SearcherRequest.builder().requestInfo(requestInfo).searchCriteria(serviceReqSearchCriteria).build();
-	}
-
-	/**
-	 * Prepares request and uri for service request search
-	 * 
-	 * @param uri
-	 * @param serviceReqSearchCriteria
-	 * @param requestInfo
-	 * @return SearcherRequest
-	 * @author vishal
-	 */
-	public SearcherRequest prepareSearchRequestForAssignedTo(StringBuilder uri,
-			ServiceReqSearchCriteria serviceReqSearchCriteria, RequestInfo requestInfo) {
-		uri.append(searcherHost);
-		String endPoint = searcherEndpoint.replace(MODULE_NAME, BookingsConstants.SEARCHER_PGR_MOD_NAME).replace(SEARCH_NAME,
-				BookingsConstants.SEARCHER_SRID_ASSIGNEDTO_DEF_NAME);
-		uri.append(endPoint);
-		return SearcherRequest.builder().requestInfo(requestInfo).searchCriteria(serviceReqSearchCriteria).build();
-	}
-
-	/**
-	 * Prepares request and uri for service request search
-	 * 
-	 * @param uri
-	 * @param serviceReqSearchCriteria
-	 * @param requestInfo
-	 * @return SearcherRequest
-	 * @author vishal
-	 */
-	public SearcherRequest prepareCountRequestWithDetails(StringBuilder uri,
-			ServiceReqSearchCriteria serviceReqSearchCriteria, RequestInfo requestInfo) {
-		uri.append(searcherHost);
-		String endPoint = searcherEndpoint.replace(MODULE_NAME, BookingsConstants.SEARCHER_PGR_MOD_NAME).replace(SEARCH_NAME,
-				BookingsConstants.SEARCHER_COUNT_DEF_NAME);
-		uri.append(endPoint);
-		return SearcherRequest.builder().requestInfo(requestInfo).searchCriteria(serviceReqSearchCriteria).build();
-	}
-	
-	public MdmsCriteriaReq prepareServiceDefSearchMdmsRequest(StringBuilder uri, String tenantId, RequestInfo requestInfo) {
-		uri.append(mdmsHost).append(mdmsEndpoint);
-		MasterDetail masterDetail = org.egov.mdms.model.MasterDetail.builder()
-				.name(BookingsConstants.MDMS_SERVICETYPE_MASTER_NAME)
-				.build();
-		if(!areInactiveComplaintCategoriesEnabled) {
-			masterDetail.setFilter("[?(@.active == true)]");
-		}		
-		List<MasterDetail> masterDetails = new ArrayList<>();
-		masterDetails.add(masterDetail);
-		ModuleDetail moduleDetail = ModuleDetail.builder().moduleName(BookingsConstants.MDMS_PGR_MOD_NAME)
-				.masterDetails(masterDetails).build();
-		List<ModuleDetail> moduleDetails = new ArrayList<>();
-		moduleDetails.add(moduleDetail);
-		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().tenantId(tenantId).moduleDetails(moduleDetails).build();
-		return MdmsCriteriaReq.builder().requestInfo(requestInfo).mdmsCriteria(mdmsCriteria).build();
-	}
-
-	public RequestInfoWrapper prepareRequestForEmployeeSearch(StringBuilder uri, RequestInfo requestInfo,
-			ServiceReqSearchCriteria serviceReqSearchCriteria) {
-		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
-		requestInfoWrapper.setRequestInfo(requestInfo);
-		uri.append(egovHRMShost).append(egovHRMSSearchEndpoint).append("?ids=" + requestInfo.getUserInfo().getId())
-				.append("&tenantId=" + serviceReqSearchCriteria.getTenantId());
-
-		return requestInfoWrapper;
-	}
-	
 	public RequestInfoWrapper prepareRequestForLocalization(StringBuilder uri, RequestInfo requestInfo, String locale,
 			String tenantId, String module) {
 		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
@@ -386,52 +118,6 @@ public class BookingsUtils {
 				.append("&module=" + module).append("&locale=" + locale);
 
 		return requestInfoWrapper;
-	}
-	
-	public RequestInfoWrapper prepareRequestForLocation(StringBuilder uri, RequestInfo requestInfo, String boundaryType,
-			String tenantId, String hierarchyType, List<String> mohallaCodes) {
-		RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
-		requestInfoWrapper.setRequestInfo(requestInfo);
-		String codes = mohallaCodes.toString().substring(1, mohallaCodes.toString().length() - 1);
-		uri.append(locationHost).append(locationSearchEndpoint).append("?tenantId=" + tenantId)
-				.append("&hierarchyTypeCode=" + hierarchyType).append("&boundaryType=" + boundaryType).append("&codes=" + codes);
-
-		return requestInfoWrapper;
-	}
-
-	public Map<String, Object> prepareRequestForUserSearch(StringBuilder uri, RequestInfo requestInfo, String userId,
-			String tenantId) {
-		Map<String, Object> userServiceRequest = new HashMap();
-		String[] userIds = { userId };
-		userServiceRequest.put("RequestInfo", requestInfo);
-		userServiceRequest.put("tenantId", tenantId);
-		userServiceRequest.put("id", Arrays.asList(userIds));
-		userServiceRequest.put("userType", BookingsConstants.ROLE_CITIZEN);
-
-		uri.append(egovUserHost).append(egovUserSearchEndpoint);
-
-		return userServiceRequest;
-	}
-
-	/**
-	 * Default response is responseInfo with error status and empty lists
-	 * 
-	 * @param requestInfo
-	 * @return ServiceResponse
-	 */
-	public ServiceResponse getDefaultServiceResponse(RequestInfo requestInfo) {
-		return new ServiceResponse(factory.createResponseInfoFromRequestInfo(requestInfo, false),
-				new ArrayList<Service>(), new ArrayList<ActionHistory>());
-	}
-
-	/**
-	 * Default response is responseInfo with error status and zero count
-	 * 
-	 * @param requestInfo
-	 * @return CountResponse
-	 */
-	public CountResponse getDefaultCountResponse(RequestInfo requestInfo) {
-		return new CountResponse(factory.createResponseInfoFromRequestInfo(requestInfo, false), 0D);
 	}
 
 	/**
@@ -450,120 +136,57 @@ public class BookingsUtils {
 	}
 
 	/**
-	 * prepares and returns a map with integer keys starting from zero and values as
-	 * role codes the integer values decides the precedence by which actions should
-	 * be applied among there roles
-	 */
-	private static Map<Integer, String> prepareEmployeeRolesPrecedenceMap() {
-
-		Map<Integer, String> map = new TreeMap<>();
-
-		map.put(3, BookingsConstants.ROLE_EMPLOYEE);
-		map.put(2, BookingsConstants.ROLE_DGRO);
-		map.put(1, BookingsConstants.ROLE_GRO);
-		map.put(0, BookingsConstants.ROLE_CSR);
-
-		return map;
-	}
-
-	/**
-	 * @return employeeRolesPrecedenceMap
-	 */
-	public static Map<Integer, String> getEmployeeRolesPrecedenceMap() {
-		return employeeRolesPrecedenceMap;
-	}
-
-	/**
-	 * Helper method which returns the precedent role among all the given roles
-	 * 
-	 * The employee precedent map is a tree map which will have the roles ordered
-	 * based on their keys precedence
-	 * 
-	 * The method will fail if the list of roles is null, so the parameter must be
-	 * null checked
-	 * 
-	 * If the none of roles in the precedence map has a match in roles object then
-	 * the method will return null
-	 */
-	public String getPrecedentRole(List<String> roles) {
-		if(roles.contains(BookingsConstants.ROLE_CITIZEN)) {
-			return BookingsConstants.ROLE_CITIZEN;
-		}
-		for (Entry<Integer, String> entry : BookingsUtils.getEmployeeRolesPrecedenceMap().entrySet()) {
-			String currentValue = entry.getValue();
-			if (roles.contains(currentValue))
-				return currentValue;
-		}
-		return null;
-	}
-
-	/**
-	 * Returns the roles that need to receive notification at this status and action.
-	 * 
-	 * @param status
-	 * @param action
+	 * Returns the roles that need to receive notification at this status and
+	 * action.
+	 *
+	 * @param status the status
+	 * @param action the action
 	 * @return Set
 	 */
-	public Set<String> getReceptorsOfNotification(String status, String action){
+	public Set<String> getReceptorsOfNotification(String status, String action) {
 		Set<String> setOfRoles = new HashSet<>();
 		setOfRoles.addAll(WorkFlowConfigs.getMapOfStatusAndReceptors().get(status));
-		if(!StringUtils.isEmpty(action) && (action.equals(WorkFlowConfigs.ACTION_REASSIGN) || action.equals(WorkFlowConfigs.ACTION_REOPEN))) {
+		if (!StringUtils.isEmpty(action)
+				&& (action.equals(WorkFlowConfigs.ACTION_REASSIGN) || action.equals(WorkFlowConfigs.ACTION_REOPEN))) {
 			setOfRoles.clear();
 			setOfRoles.addAll(WorkFlowConfigs.getMapOfActionAndReceptors().get(action));
-		}		
+		}
 		return setOfRoles;
 	}
+
 	/**
-	 * Splits any camelCase to human readable string
-	 * @param String
+	 * Splits any camelCase to human readable string.
+	 *
+	 * @param s the s
 	 * @return String
 	 */
 	public static String splitCamelCase(String s) {
 		return s.replaceAll(String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])",
 				"(?<=[A-Za-z])(?=[^A-Za-z])"), " ");
 	}
-	
+
+	/**
+	 * Convert to milli sec.
+	 *
+	 * @param hours the hours
+	 * @return the long
+	 */
 	public Long convertToMilliSec(Integer hours) {
 		Long milliseconds = TimeUnit.SECONDS.toMillis(TimeUnit.HOURS.toSeconds(hours));
-		log.info("SLA in ms: "+milliseconds);
+		log.info("SLA in ms: " + milliseconds);
 		return milliseconds;
 	}
-	
-	/**
-	 * helper method which collects the service code from services obtained by
-	 * databse call
-	 * 
-	 * @param tenantId
-	 * @param inputCodes
-	 * @param requestInfo
-	 * @return
-	 */
-	public List<String> getServiceCodes(String tenantId, Set<String> inputCodes, RequestInfo requestInfo) {
 
-		StringBuilder uri = new StringBuilder(mdmsHost).append(mdmsEndpoint);
-		MdmsCriteriaReq criteriaReq = prepareMdMsRequest(tenantId.split("\\.")[0], BookingsConstants.SERVICE_CODES,
-				inputCodes.toString(), requestInfo);
-		try {
-			Object result = serviceRequestRepository.fetchResult(uri, criteriaReq);
-			return JsonPath.read(result, BookingsConstants.JSONPATH_SERVICEDEFS);
-		} catch (Exception e) {
-			log.info("Exception while fetching serviceDefs: ",e);
-			throw new CustomException(ErrorConstants.INVALID_TENANT_ID_MDMS_SERVICE_CODE_KEY,
-					ErrorConstants.INVALID_TENANT_ID_MDMS_SERVICE_CODE_MSG);
-		}
-	}
-	
 	/**
-	 * returns the current status of the service
-	 * 
-	 * @param requestInfo
-	 * @param actionInfo
-	 * @param currentStatusList
-	 * @return
+	 * returns the current status of the service.
+	 *
+	 * @param history the history
+	 * @return the current status
 	 */
 	public String getCurrentStatus(ActionHistory history) {
 		List<ActionInfo> infos = history.getActions();
-		//FIXME pickup latest status another way which is not hardocoded, put query to searcher to pick latest status
+		// FIXME pickup latest status another way which is not hardocoded, put query to
+		// searcher to pick latest status
 		// or use status from service object
 		for (int i = 0; i <= infos.size() - 1; i++) {
 			String status = infos.get(i).getStatus();
@@ -573,105 +196,143 @@ public class BookingsUtils {
 		}
 		return null;
 	}
-	
-	/**
-	 * helper method to add the errors to the error map
-	 * 
-	 * @param errorMsg
-	 * @param key
-	 * @param errorMap
-	 */
-	private void addError(String errorMsg, String key, Map<String, List<String>> errorMap) {
 
-		List<String> errors = errorMap.get(key);
-		if (null == errors) {
-			errors = Arrays.asList(errorMsg);
-			errorMap.put(key, errors);
-		} else
-			errors.add(errorMsg);
-	}
-	
+	/**
+	 * Gets the booking type.
+	 *
+	 * @return the booking type
+	 */
 	private ModuleDetail getBookingType() {
 
-		// master details for TL module
-		List<MasterDetail> tlMasterDetails = new ArrayList<>();
+		List<MasterDetail> bkMasterDetails = new ArrayList<>();
 
-		// filter to only get code field from master data
+		bkMasterDetails.add(MasterDetail.builder().name("BookingType").build());
 
-		final String filterCodeForUom = "null";
-
-		tlMasterDetails.add(MasterDetail.builder().name("BookingType").build());
-
-		ModuleDetail tlModuleDtls = ModuleDetail.builder().masterDetails(tlMasterDetails).moduleName("Booking").build();
-
-		/*
-		 * MdmsCriteria mdmsCriteria =
-		 * MdmsCriteria.builder().moduleDetails(Collections.singletonList(tlModuleDtls))
-		 * .tenantId(tenantId) .build();
-		 */
-
-		return tlModuleDtls;
+		ModuleDetail bkModuleDtls = ModuleDetail.builder().masterDetails(bkMasterDetails).moduleName("Booking").build();
+		return bkModuleDtls;
 	}
 	
-	
+	/**
+	 * Gets the mdms module search type.
+	 *
+	 * @param moduleName the module name
+	 * @param mdmsFileName the mdms file name
+	 * @return the mdms module search type
+	 */
+	private ModuleDetail getMdmsModuleSearchType(String moduleName, String mdmsFileName) {
+
+		List<MasterDetail> bkMasterDetails = new ArrayList<>();
+
+		bkMasterDetails.add(MasterDetail.builder().name(mdmsFileName).build());
+
+		ModuleDetail bkModuleDtls = ModuleDetail.builder().masterDetails(bkMasterDetails).moduleName(moduleName).build();
+		return bkModuleDtls;
+	}
+
+	/**
+	 * Gets the tax head master type.
+	 *
+	 * @return the tax head master type
+	 */
 	private ModuleDetail getTaxHeadMasterType() {
 
-		// master details for TL module
-		List<MasterDetail> tlMasterDetails = new ArrayList<>();
+		List<MasterDetail> bkMasterDetails = new ArrayList<>();
 
-		// filter to only get code field from master data
+		bkMasterDetails.add(MasterDetail.builder().name("TaxHeadMaster").build());
 
-		final String filterCodeForUom = "null";
+		ModuleDetail bkModuleDtls = ModuleDetail.builder().masterDetails(bkMasterDetails).moduleName("BillingService")
+				.build();
 
-		tlMasterDetails
-				.add(MasterDetail.builder().name("TaxHeadMaster").build());
-
-		ModuleDetail tlModuleDtls = ModuleDetail.builder().masterDetails(tlMasterDetails)
-				.moduleName("BillingService").build();
-
-		/*
-		 * MdmsCriteria mdmsCriteria =
-		 * MdmsCriteria.builder().moduleDetails(Collections.singletonList(tlModuleDtls))
-		 * .tenantId(tenantId) .build();
-		 */
-
-		return tlModuleDtls;
+		return bkModuleDtls;
 	}
-	
-	
-	
+
+	/**
+	 * Gets the MDMS request.
+	 *
+	 * @param requestInfo the request info
+	 * @param tenantId    the tenant id
+	 * @return the MDMS request
+	 */
 	private MdmsCriteriaReq getMDMSRequest(RequestInfo requestInfo, String tenantId) {
-		
-		
-		
-		
+
 		ModuleDetail getBookingTypes = getBookingType();
 
 		List<ModuleDetail> moduleDetails = new LinkedList<>();
 		moduleDetails.add(getBookingTypes);
-		
+
 		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().moduleDetails(moduleDetails).tenantId(tenantId).build();
-		log.info("Mdms Criteria : "+mdmsCriteria);
-		MdmsCriteriaReq mdmsCriteriaReq = MdmsCriteriaReq.builder().mdmsCriteria(mdmsCriteria)
-				.requestInfo(requestInfo)
+		log.info("Mdms Criteria : " + mdmsCriteria);
+		MdmsCriteriaReq mdmsCriteriaReq = MdmsCriteriaReq.builder().mdmsCriteria(mdmsCriteria).requestInfo(requestInfo)
 				.build();
-		
-		log.info("Mdms Criteria Req: "+mdmsCriteriaReq);
+
+		log.info("Mdms Criteria Req: " + mdmsCriteriaReq);
 		return mdmsCriteriaReq;
 	}
 	
-	
+	/**
+	 * Gets the MDMS request.
+	 *
+	 * @param requestInfo the request info
+	 * @param tenantId the tenant id
+	 * @param moduleName the module name
+	 * @param mdmsFileName the mdms file name
+	 * @return the MDMS request
+	 */
+	private MdmsCriteriaReq getMDMSRequest(RequestInfo requestInfo, String tenantId, String moduleName, String mdmsFileName) {
 
+		ModuleDetail getMdmsModuleTypes = getMdmsModuleSearchType(moduleName, mdmsFileName);
+
+		List<ModuleDetail> moduleDetails = new LinkedList<>();
+		moduleDetails.add(getMdmsModuleTypes);
+
+		MdmsCriteria mdmsCriteria = MdmsCriteria.builder().moduleDetails(moduleDetails).tenantId(tenantId).build();
+		log.info("Mdms Criteria : " + mdmsCriteria);
+		MdmsCriteriaReq mdmsCriteriaReq = MdmsCriteriaReq.builder().mdmsCriteria(mdmsCriteria).requestInfo(requestInfo)
+				.build();
+
+		log.info("Mdms Criteria Req: " + mdmsCriteriaReq);
+		return mdmsCriteriaReq;
+	}
+
+	/**
+	 * Prepare md ms request for booking.
+	 *
+	 * @param requestInfo the request info
+	 * @return the object
+	 */
 	public Object prepareMdMsRequestForBooking(RequestInfo requestInfo) {
 		String tenantId = requestInfo.getUserInfo().getTenantId();
 		MdmsCriteriaReq mdmsCriteriaReq = getMDMSRequest(requestInfo, tenantId);
 		StringBuilder uri = new StringBuilder(mdmsHost).append(mdmsEndpoint);
 		Object result = serviceRequestRepository.fetchResult(uri, mdmsCriteriaReq);
 		return result;
-		
+
+	}
+
+	/**
+	 * Gets the mdms search request.
+	 *
+	 * @param requestInfo the request info
+	 * @param moduleName the module name
+	 * @param mdmsFileName the mdms file name
+	 * @return the mdms search request
+	 */
+	public Object getMdmsSearchRequest(RequestInfo requestInfo, String moduleName, String mdmsFileName) {
+		String tenantId = requestInfo.getUserInfo().getTenantId();
+		MdmsCriteriaReq mdmsCriteriaReq = getMDMSRequest(requestInfo, tenantId, moduleName, mdmsFileName);
+		StringBuilder uri = new StringBuilder(mdmsHost).append(mdmsEndpoint);
+		Object result = serviceRequestRepository.fetchResult(uri, mdmsCriteriaReq);
+		return result;
+
 	}
 	
-	
+	/**
+	 * Gets the MDMS request for tax head master.
+	 *
+	 * @param requestInfo the request info
+	 * @param tenantId    the tenant id
+	 * @return the MDMS request for tax head master
+	 */
 	private MdmsCriteriaReq getMDMSRequestForTaxHeadMaster(RequestInfo requestInfo, String tenantId) {
 
 		ModuleDetail taxHeadMaster = getTaxHeadMasterType();
@@ -687,40 +348,58 @@ public class BookingsUtils {
 		log.info("Mdms Criteria Req: " + mdmsCriteriaReq);
 		return mdmsCriteriaReq;
 	}
-	
-	
-	
-	
-	public Object prepareMdMsRequestForTaxHeadMaster(RequestInfo requestInfo) {
-		String tenantId = requestInfo.getUserInfo().getTenantId();
-		MdmsCriteriaReq mdmsCriteriaReq = getMDMSRequestForTaxHeadMaster(requestInfo, tenantId);
+
+	/**
+	 * Prepare md ms request for tax head master.
+	 *
+	 * @param requestInfo the request info
+	 * @return the object
+	 */
+	public Object prepareMdMsRequestForTaxHeadMaster(BookingsRequest bookingsRequest) {
+		String tenantId = bookingsRequest.getBookingsModel().getTenantId();
+		MdmsCriteriaReq mdmsCriteriaReq = getMDMSRequestForTaxHeadMaster(bookingsRequest.getRequestInfo(), tenantId);
 		StringBuilder uri = new StringBuilder(mdmsHost).append(mdmsEndpoint);
 		Object result = serviceRequestRepository.fetchResult(uri, mdmsCriteriaReq);
 		return result;
-		
-	}
-	
 
+	}
+
+	/**
+	 * Gets the current sql date.
+	 *
+	 * @return the current sql date
+	 */
 	public java.sql.Date getCurrentSqlDate() {
-		 long millis=System.currentTimeMillis();  
-	        return new java.sql.Date(millis);  
+		long millis = System.currentTimeMillis();
+		return new java.sql.Date(millis);
 	}
-	
-	 public String getDemandSearchURL(){
-	        StringBuilder url = new StringBuilder(config.getBillingHost());
-	        url.append(config.getDemandSearchEndpoint());
-	        url.append("?");
-	        url.append("tenantId=");
-	        url.append("{1}");
-	        url.append("&");
-	        url.append("businessService=");
-	        url.append("{2}");
-	        url.append("&");
-	        url.append("consumerCode=");
-	        url.append("{3}");
-	        return url.toString();
-	    }
 
+	/**
+	 * Gets the demand search URL.
+	 *
+	 * @return the demand search URL
+	 */
+	public String getDemandSearchURL() {
+		StringBuilder url = new StringBuilder(config.getBillingHost());
+		url.append(config.getDemandSearchEndpoint());
+		url.append("?");
+		url.append("tenantId=");
+		url.append("{1}");
+		url.append("&");
+		url.append("businessService=");
+		url.append("{2}");
+		url.append("&");
+		url.append("consumerCode=");
+		url.append("{3}");
+		return url.toString();
+	}
+
+	/**
+	 * Removes the round off.
+	 *
+	 * @param finalAmount the final amount
+	 * @return the big decimal
+	 */
 	public static BigDecimal removeRoundOff(BigDecimal finalAmount) {
 		BigDecimal decimalValue = finalAmount.remainder(BigDecimal.ONE);
 		BigDecimal midVal = new BigDecimal(0.5);
@@ -732,5 +411,51 @@ public class BookingsUtils {
 
 	}
 	
+	/**
+	 * Round off to nearest.
+	 *
+	 * @param amount the amount
+	 * @return the big decimal
+	 */
+	public static BigDecimal roundOffToNearest(BigDecimal amount) {
+		Double taxAmount = Double.valueOf(amount+"");
+		return BigDecimal.valueOf(Math.round(taxAmount));
+	}
 
+	public Transaction fetchPaymentTransaction(RefundTransactionRequest refundTransactionRequest) {
+		String uri = getPaymentTransactionURL();
+		uri = uri.replace("{1}", refundTransactionRequest.getRefundTransaction().getTenantId());
+		uri = uri.replace("{2}", refundTransactionRequest.getRefundTransaction().getTxnId());
+		
+		Object result = serviceRequestRepository.fetchResult(new StringBuilder(uri),
+				RequestInfoWrapper.builder().requestInfo(refundTransactionRequest.getRequestInfo()).build());
+
+		TransactionResponse transaction;
+		try {
+			transaction = mapper.convertValue(result, TransactionResponse.class);
+		} catch (IllegalArgumentException e) {
+			throw new CustomException("PARSING ERROR", "Failed to parse response from Demand Search");
+		}
+				
+		return transaction.getTransaction().get(0);
+	}
+
+	private String getPaymentTransactionURL() {
+		StringBuilder url = new StringBuilder(config.getPgServiceHost());
+		url.append(config.getPgServiceEndPoint());
+		url.append("?");
+		url.append("tenantId=");
+		url.append("{1}");
+		url.append("&");
+		url.append("txnId=");
+		url.append("{2}");
+		return url.toString();
+	}
+
+	
+	public DateFormat getSimpleDateFormat() {
+		DateFormat formatter = new SimpleDateFormat(BookingsConstants.DATE_FORMAT);
+		formatter.setTimeZone(TimeZone.getTimeZone(BookingsConstants.TIME_ZONE));
+		return formatter;
+	}
 }

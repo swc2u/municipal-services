@@ -40,6 +40,15 @@ public interface CommonRepository extends JpaRepository<BookingsModel, Long> {
 	 */
 	@Query(value = BookingsQueryBuilder.FIND_APPLICATION_NUMBER, nativeQuery = true)
 	public Set<String> findApplicationNumber(@Param(BookingsConstants.ROLES) String roles);
+	
+	/**
+	 * Find business id.
+	 *
+	 * @param roles the roles
+	 * @return the sets the
+	 */
+	@Query(value = BookingsQueryBuilder.FIND_BUSINESS_ID, nativeQuery = true)
+	public Set<String> findBusinessId (@Param(BookingsConstants.ROLES) String roles);
 
 	/**
 	 * Find sector list.
@@ -117,7 +126,7 @@ public interface CommonRepository extends JpaRepository<BookingsModel, Long> {
 	 */
 	@Query(value = BookingsQueryBuilder.CHECK_JURISDICTION_AVAILABILITY, nativeQuery = true)
 	public Set<BookingsModel> searchJurisdictionAvailability(@Param(BookingsConstants.BOOKING_VENUE) String bookingVenue,@Param(BookingsConstants.BOOKING_TYPE) String bookingType, @Param(BookingsConstants.BK_SECTOR) String bkSector,
-			@Param(BookingsConstants.DATE) 	Date date, @Param(BookingsConstants.PAY) String PAY);
+			@Param(BookingsConstants.DATE) 	Date date, @Param(BookingsConstants.PAYMENT_SUCCESS_STATUS) String SUCCESS);
 	
 	
 	/**
@@ -140,21 +149,12 @@ public interface CommonRepository extends JpaRepository<BookingsModel, Long> {
 	public String findApproverName(@Param(BookingsConstants.STATE) String state);
 	
 	/**
-	 * Find user id.
+	 * Find application list.
 	 *
+	 * @param action the action
 	 * @param approver the approver
 	 * @return the list
 	 */
-	@Query(value = BookingsQueryBuilder.FIND_USER_ID, nativeQuery = true)
-	public List<Integer> findUserId(@Param(BookingsConstants.APPROVER) String approver);
-	
-	/**
-	 * Find user list.
-	 *
-	 * @param userId the user id
-	 * @return the list
-	 */
-	@Query(value = BookingsQueryBuilder.FIND_USER_LIST, nativeQuery = true)
-	public List<?> findUserList(@Param(BookingsConstants.USER_ID) List<Integer> userId);
-
+	@Query(value = BookingsQueryBuilder.FIND_APPLICATION_LIST, nativeQuery = true)
+	public List<String> findApplicationList(@Param(BookingsConstants.ACTION) String action, @Param(BookingsConstants.APPROVER) String approver);
 }

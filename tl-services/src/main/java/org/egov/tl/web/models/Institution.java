@@ -1,11 +1,14 @@
 package org.egov.tl.web.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -36,7 +39,7 @@ public class Institution {
   private String designation;
 
   @JsonProperty("active")
-  private Boolean active = null;
+  private Boolean active;
 
   @Size(max=256)
   @JsonProperty("instituionName")

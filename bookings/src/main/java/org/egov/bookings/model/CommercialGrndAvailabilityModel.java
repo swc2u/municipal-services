@@ -17,24 +17,40 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "CommercialGrndAvailabilityModel")
-@Table(name = "TT_COMMERCIAL_GROUND_AVAILABILITY_LOCK")
+@Table(name = "BK_COMMERCIAL_GROUND_AVAILABILITY_LOCK")
 public class CommercialGrndAvailabilityModel {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	@Column(name = "ID")
-	private Long id;
-	
+	private String id;
+
 	@Column(name = "BOOKING_VENUE")
 	private String bookingVenue;
-	
+
 	@Column(name = "FROM_DATE")
 	private Date fromDate;
-	
+
 	@Column(name = "TO_DATE")
 	private Date toDate;
+
+	@Column(name = "IS_LOCKED")
+	private boolean locked;
+
+	@Column(name = "venue_type")
+	private String venueType;
+
+	@Column(name = "created_date")
+	private String createdDate;
+
+	@Column(name = "last_modified_date")
+	private String lastModifiedDate;
 	
-	@Column(name = "ISLOCKED")
-	private boolean isLocked;
+	@Column(name = "REASON_FOR_HOLD")
+	private String reasonForHold;
+
 	
+	@Column(name = "SECTOR")
+	private String sector;
+	
+
 }

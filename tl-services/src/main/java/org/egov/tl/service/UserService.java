@@ -1,28 +1,40 @@
 package org.egov.tl.service;
 
+import static org.egov.tl.util.TLConstants.businessService_BPA;
+import static org.egov.tl.util.TLConstants.businessService_TL;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
 import org.egov.tl.config.TLConfiguration;
 import org.egov.tl.repository.ServiceRequestRepository;
-import org.egov.tl.repository.TLRepository;
 import org.egov.tl.util.TradeUtil;
-import org.egov.tl.validator.TLValidator;
-import org.egov.tl.web.models.*;
+import org.egov.tl.web.models.OwnerInfo;
+import org.egov.tl.web.models.TradeLicense;
+import org.egov.tl.web.models.TradeLicenseRequest;
+import org.egov.tl.web.models.TradeLicenseSearchCriteria;
+import org.egov.tl.web.models.User;
 import org.egov.tl.web.models.user.CreateUserRequest;
 import org.egov.tl.web.models.user.UserDetailResponse;
 import org.egov.tl.web.models.user.UserSearchRequest;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import static org.egov.tl.util.TLConstants.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
@@ -39,15 +51,13 @@ public class UserService{
 
     private TradeUtil tradeUtil;
 
-    private TLRepository repository;
-
     @Autowired
-    public UserService(ObjectMapper mapper, ServiceRequestRepository serviceRequestRepository, TLConfiguration config,TradeUtil tradeUtil,TLRepository repository) {
+    public UserService(ObjectMapper mapper, ServiceRequestRepository serviceRequestRepository, TLConfiguration config,
+            TradeUtil tradeUtil) {
         this.mapper = mapper;
         this.serviceRequestRepository = serviceRequestRepository;
         this.config = config;
-        this.tradeUtil=tradeUtil;
-        this.repository=repository;
+        this.tradeUtil = tradeUtil;
     }
 
 
@@ -353,8 +363,10 @@ public class UserService{
         try {
             d = f.parse(date);
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("Error while parsing date ",e);
         }
+        if(d == null)
+        	throw new CustomException("DATE PARSING ERROR", String.format("Can not Parse the date  %s", date));
         return  d.getTime();
     }
 

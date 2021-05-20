@@ -45,5 +45,8 @@ public class ParkAndCommunitySearchCriteria implements Serializable{
 
 	/** The sector. */
 	private String sector;
+	
+	/** The application number. */
+	private String applicationNumber;
 
 }

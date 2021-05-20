@@ -1,6 +1,15 @@
 package org.egov.tl.service;
 
-import java.util.*;
+import static org.egov.tl.util.TLConstants.STATUS_APPROVED;
+import static org.egov.tl.util.TLConstants.STATUS_REJECTED;
+import static org.egov.tl.util.TLConstants.businessService_BPA;
+import static org.egov.tl.util.TLConstants.businessService_TL;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +20,12 @@ import org.egov.tl.repository.TLRepository;
 import org.egov.tl.service.notification.EditNotificationService;
 import org.egov.tl.util.TradeUtil;
 import org.egov.tl.validator.TLValidator;
-import org.egov.tl.web.models.*;
+import org.egov.tl.web.models.Difference;
+import org.egov.tl.web.models.OwnerInfo;
+import org.egov.tl.web.models.TradeLicense;
+import org.egov.tl.web.models.TradeLicenseRequest;
+import org.egov.tl.web.models.TradeLicenseSearchCriteria;
+import org.egov.tl.web.models.TradeUnit;
 import org.egov.tl.web.models.user.UserDetailResponse;
 import org.egov.tl.web.models.workflow.BusinessService;
 import org.egov.tl.workflow.ActionValidator;
@@ -22,9 +36,6 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import static org.egov.tl.util.TLConstants.*;
 
 @Service
 public class TradeLicenseService {
@@ -154,6 +165,7 @@ public class TradeLicenseService {
         List<TradeLicense> licenses;
         tlValidator.validateSearch(requestInfo,criteria,serviceFromPath);
         enrichmentService.enrichSearchCriteriaWithAccountId(requestInfo,criteria);
+		enrichmentService.enrichSearchCriteriaHideStatusForEmployee(requestInfo, criteria);
          if(criteria.getMobileNumber()!=null){
              licenses = getLicensesFromMobileNumber(criteria,requestInfo);
          }

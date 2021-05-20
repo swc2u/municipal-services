@@ -12,6 +12,7 @@ import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 // TODO: Auto-generated Javadoc
@@ -62,6 +63,7 @@ public class DemandRepository {
 	 * @param requestInfo the request info
 	 * @param demands the demands
 	 * @return the list
+	 * @throws JsonProcessingException 
 	 */
 	public List<Demand> updateDemand(RequestInfo requestInfo, List<Demand> demands) {
 		StringBuilder url = new StringBuilder(config.getBillingHost());

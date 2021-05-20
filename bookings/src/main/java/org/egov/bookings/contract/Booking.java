@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.egov.bookings.model.BookingsModel;
 import org.egov.bookings.model.OsujmNewLocationModel;
+import org.egov.bookings.model.RoomsModel;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -36,6 +37,12 @@ public class Booking implements Serializable {
 	
 	/** The document list. */
 	private List<DocumentFields> documentList;
+	
+	/** The community center document map. */
+	private Map<String, String> communityCenterDocumentMap;
+	
+	/** The community center room booking map. */
+	private Map<RoomsModel, BookingsModel> communityCenterRoomBookingMap;
 	
 	/**
 	 * Gets the bookings model list.
@@ -152,4 +159,41 @@ public class Booking implements Serializable {
 	public void setDocumentList(List<DocumentFields> documentList) {
 		this.documentList = documentList;
 	}
+
+	/**
+	 * Gets the community center document map.
+	 *
+	 * @return the community center document map
+	 */
+	public Map<String, String> getCommunityCenterDocumentMap() {
+		return communityCenterDocumentMap;
+	}
+
+	/**
+	 * Sets the community center document map.
+	 *
+	 * @param communityCenterDocumentMap the community center document map
+	 */
+	public void setCommunityCenterDocumentMap(Map<String, String> communityCenterDocumentMap) {
+		this.communityCenterDocumentMap = communityCenterDocumentMap;
+	}
+
+	/**
+	 * Gets the community center room booking map.
+	 *
+	 * @return the community center room booking map
+	 */
+	public Map<RoomsModel, BookingsModel> getCommunityCenterRoomBookingMap() {
+		return communityCenterRoomBookingMap;
+	}
+
+	/**
+	 * Sets the community center room booking map.
+	 *
+	 * @param communityCenterRoomBookingMap the community center room booking map
+	 */
+	public void setCommunityCenterRoomBookingMap(Map<RoomsModel, BookingsModel> communityCenterRoomBookingMap) {
+		this.communityCenterRoomBookingMap = communityCenterRoomBookingMap;
+	}
+
 }

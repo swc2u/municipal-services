@@ -1,12 +1,15 @@
 package org.egov.tlcalculator.service;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
 import com.jayway.jsonpath.JsonPath;
-import lombok.extern.slf4j.Slf4j;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.tlcalculator.utils.BillingslabConstants;
 import org.egov.tlcalculator.utils.BillingslabUtils;
-import org.egov.tlcalculator.utils.ResponseInfoFactory;
 import org.egov.tlcalculator.web.models.BillingSlab;
 import org.egov.tlcalculator.web.models.BillingSlabSearchCriteria;
 import org.egov.tracer.model.CustomException;
@@ -14,9 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -27,9 +28,6 @@ public class BPABillingSlabService {
 
     @Autowired
     private RestTemplate restTemplate;
-
-    @Autowired
-    private ResponseInfoFactory factory;
 
     public BillingSlab search(BillingSlabSearchCriteria billingSlabSearchCriteria, RequestInfo requestInfo) {
         StringBuilder uri = new StringBuilder();

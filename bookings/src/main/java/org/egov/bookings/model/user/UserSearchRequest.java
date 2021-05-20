@@ -1,29 +1,25 @@
 package org.egov.bookings.model.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+import org.egov.common.contract.request.RequestInfo;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.egov.common.contract.request.RequestInfo;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-
 @Getter
 @Setter
-@Builder
 public class UserSearchRequest {
 
 	@JsonProperty("RequestInfo")
 	private RequestInfo requestInfo;
 
-	@JsonProperty("id")
-	private List<Long> id;
-	
 	@JsonProperty("uuid")
 	private List<String> uuid;
+
+	@JsonProperty("id")
+	private List<String> id;
 
 	@JsonProperty("userName")
 	private String userName;
@@ -67,5 +63,6 @@ public class UserSearchRequest {
 
 	@JsonProperty("roleCodes")
 	private List<String> roleCodes;
+
 
 }

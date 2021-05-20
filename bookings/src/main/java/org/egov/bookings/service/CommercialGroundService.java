@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.egov.bookings.contract.AvailabilityResponse;
+import org.egov.bookings.contract.CommercialGrndAvailabiltyLockRequest;
 import org.egov.bookings.contract.CommercialGroundAvailabiltySearchCriteria;
 import org.egov.bookings.contract.CommercialGroundFeeSearchCriteria;
 import org.egov.bookings.model.BookingsModel;
@@ -32,10 +33,16 @@ public interface CommercialGroundService {
 	Set<AvailabilityResponse> searchCommercialGroundAvailabilty(
 			CommercialGroundAvailabiltySearchCriteria commercialGroundAvailabiltySearchCriteria);
 
-	CommercialGrndAvailabilityModel lockCommercialAvailability(
-			CommercialGrndAvailabilityModel commercialGrndAvailabilityModel);
+	List<CommercialGrndAvailabilityModel> saveCommercialAvailabilityLockDates(
+			CommercialGrndAvailabiltyLockRequest commercialGrndAvailabiltyLockRequest);
 
 	Set<Date> fetchBookedDates(
 			BookingsRequest bookingsRequest);
 
+	
+	List<CommercialGrndAvailabilityModel> updateCommercialAvailabilityLockDates(
+			CommercialGrndAvailabiltyLockRequest commercialGrndAvailabiltyLockRequest);
+
+	List<CommercialGrndAvailabilityModel> fetchLockedDates();
+	
 }

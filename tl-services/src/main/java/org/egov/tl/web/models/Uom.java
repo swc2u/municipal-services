@@ -1,18 +1,14 @@
 package org.egov.tl.web.models;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.Builder;
 
 /**
  * Uom
@@ -27,13 +23,13 @@ import lombok.Builder;
 @Builder
 public class Uom   {
         @JsonProperty("name")
-        private String name = null;
+        private String name;
 
         @JsonProperty("code")
-        private String code = null;
+        private String code;
 
         @JsonProperty("active")
-        private Boolean active = null;
+        private Boolean active;
 
 
 }

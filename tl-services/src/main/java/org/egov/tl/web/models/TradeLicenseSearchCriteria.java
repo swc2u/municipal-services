@@ -76,6 +76,9 @@ public class TradeLicenseSearchCriteria {
     @JsonProperty("sortBy")
     private String sortBy;
 
+	@JsonIgnore
+    private List<String> statusToHideForEmployee;
+
 
     public boolean isEmpty() {
         return (this.tenantId == null && this.status == null && this.ids == null && this.applicationNumber == null

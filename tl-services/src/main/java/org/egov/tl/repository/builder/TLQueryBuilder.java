@@ -1,24 +1,15 @@
 package org.egov.tl.repository.builder;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.egov.tl.config.TLConfiguration;
-import org.egov.tl.web.models.*;
-import org.egov.tracer.model.CustomException;
-import org.postgresql.util.PGobject;
+import org.egov.tl.web.models.TradeLicenseSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
 
-@Slf4j
 @Component
 public class TLQueryBuilder {
 
@@ -204,6 +195,14 @@ public class TLQueryBuilder {
             preparedStmtList.add(criteria.getApplicationType());
         }
 
+		if (criteria.getStatusToHideForEmployee() != null && !criteria.getStatusToHideForEmployee().isEmpty()) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append(" tl.status NOT IN (").append(createQuery(config.getStatusHideForEmployeeSearch()))
+					.append(")");
+			addToPreparedStatement(preparedStmtList, config.getStatusHideForEmployeeSearch());
+
+		}
+		
        // enrichCriteriaForUpdateSearch(builder,preparedStmtList,criteria);
 
         return builder.toString();

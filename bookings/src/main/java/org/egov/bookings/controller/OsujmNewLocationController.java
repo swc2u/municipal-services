@@ -107,10 +107,6 @@ public class OsujmNewLocationController {
 			{
 				throw new IllegalArgumentException("Invalid searchCriteriaFieldsDTO");
 			}
-			if (BookingsFieldsValidator.isNullOrEmpty(searchCriteriaFieldsDTO.getTenantId())) 
-			{
-				throw new IllegalArgumentException("Invalid tentantId");
-			}
 			if (BookingsFieldsValidator.isNullOrEmpty(searchCriteriaFieldsDTO.getUuid())) 
 			{
 				throw new IllegalArgumentException("Invalid uuId");
@@ -139,10 +135,6 @@ public class OsujmNewLocationController {
 			if (BookingsFieldsValidator.isNullOrEmpty(searchCriteriaFieldsDTO)) 
 			{
 				throw new IllegalArgumentException("Invalid searchCriteriaFieldsDTO");
-			}
-			if (BookingsFieldsValidator.isNullOrEmpty(searchCriteriaFieldsDTO.getTenantId())) 
-			{
-				throw new IllegalArgumentException("Invalid tentantId");
 			}
 			if (BookingsFieldsValidator.isNullOrEmpty(searchCriteriaFieldsDTO.getUuid())) 
 			{

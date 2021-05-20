@@ -1,5 +1,6 @@
 package org.egov.bookings.service.impl;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -28,6 +29,7 @@ import org.egov.bookings.repository.OsujmNewLocationRepository;
 import org.egov.bookings.service.BookingsService;
 import org.egov.bookings.service.OsujmNewLocationService;
 import org.egov.bookings.utils.BookingsConstants;
+import org.egov.bookings.utils.BookingsUtils;
 import org.egov.bookings.utils.NewLocationCreateDate;
 import org.egov.bookings.validator.BookingsFieldsValidator;
 import org.egov.bookings.web.models.NewLocationRequest;
@@ -40,7 +42,6 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class OsujmNewLocationServiceImpl.
  */
@@ -82,6 +83,9 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 	
 	@Autowired
 	private BookingsProducer bookingsProducer; 
+	
+	@Autowired
+	private BookingsUtils bookingsUtils;
 
 	
 	/** The Constant LOGGER. */
@@ -95,6 +99,8 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 	 */
 	@Override
 	public OsujmNewLocationModel addNewLocation(NewLocationRequest newLocationRequest) {
+		OsujmNewLocationModel newLocationModel = new OsujmNewLocationModel();
+		newLocationModel.setApplicationStatus(newLocationRequest.getNewLocationModel().getApplicationStatus());
 		try
 		{
 			boolean flag = bookingsService.isBookingExists(newLocationRequest.getNewLocationModel().getApplicationNumber());
@@ -106,12 +112,14 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 				if (!flag)
 					workflowIntegrator.callWorkFlow(newLocationRequest);
 			}
-			enrichmentService.enrichNewLocationDetails(newLocationRequest);
+			enrichmentService.enrichNewLocationDetails(newLocationRequest,flag);
 			NewLocationKafkaRequest newLocationKafkaRequest = enrichmentService.enrichKafkaForNewLocation(newLocationRequest);
 			bookingsProducer.push(config.getSaveNewLocationTopic(), newLocationKafkaRequest);
 			//osujmNewLocationModel = newLocationRepository.save(newLocationRequest.getNewLocationModel());
 			if (!BookingsFieldsValidator.isNullOrEmpty(newLocationRequest.getNewLocationModel())) {
-				//bookingsProducer.push(config.getSaveTopic(), newLocationRequest);
+				if(!BookingsFieldsValidator.isNullOrEmpty(newLocationModel) && !BookingsConstants.INITIATED.equals(newLocationModel.getApplicationStatus())) {
+					bookingsProducer.push(config.getSaveNLUJMBookingSMSTopic(), newLocationRequest);
+				}
 			}
 		}
 		catch (Exception e) {
@@ -135,7 +143,7 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 		if(!BookingsFieldsValidator.isNullOrEmpty(messageResponse))
 		{
 			if(BookingsConstants.BUSINESS_SERVICE_NLUJM.equals(osujmNewLocationModel.getBusinessService())) {
-				applicationStatus = "BK_WF_NLUJM_" + osujmNewLocationModel.getApplicationStatus();
+				applicationStatus = BookingsConstants.BK_WF_NLUJM + osujmNewLocationModel.getApplicationStatus();
 			}
 			for (Message message : messageResponse.getMessages()) {
 				if(message.getCode().equals(applicationStatus)){
@@ -156,7 +164,8 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 	public OsujmNewLocationModel updateNewLocation(NewLocationRequest newLocationRequest) {
 
 		String businessService = newLocationRequest.getNewLocationModel().getBusinessService();
-		
+		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
+			newLocationRequest.getNewLocationModel().setLastModifiedDate(formatter.format(new java.util.Date()));
 		if (config.getIsExternalWorkFlowEnabled())
 			workflowIntegrator.callWorkFlow(newLocationRequest);
 
@@ -181,7 +190,7 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 				newLocaltionModel = newLocationRequest.getNewLocationModel();
 			}
 			if (!BookingsFieldsValidator.isNullOrEmpty(newLocaltionModel)) {
-				//bookingsProducer.push(config.getSaveTopic(), newLocationRequest);
+				bookingsProducer.push(config.getUpdateNLUJMBookingSMSTopic(), newLocationRequest);
 			}
 		} catch (Exception e) {
 			throw new CustomException("OSUJM_NEW_LOCATION_ERROR", e.getLocalizedMessage());
@@ -207,7 +216,6 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 			if (BookingsFieldsValidator.isNullOrEmpty(searchCriteriaFieldsDTO)) {
 				throw new IllegalArgumentException("Invalid searchCriteriaFieldsDTO");
 			}
-			String tenantId = searchCriteriaFieldsDTO.getTenantId();
 			String applicationNumber = searchCriteriaFieldsDTO.getApplicationNumber();
 			String applicationStatus = searchCriteriaFieldsDTO.getApplicationStatus();
 			String mobileNumber = searchCriteriaFieldsDTO.getMobileNumber();
@@ -219,9 +227,6 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 				throw new IllegalArgumentException("Invalid request info details");
 			}
 			List< Role > roles = searchCriteriaFieldsDTO.getRequestInfo().getUserInfo().getRoles();
-			if (BookingsFieldsValidator.isNullOrEmpty(tenantId)) {
-				throw new IllegalArgumentException("Invalid tentantId");
-			}
 			if (BookingsFieldsValidator.isNullOrEmpty(uuid)) {
 				throw new IllegalArgumentException("Invalid uuId");
 			}
@@ -234,40 +239,26 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 					applicationNumberSet.addAll(commonRepository.findApplicationNumber(role.getCode()));
 				}
 			}
-			boolean flag = false;
-			if (!BookingsFieldsValidator.isNullOrEmpty(applicationNumber) && !BookingsFieldsValidator.isNullOrEmpty(applicationNumberSet)) {
-				if(applicationNumberSet.contains(applicationNumber))
-				{
-					flag = true;
-					applicationNumberSet.clear();
-					applicationNumberSet.add(applicationNumber);
-				}
-				if(!flag)
-				{
-					return booking;
-				}
-			}
 			for (Role role : roles) {
 				if(!BookingsConstants.CITIZEN.equals(role.getCode()) && !BookingsConstants.EMPLOYEE.equals(role.getCode()) ) {
 					
 					if(BookingsConstants.MCC_APPROVER.equals(role.getCode()) || BookingsConstants.OSD_APPROVER.equals(role.getCode()) || BookingsConstants.ADMIN_APPROVER.equals(role.getCode()))
 					{
 						List<String> sectorList = commonRepository.findSectorList(uuid);
-						if (sectorList == null || sectorList.isEmpty()) {
-							return booking;
-						}
-						if (BookingsFieldsValidator.isNullOrEmpty(fromDate) && BookingsFieldsValidator.isNullOrEmpty(fromDate)) {
-							osujmNewLocationModelSet.addAll( newLocationRepository.getEmployeeNewlocationSearch(tenantId, applicationNumber,
-									applicationStatus, mobileNumber, sectorList, applicationNumberSet));
-						}
-						else if (!BookingsFieldsValidator.isNullOrEmpty(fromDate) && !BookingsFieldsValidator.isNullOrEmpty(fromDate)) {
-							osujmNewLocationModelSet.addAll( newLocationRepository.getEmployeeNewlocationSearch(tenantId, applicationNumber,
-									applicationStatus, mobileNumber, sectorList, applicationNumberSet, fromDate, toDate ));
+						if (!BookingsFieldsValidator.isNullOrEmpty(applicationNumberSet) ) {
+							if (BookingsFieldsValidator.isNullOrEmpty(fromDate) && BookingsFieldsValidator.isNullOrEmpty(fromDate)) {
+								osujmNewLocationModelSet.addAll( newLocationRepository.getEmployeeNewlocationSearch(applicationNumber,
+										applicationStatus, mobileNumber, sectorList, applicationNumberSet));
+							}
+							else if (!BookingsFieldsValidator.isNullOrEmpty(fromDate) && !BookingsFieldsValidator.isNullOrEmpty(fromDate)) {
+								osujmNewLocationModelSet.addAll( newLocationRepository.getEmployeeNewlocationSearch(applicationNumber,
+										applicationStatus, mobileNumber, sectorList, applicationNumberSet, fromDate, toDate ));
+							}
 						}
 					}
 				}
 			}
-			if (!BookingsFieldsValidator.isNullOrEmpty(applicationNumber)) {
+			if (!BookingsFieldsValidator.isNullOrEmpty(applicationNumber) && !BookingsFieldsValidator.isNullOrEmpty(osujmNewLocationModelSet)) {
 				documentList = commonRepository.findDocuments(applicationNumber);
 				booking.setBusinessService(commonRepository.findBusinessService(applicationNumber));
 			}
@@ -314,7 +305,6 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 			if (BookingsFieldsValidator.isNullOrEmpty(searchCriteriaFieldsDTO)) {
 				throw new IllegalArgumentException("Invalid searchCriteriaFieldsDTO");
 			}
-			String tenantId = searchCriteriaFieldsDTO.getTenantId();
 			String applicationNumber = searchCriteriaFieldsDTO.getApplicationNumber();
 			String applicationStatus = searchCriteriaFieldsDTO.getApplicationStatus();
 			String mobileNumber = searchCriteriaFieldsDTO.getMobileNumber();
@@ -322,21 +312,18 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 			Date toDate = searchCriteriaFieldsDTO.getToDate();
 			String uuid = searchCriteriaFieldsDTO.getUuid();
 
-			if (BookingsFieldsValidator.isNullOrEmpty(tenantId)) {
-				throw new IllegalArgumentException("Invalid tentantId");
-			}
 			if (BookingsFieldsValidator.isNullOrEmpty(uuid)) {
 				throw new IllegalArgumentException("Invalid uuId");
 			}
 			if (BookingsFieldsValidator.isNullOrEmpty(fromDate) && BookingsFieldsValidator.isNullOrEmpty(fromDate)) {
-				osujmNewLocationModelList = newLocationRepository.getCitizenNewlocationSearch(tenantId, applicationNumber,
+				osujmNewLocationModelList = newLocationRepository.getCitizenNewlocationSearch(applicationNumber,
 						applicationStatus, mobileNumber, uuid);
 			} else if (!BookingsFieldsValidator.isNullOrEmpty(fromDate)
 					&& !BookingsFieldsValidator.isNullOrEmpty(fromDate)) {
-				osujmNewLocationModelList = newLocationRepository.getCitizenNewlocationSearch(tenantId, applicationNumber,
+				osujmNewLocationModelList = newLocationRepository.getCitizenNewlocationSearch(applicationNumber,
 						applicationStatus, mobileNumber, uuid, fromDate, toDate);
 			}
-			if (!BookingsFieldsValidator.isNullOrEmpty(applicationNumber)) {
+			if (!BookingsFieldsValidator.isNullOrEmpty(applicationNumber) && !BookingsFieldsValidator.isNullOrEmpty(osujmNewLocationModelList)) {
 				documentList = commonRepository.findDocuments(applicationNumber);
 				booking.setBusinessService(commonRepository.findBusinessService(applicationNumber));
 			}
@@ -348,7 +335,7 @@ public class OsujmNewLocationServiceImpl implements OsujmNewLocationService{
 					DocumentFields documentFields = new DocumentFields();
 					documentFields.setFileStoreId(documentStrArray[0].substring(2,documentStrArray[0].length()-1));
 					String[] strArray = documentStrArray[1].split("/");
-					documentFields.setFileName(strArray[strArray.length - 1].substring(13,(strArray[strArray.length - 1].length() - 2)));
+					documentFields.setFileName(strArray[strArray.length - 1].substring(13,(strArray[strArray.length - 1].length() - 1)));
 					if(!"null".equals(documentStrArray[2].substring(0,documentStrArray[2].length()-1)))
 					{
 						documentFields.setDocumentType(documentStrArray[2].substring(1,documentStrArray[2].length()-2));

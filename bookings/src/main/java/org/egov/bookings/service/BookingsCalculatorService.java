@@ -5,16 +5,19 @@ import java.util.List;
 import java.util.Set;
 
 import org.egov.bookings.contract.TaxHeadMasterFields;
+import org.egov.bookings.model.CommercialGroundFeeModel;
 import org.egov.bookings.models.demand.Demand;
 import org.egov.bookings.models.demand.TaxHeadEstimate;
 import org.egov.bookings.web.models.BookingsRequest;
 import org.egov.common.contract.request.RequestInfo;
+import org.springframework.stereotype.Service;
 
 
 // TODO: Auto-generated Javadoc
 /**
  * The Interface BookingsCalculatorService.
  */
+@Service
 public interface BookingsCalculatorService {
 
 	/**
@@ -35,10 +38,13 @@ public interface BookingsCalculatorService {
 	 * @param bookingsRequest the bookings request
 	 * @param taxHeadCode1 the tax head code 1
 	 * @param taxHeadCode2 the tax head code 2
+	 * @param taxHeadCode2 the tax head code 3
+	 * @param taxHeadCode2 the tax head code 4
+	 * @param taxHeadCode2 the tax head code 5
 	 * @return the tax head estimate
 	 */
 	public List<TaxHeadEstimate> getTaxHeadEstimate(BookingsRequest bookingsRequest, String taxHeadCode1,
-			String taxHeadCode2);
+			String taxHeadCode2, String taxHeadCode3, String taxHeadCode4, String taxHeadCode5);
 
 	/**
 	 * Gets the jurisdication amount.
@@ -71,5 +77,17 @@ public interface BookingsCalculatorService {
 	 * @param bookingsRequest the bookings request
 	 * @return the commercial amount
 	 */
-	public BigDecimal getCommercialAmount(BookingsRequest bookingsRequest);
+	public CommercialGroundFeeModel getCommercialAmount(BookingsRequest bookingsRequest);
+
+	
+	/**
+	 * Gets the tax head estimate for room.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @param taxHeadCode1 the tax head code 1
+	 * @param taxHeadCode2 the tax head code 2
+	 * @return the tax head estimate for room
+	 */
+	public List<TaxHeadEstimate> getTaxHeadEstimateForRoom(BookingsRequest bookingsRequest, String taxHeadCode1,
+			String taxHeadCode2);
 }

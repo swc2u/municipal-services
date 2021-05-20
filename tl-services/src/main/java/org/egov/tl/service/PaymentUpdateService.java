@@ -1,18 +1,31 @@
 package org.egov.tl.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
+import static org.egov.tl.util.CTLConstants.businessService_BOOK_SHOP;
+import static org.egov.tl.util.CTLConstants.businessService_DHOBI_GHAT;
+import static org.egov.tl.util.CTLConstants.businessService_REHRI_DL;
+import static org.egov.tl.util.CTLConstants.businessService_REHRI_RC;
+import static org.egov.tl.util.TLConstants.ACTION_PAY;
+import static org.egov.tl.util.TLConstants.EMAIL_SUBJECT;
+import static org.egov.tl.util.TLConstants.STATUS_APPROVED;
+import static org.egov.tl.util.TLConstants.businessService_BPA;
+import static org.egov.tl.util.TLConstants.businessService_TL;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.Role;
 import org.egov.tl.config.TLConfiguration;
 import org.egov.tl.repository.TLRepository;
-import org.egov.tl.util.TradeUtil;
 import org.egov.tl.util.CTLConstants;
 import org.egov.tl.util.NotificationUtil;
+import org.egov.tl.util.TradeUtil;
 import org.egov.tl.web.models.EmailRequest;
 import org.egov.tl.web.models.OwnerInfo;
 import org.egov.tl.web.models.SMSRequest;
@@ -25,21 +38,12 @@ import org.egov.tl.web.models.workflow.BusinessService;
 import org.egov.tl.workflow.WorkflowIntegrator;
 import org.egov.tl.workflow.WorkflowService;
 import org.egov.tracer.model.CustomException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.egov.tl.util.TLConstants.*;
-import static org.egov.tl.util.CTLConstants.*;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Service
@@ -179,7 +183,7 @@ public class PaymentUpdateService {
 			}
 		 }
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Error while processing the payment ",e);
 		}
 
 	}
@@ -219,7 +223,7 @@ public class PaymentUpdateService {
      * @return The list of the SMS Requests
      */
     private SMSRequest getCTLOwnerSMSRequest(TradeLicense license, OwnerInfo owner, String localizationMessages){
-        String message = notificationUtil.getCTLOwnerPaymentMsg(license, new HashMap<String, String>(), localizationMessages);
+        String message = notificationUtil.getCTLOwnerPaymentMsg(license, new HashMap<String, String>(), localizationMessages,CTLConstants.SMS_NOTIFICATION);
         String customizedMsg = message.replace("<1>", owner.getName());
         SMSRequest smsRequest = new SMSRequest(owner.getMobileNumber(),customizedMsg);
         return smsRequest;
@@ -234,7 +238,7 @@ public class PaymentUpdateService {
      * @return The list of the SMS Requests
      */
     private EmailRequest getCTLOwnerEmailRequest(TradeLicense license, OwnerInfo owner,String localizationMessages){
-        String message = notificationUtil.getCTLOwnerPaymentMsg(license, new HashMap<String, String>(), localizationMessages);
+        String message = notificationUtil.getCTLOwnerPaymentMsg(license, new HashMap<String, String>(), localizationMessages,CTLConstants.MAIL_NOTIFICATION);
         
         String customizedMsg = message.replace("<1>", owner.getName());
         EmailRequest emailRequest = EmailRequest.builder()
@@ -245,24 +249,5 @@ public class PaymentUpdateService {
         								.build();
         return emailRequest;
     }
-    
-	/**
-	 * Extracts the required fields as map
-	 * 
-	 * @param context The documentcontext of the incoming receipt
-	 * @return Map containing values of required fields
-	 */
-	private Map<String, String> enrichValMap(DocumentContext context) {
-		Map<String, String> valMap = new HashMap<>();
-		try {
-			valMap.put(businessService, context.read("$.Payments.*.paymentDetails[?(@.businessService=='TL')].businessService"));
-			valMap.put(consumerCode, context.read("$.Payments.*.paymentDetails[?(@.businessService=='TL')].bill.consumerCode"));
-			valMap.put(tenantId, context.read("$.Payments[0].tenantId"));
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new CustomException("PAYMENT ERROR", "Unable to fetch values from payment");
-		}
-		return valMap;
-	}
 
 }

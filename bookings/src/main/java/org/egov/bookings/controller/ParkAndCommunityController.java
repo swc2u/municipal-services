@@ -4,6 +4,8 @@ import java.sql.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.egov.bookings.common.model.ResponseModel;
 import org.egov.bookings.contract.AvailabilityResponse;
 import org.egov.bookings.contract.ParkAndCommunitySearchCriteria;
@@ -11,6 +13,7 @@ import org.egov.bookings.contract.ParkCommunityFeeMasterRequest;
 import org.egov.bookings.contract.ParkCommunityFeeMasterResponse;
 import org.egov.bookings.model.BookingsModel;
 import org.egov.bookings.model.ParkCommunityHallV1MasterModel;
+import org.egov.bookings.service.DemandService;
 import org.egov.bookings.service.ParkAndCommunityService;
 import org.egov.bookings.service.impl.EnrichmentService;
 import org.egov.bookings.validator.BookingsFieldsValidator;
@@ -21,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 // TODO: Auto-generated Javadoc
@@ -30,6 +34,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/park/community")
 public class ParkAndCommunityController {
+	
+	/** The Constant LOGGER. */
+	private static final Logger LOGGER = LogManager.getLogger( ParkAndCommunityController.class.getName() );
 
 	/** The park and community service. */
 	@Autowired
@@ -45,7 +52,10 @@ public class ParkAndCommunityController {
 
 	/** The bookings fields validator. */
 	@Autowired
-	BookingsFieldsValidator bookingsFieldsValidator;
+	private BookingsFieldsValidator bookingsFieldsValidator;
+
+	@Autowired
+	private DemandService demandService;
 
 	/**
 	 * Creates the park and community booking.
@@ -104,10 +114,11 @@ public class ParkAndCommunityController {
 	 * @return the response entity
 	 */
 	@PostMapping("/master/_fetch")
-	private ResponseEntity<?> fetchParkCommunityMaster(@RequestBody ParkCommunityFeeMasterRequest parkCommunityFeeMasterRequest) {
+	private ResponseEntity<?> fetchParkCommunityMaster(
+			@RequestBody ParkCommunityFeeMasterRequest parkCommunityFeeMasterRequest) {
 
 		bookingsFieldsValidator.validateParkAndCommunityMasterRequest(parkCommunityFeeMasterRequest);
-		
+
 		List<ParkCommunityHallV1MasterModel> parkCommunityHallV1MasterList = parkAndCommunityService
 				.fetchParkCommunityMaster(parkCommunityFeeMasterRequest);
 
@@ -125,11 +136,11 @@ public class ParkAndCommunityController {
 		return ResponseEntity.ok(rs);
 	}
 
-	
-	
 	@PostMapping("/availability/_search")
-	private ResponseEntity<?> availabilitySearch(@RequestBody ParkAndCommunitySearchCriteria parkAndCommunitySearchCriteria) {
+	private ResponseEntity<?> availabilitySearch(
+			@RequestBody ParkAndCommunitySearchCriteria parkAndCommunitySearchCriteria) {
 
+		bookingsFieldsValidator.validatePACCSearchCriteria(parkAndCommunitySearchCriteria);
 		Set<AvailabilityResponse> parkCommunityHallV1MasterList = parkAndCommunityService
 				.availabilitySearch(parkAndCommunitySearchCriteria);
 		ResponseModel rs = new ResponseModel();
@@ -145,40 +156,57 @@ public class ParkAndCommunityController {
 
 		return ResponseEntity.ok(rs);
 	}
-	
-	
+
 	@PostMapping("/booked/dates/_search")
-	private ResponseEntity<?> fetchBookedDates(
-			@RequestBody BookingsRequest bookingsRequest) {
-		
+	private ResponseEntity<?> fetchBookedDates(@RequestBody BookingsRequest bookingsRequest) {
+
 		bookingsFieldsValidator.validateGrndAvailabilityRequest(bookingsRequest);
-		
-		
+
 		Set<Date> res = parkAndCommunityService.fetchBookedDates(bookingsRequest);
 		ResponseModel rs = new ResponseModel();
 		rs.setStatus("200");
 		rs.setMessage("Already Booked Dates");
 		rs.setData(res);
-		
+
 		return ResponseEntity.ok(rs);
 	}
 
-	
 	@PostMapping("/amount/_fetch")
-	private ResponseEntity<?> fetchAmount(
-			@RequestBody ParkCommunityFeeMasterRequest parkCommunityFeeMasterRequest) {
-		
-		//bookingsFieldsValidator.validateGrndAvailabilityRequest(bookingsRequest);
-		
-		
+	private ResponseEntity<?> fetchAmount(@RequestBody ParkCommunityFeeMasterRequest parkCommunityFeeMasterRequest) {
+
+		// bookingsFieldsValidator.validateGrndAvailabilityRequest(bookingsRequest);
+
 		ParkCommunityFeeMasterResponse res = parkAndCommunityService.fetchAmount(parkCommunityFeeMasterRequest);
 		ResponseModel rs = new ResponseModel();
 		rs.setStatus("200");
 		rs.setMessage("Amount Fetched");
 		rs.setData(res);
-		
+
 		return ResponseEntity.ok(rs);
 	}
 	
-	
+	/**
+	 * Fetch sector.
+	 *
+	 * @param venueType the venue type
+	 * @return the response entity
+	 */
+	@PostMapping(value = "/sector/_fetch")
+	public ResponseEntity<?> fetchSector(@RequestParam(value = "venueType", required = true) String venueType){
+		if (BookingsFieldsValidator.isNullOrEmpty(venueType)) {
+			throw new IllegalArgumentException("Invalid venueType");
+		}
+		ResponseModel rs = new ResponseModel();
+		try {
+			List<ParkCommunityHallV1MasterModel> paccSectorList = parkAndCommunityService.fetchSector(venueType); 
+			rs.setStatus("200");
+			rs.setMessage("Success");
+			rs.setData(paccSectorList);
+		}
+		catch (Exception e) {
+			LOGGER.error("Exception occur in the fetchSector " + e);
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(rs);
+	}
 }

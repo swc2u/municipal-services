@@ -1,25 +1,32 @@
 package org.egov.tl.util;
 
+import static org.egov.tl.util.BPAConstants.ACTION_STATUS_APPROVED;
+import static org.egov.tl.util.BPAConstants.ACTION_STATUS_PENDINGAPPROVAL;
+import static org.egov.tl.util.BPAConstants.ACTION_STATUS_PENDINGPAYMENT;
+import static org.egov.tl.util.BPAConstants.ACTION_STATUS_REJECTED;
+import static org.egov.tl.util.BPAConstants.NOTIFICATION_APPROVED;
+import static org.egov.tl.util.BPAConstants.NOTIFICATION_PENDINGAPPROVAL;
+import static org.egov.tl.util.BPAConstants.NOTIFICATION_PENDINGPAYMENT;
+import static org.egov.tl.util.BPAConstants.NOTIFICATION_REJECTED;
+import static org.egov.tl.util.BPAConstants.TRADE_LOCALISATION_PREFIX;
+import static org.egov.tl.util.TLConstants.NOTIFICATION_LOCALE;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
 import com.jayway.jsonpath.JsonPath;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tl.config.TLConfiguration;
-import org.egov.tl.producer.Producer;
 import org.egov.tl.repository.ServiceRequestRepository;
-import org.egov.tl.web.models.*;
-import org.egov.tracer.model.CustomException;
+import org.egov.tl.web.models.TradeLicense;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
-import java.util.*;
-
-import static org.egov.tl.util.BPAConstants.*;
-import static org.egov.tl.util.TLConstants.NOTIFICATION_LOCALE;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -28,8 +35,6 @@ public class BPANotificationUtil {
     private TLConfiguration config;
 
     private ServiceRequestRepository serviceRequestRepository;
-
-    private Producer producer;
 
     @Value("${egov.host.domain.name}")
     private String egovhost;
@@ -41,11 +46,9 @@ public class BPANotificationUtil {
     private String citizenHomeEndpoint;
 
     @Autowired
-    public BPANotificationUtil(TLConfiguration config, ServiceRequestRepository serviceRequestRepository,
-                               Producer producer) {
+    public BPANotificationUtil(TLConfiguration config, ServiceRequestRepository serviceRequestRepository) {
         this.config = config;
         this.serviceRequestRepository = serviceRequestRepository;
-        this.producer = producer;
     }
 
     final String receiptNumberKey = "receiptNumber";

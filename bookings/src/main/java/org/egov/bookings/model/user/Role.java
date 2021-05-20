@@ -12,7 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Role {
-
+	
+	private Long id;
+	
     @JsonProperty("name")
     private String name;
     

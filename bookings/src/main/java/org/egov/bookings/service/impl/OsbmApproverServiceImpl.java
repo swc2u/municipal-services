@@ -24,11 +24,11 @@ public class OsbmApproverServiceImpl implements OsbmApproverService{
 	public OsbmApproverModel createOsbmApprover(OsbmApproverRequest osbmApproverRequest) {
 		OsbmApproverModel osbmApproverModel = null;
 		try {
-			 osbmApproverModel = new OsbmApproverModel();
-			osbmApproverModel.setSector(osbmApproverRequest.getSector());
-			osbmApproverModel.setUuid(osbmApproverRequest.getUuid());
-			osbmApproverModel =  osbmApproverRepository.save(osbmApproverModel);
-		
+			osbmApproverModel = new OsbmApproverModel();
+//			osbmApproverModel.setSector(osbmApproverRequest.getSector());
+//			osbmApproverModel.setUuid(osbmApproverRequest.getUuid());
+			osbmApproverModel = osbmApproverRepository.save(osbmApproverModel);
+
 		}catch (Exception e) {
 			throw new CustomException("APPROVER_SAVE_ERROR", "ERROR WHILE SAVING OSBM SECTOR");
 		}

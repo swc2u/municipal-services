@@ -3,7 +3,6 @@ package org.egov.tlcalculator.config;
 import org.egov.tlcalculator.kafka.broker.TLCalculatorProducer;
 import org.egov.tlcalculator.service.DemandService;
 import org.egov.tlcalculator.service.MDMSService;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

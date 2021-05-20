@@ -46,7 +46,6 @@ public class OsbmController {
 	@PostMapping("/approver/_create")
 	public ResponseEntity<?> createOsbmApprover(@RequestBody OsbmApproverRequest osbmApproverRequest) {
 
-		bookingsFieldsValidator.validateOsbmApproverBody(osbmApproverRequest);
 		OsbmApproverModel osbmModel = osbmApproverService.createOsbmApprover(osbmApproverRequest);
 
 		ResponseModel rs = new ResponseModel();

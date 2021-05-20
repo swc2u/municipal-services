@@ -31,12 +31,12 @@ import io.swagger.annotations.ApiModel;
 public class  TradeLicense   {
         @Size(max=64)
         @JsonProperty("id")
-        private String id = null;
+        private String id;
 
         @NotNull
         @Size(max=64)
         @JsonProperty("tenantId")
-        private String tenantId = null;
+        private String tenantId;
 
         public enum ApplicationTypeEnum {
             NEW("New"),
@@ -98,17 +98,17 @@ public class  TradeLicense   {
   }
 
         @JsonProperty("businessService")
-        private String businessService = null;
+        private String businessService;
 
         @JsonProperty("licenseType")
-        private LicenseTypeEnum licenseType = null;
+        private LicenseTypeEnum licenseType;
         
         @JsonProperty("applicationType")
-        private ApplicationTypeEnum applicationType = null;
+        private ApplicationTypeEnum applicationType;
 
         @Size(max=64)
         @JsonProperty("licenseNumber")
-        private String licenseNumber = null;
+        private String licenseNumber;
 
         @Size(max=64)
         @JsonProperty("applicationNumber")
@@ -116,43 +116,43 @@ public class  TradeLicense   {
 
         @Size(max=64)
         @JsonProperty("oldLicenseNumber")
-        private String oldLicenseNumber = null;
+        private String oldLicenseNumber;
 
 
         @Size(max=256)
         @JsonProperty("propertyId")
-        private String propertyId = null;
+        private String propertyId;
 
         @Size(max=64)
         @JsonProperty("oldPropertyId")
-        private String oldPropertyId = null;
+        private String oldPropertyId;
 
         @Size(max=64)
         @JsonProperty("accountId")
-        private String accountId = null;
+        private String accountId;
 
         @Size(max=256)
         @JsonProperty("tradeName")
-        private String tradeName = null;
+        private String tradeName;
 
         @JsonProperty("applicationDate")
-        private Long applicationDate = null;
+        private Long applicationDate;
 
         @JsonProperty("commencementDate")
-        private Long commencementDate = null;
+        private Long commencementDate;
 
         @JsonProperty("issuedDate")
-        private Long issuedDate = null;
+        private Long issuedDate;
 
         @Size(max=64)
         @JsonProperty("financialYear")
-        private String financialYear = null;
+        private String financialYear;
 
         @JsonProperty("validFrom")
-        private Long validFrom = null;
+        private Long validFrom;
 
         @JsonProperty("validTo")
-        private Long validTo = null;
+        private Long validTo;
 
               /**
    * 1. Perform action to change the state of the trade license. 2. INITIATE, if application is getting submitted without required document. 3. APPLY, if application is getting submitted with application documents, in that case api will validate all the required application document. 4. APPROVE action is only applicable for specific role, that role has to be configurable at service level. Employee can approve a application only if application is in APPLIED state and Licesance fees is paid.
@@ -161,10 +161,10 @@ public class  TradeLicense   {
         @NotNull
         @Size(max=64)
         @JsonProperty("action")
-        private String action = null;
+        private String action;
 
         @JsonProperty("assignee")
-        private List<String> assignee = null;
+        private List<String> assignee;
 
         @Valid
         @JsonProperty("wfDocuments")
@@ -172,18 +172,18 @@ public class  TradeLicense   {
 
         @Size(max=64)
         @JsonProperty("status")
-        private String status = null;
+        private String status;
 
         @Valid
         @NotNull
         @JsonProperty("tradeLicenseDetail")
-        private TradeLicenseDetail tradeLicenseDetail = null;
+        private TradeLicenseDetail tradeLicenseDetail;
 
         @JsonProperty("calculation")
         private Calculation calculation;
 
         @JsonProperty("auditDetails")
-        private AuditDetails auditDetails = null;
+        private AuditDetails auditDetails;
 
         @Size(max=128)
         private String comment;

@@ -1,6 +1,23 @@
 package org.egov.tlcalculator.service;
 
+import static org.egov.tlcalculator.utils.TLCalculatorConstants.BILLINGSLAB_KEY;
+import static org.egov.tlcalculator.utils.TLCalculatorConstants.MDMS_ROUNDOFF_TAXHEAD;
+import static org.egov.tlcalculator.utils.TLCalculatorConstants.businessService_BPA;
+import static org.egov.tlcalculator.utils.TLCalculatorConstants.businessService_TL;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
@@ -11,31 +28,27 @@ import org.egov.tlcalculator.repository.ServiceRequestRepository;
 import org.egov.tlcalculator.repository.builder.CalculationQueryBuilder;
 import org.egov.tlcalculator.utils.CalculationUtils;
 import org.egov.tlcalculator.utils.TLCalculatorConstants;
-import org.egov.tlcalculator.web.models.*;
-import org.egov.tlcalculator.web.models.tradelicense.TradeLicense;
-import org.egov.tlcalculator.web.models.demand.*;
+import org.egov.tlcalculator.web.models.BillAndCalculations;
+import org.egov.tlcalculator.web.models.BillingSlabIds;
+import org.egov.tlcalculator.web.models.Calculation;
+import org.egov.tlcalculator.web.models.CalculationSearchCriteria;
+import org.egov.tlcalculator.web.models.RequestInfoWrapper;
+import org.egov.tlcalculator.web.models.demand.BillResponse;
+import org.egov.tlcalculator.web.models.demand.Demand;
 import org.egov.tlcalculator.web.models.demand.Demand.StatusEnum;
+import org.egov.tlcalculator.web.models.demand.DemandDetail;
+import org.egov.tlcalculator.web.models.demand.DemandResponse;
+import org.egov.tlcalculator.web.models.demand.GenerateBillCriteria;
+import org.egov.tlcalculator.web.models.demand.TaxHeadEstimate;
+import org.egov.tlcalculator.web.models.tradelicense.TradeLicense;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.egov.tlcalculator.utils.TLCalculatorConstants.BILLINGSLAB_KEY;
-import static org.egov.tlcalculator.utils.TLCalculatorConstants.MDMS_ROUNDOFF_TAXHEAD;
-import static org.egov.tlcalculator.utils.TLCalculatorConstants.businessService_BPA;
-import static org.egov.tlcalculator.utils.TLCalculatorConstants.businessService_TL;
-
 
 @Service
 public class DemandService {
-
-    @Autowired
-    private CalculationService calculationService;
 
     @Autowired
     private CalculationUtils utils;

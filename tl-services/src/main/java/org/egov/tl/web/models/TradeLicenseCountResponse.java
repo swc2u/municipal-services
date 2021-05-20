@@ -1,22 +1,18 @@
 package org.egov.tl.web.models;
 
-import java.util.Objects;
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.egov.common.contract.response.ResponseInfo;
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.Builder;
 
 /**
  * Contract class to send response. Array of tradelicense items are used in case of search results or response for create, whereas single tradelicense item is used for update
@@ -32,11 +28,11 @@ import lombok.Builder;
 @Builder
 public class TradeLicenseCountResponse   {
         @JsonProperty("ResponseInfo")
-        private ResponseInfo responseInfo = null;
+        private ResponseInfo responseInfo;
 
         @JsonProperty("licensesCount")
         @Valid
-        private int licensesCount = 0;
+        private int licensesCount;
 
 }
 

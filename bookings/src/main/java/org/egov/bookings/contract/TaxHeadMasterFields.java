@@ -35,5 +35,7 @@ public class TaxHeadMasterFields {
 	
 	private BigDecimal taxAmount;
 	
+	private BigDecimal facilitationCharge;
+	
 	
 }

@@ -1,7 +1,23 @@
 package org.egov.tl.service.notification;
 
+import static org.egov.tl.util.CTLConstants.businessService_BOOK_SHOP;
+import static org.egov.tl.util.CTLConstants.businessService_DHOBI_GHAT;
+import static org.egov.tl.util.CTLConstants.businessService_REHRI_DL;
+import static org.egov.tl.util.CTLConstants.businessService_REHRI_RC;
+import static org.egov.tl.util.TLConstants.businessService_BPA;
+import static org.egov.tl.util.TLConstants.businessService_TL;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.jayway.jsonpath.JsonPath;
-import lombok.extern.slf4j.Slf4j;
+
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tl.config.TLConfiguration;
 import org.egov.tl.repository.ServiceRequestRepository;
@@ -10,21 +26,21 @@ import org.egov.tl.util.BPANotificationUtil;
 import org.egov.tl.util.CTLConstants;
 import org.egov.tl.util.NotificationUtil;
 import org.egov.tl.util.TLConstants;
-import org.egov.tl.web.models.*;
+import org.egov.tl.web.models.Action;
+import org.egov.tl.web.models.ActionItem;
+import org.egov.tl.web.models.EmailRequest;
+import org.egov.tl.web.models.Event;
+import org.egov.tl.web.models.EventRequest;
+import org.egov.tl.web.models.Recepient;
+import org.egov.tl.web.models.SMSRequest;
+import org.egov.tl.web.models.Source;
+import org.egov.tl.web.models.TradeLicense;
+import org.egov.tl.web.models.TradeLicenseRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.egov.tl.util.BPAConstants.NOTIFICATION_APPROVED;
-import static org.egov.tl.util.CTLConstants.businessService_BOOK_SHOP;
-import static org.egov.tl.util.CTLConstants.businessService_DHOBI_GHAT;
-import static org.egov.tl.util.CTLConstants.businessService_REHRI_DL;
-import static org.egov.tl.util.CTLConstants.businessService_REHRI_RC;
-import static org.egov.tl.util.TLConstants.businessService_BPA;
-import static org.egov.tl.util.TLConstants.businessService_TL;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
@@ -138,7 +154,7 @@ public class TLNotificationService {
 				case businessService_DHOBI_GHAT:
 				case businessService_BOOK_SHOP:
 					localizationMessages = util.getLocalizationMessages(tenantId, request.getRequestInfo());
-					message = util.getCustomizedCTLMessage(request.getRequestInfo(), license, localizationMessages);
+					message = util.getCustomizedCTLMessage(request.getRequestInfo(), license, localizationMessages,CTLConstants.SMS_NOTIFICATION);
 					break;
 			}
             if(message==null) continue;
@@ -191,18 +207,19 @@ public class TLNotificationService {
 				case businessService_DHOBI_GHAT:
 				case businessService_BOOK_SHOP:
 					localizationMessages = util.getLocalizationMessages(tenantId, request.getRequestInfo());
-					message = util.getCustomizedCTLMessage(request.getRequestInfo(), license, localizationMessages);
+					message = util.getCustomizedCTLMessage(request.getRequestInfo(), license, localizationMessages,CTLConstants.MAIL_NOTIFICATION);
 					
-					if (message != null) {						
+					/*if (message != null) {						
 						//Append email signature to all outgoing messages.
 						String emailSignature = util.getMessageTemplate(CTLConstants.EMAIL_SIGNATURE, localizationMessages);
 						message = new StringBuilder(message).append("\n").append(emailSignature).toString();
-					}
+					}*/
 					break;
 			}
             if(message==null) continue;
 
-			message = message.replace("\\n", "\n");
+//			message = message.replace("\\n", "\n");
+            log.info("message:"+message);
             emailRequests.addAll(util.createEMAILRequest(message,emailIdToOwner));
         }
     }
@@ -221,7 +238,7 @@ public class TLNotificationService {
         String localizationMessages = util.getLocalizationMessages(tenantId,request.getRequestInfo());
         for(TradeLicense license : request.getLicenses()){
 
-            String message = util.getCustomizedCTLMessage(request.getRequestInfo(), license, localizationMessages);
+            String message = util.getCustomizedCTLMessage(request.getRequestInfo(), license, localizationMessages,CTLConstants.SMS_NOTIFICATION);
             if(message == null) continue;
             message = message.replace("\\n"," ");
             Map<String,String > mobileNumberToOwner = new HashMap<>();

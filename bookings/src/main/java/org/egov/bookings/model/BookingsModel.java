@@ -3,6 +3,7 @@ package org.egov.bookings.model;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.Valid;
@@ -29,7 +31,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "BookingsModel")
-@Table(name = "TT_BOOKINGS")
+@Table(name = "BK_BOOKINGS")
 @Builder
 @ToString
 public class BookingsModel {
@@ -47,6 +49,14 @@ public class BookingsModel {
 	@Column(name = "BK_HOUSE_NO")
 	private String bkHouseNo;
 
+	@OneToMany
+	@JoinColumn(name = "application_number")
+	private List<TimeslotsModel> timeslots;
+	
+	@OneToMany
+	@JoinColumn(name = "COMMUNITY_APPLICATION_NUMBER")
+	private List<RoomsModel> roomsModel;
+	
 	@JsonProperty("bkAddress")
 	@Column(name = "BK_ADDRESS")
 	private String bkAddress;
@@ -103,10 +113,10 @@ public class BookingsModel {
 	@Column(name = "BK_PAYMENT_STATUS")
 	private String bkPaymentStatus;
 
-	@JsonProperty("bkPaymentDate")
+	/*@JsonProperty("bkPaymentDate")
 	@Column(name = "BK_PAYMENT_DATE")
 	private Date bkPaymentDate;
-
+*/
 	@JsonProperty("bkBookingType")
 	@Column(name = "BK_BOOKING_TYPE")
 	private String bkBookingType;
@@ -241,13 +251,13 @@ public class BookingsModel {
 	@Column(name = "BK_LOCATION_PICTURES")
 	private String bkLocationPictures;
 
-	@JsonProperty("bkBookingReferenceNumber")
+	/*@JsonProperty("bkBookingReferenceNumber")
 	@Column(name = "BK_BOOKING_REFERENCE_NUMBER")
 	private String bkBookingReferenceNumber;
 
 	@JsonProperty("bkPaymentReceiptNumber")
 	@Column(name = "BK_PAYMENT_RECEIPT_NUMBER")
-	private String bkPaymentReceiptNumber;
+	private String bkPaymentReceiptNumber;*/
 
 	@JsonProperty("bkParkOrCommunityCenter")
 	@Column(name = "BK_PARK_OR_COMMUNITY_CENTER")
@@ -272,6 +282,14 @@ public class BookingsModel {
 	@JsonProperty("bkAccountType")
 	@Column(name = "BK_ACCOUNT_TYPE")
 	private String bkAccountType;
+	
+	
+	@JsonProperty("bkBankAccountHolder")
+	@Column(name = "BK_BANK_ACCOUNT_HOLDER")
+	private String bkBankAccountHolder;
+	
+	
+	
 
 	@JsonProperty("bkPropertyOwnerName")
 	@Column(name = "BK_PROPERTY_OWNER_NAME")
@@ -287,11 +305,11 @@ public class BookingsModel {
 
 	@JsonProperty("bkMaterialStorageArea")
 	@Column(name = "BK_MATERIAL_STORAGE_AREA")
-	private String bkMaterialStorageArea;
+	private String bkMaterialStorageArea; // used for payment mode in pacc
 
 	@JsonProperty("bkPlotSketch")
 	@Column(name = "BK_PLOT_SKETCH")
-	private String bkPlotSketch;
+	private String bkPlotSketch; // used for type of discount in pacc
 
 	@JsonProperty("bkApplicationStatus")
 	@Column(name = "BK_APPLICATION_STATUS")
@@ -373,8 +391,9 @@ public class BookingsModel {
 	@Column(name = "APPROVER_NAME")
 	private String bkApproverName;
 
-	@Transient
+	
 	@JsonProperty("discount")
+	@Column(name = "discount")
 	private BigDecimal discount;
 	
 	@Size(max = 64)
@@ -391,6 +410,24 @@ public class BookingsModel {
     @Size(max=64)
     @JsonProperty("financialYear")
     private String financialYear = null;
-	
+    
+    @Transient
+    private boolean reInitiateStatus;
+    
+    @JsonProperty("financeBusinessService")
+    @Transient
+    private String financeBusinessService;
+    
+	@Column(name = "created_date")
+	private String createdDate;
 
+	@Column(name = "last_modified_date")
+	private String lastModifiedDate;
+	
+	@Column(name = "BK_NOMINEE_NAME")
+	private String bkNomineeName;
+	
+	@Column(name = "REFUNDABLE_SECURITY_MONEY")
+	private BigDecimal refundableSecurityMoney;
+	
 }

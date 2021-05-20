@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.TimeZone;
+import java.util.List;
 
 
 @Import({TracerConfiguration.class})
@@ -213,6 +214,8 @@ public class TLConfiguration {
     @Value("${employee.allowed.search.params}")
     private String allowedEmployeeSearchParameters;
 
+    @Value("#{'${employee.search.status.hide}'.split(',')}")
+    private List<String> statusHideForEmployeeSearch;
 
 
     @Value("${egov.tl.previous.allowed}")

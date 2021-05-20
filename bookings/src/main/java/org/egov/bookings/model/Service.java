@@ -9,7 +9,6 @@ import org.egov.bookings.model.user.Citizen;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import org.egov.bookings.contract.Address;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -85,8 +84,8 @@ public class Service   {
   @JsonProperty("attributes")
   private Object attributes;
   
-  @JsonProperty("addressDetail")
-  private Address addressDetail;
+ // @JsonProperty("addressDetail")
+ // private Address addressDetail;
   
   @JsonProperty("active")
   private Boolean active;

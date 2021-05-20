@@ -1,35 +1,36 @@
 package org.egov.tl.validator;
 
-import com.jayway.jsonpath.JsonPath;
+import static org.egov.tl.util.TLConstants.businessService_BPA;
+import static org.egov.tl.util.TLConstants.businessService_TL;
+
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
 import org.apache.commons.lang.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
-import org.egov.common.contract.request.Role;
 import org.egov.tl.config.TLConfiguration;
-import org.egov.tl.repository.TLRepository;
-import org.egov.tl.service.TradeLicenseService;
-import org.egov.tl.service.UserService;
-import org.egov.tl.util.BPAConstants;
 import org.egov.tl.util.TLConstants;
 import org.egov.tl.util.TradeUtil;
-import org.egov.tl.web.models.*;
-import org.egov.tl.web.models.user.UserDetailResponse;
+import org.egov.tl.web.models.OwnerInfo;
+import org.egov.tl.web.models.TradeLicense;
+import org.egov.tl.web.models.TradeLicenseRequest;
+import org.egov.tl.web.models.TradeLicenseSearchCriteria;
+import org.egov.tl.web.models.TradeUnit;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.egov.tl.util.TLConstants.businessService_BPA;
-import static org.egov.tl.util.TLConstants.businessService_TL;
-
 @Component
 public class TLValidator {
 
-
-    private TLRepository tlRepository;
 
     private TLConfiguration config;
 
@@ -39,8 +40,6 @@ public class TLValidator {
 
     private TradeUtil tradeUtil;
 
-    private UserService userService;
-
     @Value("${egov.allowed.businessServices}")
     private String allowedBusinessService;
 
@@ -48,14 +47,12 @@ public class TLValidator {
     private String businessServiceTL;
 
     @Autowired
-    public TLValidator(TLRepository tlRepository, TLConfiguration config, PropertyValidator propertyValidator,
-                       MDMSValidator mdmsValidator, TradeUtil tradeUtil,UserService userService) {
-        this.tlRepository = tlRepository;
+    public TLValidator(TLConfiguration config, PropertyValidator propertyValidator,
+                       MDMSValidator mdmsValidator, TradeUtil tradeUtil) {
         this.config = config;
         this.propertyValidator = propertyValidator;
         this.mdmsValidator = mdmsValidator;
         this.tradeUtil = tradeUtil;
-        this.userService=userService;
     }
 
 
@@ -546,7 +543,7 @@ public class TLValidator {
      * @param request The tradeLcienseRequest
      */
     private void validateDuplicateDocuments(TradeLicenseRequest request){
-        List<String> documentFileStoreIds = new LinkedList();
+        List<String> documentFileStoreIds = new LinkedList<String>();
         request.getLicenses().forEach(license -> {
             if(license.getTradeLicenseDetail().getApplicationDocuments()!=null){
                 license.getTradeLicenseDetail().getApplicationDocuments().forEach(

@@ -36,19 +36,51 @@ public interface ParkAndCommunityService {
 
 	/**
 	 * Fetch park community master.
-	 * @param parkCommunityFeeMasterRequest 
 	 *
+	 * @param parkCommunityFeeMasterRequest the park community fee master request
 	 * @return the list
 	 */
 	List<ParkCommunityHallV1MasterModel> fetchParkCommunityMaster(ParkCommunityFeeMasterRequest parkCommunityFeeMasterRequest);
 
 
+	/**
+	 * Availability search.
+	 *
+	 * @param parkAndCommunitySearchCriteria the park and community search criteria
+	 * @return the sets the
+	 */
 	Set<AvailabilityResponse> availabilitySearch(ParkAndCommunitySearchCriteria parkAndCommunitySearchCriteria);
 
+	/**
+	 * Fetch booked dates.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @return the sets the
+	 */
 	Set<Date> fetchBookedDates(BookingsRequest bookingsRequest);
 
+	/**
+	 * Find park and community fee.
+	 *
+	 * @param string the string
+	 * @return the park community hall V 1 master model
+	 */
 	ParkCommunityHallV1MasterModel findParkAndCommunityFee(String string);
 
+	/**
+	 * Fetch amount.
+	 *
+	 * @param parkCommunityFeeMasterRequest the park community fee master request
+	 * @return the park community fee master response
+	 */
 	ParkCommunityFeeMasterResponse fetchAmount(ParkCommunityFeeMasterRequest parkCommunityFeeMasterRequest);
+	
+	/**
+	 * Fetch sector.
+	 *
+	 * @param venueType the venue type
+	 * @return the list
+	 */
+	List<ParkCommunityHallV1MasterModel> fetchSector(String venueType);
 
 }

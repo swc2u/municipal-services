@@ -15,10 +15,23 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ParkAndCommunityRepository extends CrudRepository<BookingsModel, String> {
 
+	/**
+	 * Fetch booked dates of park and community.
+	 *
+	 * @param bookingVenue the booking venue
+	 * @param bookingType the booking type
+	 * @param sector the sector
+	 * @param date the date
+	 * @param SUCCESS the success
+	 * @param applicationNumber the application number
+	 * @return the sets the
+	 */
 	@Query(value = BookingsQueryBuilder.CHECK_PARK_AND_COMMUNITY_AVAILABILITY, nativeQuery = true)
 	Set<BookingsModel> fetchBookedDatesOfParkAndCommunity(@Param(BookingsConstants.BOOKING_VENUE) String bookingVenue,
 			@Param(BookingsConstants.BOOKING_TYPE) String bookingType, @Param(BookingsConstants.SECTOR) String sector,
-			@Param(BookingsConstants.DATE) Date date, @Param(BookingsConstants.APPLY) String APPLY);
+			@Param(BookingsConstants.DATE) Date date, @Param(BookingsConstants.PAYMENT_SUCCESS_STATUS) String SUCCESS,
+			@Param(BookingsConstants.APPLICATION_NUMBER) String applicationNumber);
+
 
 	
 }

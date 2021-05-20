@@ -1,21 +1,20 @@
 package org.egov.tl.web.models;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.egov.tl.web.models.Boundary;
-import org.springframework.validation.annotation.Validated;
+
 import javax.validation.Valid;
-import javax.validation.constraints.*;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.springframework.validation.annotation.Validated;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.Builder;
 
 /**
  * Boundary
@@ -32,26 +31,26 @@ public class Boundary   {
 
         @Size(max=64)
         @JsonProperty("code")
-        private String code = null;
+        private String code;
 
         @JsonProperty("name")
-        private String name = null;
+        private String name;
 
         @JsonProperty("label")
-        private String label = null;
+        private String label;
 
         @JsonProperty("latitude")
-        private String latitude = null;
+        private String latitude;
 
         @JsonProperty("longitude")
-        private String longitude = null;
+        private String longitude;
 
         @JsonProperty("children")
         @Valid
-        private List<Boundary> children = null;
+        private List<Boundary> children;
 
         @JsonProperty("materializedPath")
-        private String materializedPath = null;
+        private String materializedPath;
 
 
         public Boundary addChildrenItem(Boundary childrenItem) {
