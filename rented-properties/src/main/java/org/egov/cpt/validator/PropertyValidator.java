@@ -446,7 +446,7 @@ public class PropertyValidator {
 	 */
 	private Boolean isEmailValid(String email) {
 
-		String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
+		String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w-]+\\.)+[\\w]+[\\w]$";
 
 		if (email == "" || email == null)
 			return true;
