@@ -199,5 +199,7 @@ public class PSConstants {
 	public static final String BB_NOC_PENDING_AC_APPROVAL = "PENDING_AC_APPROVAL";
 
 	public static final String BB_NOC_DUMMY_FILENO = "BBNOC-1";
+	
+	public static final String MM_PROPERTY_TYPE_OTHER = "PROPERTY_TYPE.OTHERS";
 
 }
