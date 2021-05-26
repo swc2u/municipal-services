@@ -58,7 +58,7 @@ public class NotificationUtil {
 
 	private static DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
-	private final static ArrayList<String> offlineModes =new ArrayList<>(Arrays.asList("CASH","CHEQUE","DD"));
+	private final static ArrayList<String> offlineModes =new ArrayList<>(Arrays.asList("CASH","CHEQUE","DD","OFFLINE_NEFT"));
 
 	@Autowired
 	public NotificationUtil(PropertyConfiguration config, ServiceRequestRepository serviceRequestRepository,
@@ -434,7 +434,7 @@ public class NotificationUtil {
 	public String getRPOwnerPaymentMsg(Owner owner, PaymentDetail paymentDetail, String localizationMessages,
 			String transitNumber, PaymentRequest paymentRequest) {
 		String messageTemplate = getMessageTemplate(PTConstants.NOTIFICATION_PAYMENT_RECIEVED, localizationMessages);
-		if (paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase("DD") || paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase("CHEQUE")) {
+		if (paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase("DD") || paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase("CHEQUE") || paymentRequest.getPayment().getPaymentMode().equalsIgnoreCase("OFFLINE_NEFT")) {
 			messageTemplate = messageTemplate.replace("<1>", owner.getOwnerDetails().getName());
 			messageTemplate = messageTemplate.replace("<4>", owner.getProperty().getOfflinePaymentDetails().get(0).getTransactionNumber());
 		} else {
