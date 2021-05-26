@@ -84,7 +84,7 @@ public class PropertyRowMapper implements ResultSetExtractor<List<Property>> {
 							.branchType(rs.getString("branch_type")).tenantId(tenantId)
 							.typeOfAllocation(rs.getString("type_of_allocation"))
 							.modeOfAuction(rs.getString("mode_of_auction")).schemeName(rs.getString("scheme_name"))
-							.areaSqft(rs.getInt("area_sqft")).dateOfAuction(rs.getLong("date_of_auction"))
+							.areaSqft(rs.getBigDecimal("area_sqft")).dateOfAuction(rs.getLong("date_of_auction"))
 							.ratePerSqft(rs.getBigDecimal("rate_per_sqft")).lastNocDate(rs.getLong("last_noc_date"))
 							.serviceCategory(rs.getString("service_category"))
 							.isPropertyActive(rs.getBoolean("is_property_active")).tradeType(rs.getString("trade_type"))

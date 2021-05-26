@@ -113,7 +113,8 @@ public class PropertyService {
 		// bifurcate demand
 		enrichmentService.enrichPropertyRequest(request);
 		if (request.getProperties().get(0).getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)) {
-			maniMajraSettlePayment(request);
+			if(!request.getProperties().get(0).getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER))
+				maniMajraSettlePayment(request);
 			producer.push(config.getSavePropertyTopic(), request);
 		} else {
 			processRentHistory(request);
@@ -223,13 +224,15 @@ public class PropertyService {
 		/* ManiMajra Demands */
 		if (null != request.getProperties().get(0).getState()
 				&& PSConstants.PENDING_PM_MM_APPROVAL.equalsIgnoreCase(property.getState())
-				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA)
+				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA) 
+				&& !property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER)
 				&& !action.contentEquals("")) {
 			maniMajraDemandGenerationService.createMissingDemandsForMM(property, request.getRequestInfo());
 		}
 
 		enrichmentService.enrichPropertyRequest(request);
-		if (property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)) {
+		if (property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)
+				&& !property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER)) {
 			maniMajraSettlePayment(request);
 		} else {
 			processRentHistory(request);
@@ -254,7 +257,8 @@ public class PropertyService {
 			}
 		}
 		producer.push(config.getUpdatePropertyTopic(), request);
-		if (!property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)) {
+		if (!property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)
+				&& !property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER)) {
 			processRentSummary(request);
 		}
 		return request.getProperties();
