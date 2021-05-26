@@ -292,6 +292,7 @@ public class PropertyValidator {
 		}
 
 		if (requestProperty.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA)
+				&& !requestProperty.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER)
 				&& (requestProperty.getPropertyDetails().getMmDemandStartMonth() == 0
 				|| requestProperty.getPropertyDetails().getMmDemandStartYear() == 0)) {
 			errorMap.put("MANIMAJRA DEMAND DATE", "The Demand Start Year or Start Month can't be null or 0");
