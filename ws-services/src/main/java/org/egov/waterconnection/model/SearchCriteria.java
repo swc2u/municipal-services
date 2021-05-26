@@ -60,6 +60,12 @@ public class SearchCriteria {
 	@JsonProperty("toDate")
 	private Long toDate = null;
 
+	@JsonProperty("appFromDate")
+	private Long appFromDate = null;
+
+	@JsonProperty("appToDate")
+	private Long appToDate = null;
+
 	@JsonProperty("offset")
 	private Integer offset;
 
@@ -71,6 +77,15 @@ public class SearchCriteria {
 	
 	@JsonProperty("connectionUserId")
 	private String connectionUserId;
+	
+	@JsonProperty("plotNo")
+	private String plotNo;
+	
+	@JsonProperty("sectorNo")
+	private String sectorNo;
+	
+	@JsonProperty("groupNo")
+	private String groupNo;
 
 	@JsonIgnore
 	private List<String> ownerIds;
@@ -79,8 +94,9 @@ public class SearchCriteria {
 		return (StringUtils.isEmpty(this.tenantId) && StringUtils.isEmpty(this.mobileNumber)
 				&& StringUtils.isEmpty(this.propertyId) && CollectionUtils.isEmpty(this.ids)
 				&& StringUtils.isEmpty(this.oldConnectionNumber) && StringUtils.isEmpty(this.connectionNumber)
-				&& StringUtils.isEmpty(this.status) && StringUtils.isEmpty(this.applicationNumber)
-				&& StringUtils.isEmpty(this.applicationStatus) && StringUtils.isEmpty(this.fromDate)
+				&& StringUtils.isEmpty(this.sectorNo)&& StringUtils.isEmpty(this.plotNo)&& StringUtils.isEmpty(this.groupNo)&& StringUtils.isEmpty(this.status) && StringUtils.isEmpty(this.applicationNumber)
+				&& StringUtils.isEmpty(this.applicationStatus) && StringUtils.isEmpty(this.appFromDate)
+				&& StringUtils.isEmpty(this.appToDate) && StringUtils.isEmpty(this.fromDate)
 				&& StringUtils.isEmpty(this.toDate)) && StringUtils.isEmpty(this.applicationType);
 	}
 

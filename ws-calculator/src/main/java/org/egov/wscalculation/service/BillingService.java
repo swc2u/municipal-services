@@ -60,11 +60,15 @@ public class BillingService {
 
 
 	public List<BillGeneration> getBillingEstimation(BillGenerationRequest billGenerationRequest){
+		List<BillGeneration> billList = new ArrayList<BillGeneration>();
 		BillGeneration bill = billingRepository.getBillingEstimation(billGenerationRequest.getBillGeneration().getConsumerCode());
+		if(bill == null) {
+			return billList;
+		}
 		bill.setConsumerCode(bill.getDivSdiv()+bill.getConsumerCode());
 		Map<String, Object> masterMap = masterDataService.loadMasterData(billGenerationRequest.getRequestInfo(),
 				billGenerationRequest.getBillGeneration().getTenantId());
-		List<BillGeneration> billList = new ArrayList<BillGeneration>();
+		
 		
 		String paymentMode =billGenerationRequest.getBillGeneration().getPaymentMode();
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");

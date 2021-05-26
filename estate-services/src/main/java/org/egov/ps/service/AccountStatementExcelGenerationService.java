@@ -71,6 +71,9 @@ public class AccountStatementExcelGenerationService {
 		List<HashMap<String, String>> response = new ArrayList<HashMap<String, String>>();
 
 		if (property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA)) {
+			if(property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER)) {
+				throw new CustomException("NO_DEMAND_FOR_THIS_PROPERTY", "This property does not have demands");
+			}
 			AccountStatementResponse accountStatementResponse = propertyService.searchPayments(accountStatementCriteria,
 					requestInfo);
 

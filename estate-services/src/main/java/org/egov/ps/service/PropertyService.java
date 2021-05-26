@@ -113,7 +113,8 @@ public class PropertyService {
 		// bifurcate demand
 		enrichmentService.enrichPropertyRequest(request);
 		if (request.getProperties().get(0).getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)) {
-			maniMajraSettlePayment(request);
+			if(!request.getProperties().get(0).getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER))
+				maniMajraSettlePayment(request);
 			producer.push(config.getSavePropertyTopic(), request);
 		} else {
 			processRentHistory(request);
@@ -223,13 +224,15 @@ public class PropertyService {
 		/* ManiMajra Demands */
 		if (null != request.getProperties().get(0).getState()
 				&& PSConstants.PENDING_PM_MM_APPROVAL.equalsIgnoreCase(property.getState())
-				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA)
+				&& property.getPropertyDetails().getBranchType().equalsIgnoreCase(PSConstants.MANI_MAJRA) 
+				&& !property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER)
 				&& !action.contentEquals("")) {
 			maniMajraDemandGenerationService.createMissingDemandsForMM(property, request.getRequestInfo());
 		}
 
 		enrichmentService.enrichPropertyRequest(request);
-		if (property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)) {
+		if (property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)
+				&& !property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER)) {
 			maniMajraSettlePayment(request);
 		} else {
 			processRentHistory(request);
@@ -254,7 +257,8 @@ public class PropertyService {
 			}
 		}
 		producer.push(config.getUpdatePropertyTopic(), request);
-		if (!property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)) {
+		if (!property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)
+				&& !property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER)) {
 			processRentSummary(request);
 		}
 		return request.getProperties();
@@ -671,7 +675,11 @@ public class PropertyService {
 			throw new CustomException("NO_PROPERTY_FOUND", "No approved property found");
 
 		List<PropertyDueAmount> PropertyDueAmounts = new ArrayList<>();
-		properties.stream().forEach(property -> {
+		for(Property property:properties) {
+//		properties.stream().forEach(property -> {
+			if(property.getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO)) {
+				continue;
+			}
 			Optional<OwnerDetails> currentOwnerDetails = property.getPropertyDetails().getOwners().stream()
 					.map(owner -> owner.getOwnerDetails())
 					.filter(ownerDetail -> ownerDetail.getIsCurrentOwner() == true).findFirst();
@@ -709,7 +717,7 @@ public class PropertyService {
 						property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue()));
 			}
 			PropertyDueAmounts.add(propertyDueAmount);
-		});
+		}
 		PropertyDueRequest propertyDueRequest = PropertyDueRequest.builder().requestInfo(requestInfo)
 				.propertyDueAmounts(PropertyDueAmounts).build();
 		producer.push(config.getDueAmountTopic(), propertyDueRequest);

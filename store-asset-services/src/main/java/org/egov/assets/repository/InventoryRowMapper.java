@@ -39,7 +39,11 @@ public class InventoryRowMapper implements RowMapper<JSONArray> {
 		sunMain.put("receiptTotalValue", resultSet.getString("recpttotalvalue"));
 		sunMain.put("issuedDate", resultSet.getString("issuedate"));
 		sunMain.put("issuedNo", resultSet.getString("issuenum"));
-		sunMain.put("issuedToDepartment", resultSet.getString("issuedepart"));
+		
+		sunMain.put("issuedToDepartment",
+				departmentMap.get(resultSet.getString("issuedepart")) != null
+						? departmentMap.get(resultSet.getString("issuedepart")).getName()
+						: resultSet.getString("issuedepart"));
 		sunMain.put("issuedQty", resultSet.getString("issueqty"));
 		sunMain.put("issuedUom", resultSet.getString("issueuom"));
 		sunMain.put("issuedUnitRate", resultSet.getString("issuerate"));

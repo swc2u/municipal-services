@@ -38,12 +38,14 @@ public class SWQueryBuilder {
 			+ " conn.aadharNo, conn.ferruleSize, conn.cccode,conn.div,conn.subdiv,conn.ledger_no,conn.ledgergroup,conn.billgroup,conn.contract_value,conn.roadcuttingarea, conn.action, conn.adhocpenalty, conn.adhocrebate, conn.createdBy as sw_createdBy,"
 			+ " conn.lastModifiedBy as sw_lastModifiedBy, conn.createdTime as sw_createdTime, conn.lastModifiedTime as sw_lastModifiedTime, "
 			+ " conn.adhocpenaltyreason, conn.adhocpenaltycomment, conn.adhocrebatereason, conn.adhocrebatecomment,"
-			+ " conn.roadtype,conn.total_amount_paid, document.id as doc_Id, document.documenttype, document.filestoreid, document.active as doc_active, plumber.id as plumber_id, plumber.name as plumber_name, plumber.licenseno,"
+			+ " conn.roadtype,conn.total_amount_paid, document.id as doc_Id, document.documenttype, document.filestoreid, document.active as doc_active, plumber.id as plumber_id, plumber.name as plumber_name, plumber.licenseno, property.usagesubcategory,pta.doorno as propertyplotno,pta.locality as propertysectorno ,"
 			+ " plumber.mobilenumber as plumber_mobileNumber, plumber.gender as plumber_gender, plumber.fatherorhusbandname, plumber.correspondenceaddress, plumber.relationship, "
 			+ " property.id as seweragepropertyid, property.usagecategory, property.usagesubcategory, " +holderSelectValues
 			+ " FROM eg_sw_connection conn "
 	+  INNER_JOIN_STRING 
 	+" eg_sw_service sc ON sc.connection_id = conn.id"
+			+  INNER_JOIN_STRING 
+			+ "eg_pt_address pta ON conn.property_id = pta.propertyid"
 	+  INNER_JOIN_STRING
 	+ "eg_sw_property property ON property.swid = conn.id"
 	+  LEFT_OUTER_JOIN_STRING
@@ -101,7 +103,21 @@ public class SWQueryBuilder {
 			query.append(" conn.oldconnectionno = ? ");
 			preparedStatement.add(criteria.getOldConnectionNumber());
 		}
-
+		if (!StringUtils.isEmpty(criteria.getPlotNo())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" pta.doorno = ? ");
+			preparedStatement.add(criteria.getPlotNo());
+		}
+		if (!StringUtils.isEmpty(criteria.getSectorNo())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" pta.locality = ? ");
+			preparedStatement.add(criteria.getSectorNo());
+		}
+		if (!StringUtils.isEmpty(criteria.getGroupNo())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" conn.billgroup = ? ");
+			preparedStatement.add(criteria.getGroupNo());
+		}
 		if (!StringUtils.isEmpty(criteria.getConnectionNumber())) {
 			addClauseIfRequired(preparedStatement, query);
 			query.append(" conn.connectionno = ? ");

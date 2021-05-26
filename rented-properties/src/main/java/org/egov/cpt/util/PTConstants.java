@@ -293,4 +293,7 @@ public class PTConstants {
 	public static final String OT_PENDINGPAYMENT ="OT_PENDINGPAYMENT";
 	public static final String DC_PENDINGPAYMENT ="DC_PENDINGPAYMENT";
 	public static final String PAYRENT ="PAYRENT";
+	
+	public static final String CLERK_ROLE ="RP_CLERK";
+	public static final String JA_ROLE ="RP_JA";
 }

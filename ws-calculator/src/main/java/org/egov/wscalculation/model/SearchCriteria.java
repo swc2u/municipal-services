@@ -57,11 +57,26 @@ public class SearchCriteria {
 	@JsonProperty("toDate")
 	private Long toDate = null;
 
+	@JsonProperty("appFromDate")
+	private Long appFromDate = null;
+
+	@JsonProperty("appToDate")
+	private Long appToDate = null;
+
 	@JsonProperty("offset")
 	private Integer offset;
 
 	@JsonProperty("limit")
 	private Integer limit;
+
+	@JsonProperty("plotNo")
+	private String plotNo;
+	
+	@JsonProperty("sectorNo")
+	private String sectorNo;
+	
+	@JsonProperty("groupNo")
+	private String groupNo;
 
 	@JsonIgnore
 	private List<String> ownerIds;
