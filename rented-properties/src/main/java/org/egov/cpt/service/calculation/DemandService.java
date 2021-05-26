@@ -499,7 +499,7 @@ public class DemandService {
 	 * @return
 	 */
 	public Object createCashPayment(RequestInfo requestInfo, Double paymentAmount,String transactionNumber, String billId,  Owner owner,
-			String billingBusinessService,String paymentMode) {
+			String billingBusinessService,String paymentMode,Long transactionDate) {
 		String tenantId = owner.getTenantId();
 		OwnerDetails ownerDetails = owner.getOwnerDetails();
 		CollectionPaymentDetail paymentDetail = CollectionPaymentDetail.builder().tenantId(tenantId)
@@ -510,8 +510,13 @@ public class DemandService {
 				.paidBy("COUNTER").mobileNumber(ownerDetails.getPhone())
 				.paymentDetails(Collections.singletonList(paymentDetail))
 				.build();
+		if(CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.OFFLINE_NEFT)) {
+			payment.setTransactionNumber(transactionNumber);
+			payment.setInstrumentDate(transactionDate);
+			payment.setInstrumentNumber(transactionNumber);
+		}
 
-		if(!CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.CASH)) {
+		else if(!CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.CASH)) {
 			payment.setTransactionNumber(transactionNumber);
 			payment.setInstrumentDate(new Date().getTime());
 			payment.setInstrumentNumber(transactionNumber);
