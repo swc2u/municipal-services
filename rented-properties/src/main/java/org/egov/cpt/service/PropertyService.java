@@ -300,6 +300,7 @@ public class PropertyService {
 		property.setTransactionId(propertyFromRequest.getTransactionId());
 		property.setBankName(propertyFromRequest.getBankName());
 		property.setPaymentMode(propertyFromRequest.getPaymentMode());
+		property.setTransactionDate(propertyFromRequest.getTransactionDate());
 
 		Owner owner = utils.getCurrentOwnerFromProperty(property);
 
@@ -341,7 +342,7 @@ public class PropertyService {
 			 * if offline, create a payment.
 			 */
 			demandService.createCashPayment(propertyRequest.getRequestInfo(), property.getPaymentAmount(),property.getTransactionId(),
-					bills.get(0).getId(), owner, property.getBillingBusinessService(),property.getPaymentMode());
+					bills.get(0).getId(), owner, property.getBillingBusinessService(),property.getPaymentMode(),property.getTransactionDate());
 
 			AuditDetails auditDetails = utils.getAuditDetails(propertyRequest.getRequestInfo().getUserInfo().getUuid(),
 					true);

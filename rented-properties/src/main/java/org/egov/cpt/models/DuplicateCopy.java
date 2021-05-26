@@ -139,4 +139,7 @@ public class DuplicateCopy {
 	
 	@JsonProperty("paymentMode")
 	private String paymentMode;
+	
+	@JsonProperty("transactionDate")
+	private Long transactionDate;
 }
