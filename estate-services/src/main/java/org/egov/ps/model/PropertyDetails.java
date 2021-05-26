@@ -95,8 +95,9 @@ public class PropertyDetails {
 	@JsonProperty("dateOfAuction")
 	private Long dateOfAuction;
 
+	
 	@JsonProperty("areaSqft")
-	private int areaSqft;
+	private BigDecimal areaSqft;
 
 	@JsonProperty("ratePerSqft")
 	private BigDecimal ratePerSqft;
