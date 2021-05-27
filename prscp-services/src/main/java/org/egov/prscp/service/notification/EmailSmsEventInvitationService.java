@@ -328,6 +328,7 @@ public class EmailSmsEventInvitationService {
 									EmailRequest emailRequest = EmailRequest.builder().email(press.getEmail())
 											.subject(emailSubject).body(builderEmail.toString()).isHTML(true)
 											.attachments(listOfAttachments).build();
+								System.out.println("email"+emailRequest);
 									producer.push(config.getNotificationEmailTopic(), emailRequest);
 								}
 							 }
@@ -802,7 +803,12 @@ public class EmailSmsEventInvitationService {
 				if (urls.length > 0) {
 					urls = urls[0].split(";");
 					URL url = new URL(urls[0]);
-					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+					
+					String urls1=url.toString();
+					urls1=urls1.replaceAll(" ", "%20");
+					String[] urls2 = new String[] {urls1};
+					URL url1 = new URL(urls2[0]);
+					HttpURLConnection connection = (HttpURLConnection) url1.openConnection();
 					connection.setRequestMethod("HEAD");
 					connection.connect();
 					// url.get
