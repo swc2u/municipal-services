@@ -145,6 +145,11 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 					property.setId(rs.getString("waterpropertyid"));
 					property.setUsageCategory(rs.getString("usagecategory"));
 					property.setUsageSubCategory(rs.getString("usagesubcategory"));
+
+					property.setPlotNo(rs.getString("propertyplotno"));
+
+					property.setSectorNo(rs.getString("propertysectorno"));
+					
 					currentWaterConnection.setWaterProperty(property);
 				}
 				 

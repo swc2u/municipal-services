@@ -30,7 +30,7 @@ ColumnMaps:
      smsTemplate: Dear [:applicantName:], you are requested to provide clarification for your application id [:applicationId:] for permission of Keeping pets. Please visit MCC portal for details.
 
    - applicationType: SELLMEATNOC
-     status: [INITIATED]
+     status: [PAID]
      roles: [CITIZEN]
      emailSubject: Application Submitted
      template: Dear [:applicantName:],<br/><p>Thank you for submitting online application for permission to sell meat at Chandigarh Municipal Corporation portal.Your Application id - [:applicationId:] .You can log on to the MCC Chandigarh portal for further details.</p><br/>Regards,<br/>Portal Administrator (MCC Chandigarh)
@@ -56,7 +56,7 @@ ColumnMaps:
      emailSubject: Application Required Information
      template: Dear [:applicantName:],<br/><p>You are requested to provide additional clarification as requested by the Department against your application id [:applicationId:] for permission to sell meat. Please login to MCC portal for details.</p><br/>Regards,<br/>Portal Administrator (MCC Chandigarh)
      smsTemplate: Dear [:applicantName:], you are requested to provide clarification for your application id [:applicationId:] for permission to sell meat. Please visit MCC portal for details.
- 
+   
    - applicationType: ROADCUTNOC
      status: [INITIATED]
      roles: [CITIZEN]

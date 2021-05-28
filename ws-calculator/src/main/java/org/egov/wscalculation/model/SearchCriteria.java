@@ -69,6 +69,15 @@ public class SearchCriteria {
 	@JsonProperty("limit")
 	private Integer limit;
 
+	@JsonProperty("plotNo")
+	private String plotNo;
+	
+	@JsonProperty("sectorNo")
+	private String sectorNo;
+	
+	@JsonProperty("groupNo")
+	private String groupNo;
+
 	@JsonIgnore
 	private List<String> ownerIds;
 

@@ -2,10 +2,9 @@ package org.egov.integration.web.controller;
 
 import javax.validation.Valid;
 
-import org.egov.integration.model.FireRequestInfoWrapper;
 import org.egov.integration.model.ResponseInfoWrapper;
 import org.egov.integration.service.FireService;
-import org.egov.integration.service.RtiService;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +29,7 @@ public class FireController {
 	 * @return Fire Response
 	 */
 	@PostMapping(value = "/_pushData")
-	public ResponseEntity<ResponseInfoWrapper> postData(@Valid @RequestBody  FireRequestInfoWrapper request) {		 
+	public ResponseEntity<ResponseInfoWrapper> postData(@Valid @RequestBody JSONObject request) {		 
 		return service.postData(request);		
 	}
 	

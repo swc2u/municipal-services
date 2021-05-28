@@ -150,6 +150,7 @@ public class WaterServiceImpl implements WaterService {
 			waterConnectionRequest.getWaterConnection().setDocuments(null);
 			enrichmentService.enrichWaterApplication(waterConnectionRequest);
 			enrichmentService.enrichUpdateWaterConnection(waterConnectionRequest);
+			waterConnectionRequest.getWaterConnection().setApplicationStatus(WCConstants.STATUS_INITIATED);
 		}else {
 		
 			businessService = workflowService.getBusinessService(waterConnectionRequest.getWaterConnection().getTenantId(), 
@@ -189,6 +190,15 @@ public class WaterServiceImpl implements WaterService {
 		
 	//	enrichmentService.postForMeterReading(waterConnectionRequest);
 		return Arrays.asList(waterConnectionRequest.getWaterConnection());
+	}
+	
+
+	@Override
+	public List<WaterConnection> deactivateConnection(WaterConnectionRequest waterConnectionRequest) {
+
+		waterDao.updateWaterConnection(waterConnectionRequest, false);
+		
+		return  Arrays.asList(waterConnectionRequest.getWaterConnection());
 	}
 	
 	/**

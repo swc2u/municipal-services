@@ -49,6 +49,12 @@ public class PMCalculatorConfigs {
 
 	@Value("${egov.taxhead.basepetfee}")
 	private String basePetFeeHead;
+	
+	@Value("${egov.taxhead.basesellmeatfee}")
+	private String baseSellMeatFeeHead;
+	
+	/*@Value("${egov.taxhead.basesellmeattax}")
+	private String baseSellMeatTaxHead;*/
 
 	@Value("${egov.taxhead.baseroadcuttax}")
 	private String baseRoadCutTaxHead;

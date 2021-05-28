@@ -71,6 +71,9 @@ public class UpdateStatusListener {
 						}
 					});
 				});
+				if (requestData.getApplicationType().contains("SELLMEATNOC")) {
+					datapayload.put("gstAmount", 0);
+				}
 				if(requestInfo.getUserInfo().getType().equals("SYSTEM")) {
 					requestInfo.getUserInfo().setId(Long.valueOf(userid));
 					requestInfo.getUserInfo().setUuid(useruuid);
