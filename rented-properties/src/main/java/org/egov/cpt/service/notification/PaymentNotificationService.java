@@ -64,7 +64,7 @@ public class PaymentNotificationService {
 	private PropertyService propertyService;
 
 	
-	private final static ArrayList<String> offlineModes =new ArrayList<>(Arrays.asList("CASH","CHEQUE","DD"));
+	private final static ArrayList<String> offlineModes =new ArrayList<>(Arrays.asList("CASH","CHEQUE","DD","OFFLINE_NEFT"));
 
 	@Value("${egov.allowed.businessServices}")
 	private String allowedBusinessServices;

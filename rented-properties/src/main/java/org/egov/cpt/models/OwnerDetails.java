@@ -194,6 +194,9 @@ public class OwnerDetails {
 	@JsonProperty("paymentMode")
 	private String paymentMode;
 	
+	@JsonProperty("transactionDate")
+	private Long transactionDate;
+	
 	@JsonProperty("isAPROChargePaid")
 	private boolean isAPROChargePaid;
 

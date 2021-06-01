@@ -254,6 +254,7 @@ public class OwnershipTransferService {
 		ownerFromDB.getOwnerDetails().setBankName(ownerFromRequest.getOwnerDetails().getBankName());
 		ownerFromDB.getOwnerDetails().setPaymentAmount(ownerFromRequest.getOwnerDetails().getPaymentAmount());
 		ownerFromDB.getOwnerDetails().setPaymentMode(ownerFromRequest.getOwnerDetails().getPaymentMode());
+		ownerFromDB.getOwnerDetails().setTransactionDate(ownerFromRequest.getOwnerDetails().getTransactionDate());
 
 		/**
 		 * Create egov user if not already present.
@@ -276,7 +277,7 @@ public class OwnershipTransferService {
 			 * if offline, create a payment.
 			 */
 			demandService.createCashPayment(otRequest.getRequestInfo(), ownerFromDB.getOwnerDetails().getPaymentAmount(),ownerFromDB.getOwnerDetails().getTransactionId(),
-					bills.get(0).getId(), ownerFromDB, ownerFromDB.getBillingBusinessService(),ownerFromDB.getOwnerDetails().getPaymentMode());
+					bills.get(0).getId(), ownerFromDB, ownerFromDB.getBillingBusinessService(),ownerFromDB.getOwnerDetails().getPaymentMode(),ownerFromDB.getOwnerDetails().getTransactionDate());
 
 			otRequest.setOwners(Collections.singletonList(ownerFromDB));
 			producer.push(config.getOwnershipTransferUpdateTopic(), otRequest);
