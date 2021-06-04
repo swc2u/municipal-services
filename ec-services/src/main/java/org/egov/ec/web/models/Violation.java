@@ -195,4 +195,6 @@ public class Violation {
 	@JsonProperty("toDate")
 	private Date toDate;
 	
+	 private Integer offset;
+	    private Integer limit;
 }
