@@ -40,6 +40,7 @@ import org.egov.bookings.repository.CommonRepository;
 import org.egov.bookings.repository.OsbmApproverRepository;
 import org.egov.bookings.repository.RoomsRepository;
 import org.egov.bookings.repository.impl.ServiceRequestRepository;
+import org.egov.bookings.service.BookingLockService;
 import org.egov.bookings.service.BookingsService;
 import org.egov.bookings.utils.BookingsConstants;
 import org.egov.bookings.utils.BookingsUtils;
@@ -113,6 +114,8 @@ public class BookingsServiceImpl implements BookingsService {
 	@Autowired
 	private RoomsRepository roomsRepository;
 
+	@Autowired
+	private BookingLockService bookingLockService;
 	/** The mail notification service. */
 	/*
 	 * @Autowired private MailNotificationService mailNotificationService;
@@ -647,6 +650,7 @@ public class BookingsServiceImpl implements BookingsService {
 	 */
 	@Override
 	public BookingsModel update(BookingsRequest bookingsRequest) {
+		bookingLockService.deleteLockDates(bookingsRequest.getBookingsModel().getBkApplicationNumber());
 		String businessService = bookingsRequest.getBookingsModel().getBusinessService();
 		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
 		bookingsRequest.getBookingsModel().setLastModifiedDate(formatter.format(new java.util.Date()));
@@ -1364,6 +1368,19 @@ public class BookingsServiceImpl implements BookingsService {
 			e.printStackTrace();
 		}
 		return booking;
+	}
+
+	@Override
+	public BookingsModel saveCardDetails(BookingsRequest bookingsRequest) {
+		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
+		bookingsRequest.getBookingsModel().setLastModifiedDate(formatter.format(new java.util.Date()));
+		try {
+			BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+			bookingsProducer.push(config.getSaveBookingCardDetails(), kafkaBookingRequest);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e.getLocalizedMessage());
+		}
+		return bookingsRequest.getBookingsModel();
 	}
 	
 }

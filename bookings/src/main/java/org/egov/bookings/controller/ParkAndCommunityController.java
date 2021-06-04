@@ -8,9 +8,11 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.egov.bookings.common.model.ResponseModel;
 import org.egov.bookings.contract.AvailabilityResponse;
+import org.egov.bookings.contract.BookingLockRequest;
 import org.egov.bookings.contract.ParkAndCommunitySearchCriteria;
 import org.egov.bookings.contract.ParkCommunityFeeMasterRequest;
 import org.egov.bookings.contract.ParkCommunityFeeMasterResponse;
+import org.egov.bookings.model.BookingLockModel;
 import org.egov.bookings.model.BookingsModel;
 import org.egov.bookings.model.ParkCommunityHallV1MasterModel;
 import org.egov.bookings.service.DemandService;
@@ -207,6 +209,26 @@ public class ParkAndCommunityController {
 			LOGGER.error("Exception occur in the fetchSector " + e);
 			e.printStackTrace();
 		}
+		return ResponseEntity.ok(rs);
+	}
+	
+	
+	@PostMapping("/lock/dates/_save")
+	private ResponseEntity<?> bookingLock(@RequestBody BookingLockRequest bookingLockRequest) {
+
+		bookingsFieldsValidator.validateBookingLockDetails(bookingLockRequest);
+		BookingLockModel bookingLockModel = parkAndCommunityService.bookingLock(bookingLockRequest);
+		ResponseModel rs = new ResponseModel();
+		if (bookingLockModel == null) {
+			rs.setStatus("400");
+			rs.setMessage("Error while saving lock dates");
+			rs.setData(bookingLockModel);
+		} else {
+			rs.setStatus("200");
+			rs.setMessage("Lock Dates saved Successfully");
+			rs.setData(bookingLockModel);
+		}
+
 		return ResponseEntity.ok(rs);
 	}
 }

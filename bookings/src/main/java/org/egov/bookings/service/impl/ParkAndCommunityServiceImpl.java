@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -18,10 +19,12 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.egov.bookings.config.BookingsConfiguration;
 import org.egov.bookings.contract.AvailabilityResponse;
+import org.egov.bookings.contract.BookingLockRequest;
 import org.egov.bookings.contract.BookingsRequestKafka;
 import org.egov.bookings.contract.ParkAndCommunitySearchCriteria;
 import org.egov.bookings.contract.ParkCommunityFeeMasterRequest;
 import org.egov.bookings.contract.ParkCommunityFeeMasterResponse;
+import org.egov.bookings.model.BookingLockModel;
 import org.egov.bookings.model.BookingsModel;
 import org.egov.bookings.model.CommercialGrndAvailabilityModel;
 import org.egov.bookings.model.ParkCommunityHallV1MasterModel;
@@ -29,6 +32,7 @@ import org.egov.bookings.producer.BookingsProducer;
 import org.egov.bookings.repository.CommercialGrndAvailabilityRepository;
 import org.egov.bookings.repository.ParkAndCommunityRepository;
 import org.egov.bookings.repository.ParkCommunityHallV1MasterRepository;
+import org.egov.bookings.service.BookingLockService;
 import org.egov.bookings.service.BookingsService;
 import org.egov.bookings.service.ParkAndCommunityService;
 import org.egov.bookings.utils.BookingsConstants;
@@ -103,6 +107,9 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 	@Autowired
 	private BookingsUtils bookingsUtils;
 	
+	@Autowired
+	private BookingLockService bookingLockService;
+	
 	/**
 	 * Creates the park and community booking.
 	 *
@@ -171,6 +178,7 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
 			bookingsRequest.getBookingsModel().setLastModifiedDate(formatter.format(new java.util.Date()));
 		String businessService = bookingsRequest.getBookingsModel().getBusinessService();
+		bookingLockService.deleteLockDates(bookingsRequest.getBookingsModel().getBkApplicationNumber());
 		bookingsFieldsValidator.validateRefundAmount(bookingsRequest);
 		if (config.getIsExternalWorkFlowEnabled())
 			workflowIntegrator.callWorkFlow(bookingsRequest);
@@ -281,6 +289,7 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 	@Override
 	public Set<Date> fetchBookedDates(BookingsRequest bookingsRequest) {
 
+		enrichmentService.enrichLockDates(bookingsRequest);
 		// Date date = commercialGroundAvailabiltySearchCriteria.getDate();
 		LocalDate date = LocalDate.now();
 		Date date1 = Date.valueOf(date);
@@ -422,6 +431,24 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 			e.printStackTrace();
 		}
 		return paccSectorList;
+	}
+
+	@Override
+	public BookingLockModel bookingLock(BookingLockRequest bookingLockRequest) {
+		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
+		for(BookingLockModel bookingLockModel:bookingLockRequest.getBookingLockModel()) {
+			bookingLockModel.setId(UUID.randomUUID().toString());
+			bookingLockModel.setLastModifiedDate(formatter.format(new java.util.Date()));
+			bookingLockModel.setCreatedDate(formatter.format(new java.util.Date()));
+		}
+		
+		try {
+			//BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+			bookingsProducer.push(config.getBookingLockDates(), bookingLockRequest);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e.getLocalizedMessage());
+		}
+		return bookingLockRequest.getBookingLockModel().get(0);
 	}
 
 }

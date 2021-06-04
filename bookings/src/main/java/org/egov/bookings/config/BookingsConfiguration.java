@@ -269,5 +269,11 @@ public class BookingsConfiguration {
 	 
 	 @Value("${kafka.topics.update-room-status}")
 	 private String updateRoomStatus;
-	
+	 
+	 @Value("${kafka.topics.save.booking-card-details.service}")
+	 private String saveBookingCardDetails;
+	 
+	 
+	 @Value("${kafka.topics.save.booking-lock-dates.service}")
+	 private String bookingLockDates;
 }

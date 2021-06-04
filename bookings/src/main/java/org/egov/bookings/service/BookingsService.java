@@ -134,4 +134,12 @@ public interface BookingsService {
 	 * @return the employee community center room booking search
 	 */
 	public Booking getEmployeeCommunityCenterRoomBookingSearch(SearchCriteriaFieldsDTO searchCriteriaFieldsDTO);
+
+	/**
+	 * Save card details.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @return the bookings model
+	 */
+	public BookingsModel saveCardDetails(BookingsRequest bookingsRequest);
 }

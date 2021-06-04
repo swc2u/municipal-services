@@ -80,4 +80,8 @@ public class BookingsQueryBuilder {
 	public static final String FIND_COMMERCIAL_GRND_LOCK_DATES = "select * from bk_commercial_ground_availability_lock where booking_venue =:bookingVenue and to_date >= :date";
 
 	public static final String FIND_LOCK_DATES_FROM_NOW_TO_SIX_MONTHS = "select * from bk_commercial_ground_availability_lock where to_date >= :date and from_date <= :sixMonthsFromNowSql";
+
+	public static final String FETCH_LOCK_DATES = "select * from bk_booking_lock_dates where booking_venue =:bookingVenue and booking_Type =:bookingType and sector =:sector";
+	
+	public static final String FETCH_LOCK_DATES_FOR_COMMERCIAL = "select * from bk_booking_lock_dates where booking_venue =:bookingVenue and booking_type =:bookingType";
 }

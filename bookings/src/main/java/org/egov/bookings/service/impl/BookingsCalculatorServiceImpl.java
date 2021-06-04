@@ -289,7 +289,7 @@ public class BookingsCalculatorServiceImpl implements BookingsCalculatorService 
 			    cleaningCharges = BigDecimal.valueOf(Long.valueOf(parkCommunityHallV1FeeMaster.getCleaningCharges()));
 				amount = days.multiply(rentBeforeDiscount);
 				BigDecimal rentAfterDiscount = amount.multiply(bookingsRequest.getBookingsModel().getDiscount().divide(new BigDecimal(100))); 
-				rent = amount.subtract(rentAfterDiscount);
+				rent = BookingsUtils.roundOffToNearest(amount.subtract(rentAfterDiscount));
 				//finalAmount = cleaningCharges.add(rentAfterDiscount1);
 			}
 			else {

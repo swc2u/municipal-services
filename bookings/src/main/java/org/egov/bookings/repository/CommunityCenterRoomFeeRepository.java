@@ -67,4 +67,17 @@ public interface CommunityCenterRoomFeeRepository extends JpaRepository<RoomMast
 			value = "SELECT * FROM BK_ROOM_MASTER WHERE FROM_DATE <=cast((?1) AS timestamp) AND COMMUNITY_CENTER_NAME = (?2) AND TYPE_OF_ROOM in ('AC','NON-AC')",
 			nativeQuery = true )
 			List<RoomMasterModel> getRoomMasterList( Date currentDate, String communityCenterName );
+
+	/**
+	 * Find community center room fee details.
+	 *
+	 * @param sector the sector
+	 * @param typeOfRoom the type of room
+	 * @param communityCenterName the community center name
+	 * @return the room master model
+	 */
+	@Query(
+			value = "SELECT * FROM BK_ROOM_MASTER WHERE SECTOR_NAME = (?1) AND TYPE_OF_ROOM = (?2) AND COMMUNITY_CENTER_NAME = (?3)",
+			nativeQuery = true )
+			RoomMasterModel findCommunityCenterRoomFeeDetails( String sector, String typeOfRoom, String communityCenterName );
 }

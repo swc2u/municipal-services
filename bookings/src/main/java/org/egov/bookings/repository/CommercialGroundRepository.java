@@ -51,4 +51,15 @@ public interface CommercialGroundRepository extends JpaRepository<CommercialGrou
 	 */
 	public CommercialGroundFeeModel findById(String id);
 
+	/**
+	 * Find GFCP fee details.
+	 *
+	 * @param category the category
+	 * @param bookingVenue the booking venue
+	 * @return the commercial ground fee model
+	 */
+	@Query(
+			value = "SELECT * FROM bk_commercial_ground_fee where category = (?1) and booking_venue = (?2)",
+			nativeQuery = true )
+			CommercialGroundFeeModel findGFCPFeeDetails( String category, String bookingVenue );
 }

@@ -963,4 +963,6 @@ public class BookingsConstants {
 	public static final String PACC_ACTION_OFFLINE_MODIFY = "OFFLINE_MODIFY";
 	
 	public static final String PACC_ACTION_APPROVE_CLERK_DEO = "APPROVE_CLERK_DEO";
+	
+	public static final int TEN_MINUTES = 10;
 }

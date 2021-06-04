@@ -77,5 +77,8 @@ public class RoomsModel {
 	
 	@Column(name = "room_status")
 	private String roomStatus;
+	
+	@Column(name = "room_created_date")
+	private String roomCreatedDate;
 
 }

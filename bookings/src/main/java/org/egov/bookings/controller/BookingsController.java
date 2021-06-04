@@ -382,4 +382,32 @@ public class BookingsController {
 		}
 		return ResponseEntity.ok( booking );
 	}
+	
+	
+	
+	/**
+	 * Save card details.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @return the response entity
+	 */
+	@PostMapping("/save/cardDetails")
+	private ResponseEntity<?> saveCardDetails(
+			@RequestBody BookingsRequest bookingsRequest) {
+
+		
+		//bookingsFieldsValidator.validateBookingCardDetails(bookingsRequest);
+		BookingsModel bookingsModel = bookingsService.saveCardDetails(bookingsRequest);
+		ResponseModel rs = new ResponseModel();
+		if (bookingsModel == null) {
+			rs.setStatus("400");
+			rs.setMessage("Failure while saving booking card details");
+			rs.setData(bookingsModel);
+		} else {
+			rs.setStatus("200");
+			rs.setMessage("Data submitted successfully");
+			rs.setData(bookingsModel);
+		}
+		return ResponseEntity.ok(rs);
+	}
 }

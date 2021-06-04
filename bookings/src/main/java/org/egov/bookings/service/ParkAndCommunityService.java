@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.egov.bookings.contract.AvailabilityResponse;
+import org.egov.bookings.contract.BookingLockRequest;
 import org.egov.bookings.contract.ParkAndCommunitySearchCriteria;
 import org.egov.bookings.contract.ParkCommunityFeeMasterRequest;
 import org.egov.bookings.contract.ParkCommunityFeeMasterResponse;
+import org.egov.bookings.model.BookingLockModel;
 import org.egov.bookings.model.BookingsModel;
 import org.egov.bookings.model.ParkCommunityHallV1MasterModel;
 import org.egov.bookings.web.models.BookingsRequest;
@@ -82,5 +84,14 @@ public interface ParkAndCommunityService {
 	 * @return the list
 	 */
 	List<ParkCommunityHallV1MasterModel> fetchSector(String venueType);
+
+	
+	/**
+	 * Booking lock.
+	 *
+	 * @param bookingLockRequest the booking lock request
+	 * @return the booking lock model
+	 */
+	BookingLockModel bookingLock(BookingLockRequest bookingLockRequest);
 
 }

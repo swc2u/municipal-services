@@ -34,5 +34,16 @@ public interface OsujmFeeRepository extends JpaRepository<OsujmFeeModel, String>
 	 * @return the osujm fee model
 	 */
 	public OsujmFeeModel findById(String id);
-
+	
+	/**
+	 * Find OSUJM fee details.
+	 *
+	 * @param sector the sector
+	 * @param slab the slab
+	 * @return the osujm fee model
+	 */
+	@Query(
+			value = "select * from bk_osujm_fee where  sector = (?1) and slab = (?2)",
+			nativeQuery = true )
+			OsujmFeeModel findOSUJMFeeDetails(String sector, String slab);
 }

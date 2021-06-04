@@ -232,7 +232,7 @@ public class CommercialGroundServiceImpl implements CommercialGroundService {
 	 */
 	@Override
 	public Set<Date> fetchBookedDates(BookingsRequest bookingsRequest) {
-
+		enrichmentService.enrichLockDates(bookingsRequest);
 		// Date date = commercialGroundAvailabiltySearchCriteria.getDate();
 		LocalDate date = LocalDate.now();
 		Date date1 = Date.valueOf(date);

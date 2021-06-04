@@ -430,4 +430,9 @@ public class BookingsModel {
 	@Column(name = "REFUNDABLE_SECURITY_MONEY")
 	private BigDecimal refundableSecurityMoney;
 	
+	@Column(name = "CARD_NUMBER")
+	private String cardNumber;
+	
+	@Column(name = "TRANSACTION_NUMBER")
+	private String transactionNumber;
 }

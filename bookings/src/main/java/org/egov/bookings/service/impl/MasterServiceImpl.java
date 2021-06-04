@@ -175,6 +175,7 @@ public class MasterServiceImpl implements MasterService{
 				throw new IllegalArgumentException("Duplicate Data");
 			}
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the createApprover " + e);
 			throw new CustomException("APPROVER_SAVE_ERROR", "ERROR WHILE SAVING APPROVER DETAILS");
 		}
 		return masterRequest.getApproverList();
@@ -207,6 +208,7 @@ public class MasterServiceImpl implements MasterService{
 			masterRequest.getApproverList().get(0).setLastModifiedDate(formatter.format(new Date()));
 			bookingsProducer.push(config.getUpdateApproverTopic(), masterRequest);
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the updateApprover " + e);
 			throw new CustomException("APPROVER_UPDATE_ERROR", "ERROR WHILE UPDATE APPROVER DETAILS");
 		}
 		return masterRequest.getApproverList();
@@ -229,14 +231,25 @@ public class MasterServiceImpl implements MasterService{
 		{
 			throw new IllegalArgumentException("Invalid OSBM Fee List");
 		}
+		OsbmFeeModel osbmFeeModel = new OsbmFeeModel();
 		try {
-			masterRequest.getOsbmFeeList().get(0).setId(UUID.randomUUID().toString());
 			bookingsFieldsValidator.validateOSBMFeeBody(masterRequest);
-			DateFormat formatter = getSimpleDateFormat();
-			masterRequest.getOsbmFeeList().get(0).setCreatedDate(formatter.format(new Date()));
-			masterRequest.getOsbmFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
-			bookingsProducer.push(config.getSaveOsbmFeeTopic(), masterRequest);
+			osbmFeeModel = osbmFeeRepository.findOSBMFeeDetails(masterRequest.getOsbmFeeList().get(0).getResidentialCommercial(),
+					masterRequest.getOsbmFeeList().get(0).getConstructionType(),masterRequest.getOsbmFeeList().get(0).getDurationInMonths(),masterRequest.getOsbmFeeList().get(0).getStorage(),
+					masterRequest.getOsbmFeeList().get(0).getVillageCity());
+			if (BookingsFieldsValidator.isNullOrEmpty(osbmFeeModel)) 
+			{
+				masterRequest.getOsbmFeeList().get(0).setId(UUID.randomUUID().toString());
+				DateFormat formatter = getSimpleDateFormat();
+				masterRequest.getOsbmFeeList().get(0).setCreatedDate(formatter.format(new Date()));
+				masterRequest.getOsbmFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
+				bookingsProducer.push(config.getSaveOsbmFeeTopic(), masterRequest);
+			}
+			else {
+				throw new IllegalArgumentException("This is the Duplicate Data of OSBM Fee");
+			}
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the createOSBMFee " + e);
 			throw new CustomException("OSBM_FEE_SAVE_ERROR", "ERROR WHILE SAVING OSBM FEE DETAILS");
 		}
 		return masterRequest.getOsbmFeeList();
@@ -282,6 +295,7 @@ public class MasterServiceImpl implements MasterService{
 			masterRequest.getOsbmFeeList().get(0).setToDate(toDate);
 			bookingsProducer.push(config.getUpdateOsbmFeeTopic(), masterRequest);
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the updateOSBMFee " + e);
 			throw new CustomException("OSBM_FEE_UPDATE_ERROR", "ERROR WHILE UPDATE OSBM FEE DETAILS");
 		}
 		return masterRequest.getOsbmFeeList();
@@ -303,14 +317,23 @@ public class MasterServiceImpl implements MasterService{
 		{
 			throw new IllegalArgumentException("Invalid OSUJM Fee List");
 		}
+		OsujmFeeModel osujmFeeModel = new OsujmFeeModel();
 		try {
-			masterRequest.getOsujmFeeList().get(0).setId(UUID.randomUUID().toString());
 			bookingsFieldsValidator.validateOSUJMFeeBody(masterRequest);
-			DateFormat formatter = getSimpleDateFormat();
-			masterRequest.getOsujmFeeList().get(0).setCreatedDate(formatter.format(new Date()));
-			masterRequest.getOsujmFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
-			bookingsProducer.push(config.getSaveOsujmFeeTopic(), masterRequest);
+			osujmFeeModel = osujmFeeRepository.findOSUJMFeeDetails(masterRequest.getOsujmFeeList().get(0).getSector(), masterRequest.getOsujmFeeList().get(0).getSlab());
+			if (BookingsFieldsValidator.isNullOrEmpty(osujmFeeModel)) 
+			{
+				masterRequest.getOsujmFeeList().get(0).setId(UUID.randomUUID().toString());
+				DateFormat formatter = getSimpleDateFormat();
+				masterRequest.getOsujmFeeList().get(0).setCreatedDate(formatter.format(new Date()));
+				masterRequest.getOsujmFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
+				bookingsProducer.push(config.getSaveOsujmFeeTopic(), masterRequest);
+			}
+			else {
+				throw new IllegalArgumentException("This is the Duplicate Data of OSUJM Fee");
+			}
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the createOSUJMFee " + e);
 			throw new CustomException("OSUJM_FEE_SAVE_ERROR", "ERROR WHILE SAVING OSUJM FEE DETAILS");
 		}
 		return masterRequest.getOsujmFeeList();
@@ -355,6 +378,7 @@ public class MasterServiceImpl implements MasterService{
 			masterRequest.getOsujmFeeList().get(0).setToDate(toDate);
 			bookingsProducer.push(config.getUpdateOsujmFeeTopic(), masterRequest);
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the updateOSUJMFee " + e);
 			throw new CustomException("OSUJM_FEE_UPDATE_ERROR", "ERROR WHILE UPDATE OSUJM FEE DETAILS");
 		}
 		return masterRequest.getOsujmFeeList();
@@ -376,14 +400,23 @@ public class MasterServiceImpl implements MasterService{
 		{
 			throw new IllegalArgumentException("Invalid GFCP Fee List");
 		}
+		CommercialGroundFeeModel commercialGroundFeeModel = new CommercialGroundFeeModel();
 		try {
-			masterRequest.getGfcpFeeList().get(0).setId(UUID.randomUUID().toString());
 			bookingsFieldsValidator.validateGFCPFeeBody(masterRequest);
-			DateFormat formatter = getSimpleDateFormat();
-			masterRequest.getGfcpFeeList().get(0).setCreatedDate(formatter.format(new Date()));
-			masterRequest.getGfcpFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
-			bookingsProducer.push(config.getSaveGfcpFeeTopic(), masterRequest);
+			commercialGroundFeeModel = commercialGroundFeeRepository.findGFCPFeeDetails(masterRequest.getGfcpFeeList().get(0).getCategory(), masterRequest.getGfcpFeeList().get(0).getBookingVenue());
+			if (BookingsFieldsValidator.isNullOrEmpty(commercialGroundFeeModel)) 
+			{
+				masterRequest.getGfcpFeeList().get(0).setId(UUID.randomUUID().toString());
+				DateFormat formatter = getSimpleDateFormat();
+				masterRequest.getGfcpFeeList().get(0).setCreatedDate(formatter.format(new Date()));
+				masterRequest.getGfcpFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
+				bookingsProducer.push(config.getSaveGfcpFeeTopic(), masterRequest);
+			}
+			else {
+				throw new IllegalArgumentException("This is the Duplicate Data of GFCP Fee");
+			}
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the createGFCPFee " + e);
 			throw new CustomException("GFCP_FEE_SAVE_ERROR", "ERROR WHILE SAVING GFCP FEE DETAILS");
 		}
 		return masterRequest.getGfcpFeeList();
@@ -428,6 +461,7 @@ public class MasterServiceImpl implements MasterService{
 			masterRequest.getGfcpFeeList().get(0).setToDate(toDate);
 			bookingsProducer.push(config.getUpdateGfcpFeeTopic(), masterRequest);
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the updateGFCPFee " + e);
 			throw new CustomException("GFCP_FEE_UPDATE_ERROR", "ERROR WHILE UPDATE GFCP FEE DETAILS");
 		}
 		return masterRequest.getGfcpFeeList();
@@ -449,13 +483,24 @@ public class MasterServiceImpl implements MasterService{
 		{
 			throw new IllegalArgumentException("Invalid PACC Fee List");
 		}
+		ParkCommunityHallV1MasterModel parkCommunityHallV1MasterModel = new ParkCommunityHallV1MasterModel();
 		try {
-			masterRequest.getPaccFeeList().get(0).setId(UUID.randomUUID().toString());
-			DateFormat formatter = getSimpleDateFormat();
-			masterRequest.getPaccFeeList().get(0).setCreatedDate(formatter.format(new Date()));
-			masterRequest.getPaccFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
-			bookingsProducer.push(config.getSavePaccFeeTopic(), masterRequest);
+			bookingsFieldsValidator.validatePACCFeeBody(masterRequest);
+			parkCommunityHallV1MasterModel = parkCommunityHallV1MasterRepository.findPACCFeeDetails(masterRequest.getPaccFeeList().get(0).getName(),
+					masterRequest.getPaccFeeList().get(0).getSector(), masterRequest.getPaccFeeList().get(0).getVenueType());
+			if (BookingsFieldsValidator.isNullOrEmpty(parkCommunityHallV1MasterModel)) 
+			{
+				masterRequest.getPaccFeeList().get(0).setId(UUID.randomUUID().toString());
+				DateFormat formatter = getSimpleDateFormat();
+				masterRequest.getPaccFeeList().get(0).setCreatedDate(formatter.format(new Date()));
+				masterRequest.getPaccFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
+				bookingsProducer.push(config.getSavePaccFeeTopic(), masterRequest);
+			}
+			else {
+				throw new IllegalArgumentException("This is the Duplicate Data of PACC Fee");
+			}
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the createPACCFee " + e);
 			throw new CustomException("PACC_FEE_SAVE_ERROR", "ERROR WHILE SAVING PACC FEE DETAILS");
 		}
 		return masterRequest.getPaccFeeList();
@@ -485,6 +530,7 @@ public class MasterServiceImpl implements MasterService{
 		MasterRequest masterRequestPaccFeeCreate = new MasterRequest();
 		List<CommonMasterFields> paccFeeList = new ArrayList<>();
 		try {
+			bookingsFieldsValidator.validatePACCFeeBody(masterRequest);
 			DateFormat formatter = getSimpleDateFormat();
 			masterRequest.getPaccFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
 			parkCommunityHallV1MasterModel = parkCommunityHallV1MasterRepository.findById(masterRequest.getPaccFeeList().get(0).getId()); 
@@ -499,6 +545,7 @@ public class MasterServiceImpl implements MasterService{
 			masterRequest.getPaccFeeList().get(0).setToDate(toDate);
 			bookingsProducer.push(config.getUpdatePaccFeeTopic(), masterRequest);
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the updatePACCFee " + e);
 			throw new CustomException("PACC_FEE_UPDATE_ERROR", "ERROR WHILE UPDATE PACC FEE DETAILS");
 		}
 		return masterRequest.getPaccFeeList();
@@ -519,14 +566,24 @@ public class MasterServiceImpl implements MasterService{
 		{
 			throw new IllegalArgumentException("Invalid Community Center Room Fee List");
 		}
+		RoomMasterModel roomMasterModel = new RoomMasterModel();
 		try {
 			bookingsFieldsValidator.validateCommunityCenterRoomFeeBody(masterRequest);
-			masterRequest.getCommunityCenterRoomFeeList().get(0).setId(UUID.randomUUID().toString());
-			DateFormat formatter = getSimpleDateFormat();
-			masterRequest.getCommunityCenterRoomFeeList().get(0).setCreatedDate(formatter.format(new Date()));
-			masterRequest.getCommunityCenterRoomFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
-			bookingsProducer.push(config.getSaveCommunityCenterRoomFeeTopic(), masterRequest);
+			roomMasterModel = communityCenterRoomFeeRepository.findCommunityCenterRoomFeeDetails(masterRequest.getCommunityCenterRoomFeeList().get(0).getSector(),
+					masterRequest.getCommunityCenterRoomFeeList().get(0).getTypeOfRoom(), masterRequest.getCommunityCenterRoomFeeList().get(0).getCommunityCenterName());
+			if (BookingsFieldsValidator.isNullOrEmpty(roomMasterModel)) 
+			{
+				masterRequest.getCommunityCenterRoomFeeList().get(0).setId(UUID.randomUUID().toString());
+				DateFormat formatter = getSimpleDateFormat();
+				masterRequest.getCommunityCenterRoomFeeList().get(0).setCreatedDate(formatter.format(new Date()));
+				masterRequest.getCommunityCenterRoomFeeList().get(0).setLastModifiedDate(formatter.format(new Date()));
+				bookingsProducer.push(config.getSaveCommunityCenterRoomFeeTopic(), masterRequest);
+			}
+			else {
+				throw new IllegalArgumentException("This is the Duplicate Data of Community Center Room Fee");
+			}
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the createCommunityCenterRoomFee " + e);
 			throw new CustomException("COMMUNITY_CENTER_ROOM_FEE_SAVE_ERROR", "ERROR WHILE SAVING COMMUNITY CENTER ROOM FEE DETAILS");
 		}
 		return masterRequest.getCommunityCenterRoomFeeList();
@@ -573,6 +630,7 @@ public class MasterServiceImpl implements MasterService{
 			masterRequest.getCommunityCenterRoomFeeList().get(0).setToDate(toDate);
 			bookingsProducer.push(config.getUpdateCommunityCenterRoomFeeTopic(), masterRequest);
 		}catch (Exception e) {
+			LOGGER.error("Exception occur in the updateCommunityCenterRoomFee " + e);
 			throw new CustomException("COMMUNITY_CENTER_ROOM_FEE_UPDATE_ERROR", "ERROR WHILE UPDATE COMMUNITY CENTER ROOM FEE DETAILS");
 		}
 		return masterRequest.getCommunityCenterRoomFeeList();
@@ -910,6 +968,7 @@ public class MasterServiceImpl implements MasterService{
 			}
 		}
 		catch (Exception e) {
+			LOGGER.error("Exception occur in the prepareToDate " + e);
 			throw new CustomException("TO_DATE_FORMATTER", "ERROR WHILE FORMATTING TODATE OF MODULE FEE");
 		}
 		return toDate;

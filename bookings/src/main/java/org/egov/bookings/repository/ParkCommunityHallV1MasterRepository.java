@@ -49,4 +49,17 @@ public interface ParkCommunityHallV1MasterRepository extends JpaRepository<ParkC
 	 * @return the list
 	 */
 	public List<ParkCommunityHallV1MasterModel> findByVenueType(String venueType);
+	
+	/**
+	 * Find PACC fee details.
+	 *
+	 * @param name the name
+	 * @param sector the sector
+	 * @param venueType the venue type
+	 * @return the park community hall V 1 master model
+	 */
+	@Query(
+			value = "SELECT * FROM bk_park_community_hall_v1 where name = (?1) and sector = (?2) and venue_type = (?3)",
+			nativeQuery = true )
+			ParkCommunityHallV1MasterModel findPACCFeeDetails( String name, String sector, String venueType );
 }

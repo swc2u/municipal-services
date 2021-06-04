@@ -33,4 +33,7 @@ public class BookingsRequest {
 	
 	private OwnerInfo user;
 	
+	@JsonProperty("applicationNumber")
+	private String applicationNumber;
+	
 }
