@@ -50,12 +50,18 @@ public class WaterConnectionValidator {
 		ValidatorResult isPropertyValidated = propertyValidator.validate(waterConnectionRequest, isUpdate);
 		if (!isPropertyValidated.isStatus())
 			errorMap.putAll(isPropertyValidated.getErrorMessage());
-		ValidatorResult isWaterFieldValidated = waterFieldValidator.validate(waterConnectionRequest, isUpdate);
-		if (!isWaterFieldValidated.isStatus())
-			errorMap.putAll(isWaterFieldValidated.getErrorMessage());
-		ValidatorResult isMeterInfoValidated = meterInfoValidator.validate(waterConnectionRequest, isUpdate);
-		if (!isMeterInfoValidated.isStatus())
-			errorMap.putAll(isMeterInfoValidated.getErrorMessage());
+		/*
+		 * ValidatorResult isWaterFieldValidated =
+		 * waterFieldValidator.validate(waterConnectionRequest, isUpdate); if
+		 * (!isWaterFieldValidated.isStatus())
+		 * errorMap.putAll(isWaterFieldValidated.getErrorMessage());
+		 */
+		/*
+		 * ValidatorResult isMeterInfoValidated =
+		 * meterInfoValidator.validate(waterConnectionRequest, isUpdate); if
+		 * (!isMeterInfoValidated.isStatus())
+		 * errorMap.putAll(isMeterInfoValidated.getErrorMessage());
+		 */
 
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);

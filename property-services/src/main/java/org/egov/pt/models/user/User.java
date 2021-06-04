@@ -53,7 +53,6 @@ public class User   {
 
         @NotNull
         @Size(max=100)
-        @Pattern(regexp = "^[^\\$\"'<>?\\\\~`!@#$%^()+={}\\[\\]*,.:;“”‘’]*$", message = "Invalid name. Only alphabets and special characters -, ',`, .")
         @JsonProperty("name")
         private String name;
 
@@ -143,7 +142,6 @@ public class User   {
         @JsonProperty("identificationMark")
         private String identificationMark;
 
-        @Size(max=36)
         @JsonProperty("photo")
         private String photo;
 

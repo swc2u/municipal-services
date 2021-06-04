@@ -233,7 +233,7 @@ public class WsQueryBuilder {
 		}
 		if(!StringUtils.isEmpty(criteria.getApplicationType())) {
 			addClauseIfRequired(preparedStatement, query);
-			query.append(" conn.applicationType = ? ");
+			query.append(" application.activitytype = ? ");
 			preparedStatement.add(criteria.getApplicationType());
 		}
 		/*
