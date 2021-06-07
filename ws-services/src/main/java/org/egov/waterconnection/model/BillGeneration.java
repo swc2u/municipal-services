@@ -126,6 +126,9 @@ public class BillGeneration {
 	
 	  @JsonProperty("totalAmountPaid")
 	    private String totalAmountPaid;
+
+	  @JsonProperty("ledgerGroup")
+	    private String ledgerGroup;
 	  
 	@JsonProperty("paymentStatus")
 	private String paymentStatus = null;

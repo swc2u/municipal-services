@@ -42,7 +42,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 
 	@Autowired
 	private ObjectMapper mapper;
-	
+
 	@Autowired
 	private WaterServicesUtil waterServicesUtil;
 
@@ -51,44 +51,52 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 
 	@Autowired
 	private ValidateProperty validateProperty;
-	
+
 	@Override
 	public List<BillGeneration> saveBillingData(BillGenerationRequest billGenerationRequest) {
 		DateFormat dateParser = new SimpleDateFormat("dd/MMM/yy");
 		DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-		//System.out.println(dateFormatter.format("20/OCT/20"));
+		// System.out.println(dateFormatter.format("20/OCT/20"));
 
-	     
 		InputStream input = null;
 		List<BillGeneration> listOfBills = new ArrayList<BillGeneration>();
 		try {
- 
-			input = new URL(billGenerationRequest.getBillGeneration().getDocument().getFileStoreUrl().replaceAll(" ", "%20")).openStream();
+
+			input = new URL(
+					billGenerationRequest.getBillGeneration().getDocument().getFileStoreUrl().replaceAll(" ", "%20"))
+							.openStream();
 
 			AuditDetails auditDetails = waterServicesUtil
 					.getAuditDetails(billGenerationRequest.getRequestInfo().getUserInfo().getUuid(), true);
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
 				String line;
-				
+
 				while ((line = br.readLine()) != null) {
 					String[] values = line.split(",");
 					List<String> bill = Arrays.asList(values);
-					
+
 					BillGeneration uploadFileData = BillGeneration.builder()
-							.billGenerationId(UUID.randomUUID().toString()).auditDetails(auditDetails).isFileGenerated(false).status(WCConstants.STATUS_INITIATED).paymentStatus(WCConstants.STATUS_INITIATED)
-							.ccCode(bill.get(0).trim()).divSdiv(bill.get(1).trim()).consumerCode(bill.get(2).trim()).billCycle(bill.get(3).trim()).billGroup(bill.get(4).trim()).subGroup(bill.get(5).trim())
-							.billType(bill.get(6).trim()).name(bill.get(7).trim()).address(bill.get(8).trim()).cessCharge(bill.get(14).trim()).netAmount(bill.get(15).trim()).surcharge(bill.get(16).trim())
-							.grossAmount(bill.get(17).trim()).totalNetAmount(bill.get(18).trim()).totalSurcharge(bill.get(19).trim()).totalSurcharge(bill.get(20).trim())
-							.receiptDate(null).totalAmountPaid(null).billId(null).paymentId(null).toDate(billGenerationRequest.getBillGeneration().getToDate()).fromDate(billGenerationRequest.getBillGeneration().getFromDate()).dueDateCash(dateFormatter.format(dateParser.parse(bill.get(23).trim()))).dueDateCheque(dateFormatter.format(dateParser.parse(bill.get(24).trim()))).build();
+							.billGenerationId(UUID.randomUUID().toString()).auditDetails(auditDetails)
+							.isFileGenerated(false).status(WCConstants.STATUS_INITIATED)
+							.paymentStatus(WCConstants.STATUS_INITIATED).ccCode(bill.get(0).trim())
+							.divSdiv(bill.get(1).trim()).consumerCode(bill.get(2).trim()).billCycle(bill.get(3).trim())
+							.billGroup(bill.get(4).trim()).subGroup(bill.get(5).trim()).billType(bill.get(6).trim())
+							.name(bill.get(7).trim()).address(bill.get(8).trim()).cessCharge(bill.get(14).trim())
+							.netAmount(bill.get(15).trim()).surcharge(bill.get(16).trim())
+							.grossAmount(bill.get(17).trim()).totalNetAmount(bill.get(18).trim())
+							.totalSurcharge(bill.get(19).trim()).totalSurcharge(bill.get(20).trim()).receiptDate(null)
+							.totalAmountPaid(null).billId(null).paymentId(null)
+							.toDate(billGenerationRequest.getBillGeneration().getToDate())
+							.fromDate(billGenerationRequest.getBillGeneration().getFromDate())
+							.dueDateCash(dateFormatter.format(dateParser.parse(bill.get(23).trim())))
+							.dueDateCheque(dateFormatter.format(dateParser.parse(bill.get(24).trim()))).build();
 
 					listOfBills.add(uploadFileData);
 				}
 			}
-			
 
 			billRepository.saveBillingData(listOfBills);
 			return listOfBills;
-
 
 		} catch (Exception e) {
 			throw new CustomException("EXCELREADERROR", e.getMessage());
@@ -102,7 +110,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 		}
 
 	}
-	
+
 	@Override
 	public List<BillGenerationFile> getDataExchangeFile(BillGenerationRequest billGenerationRequest) {
 		PrintWriter writer;
@@ -114,7 +122,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
 		List<BillGenerationFile> billFileList = new ArrayList<BillGenerationFile>();
 		try {
-			
+
 			if (connections.isEmpty()) {
 				throw new CustomException("FILE_GENERATION_FAILED", "Data may not present");
 			}
@@ -124,19 +132,45 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 				WaterConnectionRequest waterConnectionRequest = WaterConnectionRequest.builder()
 						.requestInfo(billGenerationRequest.getRequestInfo()).waterConnection(application).build();
 				Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
-				HashMap<String, Object> addDetail = mapper
-						.convertValue(application.getAdditionalDetails(), HashMap.class);
+				HashMap<String, Object> addDetail = mapper.convertValue(application.getAdditionalDetails(),
+						HashMap.class);
 				for (WaterApplication applicationList : application.getWaterApplicationList()) {
+					if (WCConstants.ACTIVITY_TYPE_81.contains(applicationList.getActivityType())) {
+						writer.println("UW81"
+								+ getbillcycle(new Date(applicationList.getAuditDetails().getLastModifiedTime()))
+								+ application.getBillGroup() 
+								+ fixedLengthString(application.getConnectionNo(),14)
+								+ fixedLengthString(application.getConnectionHolders().get(0).getName(),30)
+								+ fixedLengthString(property.getAddress().getPlotNo(),10) 
+								+ fixedLengthString(property.getAddress().getLocality().getCode(),20)
+								+ fixedLengthString(application.getWaterProperty().getUsageCategory(),2)
+								+ fixedLengthString("",7)
+								+ fixedLengthString("",4)
+								+ fixedLengthString(application.getSanctionedCapacity(), 7));
+								
+								
+						/*
+						 * application.getDiv() + "," + application.getSubdiv() + "," +
+						 * application.getCcCode() + "," + application.getLedgerGroup() + "," +
+						 * application.getConnectionNo() + "," + applicationList.getApplicationNo() +
+						 * "," + applicationList.getActivityType() + "," +
+						 * property.getAddress().getLocality().getCode() + "," +
+						 * application.getBillGroup() + "," + property.getAddress().getDoorNo() + "," +
+						 * property.getAddress().getFloorNo() + "," +
+						 * application.getConnectionHolders().get(0).getName() + "," +
+						 * application.getWaterProperty().getUsageCategory() + "," + format.format(new
+						 * Date(applicationList.getAuditDetails().getLastModifiedTime())) + "," +
+						 * application.getProposedPipeSize() + "," + application.getMeterRentCode() +
+						 * "," + application.getMeterId() + "," + application.getMfrCode() + "," +
+						 * application.getMeterDigits() + "," + "NA" + "," +
+						 * String.valueOf(addDetail.get(WCConstants.INITIAL_METER_READING_CONST)) + ","
+						 * + application.getSanctionedCapacity() + ",NA,NA,NA" + "," +
+						 * applicationList.getActivityType());
+						 */
+					} else if (WCConstants.ACTIVITY_TYPE_82.contains(applicationList.getActivityType())) {
 
-					writer.println(application.getDiv() + "," + application.getSubdiv() + "," + application.getCcCode()
-							+ "," + application.getLedgerGroup() + "," + application.getConnectionNo() + "," +applicationList.getApplicationNo()+","+applicationList.getActivityType()+","
-							+ property.getAddress().getLocality().getCode() + "," + application.getBillGroup() + ","
-							+ property.getAddress().getDoorNo() + "," + property.getAddress().getFloorNo() + ","
-							+ application.getConnectionHolders().get(0).getName() + ","
-							+ application.getWaterProperty().getUsageCategory() + "," +format.format(new Date(applicationList.getAuditDetails().getLastModifiedTime()))
-							+"," +application.getProposedPipeSize()+","+
-							application.getMeterRentCode()+","+application.getMeterId()+","+application.getMfrCode()+","+application.getMeterDigits()+","+"NA"+","+String.valueOf(addDetail.get(WCConstants.INITIAL_METER_READING_CONST))+","+application.getSanctionedCapacity()+",NA,NA,NA"+
-							","+applicationList.getActivityType());
+					}
+
 				}
 			}
 			writer.close();
@@ -150,7 +184,16 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 		}
 		return billFileList;
 	}
-	
+
+	public String fixedLengthString(String string, int length) {
+		return String.format("%1$" + length + "s", string);
+	}
+
+	private String getbillcycle(Date d) {
+
+		return "";
+	}
+
 	@Override
 	public List<BillGenerationFile> generateBillFile(BillGenerationRequest billGenerationRequest) {
 		PrintWriter writer;
@@ -168,15 +211,18 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 
 			writer = new PrintWriter(WCConstants.WS_BILLING_FILENAME, "UTF-8");
 			for (BillGeneration billGeneration : bill) {
-				writer.println(billGeneration.getCcCode() + " "  + billGeneration.getDivSdiv()
+				writer.println(billGeneration.getCcCode() + " " + billGeneration.getDivSdiv()
 						+ billGeneration.getConsumerCode() + " " + billGeneration.getTotalAmountPaid() + " "
-						+ billGeneration.getPaymentMode() + " " + format.format(new Date(billGeneration.getReceiptDate())) + " " + billGeneration.getPaymentId()  + " " + "W"+ " " + billGeneration.getBillCycle() + billGeneration.getBillGroup()  + billGeneration.getSubGroup());
+						+ billGeneration.getPaymentMode() + " "
+						+ format.format(new Date(billGeneration.getReceiptDate())) + " " + billGeneration.getPaymentId()
+						+ " " + "W" + " " + billGeneration.getBillCycle() + billGeneration.getBillGroup()
+						+ billGeneration.getSubGroup());
 			}
 
 			writer.close();
 			BillGenerationFile billFile = billRepository.getFilesStoreUrl(WCConstants.WS_BILLING_FILENAME);
 
-		//	billRepository.savefileHistory(billFile, bill);
+			billRepository.savefileHistory(billFile, bill);
 			billFileList.add(billFile);
 
 		} catch (Exception e) {
