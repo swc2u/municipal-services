@@ -66,8 +66,8 @@ public class VendorRegistrationRepository {
 			List<Object> covNo = new ArrayList<>();
 	        String[] values = searchCriteria.getCovNo().split(",");
 
-			for (String s:values ) {  
-				covNo.add(s);
+			for (String sc:values ) {  
+				covNo.add(sc);
 			}
 			
 			paramValues.put("covNo", covNo);
