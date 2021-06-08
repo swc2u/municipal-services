@@ -1,5 +1,7 @@
 package org.egov.ec.web.models;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -59,6 +61,9 @@ public class EcSearchCriteria {
     
     @JsonProperty("challanUuid")
     private String challanUuid;
+    
+    @JsonProperty("covNo")
+    private String covNo;
 
 
 }

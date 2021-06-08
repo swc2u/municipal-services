@@ -211,7 +211,7 @@ public class ViolationRepository {
 				new Object[] { violation.getFromDate(), violation.getFromDate(),violation.getToDate(),violation.getToDate(), violation.getSiName(),
 						violation.getSiName(), violation.getEncroachmentType(), violation.getEncroachmentType(),
 						violation.getSector(), violation.getSector(),violation.getStatus(), violation.getStatus(),
-						violation.getTenantId(),violation.getChallanId(),violation.getChallanId() },
+						violation.getTenantId(),violation.getChallanId(),violation.getChallanId(),violation.getLimit() ,violation.getOffset()},
 				rowMapper);
 		
 			return violationDetailList;

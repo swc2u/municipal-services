@@ -3,6 +3,7 @@ package org.egov.ec.repository.rowmapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,13 +14,17 @@ import org.egov.ec.web.models.EcPayment;
 import org.egov.ec.web.models.Violation;
 import org.egov.ec.web.models.ViolationItem;
 import org.egov.tracer.model.CustomException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Component
 public class ViolationDetailRowMapper implements ResultSetExtractor<List<Violation>> {
-
+	@Autowired
+	private ObjectMapper mapper;
 	@Override
 	public List<Violation> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
@@ -79,8 +84,12 @@ public class ViolationDetailRowMapper implements ResultSetExtractor<List<Violati
 					ecPayment.setLastModifiedTime(rs.getLong("last_modified_time"));
 					ecPayment.setPaymentAmount(rs.getString("payment_amount"));
 					ecPayment.setPaymentGateway(rs.getString("payment_gateway"));
-
-					String docUuid = rs.getString("document_uuid");
+					List<Document> documentAttachment = null;
+					if (rs.getString("document") != null) {
+						documentAttachment = Arrays
+								.asList(mapper.readValue(rs.getString("document"), Document[].class));
+					}
+					/*String docUuid = rs.getString("document_uuid");
 					if(docUuid != null) 
 					{
 					List<Document> listRedundantDoc = listtoaddDoc.stream()
@@ -101,11 +110,14 @@ public class ViolationDetailRowMapper implements ResultSetExtractor<List<Violati
 
 						listtoaddDoc.add(doc);
 					}
+					}*/
+					List<ViolationItem> items = null;
+					if (rs.getString("item") != null) {
+						items = Arrays
+								.asList(mapper.readValue(rs.getString("item"), ViolationItem[].class));
 					}
 
-					
-
-					String violationItemUuid = rs.getString("violation_item_uuid");
+					/*String violationItemUuid = rs.getString("violation_item_uuid");
 					List<ViolationItem> listRedundantItem = listtoaddItem.stream()
 							.filter(p -> p.getViolationItemUuid().equals(violationItemUuid))
 							.collect(Collectors.toList());
@@ -128,10 +140,10 @@ public class ViolationDetailRowMapper implements ResultSetExtractor<List<Violati
 						violationItem.setVehicleNumber(rs.getString("vehicle_number"));
 
 						listtoaddItem.add(violationItem);
-					}
+					}*/
 
-					violation.setViolationItem(listtoaddItem);
-					violation.setDocument(listtoaddDoc);
+					violation.setViolationItem(items);
+					violation.setDocument(documentAttachment);
 					violation.setPaymentDetails(ecPayment);
 					violationMap.put(violationUuid, violation);
 
@@ -187,7 +199,7 @@ public class ViolationDetailRowMapper implements ResultSetExtractor<List<Violati
 					ecPayment.setPaymentAmount(rs.getString("payment_amount"));
 					ecPayment.setPaymentGateway(rs.getString("payment_gateway"));
 					
-					Document doc = new Document();
+					/*Document doc = new Document();
 					doc.setChallanId(rs.getString("challan_id"));
 					doc.setCreatedBy(rs.getString("created_by"));
 					doc.setCreatedTime(rs.getLong("created_time"));
@@ -200,11 +212,19 @@ public class ViolationDetailRowMapper implements ResultSetExtractor<List<Violati
 					doc.setTenantId(rs.getString("tenant_id"));
 					doc.setViolationUuid(rs.getString("violation_uuid"));
 
-					listtoaddDoc.add(doc);
-
+					listtoaddDoc.add(doc);*/
+					List<Document> documentAttachment = null;
+					if (rs.getString("document") != null) {
+						documentAttachment = Arrays
+								.asList(mapper.readValue(rs.getString("document"), Document[].class));
+					}
 					// violation Item
-
-					ViolationItem violationItem = new ViolationItem();
+					List<ViolationItem> items = null;
+					if (rs.getString("item") != null) {
+						items = Arrays
+								.asList(mapper.readValue(rs.getString("item"), ViolationItem[].class));
+					}
+					/*ViolationItem violationItem = new ViolationItem();
 					violationItem.setViolationItemUuid(rs.getString("violation_item_uuid"));
 					violationItem.setViolationUuid(rs.getString("violation_uuid"));
 					violationItem.setItemName(rs.getString("item_name"));
@@ -220,10 +240,10 @@ public class ViolationDetailRowMapper implements ResultSetExtractor<List<Violati
 					violationItem.setTenantId(rs.getString("tenant_id"));
 					violationItem.setVehicleNumber(rs.getString("vehicle_number"));
 
-					listtoaddItem.add(violationItem);
+					listtoaddItem.add(violationItem);*/
 
-					violation.setDocument(listtoaddDoc);
-					violation.setViolationItem(listtoaddItem);
+					violation.setDocument(documentAttachment);
+					violation.setViolationItem(items);
 					violation.setPaymentDetails(ecPayment);
 					violationMap.put(violationUuid, violation);
 

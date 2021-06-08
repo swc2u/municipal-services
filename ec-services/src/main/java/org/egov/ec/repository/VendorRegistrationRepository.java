@@ -1,6 +1,9 @@
 package org.egov.ec.repository;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -11,8 +14,10 @@ import org.egov.ec.repository.rowmapper.ViolationDetailRowMapper;
 import org.egov.ec.web.models.EcSearchCriteria;
 import org.egov.ec.web.models.RequestInfoWrapper;
 import org.egov.ec.web.models.VendorRegistration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +31,10 @@ public class VendorRegistrationRepository {
 	private Producer producer;
 
 	private EchallanConfiguration config;
+	
+
+	@Autowired
+	public NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 	public VendorRegistrationRepository(JdbcTemplate jdbcTemplate, Producer producer, EchallanConfiguration config,
 			ViolationDetailRowMapper rowMapper) {
@@ -44,7 +53,7 @@ public class VendorRegistrationRepository {
 	public List<VendorRegistration> getVendor(EcSearchCriteria searchCriteria) {
 		log.info("VendorRegistration Repository - getVendor Method");
 		List<VendorRegistration> vendor;
-
+		Map<String, Object> paramValues = new HashMap<>();
 		String parameter = "%" + searchCriteria.getSearchText() + "%";
 
 		if (null != searchCriteria.getSearchText() && !searchCriteria.getSearchText().isEmpty()) {
@@ -54,7 +63,11 @@ public class VendorRegistrationRepository {
 					new BeanPropertyRowMapper<VendorRegistration>(VendorRegistration.class));
 			return vendor;
 		} else {
-			vendor = jdbcTemplate.query(EcQueryBuilder.GET_VENDOR_DETAIL, new Object[] {},
+			List<Object> covNo = new ArrayList<>();
+			covNo.add(searchCriteria.getCovNo());
+			paramValues.put("covNo", covNo);
+		
+			vendor = namedParameterJdbcTemplate.query(EcQueryBuilder.GET_VENDOR_DETAIL, paramValues,
 					new BeanPropertyRowMapper<VendorRegistration>(VendorRegistration.class));
 			return vendor;
 
