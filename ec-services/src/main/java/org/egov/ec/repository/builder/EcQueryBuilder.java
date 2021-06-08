@@ -63,7 +63,7 @@ public class EcQueryBuilder {
 			//"join  public.egec_document doc on doc.violation_uuid = item.violation_uuid\n" + 
 			" where item.challan_uuid like ? or item.item_name like ? and item.tenant_id=?";
 
-	public static final String GET_VENDOR_DETAIL = "select *,(select case when count(*)<5 then (count(*)+1) else 5 end from egec_violation_master v where v.license_no_cov=egec_vendor_registration_master.cov_no ) as numberOfViolation from public.egec_vendor_registration_master order by last_modified_time desc ";
+	public static final String GET_VENDOR_DETAIL = "select *,(select case when count(*)<5 then (count(*)+1) else 5 end from egec_violation_master v where v.license_no_cov=egec_vendor_registration_master.cov_no  ) as numberOfViolation from public.egec_vendor_registration_master where egec_vendor_registration_master.cov_no in(:covNo) order by last_modified_time desc ";
 	public static final String GET_VENDOR_DETAIL_SEARCH = "select distinct on (cov_no) * from public.egec_vendor_registration_master \n"
 			+ "where cov_no like ? or contact_number ilike ? or name ilike ?";
 
