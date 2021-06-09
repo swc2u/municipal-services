@@ -108,7 +108,7 @@ public class ViolationTest {
 				contactNumber, licenseNoCov, natureOfViolation, location, paymentMode, challanAmount, fineAmount,
 				penaltyAmount, gstAmount, totalChallanAmount, siName, status, isActive, createdBy, createdTime,
 				lastModifiedBy, lastModifiedTime, document, violationItem, notificationTemplate, challanDetails,
-				paymentDetails, sourceUuid, fromDate, toDate, null, null);
+				paymentDetails, sourceUuid, fromDate, toDate);
 
 		assertNotNull(result);
 		assertEquals("", result.getViolationUuid());
@@ -257,7 +257,7 @@ public class ViolationTest {
 	public void testGetViolationUuid_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null, null, null);
+				null, null, null,"", null, null);
 		String result = fixture.getViolationUuid();
 		assertEquals("", result);
 	}
@@ -266,7 +266,7 @@ public class ViolationTest {
 	public void testGetChallanUuid_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getChallanUuid();
 		assertEquals("", result);
 	}
@@ -275,7 +275,7 @@ public class ViolationTest {
 	public void testGetTenantId_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getTenantId();
 		assertEquals("", result);
 	}
@@ -284,7 +284,7 @@ public class ViolationTest {
 	public void testGetNumberOfViolation_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getNumberOfViolation();
 		assertEquals("", result);
 	}
@@ -293,7 +293,7 @@ public class ViolationTest {
 	public void testGetChallanId_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getChallanId();
 		assertEquals("", result);
 	}
@@ -302,7 +302,7 @@ public class ViolationTest {
 	public void testGetEncroachmentType_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getEncroachmentType();
 		assertEquals("", result);
 	}
@@ -311,7 +311,7 @@ public class ViolationTest {
 	public void testGetViolationDate_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getViolationDate();
 		assertEquals("", result);
 	}
@@ -320,7 +320,7 @@ public class ViolationTest {
 	public void testGetViolationTime_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getViolationTime();
 		assertEquals("", result);
 	}
@@ -329,7 +329,7 @@ public class ViolationTest {
 	public void testGetViolatorName_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getViolatorName();
 		assertEquals("", result);
 	}
@@ -338,7 +338,7 @@ public class ViolationTest {
 	public void testGetSector_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getSector();
 		assertEquals("", result);
 	}
@@ -347,7 +347,7 @@ public class ViolationTest {
 	public void testGetAddress_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getAddress();
 		assertEquals("", result);
 	}
@@ -356,7 +356,7 @@ public class ViolationTest {
 	public void testGetEmailId_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getEmailId();
 		assertEquals("", result);
 	}
@@ -365,7 +365,7 @@ public class ViolationTest {
 	public void testGetFatherName_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getFatherName();
 		assertEquals("", result);
 	}
@@ -374,7 +374,7 @@ public class ViolationTest {
 	public void testGetContactNumber_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getContactNumber();
 		assertEquals("", result);
 	}
@@ -383,7 +383,7 @@ public class ViolationTest {
 	public void testGetLicenseNoCov_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getLicenseNoCov();
 		assertEquals("", result);
 	}
@@ -392,7 +392,7 @@ public class ViolationTest {
 	public void testGetNatureOfViolation_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getNatureOfViolation();
 		assertEquals("", result);
 	}
@@ -401,7 +401,7 @@ public class ViolationTest {
 	public void testGetLocation_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getLocation();
 		assertEquals("", result);
 	}
@@ -410,7 +410,7 @@ public class ViolationTest {
 	public void testGetPaymentMode_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getPaymentMode();
 		assertEquals("", result);
 	}
@@ -419,7 +419,7 @@ public class ViolationTest {
 	public void testGetChallanAmount_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getChallanAmount();
 		assertEquals(null, result);
 	}
@@ -428,7 +428,7 @@ public class ViolationTest {
 	public void testGetFineAmount_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getFineAmount();
 		assertEquals(null, result);
 	}
@@ -439,7 +439,7 @@ public class ViolationTest {
 	public void testGetGstAmount_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getGstAmount();
 		assertEquals(null, result);
 	}
@@ -448,7 +448,7 @@ public class ViolationTest {
 	public void testGetTotalChallanAmount_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getTotalChallanAmount();
 		assertEquals(null, result);
 	}
@@ -456,7 +456,7 @@ public class ViolationTest {
 	@Test
 	public void testGetSiName_1() throws Exception {
 		Violation fixture = new Violation("","","","","","","","","","", "", "", "", "", "", "", "", "",
-				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null,null,null);
+				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null);
 		String result = fixture.getSiName();
 		assertEquals("", result);
 	}
@@ -464,7 +464,7 @@ public class ViolationTest {
 	@Test
 	public void testGetStatus_1() throws Exception {
 		Violation fixture = new Violation("","","","","","","","","","", "", "", "", "", "", "", "", "",
-				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null,null,null);
+				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null);
 		String result = fixture.getStatus();
 		assertEquals("", result);
 	}
@@ -472,7 +472,7 @@ public class ViolationTest {
 	@Test
 	public void testGetDocument_1() throws Exception {
 		Violation fixture = new Violation("","","","","","","","","","", "", "", "", "", "", "", "", "",
-				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null,null,null);
+				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null);
 		List<Document> result = fixture.getDocument();
 		assertEquals(null, result);
 	}
@@ -480,7 +480,7 @@ public class ViolationTest {
 	@Test
 	public void testGetViolationItem_1() throws Exception {
 		Violation fixture = new Violation("","","","","","","","","","", "", "", "", "", "", "", "", "",
-				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null,null,null);
+				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null);
 		List<ViolationItem> result = fixture.getViolationItem();
 		assertEquals(null, result);
 	}
@@ -488,7 +488,7 @@ public class ViolationTest {
 	@Test
 	public void testGetNotificationTemplate_1() throws Exception {
 		Violation fixture = new Violation("","","","","","","","","","", "", "", "", "", "", "", "", "",
-				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null,null,null);
+				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null);
 		NotificationTemplate result = fixture.getNotificationTemplate();
 		assertEquals(null, result);
 	}
@@ -496,7 +496,7 @@ public class ViolationTest {
 	@Test
 	public void testGetChallanDetails_1() throws Exception {
 		Violation fixture = new Violation("","","","","","","","","","", "", "", "", "", "", "", "", "",
-				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null,null,null);
+				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null);
 		List<ChallanDetails> result = fixture.getChallanDetails();
 		assertEquals(null, result);
 	}
@@ -504,7 +504,7 @@ public class ViolationTest {
 	@Test
 	public void testPaymentDetails_1() throws Exception {
 		Violation fixture = new Violation("","","","","","","","","","", "", "", "", "", "", "", "", "",
-				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null,null,null);
+				null, null, null, null, null, "", "", new Boolean(true),null, new Long(1L), "", new Long(1L), null, null, null, null, null,"", null, null);
 		EcPayment result = fixture.getPaymentDetails();
 		assertEquals(null, result);
 	}
@@ -573,7 +573,7 @@ public class ViolationTest {
 	public void testSetViolationUuid_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String violationUuid = "";
 		fixture.setViolationUuid(violationUuid);
 
@@ -583,7 +583,7 @@ public class ViolationTest {
 	public void testSetChallanUuid_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String challanUuid = "";
 		fixture.setChallanUuid(challanUuid);
 
@@ -594,7 +594,7 @@ public class ViolationTest {
 	public void testSetTenantId_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String tenantId = "";
 		fixture.setTenantId(tenantId);
 
@@ -604,7 +604,7 @@ public class ViolationTest {
 	public void testSetNumberOfViolation_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String numberOfViolation = "";
 		fixture.setNumberOfViolation(numberOfViolation);
 
@@ -614,7 +614,7 @@ public class ViolationTest {
 	public void testSetChallanId_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String challanId = "";
 		fixture.setChallanId(challanId);
 
@@ -624,7 +624,7 @@ public class ViolationTest {
 	public void testSetEncroachmentType_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String encroachmentType = "";
 		fixture.setEncroachmentType(encroachmentType);
 
@@ -634,7 +634,7 @@ public class ViolationTest {
 	public void testSetViolationDate_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String violationDate = "";
 		fixture.setViolationDate(violationDate);
 
@@ -644,7 +644,7 @@ public class ViolationTest {
 	public void testSetViolationTime_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String violationTime = "";
 		fixture.setViolationTime(violationTime);
 
@@ -654,7 +654,7 @@ public class ViolationTest {
 	public void testSetViolatorName_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String violatorName = "";
 		fixture.setViolatorName(violatorName);
 
@@ -664,7 +664,7 @@ public class ViolationTest {
 	public void testGetPenaltyAmount_1() throws Exception {
 		Violation fixture = new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String result = fixture.getPenaltyAmount();
 		assertEquals(null, result);
 	}
@@ -673,7 +673,7 @@ public class ViolationTest {
 	public void testSetSector_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String sector = "";
 		fixture.setSector(sector);
 
@@ -683,7 +683,7 @@ public class ViolationTest {
 	public void testSetAddress_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String address = "";
 		fixture.setAddress(address);
 
@@ -693,7 +693,7 @@ public class ViolationTest {
 	public void testSetEmailId_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String emailId = "";
 		fixture.setEmailId(emailId);
 
@@ -703,7 +703,7 @@ public class ViolationTest {
 	public void testSetFatherName_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String fatherName = "";
 		fixture.setFatherName(fatherName);
 
@@ -713,7 +713,7 @@ public class ViolationTest {
 	public void testSetContactNumber_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String contactNumber = "";
 		fixture.setContactNumber(contactNumber);
 
@@ -723,7 +723,7 @@ public class ViolationTest {
 	public void testSetLicenseNoCov_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String licenseNoCov = "";
 		fixture.setLicenseNoCov(licenseNoCov);
 
@@ -733,7 +733,7 @@ public class ViolationTest {
 	public void testSetNatureOfViolation_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String natureOfViolation = "";
 		fixture.setNatureOfViolation(natureOfViolation);
 
@@ -743,7 +743,7 @@ public class ViolationTest {
 	public void testSetLocation_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String location = "";
 		fixture.setLocation(location);
 
@@ -753,7 +753,7 @@ public class ViolationTest {
 	public void testSetPaymentMode_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String paymentMode = "";
 		fixture.setPaymentMode(paymentMode);
 
@@ -763,7 +763,7 @@ public class ViolationTest {
 	public void testSetChallanAmount_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String challanAmount = null;
 		fixture.setChallanAmount(challanAmount);
 	}
@@ -772,7 +772,7 @@ public class ViolationTest {
 	public void testSetFineAmount_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String fineAmount = null;
 		fixture.setFineAmount(fineAmount);
 	}
@@ -781,7 +781,7 @@ public class ViolationTest {
 	public void testSetPenaltyAmount_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String penaltyAmount = null;
 		fixture.setPenaltyAmount(penaltyAmount);
 	}
@@ -790,7 +790,7 @@ public class ViolationTest {
 	public void testSetGstAmount_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String gstAmount = null;
 		fixture.setGstAmount(gstAmount);
 	}
@@ -799,7 +799,7 @@ public class ViolationTest {
 	public void testSetTotalChallanAmount_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String totalChallanAmount = null;
 		fixture.setTotalChallanAmount(totalChallanAmount);
 	}
@@ -808,7 +808,7 @@ public class ViolationTest {
 	public void testSetSiName_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String siName = "";
 		fixture.setSiName(siName);
 
@@ -818,7 +818,7 @@ public class ViolationTest {
 	public void testSetStatus_1() throws Exception {
 		Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 				null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-				null, null, null,"", null, null,null,null);
+				null, null, null,"", null, null);
 		String status = "";
 		fixture.setStatus(status);
 
@@ -828,7 +828,7 @@ public class ViolationTest {
 		public void testSetIsActive_1() throws Exception {
 			Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 					null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-					null, null, null,"", null, null,null,null);
+					null, null, null,"", null, null);
 			Boolean isActive = new Boolean(true);
 			fixture.setIsActive(isActive);
 
@@ -838,7 +838,7 @@ public class ViolationTest {
 		public void testSetCreatedBy_1() throws Exception {
 			Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 					null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-					null, null, null,"", null, null,null,null);
+					null, null, null,"", null, null);
 			String createdBy = "";
 
 			fixture.setCreatedBy(createdBy);
@@ -849,7 +849,7 @@ public class ViolationTest {
 		public void testSetCreatedTime_1() throws Exception {
 			Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 					null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-					null, null, null,"", null, null,null,null);
+					null, null, null,"", null, null);
 			Long createdTime = new Long(1L);
 
 			fixture.setCreatedTime(createdTime);
@@ -860,7 +860,7 @@ public class ViolationTest {
 		public void testSetLastModifiedBy_1() throws Exception {
 			Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 					null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-					null, null, null,"", null, null,null,null);
+					null, null, null,"", null, null);
 			String lastModifiedBy = "";
 			fixture.setLastModifiedBy(lastModifiedBy);
 
@@ -870,7 +870,7 @@ public class ViolationTest {
 		public void testSetLastModifiedTime_1() throws Exception {
 			Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 					null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-					null, null, null,"", null, null,null,null);
+					null, null, null,"", null, null);
 			Long lastModifiedTime = new Long(1L);
 			fixture.setLastModifiedTime(lastModifiedTime);
 
@@ -880,7 +880,7 @@ public class ViolationTest {
 		public void testSetDocument_1() throws Exception {
 			Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 					null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-					null, null, null,"", null, null,null,null);
+					null, null, null,"", null, null);
 			List<Document> document = null;
 			fixture.setDocument(document);
 
@@ -890,7 +890,7 @@ public class ViolationTest {
 		public void testSetViolationItem_1() throws Exception {
 			Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 					null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-					null, null, null,"", null, null,null,null);
+					null, null, null,"", null, null);
 			List<ViolationItem> violationItem = null;
 			fixture.setViolationItem(violationItem);
 
@@ -900,7 +900,7 @@ public class ViolationTest {
 		public void testSetNotificationTemplate_1() throws Exception {
 			Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 					null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-					null, null, null,"", null, null,null,null);
+					null, null, null,"", null, null);
 			NotificationTemplate notificationTemplate = null;
 			fixture.setNotificationTemplate(notificationTemplate);
 
@@ -910,7 +910,7 @@ public class ViolationTest {
 		public void testSetChallanDetails_1() throws Exception {
 			Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 					null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-					null, null, null,"", null, null,null,null);
+					null, null, null,"", null, null);
 			List<ChallanDetails> challanDetails = null;
 			fixture.setChallanDetails(challanDetails);
 
@@ -920,7 +920,7 @@ public class ViolationTest {
 		public void testSetPaymentDetails_1() throws Exception {
 			Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 					null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-					null, null, null,"", null, null,null,null);
+					null, null, null,"", null, null);
 			EcPayment paymentDetails = null;
 			fixture.setPaymentDetails(paymentDetails);
 
@@ -930,7 +930,7 @@ public class ViolationTest {
 			public void testSetSourceUuid_1() throws Exception {
 				Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 						null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-						null, null, null,"", null, null,null,null);
+						null, null, null,"", null, null);
 				String sourceUuid = "";
 				fixture.setSourceUuid(sourceUuid);
 
@@ -940,7 +940,7 @@ public class ViolationTest {
 			public void testGetSourceUuid_1() throws Exception {
 				Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 						null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-						null, null, null,"", null, null,null,null);
+						null, null, null,"", null, null);
 
 				String result = fixture.getSourceUuid();
 
@@ -951,7 +951,7 @@ public class ViolationTest {
 			public void testGetFromDate_1() throws Exception {
 				Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 						null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-						null, null, null,"", null, null,null,null);
+						null, null, null,"", null, null);
 
 				Date result = fixture.getFromDate();
 
@@ -979,7 +979,7 @@ public class ViolationTest {
 			public void testSetToDate_1() throws Exception {
 				Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
 						null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-						null, null, null,"", null, null,null, null);
+						null, null, null,"", null, null);
 				Date toDate = null;
 				fixture.setToDate(toDate);
 

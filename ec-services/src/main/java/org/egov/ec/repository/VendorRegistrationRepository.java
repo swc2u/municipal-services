@@ -64,7 +64,12 @@ public class VendorRegistrationRepository {
 			return vendor;
 		} else {
 			List<Object> covNo = new ArrayList<>();
-			covNo.add(searchCriteria.getCovNo());
+	        String[] values = searchCriteria.getCovNo().split(",");
+
+			for (String sc:values ) {  
+				covNo.add(sc);
+			}
+			
 			paramValues.put("covNo", covNo);
 		
 			vendor = namedParameterJdbcTemplate.query(EcQueryBuilder.GET_VENDOR_DETAIL, paramValues,

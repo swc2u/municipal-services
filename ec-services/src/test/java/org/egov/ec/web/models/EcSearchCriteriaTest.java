@@ -65,7 +65,7 @@ public class EcSearchCriteriaTest {
 		String challanUuid = "";
 
 		EcSearchCriteria result = new EcSearchCriteria(tenantId, status, challanId, mobileNumber, action, fromDate,
-				toDate, offset, limit, orderDir, orderColumn, searchText, challanUuid);
+				toDate, offset, limit, orderDir, orderColumn, searchText, challanUuid, challanUuid);
 
 		assertNotNull(result);
 		assertEquals(new Long(1L), (result.getFromDate()));
@@ -159,7 +159,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetTenantId_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","", null);
 
 		String result = fixture.getTenantId();
 		assertEquals("", result);
@@ -175,7 +175,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetStatus_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","", null);
 
 		String result = fixture.getStatus();
 		assertEquals("", result);
@@ -191,7 +191,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetChallanId_1() throws Exception {
-		EcSearchCriteria fixture =  new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture =  new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		String result = fixture.getChallanId();
 		assertEquals("", result);
@@ -207,7 +207,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetMobileNumber_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		String result = fixture.getMobileNumber();
 		assertEquals("", result);
@@ -223,7 +223,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetAction_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		String result = fixture.getAction();
 
@@ -240,7 +240,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetFromDate_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		Long result = fixture.getFromDate();
 
@@ -264,7 +264,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetToDate_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		Long result = fixture.getToDate();
 
@@ -288,7 +288,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetOffset_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		Integer result = fixture.getOffset();
 		assertEquals(null, result);
@@ -304,7 +304,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetLimit_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		Integer result = fixture.getLimit();
 		assertEquals(null, result);
@@ -320,7 +320,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetOrderDir_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		String result = fixture.getOrderDir();
 
@@ -337,7 +337,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetOrderColumn_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		String result = fixture.getOrderColumn();
 
@@ -346,7 +346,7 @@ public class EcSearchCriteriaTest {
 	
 	@Test
 	public void testGetChallanUuid_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		String result = fixture.getChallanUuid();
 
@@ -363,7 +363,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testGetSearchText_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 
 		String result = fixture.getSearchText();
 
@@ -381,7 +381,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testSetTenantId_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		String tenantId = "";
 		fixture.setTenantId(tenantId);
 	}
@@ -396,7 +396,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testSetStatus_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		String status = "";
 		fixture.setStatus(status);;
 	}
@@ -411,7 +411,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testSetChallanId_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		String challanId = "";
 		fixture.setChallanId(challanId);;
 	}
@@ -426,7 +426,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testSetMobileNumber_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		String mobileNumber = "";
 		fixture.setMobileNumber(mobileNumber);
 	}
@@ -441,7 +441,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testSetAction_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		String action = "";
 
 		fixture.setAction(action);
@@ -458,7 +458,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testSetFromDate_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		Long fromDate = new Long(1L);
 
 		fixture.setFromDate(fromDate);
@@ -475,7 +475,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testSetToDate_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		Long fromDate = new Long(1L);
 
 		fixture.setToDate(fromDate);
@@ -492,7 +492,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testSetOffset_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		Integer offset = null;
 		fixture.setOffset(offset);
 
@@ -508,7 +508,7 @@ public class EcSearchCriteriaTest {
 
 	@Test
 	public void testSetLimit_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		Integer limit = null;
 		fixture.setLimit(limit);
 
@@ -524,7 +524,7 @@ public class EcSearchCriteriaTest {
 	 */
 	@Test
 	public void testSetOrderDir_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		String orderDir = "";
 		fixture.setOrderDir(orderDir);
 
@@ -539,7 +539,7 @@ public class EcSearchCriteriaTest {
 	 */
 	@Test
 	public void testSetOrderColumn_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		String orderColumn = "";
 		fixture.setOrderColumn(orderColumn);
 
@@ -554,7 +554,7 @@ public class EcSearchCriteriaTest {
 	 */
 	@Test
 	public void testSetSearchText_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		String searchText = "";
 		fixture.setSearchText(searchText);
 
@@ -562,7 +562,7 @@ public class EcSearchCriteriaTest {
 	
 	@Test
 	public void testSetChallanUuid_1() throws Exception {
-		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","");
+		EcSearchCriteria fixture = new EcSearchCriteria("", "", "", "", "",  new Long(1L), new Long(1L), null, null, "", "", "","","");
 		String challanUuid = "";
 		fixture.setChallanUuid(challanUuid);
 
