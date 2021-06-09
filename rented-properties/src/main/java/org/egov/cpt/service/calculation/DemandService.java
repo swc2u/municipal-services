@@ -38,6 +38,7 @@ import org.egov.cpt.repository.ServiceRequestRepository;
 import org.egov.cpt.util.PTConstants;
 import org.egov.cpt.util.PropertyUtil;
 import org.egov.tracer.model.CustomException;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -510,7 +511,7 @@ public class DemandService {
 				.paidBy("COUNTER").mobileNumber(ownerDetails.getPhone())
 				.paymentDetails(Collections.singletonList(paymentDetail))
 				.build();
-		if(CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.OFFLINE_NEFT)) {
+		if(CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.OFFLINE_NEFT) || CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.OFFLINE_RTGS)) {
 			payment.setTransactionNumber(transactionNumber);
 			payment.setInstrumentDate(transactionDate);
 			payment.setInstrumentNumber(transactionNumber);
@@ -518,7 +519,7 @@ public class DemandService {
 
 		else if(!CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.CASH)) {
 			payment.setTransactionNumber(transactionNumber);
-			payment.setInstrumentDate(new Date().getTime());
+			payment.setInstrumentDate(new DateTime().getMillis());
 			payment.setInstrumentNumber(transactionNumber);
 		}
 
