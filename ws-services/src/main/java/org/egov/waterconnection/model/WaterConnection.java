@@ -131,6 +131,9 @@ public class WaterConnection extends Connection {
 	@JsonProperty("proposedInitialMeterReading")
 	private BigDecimal proposedInitialMeterReading = null;
 	
+	@JsonProperty("proposedLastMeterReading")
+	private BigDecimal proposedLastMeterReading = null;
+	
 	
 	public String getContractValue() {
 		return contractValue;
@@ -558,5 +561,13 @@ public class WaterConnection extends Connection {
 
 	public void setProposedInitialMeterReading(BigDecimal proposedInitialMeterReading) {
 		this.proposedInitialMeterReading = proposedInitialMeterReading;
+	}
+
+	public BigDecimal getProposedLastMeterReading() {
+		return proposedLastMeterReading;
+	}
+
+	public void setProposedLastMeterReading(BigDecimal proposedLastMeterReading) {
+		this.proposedLastMeterReading = proposedLastMeterReading;
 	}
 }

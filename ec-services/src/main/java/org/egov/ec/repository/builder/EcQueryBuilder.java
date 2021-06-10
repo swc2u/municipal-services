@@ -63,7 +63,8 @@ public class EcQueryBuilder {
 			//"join  public.egec_document doc on doc.violation_uuid = item.violation_uuid\n" + 
 			" where item.challan_uuid like ? or item.item_name like ? and item.tenant_id=?";
 
-	public static final String GET_VENDOR_DETAIL = "select *,(select case when count(*)<5 then (count(*)+1) else 5 end from egec_violation_master v where v.license_no_cov=egec_vendor_registration_master.cov_no ) as numberOfViolation from public.egec_vendor_registration_master order by last_modified_time desc ";
+	public static final String GET_VENDOR_DETAIL_COV = "select *,(select case when count(*)<5 then (count(*)+1) else 5 end from egec_violation_master v where v.license_no_cov=egec_vendor_registration_master.cov_no  ) as numberOfViolation from public.egec_vendor_registration_master where egec_vendor_registration_master.cov_no in(:covNo) order by last_modified_time desc ";
+	public static final String GET_VENDOR_DETAIL = "select *,(select case when count(*)<5 then (count(*)+1) else 5 end from egec_violation_master v where v.license_no_cov=egec_vendor_registration_master.cov_no  ) as numberOfViolation from public.egec_vendor_registration_master order by last_modified_time desc ";
 	public static final String GET_VENDOR_DETAIL_SEARCH = "select distinct on (cov_no) * from public.egec_vendor_registration_master \n"
 			+ "where cov_no like ? or contact_number ilike ? or name ilike ?";
 
@@ -197,7 +198,6 @@ public class EcQueryBuilder {
 			" and(? ilike '' or violation.encroachment_type ilike ?) and (? ilike '' or violation.sector ilike ?)\r\n" + 
 			" and(? ilike '' or (select case when (select store.item_store_deposit_date from egec_store_item_register store where store.challan_uuid=challan.challan_uuid limit 1)< now()- interval '30 days' and challan.challan_status <> 'CLOSED' and violation.encroachment_type <> 'Seizure of Vehicles' then 'PENDING FOR AUCTION'  when challan.challan_status='CLOSED' and ((select count(*) from egec_store_item_register store where store.violation_uuid=violation.violation_uuid) > 0) then 'RELEASED FROM STORE' when challan.challan_status='CLOSED' and ((select count(*) from egec_store_item_register store where store.violation_uuid=violation.violation_uuid) = 0) then 'RELEASED ON GROUND' else challan.challan_status end) ilike ?)\r\n" + 
 			" and violation.tenant_id=? and UPPER(challan.challan_id) like concat('%',case when UPPER(?)<>'' then UPPER(?) else UPPER(challan.challan_id) end,'%') order by violation.last_modified_time desc";
-	
 	public static final String GET_AUCTION_UUID_CHALLAN_MASTER="\n" + 
 			"		select auction.*,violation.si_name,violation.violator_name,violation.encroachment_type,violation.sector,challan.challan_id,violation.violation_date,violation.contact_number from egec_auction_master auction \n" + 
 			"		JOIN egec_violation_master violation ON auction.violation_uuid=violation.violation_uuid \n" + 
