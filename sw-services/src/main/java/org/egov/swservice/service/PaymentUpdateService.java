@@ -75,8 +75,10 @@ public class PaymentUpdateService {
 			} catch (Exception ex) {
 				log.error("Temp Catch Excption:", ex);
 			}
+			if(!"EARLY_RECONC_JOB".equalsIgnoreCase(paymentRequest.getRequestInfo().getUserInfo().getUuid())) {
 			paymentRequest.getRequestInfo().setUserInfo(fetchUser(
 					paymentRequest.getRequestInfo().getUserInfo().getUuid(), paymentRequest.getRequestInfo()));
+			}
 			for (PaymentDetail paymentDetail : paymentRequest.getPayment().getPaymentDetails()) {
 				log.info("Consuming Business Service", paymentDetail.getBusinessService());
 				if (paymentDetail.getBusinessService().equalsIgnoreCase(config.getReceiptBusinessservice())) {
