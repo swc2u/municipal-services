@@ -56,7 +56,7 @@ public class VendorRegistrationRepository {
 		Map<String, Object> paramValues = new HashMap<>();
 		String parameter = "%" + searchCriteria.getSearchText() + "%";
 
-		if (null != searchCriteria.getSearchText() && !searchCriteria.getSearchText().isEmpty()) {
+		if (null != searchCriteria.getSearchText() && !searchCriteria.getSearchText().isEmpty() ) {
 
 			vendor = jdbcTemplate.query(EcQueryBuilder.GET_VENDOR_DETAIL_SEARCH,
 					new Object[] { parameter, parameter, parameter },
@@ -64,16 +64,20 @@ public class VendorRegistrationRepository {
 			return vendor;
 		} else {
 			List<Object> covNo = new ArrayList<>();
+			if(searchCriteria.getCovNo()!=null && !searchCriteria.getCovNo().isEmpty()) {
 	        String[] values = searchCriteria.getCovNo().split(",");
-
 			for (String sc:values ) {  
 				covNo.add(sc);
 			}
-			
 			paramValues.put("covNo", covNo);
-		
-			vendor = namedParameterJdbcTemplate.query(EcQueryBuilder.GET_VENDOR_DETAIL, paramValues,
+			vendor = namedParameterJdbcTemplate.query(EcQueryBuilder.GET_VENDOR_DETAIL_COV, paramValues,
 					new BeanPropertyRowMapper<VendorRegistration>(VendorRegistration.class));
+			}
+			else {
+				vendor = namedParameterJdbcTemplate.query(EcQueryBuilder.GET_VENDOR_DETAIL, paramValues,
+						new BeanPropertyRowMapper<VendorRegistration>(VendorRegistration.class));
+			}
+			
 			return vendor;
 
 		}
