@@ -26,6 +26,14 @@ public class WSConfiguration {
 
 	@Value("${egov.waterservice.pagination.max.limit}")
 	private Integer maxLimit;
+	
+
+	// System User
+	@Value("${ws.system.user.uuid}")
+	private String systemUserUUID;
+	
+	@Value("${ws.system.user.id}")
+	private String systemUserID;
 
 	// IDGEN
 	@Value("${egov.idgen.wcid.name}")

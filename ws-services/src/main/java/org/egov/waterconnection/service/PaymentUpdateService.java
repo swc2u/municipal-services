@@ -7,6 +7,7 @@ import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.Role;
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
 import org.egov.waterconnection.config.WSConfiguration;
@@ -143,7 +144,12 @@ public class PaymentUpdateService {
 					}
 					
 					Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
-					
+					if(paymentRequest.getRequestInfo().getUserInfo().getType().equals("SYSTEM")) {
+						paymentRequest.getRequestInfo().getUserInfo().setId(Long.valueOf(config.getSystemUserID()));
+						paymentRequest.getRequestInfo().getUserInfo().setUuid(config.getSystemUserUUID());
+						Role role = Role.builder().code("SYSTEM").build();
+						paymentRequest.getRequestInfo().getUserInfo().getRoles().add(role);
+					} 
 					wfIntegrator.callWorkFlow(waterConnectionRequest, property);
 					enrichmentService.enrichFileStoreIds(waterConnectionRequest);
 					

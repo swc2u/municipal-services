@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.Role;
 import org.egov.common.contract.request.User;
 import org.egov.swservice.config.SWConfiguration;
 import org.egov.swservice.model.Property;
@@ -109,6 +110,12 @@ public class PaymentUpdateService {
 					}
 					
 					Property property = validateProperty.getOrValidateProperty(sewerageConnectionRequest);
+					if(paymentRequest.getRequestInfo().getUserInfo().getType().equals("SYSTEM")) {
+						paymentRequest.getRequestInfo().getUserInfo().setId(Long.valueOf(config.getSystemUserID()));
+						paymentRequest.getRequestInfo().getUserInfo().setUuid(config.getSystemUserUUID());
+						Role role = Role.builder().code("SYSTEM").build();
+						paymentRequest.getRequestInfo().getUserInfo().getRoles().add(role);
+					} 
 					wfIntegrator.callWorkFlow(sewerageConnectionRequest, property);
 					enrichmentService.enrichFileStoreIds(sewerageConnectionRequest);
 					sewerageConnectionRequest.getSewerageConnection().setTotalAmountPaid(paymentDetail.getTotalAmountPaid().toString());
