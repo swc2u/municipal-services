@@ -99,6 +99,10 @@ public class WaterServicesUtil {
 				&& "EMPLOYEE".equalsIgnoreCase(waterConnectionRequest.getRequestInfo().getUserInfo().getType())) {
 			propertyCriteria.setTenantId(waterConnectionRequest.getWaterConnection().getTenantId());
 		}
+		if (waterConnectionRequest.getRequestInfo().getUserInfo() != null
+				&& "SYSTEM".equalsIgnoreCase(waterConnectionRequest.getRequestInfo().getUserInfo().getType())) {
+			propertyCriteria.setTenantId("ch.chandigarh");
+		}
 		Object result = serviceRequestRepository.fetchResult(
 				getPropertyURL(propertyCriteria),
 				RequestInfoWrapper.builder().requestInfo(waterConnectionRequest.getRequestInfo()).build());
