@@ -45,6 +45,7 @@ import com.jayway.jsonpath.JsonPath;
 
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
+
 @Slf4j
 @Service
 public class MasterDataService {
@@ -63,15 +64,14 @@ public class MasterDataService {
 
 	@Autowired
 	private CalculatorUtil calculatorUtils;
-	
+
 	@Autowired
 	private EstimationService estimationService;
 
 	/**
 	 * Fetches and creates map of all required masters
 	 * 
-	 * @param request
-	 *            The calculation request
+	 * @param request The calculation request
 	 * @return
 	 */
 	public Map<String, Object> getMasterMap(RequestInfo requestInfo, String tenantId, String serviceFieldValue) {
@@ -142,13 +142,13 @@ public class MasterDataService {
 			timeBasedExemptionMasterMap.put(entry.getKey(), entry.getValue());
 		}
 	}
-	
-	 /**
-	  * 
-	  * @param requestInfo
-	  * @param tenantId
-	  * @param masterMap
-	  */
+
+	/**
+	 * 
+	 * @param requestInfo
+	 * @param tenantId
+	 * @param masterMap
+	 */
 	public void loadBillingSlabsAndTimeBasedExemptions(RequestInfo requestInfo, String tenantId,
 			Map<String, Object> masterMap) {
 
@@ -197,7 +197,6 @@ public class MasterDataService {
 		return financialYearMap;
 	}
 
-	
 	/**
 	 * 
 	 * @param requestInfo
@@ -219,7 +218,7 @@ public class MasterDataService {
 		enrichBillingPeriod(criteria, mdmsResponse, masterMap);
 		return masterMap;
 	}
-	
+
 	/**
 	 * 
 	 * @param master
@@ -270,6 +269,7 @@ public class MasterDataService {
 		masterMap.put(WSCalculationConstant.BILLING_PERIOD, billingPeriod);
 		return masterMap;
 	}
+
 	/**
 	 * 
 	 * @param masterMap
@@ -280,7 +280,8 @@ public class MasterDataService {
 		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, System.currentTimeMillis());
 		billingPeriod.put(WSCalculationConstant.ENDING_DATE_APPLICABLES,
 				System.currentTimeMillis() + WSCalculationConstant.APPLICATION_FEE_DEMAND_END_DATE);
-		billingPeriod.put(WSCalculationConstant.Demand_Expiry_Date_String, WSCalculationConstant.APPLICATION_FEE_DEMAND_EXP_DATE);
+		billingPeriod.put(WSCalculationConstant.Demand_Expiry_Date_String,
+				WSCalculationConstant.APPLICATION_FEE_DEMAND_EXP_DATE);
 		masterMap.put(WSCalculationConstant.BILLING_PERIOD, billingPeriod);
 		return masterMap;
 	}
@@ -288,7 +289,7 @@ public class MasterDataService {
 	/**
 	 * 
 	 * @param assessmentYear Assessment year
-	 * @param masterList master list for that applicable
+	 * @param masterList     master list for that applicable
 	 * @return master data for that assessment Year
 	 */
 	@SuppressWarnings("unchecked")
@@ -331,15 +332,14 @@ public class MasterDataService {
 	/**
 	 * Converts startDay to epoch
 	 * 
-	 * @param startDay
-	 *            StartDay of applicable
+	 * @param startDay StartDay of applicable
 	 * @return
 	 */
 	private Long getStartDayInMillis(String startDay) {
 		Date date = null;
 		try {
 			SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-			 date = df.parse(startDay);
+			date = df.parse(startDay);
 		} catch (ParseException e) {
 			throw new CustomException("INVALID STARTDAY", "The startDate of the penalty cannot be parsed");
 		}
@@ -395,15 +395,14 @@ public class MasterDataService {
 	/**
 	 * Gets the startDate and the endDate of the financialYear
 	 * 
-	 * @param requestInfo
-	 *            The RequestInfo of the calculationRequest
-	 * @param license
-	 *            The water connection for which calculation is done
+	 * @param requestInfo The RequestInfo of the calculationRequest
+	 * @param license     The water connection for which calculation is done
 	 * @return Map containing the startDate and endDate
 	 */
 	public Map<String, Long> getTaxPeriods(RequestInfo requestInfo, Object mdmsData) {
 		try {
-			String jsonPath = WSCalculationConstant.MDMS_FINACIALYEAR_PATH.replace("{}", WSCalculationConstant.FINANCIALYEAR_MASTER_KEY);
+			String jsonPath = WSCalculationConstant.MDMS_FINACIALYEAR_PATH.replace("{}",
+					WSCalculationConstant.FINANCIALYEAR_MASTER_KEY);
 			List<Map<String, Object>> jsonOutput = JsonPath.read(mdmsData, jsonPath);
 			Map<String, Object> financialYearProperties = jsonOutput.get(0);
 			Object startDate = financialYearProperties.get(WSCalculationConstant.MDMS_STARTDATE);
@@ -415,7 +414,8 @@ public class MasterDataService {
 
 		} catch (Exception e) {
 
-			throw new CustomException("INVALID FINANCIALYEAR", "No data found for the financialYear: " + WSCalculationConstant.FINANCIALYEAR_MASTER_KEY);
+			throw new CustomException("INVALID FINANCIALYEAR",
+					"No data found for the financialYear: " + WSCalculationConstant.FINANCIALYEAR_MASTER_KEY);
 		}
 	}
 
@@ -428,10 +428,8 @@ public class MasterDataService {
 	/**
 	 * Creates MDMS request
 	 * 
-	 * @param requestInfo
-	 *            The RequestInfo of the calculationRequest
-	 * @param tenantId
-	 *            The tenantId of the tradeLicense
+	 * @param requestInfo The RequestInfo of the calculationRequest
+	 * @param tenantId    The tenantId of the tradeLicense
 	 * @return MDMSCriteria Request
 	 */
 	private MdmsCriteriaReq getMDMSRequest(RequestInfo requestInfo, String tenantId) {
@@ -471,10 +469,11 @@ public class MasterDataService {
 	private StringBuilder getMdmsSearchUrl() {
 		return new StringBuilder().append(config.getMdmsHost()).append(config.getMdmsEndPoint());
 	}
+
 	public LocalDateTime setCurrentDateValueToStartingOfDay(LocalDateTime localDateTime) {
 		return localDateTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
 	}
-	
+
 	public JSONArray getMasterListOfReceiver(RequestInfo requestInfo, String tenantId) {
 		ArrayList<String> masterDetails = new ArrayList<>();
 		masterDetails.add(WSCalculationConstant.SMS_RECIEVER_MASTER);
@@ -486,7 +485,7 @@ public class MasterDataService {
 		JSONArray receiverList = res.get(WSCalculationConstant.SMS_RECIEVER_MASTER);
 		return receiverList;
 	}
-	
+
 	public HashMap<String, Long> getDemandStartAndEndValue(String billingPeriodString) {
 		HashMap<String, Long> dateMap = new HashMap<>();
 		try {
@@ -515,14 +514,13 @@ public class MasterDataService {
 
 		} catch (CustomException | ParseException ex) {
 			log.error("", ex);
-			if(ex instanceof CustomException) 
+			if (ex instanceof CustomException)
 				throw new CustomException("BILLING PERIOD ISSUE", "Billing period can not be in future!!");
 			throw new CustomException("BILLING PERIOD PARSING ISSUE", "Billing period can not parsed!!");
 		}
 		return dateMap;
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param requestInfo
@@ -535,7 +533,7 @@ public class MasterDataService {
 		loadBillingFrequencyMasterData(requestInfo, tenantId, master);
 		return master;
 	}
-	
+
 	/**
 	 * 
 	 * @param requestInfo
@@ -544,7 +542,8 @@ public class MasterDataService {
 	 * @return Master For Billing Period
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> loadBillingFrequencyMasterData(RequestInfo requestInfo, String tenantId, Map<String, Object> masterMap) {
+	public Map<String, Object> loadBillingFrequencyMasterData(RequestInfo requestInfo, String tenantId,
+			Map<String, Object> masterMap) {
 		MdmsCriteriaReq mdmsCriteriaReq = calculatorUtils.getBillingFrequency(requestInfo, tenantId);
 		Object res = repository.fetchResult(calculatorUtils.getMdmsSearchUrl(), mdmsCriteriaReq);
 		if (res == null) {
@@ -554,31 +553,26 @@ public class MasterDataService {
 		masterMap.put(WSCalculationConstant.Billing_Period_Master, mdmsResponse);
 		return masterMap;
 	}
-	
+
 	/**
 	 * 
 	 * @param requestInfo
 	 * @param tenantId
 	 * @param roadType
 	 * @param usageType
-	 * @param masterMap return master data with exception master data
+	 * @param masterMap   return master data with exception master data
 	 */
 	public Map<String, Object> loadExemptionMaster(RequestInfo requestInfo, String tenantId) {
 		Map<String, Object> master = new HashMap<>();
 		master = getMasterMap(requestInfo, tenantId, WSCalculationConstant.ONE_TIME_FEE_SERVICE_FIELD);
-		MdmsResponse response = mapper.convertValue(
-				repository.fetchResult(calculatorUtils.getMdmsSearchUrl(),
-						calculatorUtils.getEstimationMasterCriteria(requestInfo, tenantId)),
-				MdmsResponse.class);
-		
-	
-		
-		
+		MdmsResponse response = mapper.convertValue(repository.fetchResult(calculatorUtils.getMdmsSearchUrl(),
+				calculatorUtils.getEstimationMasterCriteria(requestInfo, tenantId)), MdmsResponse.class);
+
 		Map<String, JSONArray> res = response.getMdmsRes().get(WSCalculationConstant.WS_TAX_MODULE);
 		for (Map.Entry<String, JSONArray> resp : res.entrySet()) {
 			master.put(resp.getKey(), resp.getValue());
 		}
 		return master;
 	}
-	
+
 }

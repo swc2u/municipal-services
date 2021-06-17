@@ -14,7 +14,7 @@ public class WaterApplication {
 
 	@JsonProperty("applicationNo")
 	private String applicationNo = null;
-	
+
 	@JsonProperty("activityType")
 	private String activityType = null;
 
@@ -29,12 +29,21 @@ public class WaterApplication {
 
 	@JsonProperty("isFerruleApplicable")
 	private Boolean isFerruleApplicable = true;
-	
+
 	@JsonProperty("securityCharge")
 	private Double securityCharge = null;
-	
-	  @JsonProperty("totalAmountPaid")
-	    private String totalAmountPaid;
+
+	@JsonProperty("additionalCharges")
+	private Double additionalCharges = null;
+
+	@JsonProperty("constructionCharges")
+	private Double constructionCharges = null;
+
+	@JsonProperty("totalAmountPaid")
+	private String totalAmountPaid;
+
+	@JsonProperty("paymentMode")
+	private String paymentMode;
 	
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
@@ -48,7 +57,8 @@ public class WaterApplication {
 			return false;
 		}
 		WaterApplication waterApplication = (WaterApplication) o;
-		return Objects.equals(this.id, waterApplication.id) && Objects.equals(this.applicationNo, waterApplication.applicationNo)
+		return Objects.equals(this.id, waterApplication.id)
+				&& Objects.equals(this.applicationNo, waterApplication.applicationNo)
 				&& Objects.equals(this.applicationStatus, waterApplication.applicationStatus)
 				&& Objects.equals(this.action, waterApplication.action)
 				&& Objects.equals(this.comments, waterApplication.comments);
@@ -160,5 +170,29 @@ public class WaterApplication {
 
 	public void setTotalAmountPaid(String totalAmountPaid) {
 		this.totalAmountPaid = totalAmountPaid;
+	}
+
+	public Double getAdditionalCharges() {
+		return additionalCharges;
+	}
+
+	public void setAdditionalCharges(Double additionalCharges) {
+		this.additionalCharges = additionalCharges;
+	}
+
+	public Double getConstructionCharges() {
+		return constructionCharges;
+	}
+
+	public void setConstructionCharges(Double constructionCharges) {
+		this.constructionCharges = constructionCharges;
+	}
+
+	public String getPaymentMode() {
+		return paymentMode;
+	}
+
+	public void setPaymentMode(String paymentMode) {
+		this.paymentMode = paymentMode;
 	}
 }
