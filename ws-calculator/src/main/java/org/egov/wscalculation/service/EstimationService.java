@@ -524,6 +524,15 @@ public class EstimationService {
 						}
 					
 				}
+				else	if (criteria.getWaterConnection().getActivityType()
+						.equalsIgnoreCase(WSCalculationConstant.WS_REACTIVATE)) {
+					if (!(unitCost.compareTo(BigDecimal.ZERO) == 0)) {
+						estimates.add(TaxHeadEstimate.builder()
+								.taxHeadCode(WSCalculationConstant.WS_TEMPORARY_CONN_FEE)
+								.estimateAmount(unitCost.setScale(2, 2)).build());
+					}
+				
+			}
 				// addAdhocPenalityAndRebate(estimates, criteria.getWaterConnection());
 			}
 
