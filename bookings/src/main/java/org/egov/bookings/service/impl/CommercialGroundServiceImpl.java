@@ -204,7 +204,7 @@ public class CommercialGroundServiceImpl implements CommercialGroundService {
 					if(!BookingsFieldsValidator.isNullOrEmpty(bookingModelSet1))
 					bookingModelSet.addAll(bookingModelSet1);
 			}
-			List<LocalDate> fetchBookedDates = enrichmentService.enrichBookedDates(bookingModelSet);
+			Set<LocalDate> fetchBookedDates = enrichmentService.enrichBookedDates(bookingModelSet);
 			for(CommercialGrndAvailabilityModel dateHolding : commercialGrndAvailabiltyLockRequest.getCommercialGrndAvailabilityLock()) {
 				for(LocalDate localDate : fetchBookedDates) {
 					if(localDate.compareTo(dateHolding.getFromDate().toLocalDate()) == 0) {
@@ -242,13 +242,13 @@ public class CommercialGroundServiceImpl implements CommercialGroundService {
 		Date sixMonthsFromNowSql = Date.valueOf(sixMonthsFromNow);
 		try {
 			lock.lock();
-			List<LocalDate> toBeBooked = enrichmentService.extractAllDatesBetweenTwoDates(bookingsRequest);
+			Set<LocalDate> toBeBooked = enrichmentService.extractAllDatesBetweenTwoDates(bookingsRequest);
 			if (config.isCommercialLock()) {
 				Set<BookingsModel> bookingsModelSet = commonRepository.findAllBookedVenuesFromNow(
 						bookingsRequest.getBookingsModel().getBkBookingVenue(),
 						bookingsRequest.getBookingsModel().getBkBookingType(), date1, BookingsConstants.APPLY);
 
-				List<LocalDate> fetchBookedDates = enrichmentService.enrichBookedDates(bookingsModelSet);
+				Set<LocalDate> fetchBookedDates = enrichmentService.enrichBookedDates(bookingsModelSet);
 				List<CommercialGrndAvailabilityModel> lockList = commercialGrndAvailabilityRepo
 						.findLockedDatesFromNowTo6Months(currentDate, sixMonthsFromNowSql);
 				for (LocalDate toBeBooked1 : toBeBooked) {

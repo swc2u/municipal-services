@@ -143,8 +143,8 @@ public class OsujmServiceImpl implements OsujmService {
 						bookingsRequest.getBookingsModel().getBkBookingVenue(),
 						bookingsRequest.getBookingsModel().getBkBookingType(),
 						bookingsRequest.getBookingsModel().getBkSector(), date1, BookingsConstants.PAYMENT_SUCCESS_STATUS);
-				List<LocalDate> fetchBookedDates = enrichmentService.enrichBookedDates(bookingsModel);
-				List<LocalDate> toBeBooked = enrichmentService.extractAllDatesBetweenTwoDates(bookingsRequest);
+				Set<LocalDate> fetchBookedDates = enrichmentService.enrichBookedDates(bookingsModel);
+				Set<LocalDate> toBeBooked = enrichmentService.extractAllDatesBetweenTwoDates(bookingsRequest);
 				for (LocalDate toBeBooked1 : toBeBooked) {
 
 					for (LocalDate fetchBookedDates1 : fetchBookedDates) {

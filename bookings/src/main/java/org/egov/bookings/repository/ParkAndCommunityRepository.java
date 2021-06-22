@@ -32,6 +32,12 @@ public interface ParkAndCommunityRepository extends CrudRepository<BookingsModel
 			@Param(BookingsConstants.DATE) Date date, @Param(BookingsConstants.PAYMENT_SUCCESS_STATUS) String SUCCESS,
 			@Param(BookingsConstants.APPLICATION_NUMBER) String applicationNumber);
 
+	@Query(value = BookingsQueryBuilder.CHECK_COMMUNITY_AVAILABILITY, nativeQuery = true)
+	Set<BookingsModel> fetchBookedDatesOfCommunity(
+			@Param(BookingsConstants.BOOKING_TYPE) String bookingType, @Param(BookingsConstants.SECTOR) String sector,
+			@Param(BookingsConstants.DATE) Date date, @Param(BookingsConstants.PAYMENT_SUCCESS_STATUS) String SUCCESS,
+			@Param(BookingsConstants.APPLICATION_NUMBER) String applicationNumber);
+
 
 	
 }

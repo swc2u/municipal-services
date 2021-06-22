@@ -251,10 +251,19 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 		Set<AvailabilityResponse> bookedDates = new HashSet<>();
 		Set<CommercialGrndAvailabilityModel> availabilityLockModelList = commercialGrndAvailabilityRepo
 				.findByBookingVenueAndIsLocked(parkAndCommunitySearchCriteria.getBookingVenue(), date1);
-		Set<BookingsModel> bookingsModel = parkAndCommunityRepository.fetchBookedDatesOfParkAndCommunity(
+		Set<BookingsModel> bookingsModel = new HashSet<>();
+		if(parkAndCommunitySearchCriteria.getBookingType().equals(BookingsConstants.COMMUNITY_CENTER)) {
+			bookingsModel = parkAndCommunityRepository.fetchBookedDatesOfCommunity(
+					parkAndCommunitySearchCriteria.getBookingType(),
+					parkAndCommunitySearchCriteria.getSector(), date1, BookingsConstants.PAYMENT_SUCCESS_STATUS,
+					parkAndCommunitySearchCriteria.getApplicationNumber());
+		}
+		else {
+				bookingsModel = parkAndCommunityRepository.fetchBookedDatesOfParkAndCommunity(
 				parkAndCommunitySearchCriteria.getBookingVenue(), parkAndCommunitySearchCriteria.getBookingType(),
 				parkAndCommunitySearchCriteria.getSector(), date1, BookingsConstants.PAYMENT_SUCCESS_STATUS,
 				parkAndCommunitySearchCriteria.getApplicationNumber());
+		}
 		if (null != bookingsModel) {
 			for (BookingsModel bkModel : bookingsModel) {
 				if (!BookingsConstants.PACC_ACTION_APPROVE_CLERK_DEO.equals(bkModel.getBkAction())) {
@@ -292,28 +301,61 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 		enrichmentService.enrichLockDates(bookingsRequest);
 		// Date date = commercialGroundAvailabiltySearchCriteria.getDate();
 		LocalDate date = LocalDate.now();
-		Date date1 = Date.valueOf(date);
+		//Date date1 = Date.valueOf(date);
 		SortedSet<Date> bookedDates = new TreeSet<>();
+		//LocalDate sixMonthsBeforNow = date.minusMonths(1);
+		Date date1 = Date.valueOf(date);
 		LocalDate sixMonthsFromNow = date.plusMonths(6);
 		Date currentDate = Date.valueOf(date);
 		Date sixMonthsFromNowSql = Date.valueOf(sixMonthsFromNow);
+		Set<BookingsModel> bookingsModelSet = new HashSet<>();
 		try {
-			lock.lock();
-			List<LocalDate> toBeBooked = enrichmentService.extractAllDatesBetweenTwoDates(bookingsRequest);
+			//lock.lock();
+			Set<LocalDate> toBeBooked = enrichmentService.extractAllDatesBetweenTwoDates(bookingsRequest);
 			if (config.isParkAndCommunityLock()) {
-				Set<BookingsModel> bookingsModelSet = parkAndCommunityRepository.fetchBookedDatesOfParkAndCommunity(
+		
+				if(bookingsRequest.getBookingsModel().getBkBookingType().equals(BookingsConstants.COMMUNITY_CENTER)) {
+					bookingsModelSet = parkAndCommunityRepository.fetchBookedDatesOfCommunity(
+							bookingsRequest.getBookingsModel().getBkBookingType(),
+							bookingsRequest.getBookingsModel().getBkSector(), date1, BookingsConstants.PAYMENT_SUCCESS_STATUS,
+							bookingsRequest.getBookingsModel().getBkApplicationNumber());
+				}
+				else {
+				bookingsModelSet = parkAndCommunityRepository.fetchBookedDatesOfParkAndCommunity(
 						bookingsRequest.getBookingsModel().getBkBookingVenue(),
 						bookingsRequest.getBookingsModel().getBkBookingType(),
 						bookingsRequest.getBookingsModel().getBkSector(), date1, BookingsConstants.PAYMENT_SUCCESS_STATUS, bookingsRequest.getBookingsModel().getBkApplicationNumber());
-
-				List<LocalDate> fetchBookedDates = enrichmentService.enrichBookedDates(bookingsModelSet);
+				}
+				Set<LocalDate> fetchBookedDates = enrichmentService.enrichBookedDates(bookingsModelSet);
 				List<CommercialGrndAvailabilityModel> lockList = commercialGrndAvailabilityRepo
 						.findLockedDatesFromNowTo6Months(currentDate, sixMonthsFromNowSql);
+
 				for (LocalDate toBeBooked1 : toBeBooked) {
 
 					for (LocalDate fetchBookedDates1 : fetchBookedDates) {
-						if (toBeBooked1.equals(fetchBookedDates1)) {
-							bookedDates.add(Date.valueOf(toBeBooked1));
+						
+						if(bookingsRequest.getBookingsModel().getBkBookingType().equals(BookingsConstants.COMMUNITY_CENTER)) {
+							if(bookingsRequest.getBookingsModel().getTimeslots() != null && toBeBooked1.equals(fetchBookedDates1)) {
+								Set<Date> timeslotDate =  enrichmentService.checkTimeslotsAvailabilty(bookingsRequest, bookingsModelSet,
+										bookedDates);
+								if(BookingsFieldsValidator.isNullOrEmpty(timeslotDate)) {
+								    bookedDates.add(Date.valueOf(toBeBooked1));
+								    return bookedDates;
+								}
+									
+							}
+							else {
+								if (toBeBooked1.equals(fetchBookedDates1)) {
+									bookedDates.add(Date.valueOf(toBeBooked1));
+									return bookedDates;
+								}
+							}
+						}
+						else {
+							if (toBeBooked1.equals(fetchBookedDates1)) {
+								bookedDates.add(Date.valueOf(toBeBooked1));
+								return bookedDates;
+							}
 						}
 					}
 				}
@@ -326,28 +368,30 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 										.equals(commGrndAvailModel.getSector())
 								&& bookingsRequest.getBookingsModel().getBkBookingVenue()
 										.equals(commGrndAvailModel.getBookingVenue())) {
-							if (toBeBooked1.equals(commGrndAvailModel.getFromDate().toLocalDate()))
+							if (toBeBooked1.equals(commGrndAvailModel.getFromDate().toLocalDate())) {
 								bookedDates.add(commGrndAvailModel.getFromDate());
+								return bookedDates;
+							}
 						} else if (BookingsConstants.VENUE_TYPE_COMMUNITY_CENTER
 								.equals(bookingsRequest.getBookingsModel().getBkBookingType())
 								&& commGrndAvailModel.isLocked()
 								&& bookingsRequest.getBookingsModel().getBkSector()
-										.equals(commGrndAvailModel.getSector())
-								&& bookingsRequest.getBookingsModel().getBkBookingVenue()
-										.equals(commGrndAvailModel.getBookingVenue())) {
-							if (toBeBooked1.equals(commGrndAvailModel.getFromDate().toLocalDate()))
+										.equals(commGrndAvailModel.getSector())) {
+							if (toBeBooked1.equals(commGrndAvailModel.getFromDate().toLocalDate())) {
 								bookedDates.add(commGrndAvailModel.getFromDate());
+								return bookedDates;
+							}
 						}
 					}
-				}	
+				}
 			} else {
-				lock.unlock();
+				//lock.unlock();
 				throw new CustomException("OTHER_PAYMENT_IN_PROCESS", "Please try after few seconds");
 			}
-			lock.unlock();
+			//lock.unlock();
 
 		} catch (Exception e) {
-			lock.unlock();
+			//lock.unlock();
 			config.setParkAndCommunityLock(true);
 			throw new CustomException("OTHER_PAYMENT_IN_PROCESS", "Please try after few seconds");
 		}
@@ -435,15 +479,30 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 
 	@Override
 	public BookingLockModel bookingLock(BookingLockRequest bookingLockRequest) {
+		BookingsModel bookingsModel = BookingsModel.builder()
+				.bkBookingType(bookingLockRequest.getBookingLockModel().get(0).getBookingType())
+				.bkBookingVenue(bookingLockRequest.getBookingLockModel().get(0).getBookingVenue())
+				.bkSector(bookingLockRequest.getBookingLockModel().get(0).getSector())
+				.bkFromDate(bookingLockRequest.getBookingLockModel().get(0).getFromDate())
+				.bkToDate(bookingLockRequest.getBookingLockModel().get(0).getToDate()).build();
+
+		BookingsRequest bookingsRequest = BookingsRequest.builder().bookingsModel(bookingsModel).applicationNumber("")
+				.build();
+		try {
+			enrichmentService.enrichLockDates(bookingsRequest);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
-		for(BookingLockModel bookingLockModel:bookingLockRequest.getBookingLockModel()) {
+		for (BookingLockModel bookingLockModel : bookingLockRequest.getBookingLockModel()) {
 			bookingLockModel.setId(UUID.randomUUID().toString());
 			bookingLockModel.setLastModifiedDate(formatter.format(new java.util.Date()));
 			bookingLockModel.setCreatedDate(formatter.format(new java.util.Date()));
 		}
-		
+
 		try {
-			//BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+			// BookingsRequestKafka kafkaBookingRequest =
+			// enrichmentService.enrichForKafka(bookingsRequest);
 			bookingsProducer.push(config.getBookingLockDates(), bookingLockRequest);
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e.getLocalizedMessage());

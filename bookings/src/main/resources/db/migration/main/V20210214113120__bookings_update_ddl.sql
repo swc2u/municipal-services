@@ -108,3 +108,7 @@ CREATE TABLE public.bk_booking_lock_dates (
 	sector varchar(255) NULL,
 	CONSTRAINT bk_booking_lock_dates_pkey PRIMARY KEY (id)
 );
+
+
+alter table bk_booking_lock_dates add from_date date NULL;
+alter table bk_booking_lock_dates add to_date date NULL;

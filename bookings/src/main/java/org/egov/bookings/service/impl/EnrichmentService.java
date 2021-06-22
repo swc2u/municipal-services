@@ -8,10 +8,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -31,6 +34,7 @@ import org.egov.bookings.model.OsbmApproverModel;
 import org.egov.bookings.model.OsujmNewLocationModel;
 import org.egov.bookings.model.ParkCommunityHallV1MasterModel;
 import org.egov.bookings.model.RoomsModel;
+import org.egov.bookings.model.TimeslotsModel;
 import org.egov.bookings.model.user.OwnerInfo;
 import org.egov.bookings.model.user.UserDetailResponse;
 import org.egov.bookings.models.demand.Demand;
@@ -434,7 +438,7 @@ public class EnrichmentService {
 	 * @param bookingsModel the bookings model
 	 * @return the list
 	 */
-	public List<LocalDate> enrichBookedDates(Set<BookingsModel> bookingsModel) {
+	public Set<LocalDate> enrichBookedDates(Set<BookingsModel> bookingsModel) {
 		List<LocalDate> listOfDates = new ArrayList<>();
 
 		for (BookingsModel bookingsModel1 : bookingsModel) {
@@ -450,7 +454,7 @@ public class EnrichmentService {
 			}
 		}
 
-		return listOfDates;
+		return new HashSet<>(listOfDates);
 	}
 
 	/**
@@ -459,7 +463,7 @@ public class EnrichmentService {
 	 * @param bookingsRequest the bookings request
 	 * @return the list
 	 */
-	public List<LocalDate> extractAllDatesBetweenTwoDates(BookingsRequest bookingsRequest) {
+	public Set<LocalDate> extractAllDatesBetweenTwoDates(BookingsRequest bookingsRequest) {
 		LocalDate startDate = LocalDate.parse(bookingsRequest.getBookingsModel().getBkFromDate() + "");
 		LocalDate endDate = LocalDate.parse(bookingsRequest.getBookingsModel().getBkToDate() + "");
 		long numOfDays = ChronoUnit.DAYS.between(startDate, endDate);
@@ -467,7 +471,7 @@ public class EnrichmentService {
 		List<LocalDate> listOfDates2 = LongStream.range(0, numOfDays).mapToObj(startDate::plusDays)
 				.collect(Collectors.toList());
 		listOfDates2.add(endDate);
-		return listOfDates2;
+		return new HashSet<>(listOfDates2);
 
 	}
 
@@ -1061,6 +1065,12 @@ public class EnrichmentService {
 	}
 
 	public void enrichLockDates(BookingsRequest bookingsRequest) {
+		SortedSet<Date> bookedDates = new TreeSet<>();
+		java.util.Date date = new java.util.Date();
+		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
+		String timestampString = formatter.format(date.getTime());
+		Timestamp timestamp1 = Timestamp.valueOf(timestampString);
+		Set<LocalDate> toBeBooked = extractAllDatesBetweenTwoDates(bookingsRequest);
 		
 		List<BookingLockModel> listLock = new ArrayList<>();
 		if(!BookingsConstants.VENUE_TYPE_COMMERCIAL.equals(bookingsRequest.getBookingsModel().getBkBookingVenue())){
@@ -1074,12 +1084,25 @@ public class EnrichmentService {
 					bookingsRequest.getBookingsModel().getBkBookingVenue(),
 					bookingsRequest.getBookingsModel().getBkBookingType());
 		}
-		//List<BookingLockModel> listLock = (List<BookingLockModel>) bookingLockRepository.findAll();
 		if(BookingsFieldsValidator.isNullOrEmpty(listLock)) {
 			return;
 		}
-		java.util.Date date = new java.util.Date();
-	    Timestamp timestamp1 = new Timestamp(date.getTime());
+		List<LocalDate> fetchBookedDates = enrichLockedDates(listLock);
+		outerloop:
+		for (LocalDate toBeBooked1 : toBeBooked) {
+
+			for (LocalDate fetchBookedDates1 : fetchBookedDates) {
+				if (toBeBooked1.equals(fetchBookedDates1)) {
+					bookedDates.add(Date.valueOf(toBeBooked1));
+					break outerloop;
+				}
+			}
+		}
+		if(BookingsFieldsValidator.isNullOrEmpty(bookedDates)) {
+			return;
+		}
+	
+		
 	   
 	     // create a calendar and assign it the same time
 	    Calendar cal = Calendar.getInstance();
@@ -1094,7 +1117,7 @@ public class EnrichmentService {
 			    int hours = seconds / 3600;
 			    int minutes = (seconds % 3600) / 60;
 			    seconds = (seconds % 3600) % 60;
-			    if(hours == 0 && minutes <= BookingsConstants.TEN_MINUTES) {
+			    if(hours == 0 && minutes <= BookingsConstants.TEN_MINUTES && minutes >= 0) {
 			    	throw new IllegalArgumentException("These dates are already locked by another user");
 			    }
 			    else {
@@ -1103,4 +1126,48 @@ public class EnrichmentService {
 		}
 	}
 
+	
+	public List<LocalDate> enrichLockedDates(List<BookingLockModel> listLock) {
+		List<LocalDate> listOfDates = new ArrayList<>();
+
+		for (BookingLockModel bookingLockModel : listLock) {
+			LocalDate startDate = LocalDate.parse(bookingLockModel.getFromDate() + "");
+			LocalDate endDate = LocalDate.parse(bookingLockModel.getToDate() + "");
+			long numOfDays = ChronoUnit.DAYS.between(startDate, endDate);
+
+			List<LocalDate> listOfDates2 = LongStream.range(0, numOfDays).mapToObj(startDate::plusDays)
+					.collect(Collectors.toList());
+			listOfDates.addAll(listOfDates2);
+			listOfDates.add(endDate);
+		}
+
+		return listOfDates;
+	}
+
+	public Set<Date> checkTimeslotsAvailabilty(BookingsRequest bookingsRequest, Set<BookingsModel> bookingsModelSet,
+			SortedSet<Date> bookedDates) {
+		List<BookingsModel> bookingsModelList = new ArrayList<>(bookingsModelSet);
+
+		List<TimeslotsModel> extractedTimeSlots = extractTimeSlots(bookingsModelList, bookingsRequest);
+		
+		for (TimeslotsModel timeslots1 : extractedTimeSlots) {
+			for (TimeslotsModel timeslots : bookingsRequest.getBookingsModel().getTimeslots()) {
+				if (timeslots1.getSlot().equals(timeslots.getSlot())) {
+					bookedDates.add(Date.valueOf(LocalDate.now()));
+					return bookedDates;
+				}
+			}
+		}
+		return bookedDates;
+
+	}
+
+	private List<TimeslotsModel> extractTimeSlots(List<BookingsModel> bookingsModelList,
+			BookingsRequest bookingsRequest) {
+		List<TimeslotsModel> extractedTimeSlots = new ArrayList<>();
+		for (BookingsModel model : bookingsModelList) {
+			extractedTimeSlots.addAll(model.getTimeslots());
+		}
+		return extractedTimeSlots;
+	}
 }

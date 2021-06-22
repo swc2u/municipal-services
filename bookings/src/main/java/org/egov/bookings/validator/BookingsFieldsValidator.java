@@ -767,6 +767,12 @@ public class BookingsFieldsValidator {
 			if (BookingsFieldsValidator.isNullOrEmpty(bookingLockModel.getSector())) {
 				throw new IllegalArgumentException("Invalid sector Can't be null or blank");
 			}
+			if (BookingsFieldsValidator.isNullOrEmpty(bookingLockModel.getFromDate())) {
+				throw new IllegalArgumentException("Invalid from date Can't be null or blank");
+			}
+			if (BookingsFieldsValidator.isNullOrEmpty(bookingLockModel.getToDate())) {
+				throw new IllegalArgumentException("Invalid to date Can't be null or blank");
+			}
 		}
 	}
 }

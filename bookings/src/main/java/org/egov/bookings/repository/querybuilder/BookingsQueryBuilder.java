@@ -69,7 +69,7 @@ public class BookingsQueryBuilder {
 	
 	/** The Constant CHECK_PARK_AND_COMMUNITY_AVAILABILITY. */
 	//public static final String CHECK_PARK_AND_COMMUNITY_AVAILABILITY = "select * from bk_bookings where bk_booking_venue =:bookingVenue and bk_Booking_Type =:bookingType and bk_sector =:sector and bk_to_date >= :date and bk_action =:APPLY or bk_action =:OFFLINE_APPLY and bk_application_number != :applicationNumber";
-	public static final String CHECK_PARK_AND_COMMUNITY_AVAILABILITY = "select * from bk_bookings where bk_booking_venue =:bookingVenue and bk_Booking_Type =:bookingType and bk_sector =:sector and bk_to_date >= :date and bk_payment_status =:SUCCESS and bk_application_number !=:applicationNumber";
+	public static final String CHECK_PARK_AND_COMMUNITY_AVAILABILITY = "select * from bk_bookings where bk_booking_venue =:bookingVenue and bk_Booking_Type =:bookingType and bk_sector =:sector and bk_from_date >= :date and bk_payment_status =:SUCCESS and bk_application_number !=:applicationNumber";
 	
 	public static final String FIND_APPLICATION_LIST = "select ewpv.businessid from eg_wf_processinstance_v2 as ewpv "
 			+ "inner join eg_wf_state_v2 as ewsv on ewsv.state is null "
@@ -84,4 +84,6 @@ public class BookingsQueryBuilder {
 	public static final String FETCH_LOCK_DATES = "select * from bk_booking_lock_dates where booking_venue =:bookingVenue and booking_Type =:bookingType and sector =:sector";
 	
 	public static final String FETCH_LOCK_DATES_FOR_COMMERCIAL = "select * from bk_booking_lock_dates where booking_venue =:bookingVenue and booking_type =:bookingType";
+
+	public static final String CHECK_COMMUNITY_AVAILABILITY = "select * from bk_bookings where bk_Booking_Type =:bookingType and bk_sector =:sector and bk_from_date >= :date and bk_payment_status =:SUCCESS and bk_application_number !=:applicationNumber";
 }
