@@ -27,6 +27,13 @@ public class NULMQueryBuilder {
 			+ " TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END and "
 			+ "UPPER(NA.name) like concat('%',case when UPPER(?)<>'' then UPPER(?) else UPPER(NA.name) end,'%') AND  NA.application_status<>?  group by NA.application_uuid    ORDER BY created_time desc";
 
+	public static final String GET_ALF_APPLICATION_QUERY ="SELECT uuid, id, date_of_formation, name, registeration_date, address,account_number, bank_name, branch_name, contact_number, tenant_id, \r\n" + 
+			"       is_active, created_by, created_time, last_modified_by, last_modified_time FROM nulm_smid_alf_details NA where\r\n" + 
+			" NA.id=(case when ?  <>'' then ?  else NA.id end) and NA.created_by=(case when ?  <>'' then ?  else NA.created_by end) AND NA.tenant_id=(case when ?  <>'' then ?  else NA.tenant_id end) \r\n" + 
+			"and NA.is_active='true'  AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD')\r\n" + 
+			" >= CASE WHEN ?<>'' THEN DATE(?) ELSE TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END\r\n" + 
+			"AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <= CASE WHEN ?<>'' THEN DATE(?) ELSE \r\n" + 
+			" TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END ;";
 	public static final String GET_SEP_DOCUMENT_QUERY = "SELECT count(*) \n"
 			+ "        FROM public.nulm_sep_application_document \n"
 			+ "        WHERE application_uuid=? and tenant_id=? and filestore_id=? and document_type=? and is_active='true'; ";
