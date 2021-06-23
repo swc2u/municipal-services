@@ -213,12 +213,12 @@ public class WsQueryBuilder {
 		}
 		if (criteria.getFromDate() != null) {
 			addClauseIfRequired(preparedStatement, query);
-			query.append("  wc.appCreatedDate >= ? ");
+			query.append("  application.createdTime >= ? ");
 			preparedStatement.add(criteria.getFromDate());
 		}
 		if (criteria.getToDate() != null) {
 			addClauseIfRequired(preparedStatement, query);
-			query.append("  wc.appCreatedDate <= ? ");
+			query.append("  application.createdTime <= ? ");
 			preparedStatement.add(criteria.getToDate());
 		}
 		if (criteria.getAppFromDate() != null) {
