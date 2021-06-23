@@ -236,4 +236,7 @@ public class NULMConfiguration {
 	
 	@Value("${persister.update.suhcitizenngoapplication.topic}")
 	private String SuhCitizenNGOApplicationUpdateTopic;
+	
+	@Value("${persister.save.smid.alf.topic}")
+	private String SMIDALFSaveTopic;
 }
