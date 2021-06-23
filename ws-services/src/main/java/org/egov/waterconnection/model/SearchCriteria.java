@@ -87,6 +87,8 @@ public class SearchCriteria {
 	@JsonProperty("groupNo")
 	private String groupNo;
 
+	@JsonProperty("ledgerGroup")
+	private String ledgerGroup;
 	@JsonIgnore
 	private List<String> ownerIds;
 
@@ -94,7 +96,7 @@ public class SearchCriteria {
 		return (StringUtils.isEmpty(this.tenantId) && StringUtils.isEmpty(this.mobileNumber)
 				&& StringUtils.isEmpty(this.propertyId) && CollectionUtils.isEmpty(this.ids)
 				&& StringUtils.isEmpty(this.oldConnectionNumber) && StringUtils.isEmpty(this.connectionNumber)
-				&& StringUtils.isEmpty(this.sectorNo)&& StringUtils.isEmpty(this.plotNo)&& StringUtils.isEmpty(this.groupNo)&& StringUtils.isEmpty(this.status) && StringUtils.isEmpty(this.applicationNumber)
+				&& StringUtils.isEmpty(this.sectorNo)&& StringUtils.isEmpty(this.ledgerGroup)&& StringUtils.isEmpty(this.plotNo)&& StringUtils.isEmpty(this.groupNo)&& StringUtils.isEmpty(this.status) && StringUtils.isEmpty(this.applicationNumber)
 				&& StringUtils.isEmpty(this.applicationStatus) && StringUtils.isEmpty(this.appFromDate)
 				&& StringUtils.isEmpty(this.appToDate) && StringUtils.isEmpty(this.fromDate)
 				&& StringUtils.isEmpty(this.toDate)) && StringUtils.isEmpty(this.applicationType);
