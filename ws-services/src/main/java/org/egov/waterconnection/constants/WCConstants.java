@@ -219,6 +219,8 @@ public class WCConstants {
 	public static final List<String> ACTIVITY_TYPE_81 = Collections.unmodifiableList(Arrays.asList("CONNECTION_CONVERSION","UPDATE_CONNECTION_HOLDER_INFO","APPLY_FOR_TEMPORARY_REGULAR_CONNECTION"));
 
 	public static final List<String> ACTIVITY_TYPE_82 = Collections.unmodifiableList(Arrays.asList("UPDATE_METER_INFO","REACTIVATE_CONNECTION"));
+
+	public static final List<String> ACTIVITY_TYPE_NEW_CONN = Collections.unmodifiableList(Arrays.asList("NEW_WS_CONNECTION"));
 	
 	public static final String SELF = "SELF";
 	
@@ -295,7 +297,13 @@ public class WCConstants {
 
 	public static final String WS_BILLING_FILENAME = "billingData.txt";
 
-	public static final String WS_CONNECTION_FILENAME = "connectionData.csv";
+	public static final String WS_CONNECTION_FILENAME = "connectionData.txt";
+
+	public static final String CONNECTION_EXCHANGE = "CONNECTION";
+	
+	public static final String ADVICE_EXCHANGE = "ADVICE";
+	
+	public static final String WS_ADVICE_FILENAME = "adviceData.txt";
 	
 	public static final String WS_APPLY_FOR_TEMPORARY_CON = "APPLY_FOR_TEMPORARY_CONNECTION";
 

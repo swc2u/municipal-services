@@ -30,6 +30,9 @@ public class BillGeneration {
 	@JsonProperty("ccCode")
 	private String ccCode = null;
 
+	@JsonProperty("dataExchangeType")
+	private String dataExchangeType = null;
+	
 	@JsonProperty("divSdiv")
 	private String divSdiv = null;
 
