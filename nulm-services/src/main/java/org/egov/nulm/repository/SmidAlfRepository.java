@@ -67,6 +67,11 @@ public class SmidAlfRepository {
 		producer.push(config.getSMIDALFSaveTopic(), infoWrapper);
 	}
 	
+	public void updateAlfApplication(SmidAlfApplication shg) {
+		NulmSmidAlfRequest infoWrapper = NulmSmidAlfRequest.builder().nulmSmidAlfRequest(shg).build();
+		producer.push(config.getSMIDALFUpdateTopic(), infoWrapper);
+	}
+	
 	public List<SmidAlfApplication> getAlfApplication(SmidAlfApplication alfApplication, List<Role> role, Long userId) {
 		List<SmidAlfApplication> sep = new ArrayList<>();
 		boolean isEmployee=false;

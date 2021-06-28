@@ -239,4 +239,9 @@ public class NULMConfiguration {
 	
 	@Value("${persister.save.smid.alf.topic}")
 	private String SMIDALFSaveTopic;
+	
+	@Value("${persister.udate.smid.alf.topic}")
+	private String SMIDALFUpdateTopic;
+	
+	
 }
