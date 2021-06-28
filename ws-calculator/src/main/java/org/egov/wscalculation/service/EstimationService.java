@@ -462,7 +462,7 @@ public class EstimationService {
 					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_METER_CHARGE)
 							.estimateAmount(meterFittingFee.setScale(2, 2)).build());
 				if (!(stolenMeterCharges.compareTo(BigDecimal.ZERO) == 0))
-					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_METER_CHARGE)
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_SALES_METER)
 							.estimateAmount(stolenMeterCharges.setScale(2, 2)).build());
 				if (!(additionalCharges.compareTo(BigDecimal.ZERO) == 0))
 					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_ADDITIONAL_CHARGE)

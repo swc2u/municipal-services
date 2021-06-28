@@ -251,6 +251,8 @@ public class WSCalculationConstant {
 	public static final String WS_ROAD_CUTTING_CHARGE = "WS_ROAD_CUTTING_CHARGE";
 
 	public static final String WS_METER_CHARGE = "LABOUR_CHARGES_WATER_SUPPLY_PHD2";
+
+	public static final String WS_SALES_METER = "SALES_WATER_METER_PHD2";
 	
 	public static final String WS_SECURITY_CHARGE = "SECURITY_DEPOSIT_WATER_METER_PHD2";
 
