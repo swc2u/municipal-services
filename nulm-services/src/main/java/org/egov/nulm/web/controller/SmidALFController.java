@@ -28,10 +28,10 @@ public class SmidALFController {
 		return service.createAlfApplication(request);
 	}
 	
-	/*@PostMapping(value = "/_update")
-	public ResponseEntity<ResponseInfoWrapper> updateSuhApplication(@Valid @RequestBody NulmSuhRequest request) {
-		return service.updateSuhApplication(request);
-	}*/
+	@PostMapping(value = "/_update")
+	public ResponseEntity<ResponseInfoWrapper> updateAlfApplication(@Valid @RequestBody NulmSmidAlfRequest request) {
+		return service.updateAlfApplication(request);
+	}
 	
 	@PostMapping(value = "/_get")
 	public ResponseEntity<ResponseInfoWrapper> getAlfApplication( @RequestBody NulmSmidAlfRequest request) {

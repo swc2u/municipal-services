@@ -74,10 +74,27 @@ public class SmidALFService {
 					.build(), HttpStatus.CREATED);
 
 		} catch (Exception e) {
-			throw new CustomException(CommonConstants.SMID_SHG_APPLICATION_EXCEPTION_CODE, e.getMessage());
+			throw new CustomException(CommonConstants.SMID_APPLICATION_EXCEPTION_CODE, e.getMessage());
 		}
 	}
 	
+	public ResponseEntity<ResponseInfoWrapper> updateAlfApplication(NulmSmidAlfRequest request) {
+		try {
+			SmidAlfApplication shg = objectMapper.convertValue(request.getNulmSmidAlfRequest(), SmidAlfApplication.class);
+
+			shg.setAuditDetails(
+					auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_UPDATE));
+			
+			repository.updateAlfApplication(shg);
+
+			return new ResponseEntity<>(ResponseInfoWrapper.builder()
+					.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build()).responseBody(shg)
+					.build(), HttpStatus.CREATED);
+
+		} catch (Exception e) {
+			throw new CustomException(CommonConstants.SMID_APPLICATION_EXCEPTION_CODE, e.getMessage());
+		}
+	}
 	
 	public ResponseEntity<ResponseInfoWrapper> getAlfApplication(NulmSmidAlfRequest request) {
 		try {
