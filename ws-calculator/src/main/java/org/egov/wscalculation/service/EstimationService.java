@@ -389,7 +389,7 @@ public class EstimationService {
 			taxHeadEstimates = getTaxHeadForwaterActivity(criteria, masterData, requestInfo);
 		} else {
 			if (criteria.getWaterConnection().getWaterApplicationType()
-					.equalsIgnoreCase(WSCalculationConstant.WS_TEMP_CONNECTION_TYPE)) {
+					.equalsIgnoreCase(WSCalculationConstant.WS_TEMP_CONNECTION_TYPE)|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_APPLY_FOR_TEMP_REGULAR_CON)) {
 				taxHeadEstimates = getTaxHeadForFeeEstimationForTempAppCon(criteria, masterData, requestInfo);
 			} else {
 				taxHeadEstimates = getTaxHeadForRegularConnection(criteria, masterData, requestInfo);
@@ -429,6 +429,7 @@ public class EstimationService {
 
 				BigDecimal meterTestingFee = BigDecimal.ZERO;
 				BigDecimal meterFittingFee = BigDecimal.ZERO;
+				BigDecimal stolenMeterCharges = BigDecimal.ZERO;
 				BigDecimal additionalCharges = BigDecimal.ZERO;
 				BigDecimal constructionCharges = BigDecimal.ZERO;
 
@@ -439,7 +440,11 @@ public class EstimationService {
 
 					meterFittingFee = new BigDecimal(
 							mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getMeterfitting());
-
+					if(criteria.getWaterConnection().getWaterApplication().getIsMeterStolen()) {
+						stolenMeterCharges =  new BigDecimal(
+								mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getStolenmetercharges());
+						
+					}
 					additionalCharges = new BigDecimal(
 							criteria.getWaterConnection().getWaterApplication().getAdditionalCharges() == null ? 0.0
 									: criteria.getWaterConnection().getWaterApplication().getAdditionalCharges());
@@ -456,6 +461,9 @@ public class EstimationService {
 				if (!(meterFittingFee.compareTo(BigDecimal.ZERO) == 0))
 					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_METER_CHARGE)
 							.estimateAmount(meterFittingFee.setScale(2, 2)).build());
+				if (!(stolenMeterCharges.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_METER_CHARGE)
+							.estimateAmount(stolenMeterCharges.setScale(2, 2)).build());
 				if (!(additionalCharges.compareTo(BigDecimal.ZERO) == 0))
 					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_ADDITIONAL_CHARGE)
 							.estimateAmount(additionalCharges.setScale(2, 2)).build());
