@@ -51,6 +51,9 @@ public class ColumnsRowMapper implements ResultSetExtractor<List<DiscriptionRepo
 							.slaendtime(rs.getLong("slaendtime"))
 							.source(rs.getString("source"))
 							.createdtime(rs.getLong("createdtime"))
+							.comments(rs.getString("comments"))
+							.rating(rs.getString("rating"))
+							.feedback(rs.getString("feedback"))
 							.build();
 					
 					
