@@ -38,7 +38,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 				currentWaterConnection.setMeterInstallationDate(rs.getLong("meterInstallationDate"));
 				currentWaterConnection.setId(rs.getString("connection_Id"));
 				
-				currentWaterConnection.setApplicationNo(rs.getString("applicationNo"));
+				currentWaterConnection.setApplicationNo(rs.getString("app_applicationno"));
 				currentWaterConnection.setApplicationStatus(rs.getString("applicationstatus"));
 				currentWaterConnection.processInstance(ProcessInstance.builder().action((rs.getString("action"))).build());
 				
