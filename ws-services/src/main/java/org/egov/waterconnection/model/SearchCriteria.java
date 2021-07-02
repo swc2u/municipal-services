@@ -35,6 +35,9 @@ public class SearchCriteria {
 
 	@JsonProperty("applicationNumber")
 	private String applicationNumber;
+
+	@JsonProperty("applicationNumberSearch")
+	private String applicationNumberSearch;
 		
 	@JsonProperty("applicationStatus")
 	private String applicationStatus;
@@ -89,6 +92,10 @@ public class SearchCriteria {
 
 	@JsonProperty("ledgerGroup")
 	private String ledgerGroup;
+
+	@JsonProperty("subDivision")
+	private String subDivision;
+	
 	@JsonIgnore
 	private List<String> ownerIds;
 

@@ -92,12 +92,12 @@ public class WsQueryBuilder {
 	private static final String NO_OF_CONNECTION_SEARCH_QUERY = "SELECT count(*) FROM eg_ws_connection WHERE";
 	
 	private static final String PAGINATION_WRAPPER = "SELECT * FROM " +
-            "(SELECT *, DENSE_RANK() OVER (ORDER BY app_applicationno desc) offset_ FROM " +
+            "(SELECT *, DENSE_RANK() OVER (ORDER BY conn_id desc) offset_ FROM " +
             "({})" +
             " result) result_offset " +
             "WHERE offset_ > ? AND offset_ <= ?";
 	
-	private static final String ORDER_BY_CLAUSE= " ORDER BY application.createdTime DESC";
+	private static final String ORDER_BY_CLAUSE= " ORDER BY conn.id DESC";
 
 	public static final String GET_PIECHART_DATA = "SELECT id, cccode, divsdiv, consumercode, billcycle, billgroup, subgroup, \r\n" + 
 			"       billtype, name, address, cesscharge, netamount, grossamount, \r\n" + 
@@ -190,6 +190,11 @@ public class WsQueryBuilder {
 			query.append(" conn.ledgergroup = ? ");
 			preparedStatement.add(criteria.getLedgerGroup());
 		}
+		if (!StringUtils.isEmpty(criteria.getSubDivision())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" conn.subdiv = ? ");
+			preparedStatement.add(criteria.getSubDivision());
+		}
 
 		if (!StringUtils.isEmpty(criteria.getConnectionNumber())) {
 			addClauseIfRequired(preparedStatement, query);
@@ -205,6 +210,11 @@ public class WsQueryBuilder {
 			addClauseIfRequired(preparedStatement, query);
 			query.append(" application.applicationno = ? ");
 			preparedStatement.add(criteria.getApplicationNumber());
+		}
+		if (!StringUtils.isEmpty(criteria.getApplicationNumberSearch())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" application.applicationno ilike ? ");
+			preparedStatement.add("%"+criteria.getApplicationNumberSearch());
 		}
 		if (!StringUtils.isEmpty(criteria.getApplicationStatus())) {
 			addClauseIfRequired(preparedStatement, query);

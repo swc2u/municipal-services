@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -121,7 +122,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 		criteria.setAppToDate(billGenerationRequest.getBillGeneration().getToDate());
 		List<WaterConnection> connections = waterServiceImpl.getWaterConnectionsList(criteria,
 				billGenerationRequest.getRequestInfo());
-		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+		SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy");
 		SimpleDateFormat monthFormat = new SimpleDateFormat("MM");
 		List<BillGenerationFile> billFileList = new ArrayList<BillGenerationFile>();
 		 
@@ -150,6 +151,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 							HashMap.class);
 					for (WaterApplication applicationList : application.getWaterApplicationList()) {
 						if (WCConstants.ACTIVITY_TYPE_NEW_CONN.contains(applicationList.getActivityType())) {
+							String meterReading =  addDetail.get(WCConstants.INITIAL_METER_READING_CONST) == null ? "" : (((BigDecimal) addDetail.get(WCConstants.INITIAL_METER_READING_CONST)).setScale(0,BigDecimal.ROUND_DOWN)).toString() ;
 							writer.println("UW" + fixedLengthString(application.getDiv(), 1)
 									+ fixedLengthString(application.getSubdiv(), 2)
 									+ fixedLengthString(application.getCcCode(), 2)
@@ -158,7 +160,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 									+ getbillcycle(monthFormat.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
 									+ fixedLengthString(application.getBillGroup(), 1) + fixedLengthString("", 2));
 							
-							writer.println("   "+ fixedLengthString(application.getConnectionNo()
+							writer.println("0001"+ fixedLengthString(application.getConnectionNo()
 											.substring(application.getConnectionNo().length() - 6), 6)
 									+ fixedLengthString(application.getConnectionHolders()== null?"":application.getConnectionHolders().get(0).getName(), 30)
 									+ fixedLengthString(property.getAddress().getPlotNo(), 10)
@@ -172,8 +174,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 									+ fixedLengthString((application.getMeterDigits()), 2)
 									+ fixedLengthString(getMeterUnit(application.getMeterUnit()), 1)
 									+ fixedLengthString("", 2)
-									+ fixedLengthString(
-											String.valueOf(addDetail.get(WCConstants.INITIAL_METER_READING_CONST)), 10)
+									+ fixedLengthString(meterReading, 10)
 
 									+ fixedLengthString(application.getSanctionedCapacity(), 7));
 
@@ -203,6 +204,8 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 									+ fixedLengthString(application.getSanctionedCapacity(), 7));
 
 						} else if (WCConstants.ACTIVITY_TYPE_82.contains(applicationList.getActivityType())) {
+							String meterReading =  addDetail.get(WCConstants.INITIAL_METER_READING_CONST) == null ? "" : (((BigDecimal) addDetail.get(WCConstants.INITIAL_METER_READING_CONST)).setScale(0,BigDecimal.ROUND_DOWN)).toString() ;
+
 							writer.println("UW82"
 									+ getbillcycle(monthFormat.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
 									+ application.getBillGroup() + fixedLengthString(application.getConnectionNo(), 14)
@@ -214,9 +217,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 									+ fixedLengthString((application.getMeterDigits()), 2)
 									+ fixedLengthString(getMeterUnit(application.getMeterUnit()), 1)
 									+ fixedLengthString("", 2) + fixedLengthString("", 1)
-									+ fixedLengthString(
-											String.valueOf(addDetail.get(WCConstants.INITIAL_METER_READING_CONST)),
-											10));
+									+ fixedLengthString(meterReading, 10));
 						}
 
 					}
@@ -261,19 +262,19 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 	private String getbillcycle(String month) {
 
 		switch (month) {
-		case "1":case "2":
+		case "01":case "02":
 		
 			return "01";
-		case "3":case "4":
+		case "03":case "04":
 
 			return "02";
-		case "5":case "6":
+		case "05":case "06":
 
 			return "03";
-		case "7":case "8":
+		case "07":case "08":
 
 			return "04";
-		case "9":case "10":
+		case "09":case "10":
 
 			return "05";
 		case "11":case "12":
