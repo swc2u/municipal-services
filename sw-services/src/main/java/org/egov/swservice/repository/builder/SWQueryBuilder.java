@@ -133,6 +133,16 @@ public class SWQueryBuilder {
 			query.append(" conn.applicationno = ? ");
 			preparedStatement.add(criteria.getApplicationNumber());
 		}
+		if (!StringUtils.isEmpty(criteria.getApplicationNumberSearch())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" conn.applicationno ilike ? ");
+			preparedStatement.add("%"+criteria.getApplicationNumberSearch());
+		}
+		if (!StringUtils.isEmpty(criteria.getSubDivision())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" conn.subdiv = ? ");
+			preparedStatement.add(criteria.getSubDivision());
+		}
 		if (!StringUtils.isEmpty(criteria.getApplicationStatus())) {
 			addClauseIfRequired(preparedStatement, query);
 			query.append(" conn.applicationStatus = ? ");

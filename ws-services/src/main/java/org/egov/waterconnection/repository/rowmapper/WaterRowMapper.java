@@ -27,6 +27,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 		WaterConnection currentWaterConnection = new WaterConnection();
 		while (rs.next()) {
 			String applicationNo = rs.getString("connection_Id");
+
 			if (connectionListMap.getOrDefault(applicationNo, null) == null) {
 				currentWaterConnection = new WaterConnection();
 				currentWaterConnection.setTenantId(rs.getString("tenantid"));
@@ -37,13 +38,17 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 				currentWaterConnection.setMeterInstallationDate(rs.getLong("meterInstallationDate"));
 				currentWaterConnection.setId(rs.getString("connection_Id"));
 				
-				/*currentWaterConnection.setApplicationNo(rs.getString("applicationNo"));
+				currentWaterConnection.setApplicationNo(rs.getString("applicationNo"));
 				currentWaterConnection.setApplicationStatus(rs.getString("applicationstatus"));
-				currentWaterConnection.processInstance(ProcessInstance.builder().action((rs.getString("action"))).build());*/
+				currentWaterConnection.processInstance(ProcessInstance.builder().action((rs.getString("action"))).build());
 				
-				currentWaterConnection.setApplicationNo(rs.getString("app_applicationno"));
-				currentWaterConnection.setApplicationStatus(rs.getString("app_applicationstatus"));
-				currentWaterConnection.processInstance(ProcessInstance.builder().action((rs.getString("app_action"))).build());
+				/*
+				 * currentWaterConnection.setApplicationNo(rs.getString("app_applicationno"));
+				 * currentWaterConnection.setApplicationStatus(rs.getString(
+				 * "app_applicationstatus"));
+				 * currentWaterConnection.processInstance(ProcessInstance.builder().action((rs.
+				 * getString("app_action"))).build());
+				 */
 				
 				currentWaterConnection.setStatus(StatusEnum.fromValue(rs.getString("status")));
 				currentWaterConnection.setConnectionNo(rs.getString("connectionNo"));
