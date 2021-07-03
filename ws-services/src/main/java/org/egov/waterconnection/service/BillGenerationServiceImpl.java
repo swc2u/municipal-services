@@ -170,7 +170,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 									+ fixedLengthString(application.getProposedPipeSize(), 3)
 									+ fixedLengthString(application.getMeterRentCode(), 2)
 									+ fixedLengthString(application.getMeterId(), 10)
-									+ fixedLengthString(application.getMfrCode(), 2)
+									+ fixedLengthString(application.getMfrCode(), 3)
 									+ fixedLengthString((application.getMeterDigits()), 2)
 									+ fixedLengthString(getMeterUnit(application.getMeterUnit()), 1)
 									+ fixedLengthString("", 2)
