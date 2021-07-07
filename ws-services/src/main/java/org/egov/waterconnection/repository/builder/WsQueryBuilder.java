@@ -195,6 +195,11 @@ public class WsQueryBuilder {
 			query.append(" conn.subdiv = ? ");
 			preparedStatement.add(criteria.getSubDivision());
 		}
+		if (!StringUtils.isEmpty(criteria.getDivision())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" conn.div = ? ");
+			preparedStatement.add(criteria.getDivision());
+		}
 
 		if (!StringUtils.isEmpty(criteria.getConnectionNumber())) {
 			addClauseIfRequired(preparedStatement, query);
