@@ -80,6 +80,9 @@ public class SearchCriteria {
 
 	@JsonProperty("subDivision")
 	private String subDivision;
+
+	@JsonProperty("division")
+	private String division;
 	
 	@JsonIgnore
 	private List<String> ownerIds;

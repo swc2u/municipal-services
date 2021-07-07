@@ -143,6 +143,11 @@ public class SWQueryBuilder {
 			query.append(" conn.subdiv = ? ");
 			preparedStatement.add(criteria.getSubDivision());
 		}
+		if (!StringUtils.isEmpty(criteria.getDivision())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" conn.div = ? ");
+			preparedStatement.add(criteria.getDivision());
+		}
 		if (!StringUtils.isEmpty(criteria.getApplicationStatus())) {
 			addClauseIfRequired(preparedStatement, query);
 			query.append(" conn.applicationStatus = ? ");
