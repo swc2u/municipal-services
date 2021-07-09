@@ -75,4 +75,16 @@ public class SmidAlfApplication {
 	@JsonProperty("toDate")
 	private String toDate;
 	
+	
+	@JsonProperty("adhaarNumber")
+	private String adhaarNumber;
+	
+	@JsonProperty("dateOfOpeningAccount")
+	private String dateOfOpeningAccount;
+	
+	@JsonProperty("alfFormatedThrough")
+	private String alfFormatedThrough;
+	
+	@JsonProperty("applicationDocument")
+	private List<ALFApplicationDocument> applicationDocument;
 }

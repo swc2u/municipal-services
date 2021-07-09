@@ -1,6 +1,7 @@
 
 package org.egov.nulm.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,13 +10,12 @@ import org.egov.common.contract.response.ResponseInfo;
 import org.egov.nulm.common.CommonConstants;
 import org.egov.nulm.config.NULMConfiguration;
 import org.egov.nulm.idgen.model.IdGenerationResponse;
-import org.egov.nulm.model.NulmSepRequest;
+import org.egov.nulm.model.ALFApplicationDocument;
 import org.egov.nulm.model.NulmSmidAlfRequest;
 import org.egov.nulm.model.ResponseInfoWrapper;
-import org.egov.nulm.model.SepApplication;
+import org.egov.nulm.model.SepApplicationDocument;
 import org.egov.nulm.model.SmidAlfApplication;
 import org.egov.nulm.repository.SmidAlfRepository;
-import org.egov.nulm.repository.SmidShgRepository;
 import org.egov.nulm.util.AuditDetailsUtil;
 import org.egov.nulm.util.IdGenRepository;
 import org.egov.tracer.model.CustomException;
@@ -66,7 +66,24 @@ public class SmidALFService {
 				shg.setId(id.getIdResponses().get(0).getId());
 			else
 				throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR.toString(), CommonConstants.ID_GENERATION);
+			// save document to nulm_sep_application_document table
+						List<ALFApplicationDocument> sepdoc = new ArrayList<>();
+						for (ALFApplicationDocument docobj : shg.getApplicationDocument()) {
+							ALFApplicationDocument documnet = new ALFApplicationDocument();
+							documnet.setDocumnetUuid(UUID.randomUUID().toString());
+							documnet.setApplicationUuid(uuid);
+							documnet.setDocumentType(docobj.getDocumentType());
+							documnet.setFilestoreId(docobj.getFilestoreId());
+							documnet.setAuditDetails(
+									auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_CREATE));
+							documnet.setIsActive(true);
+							documnet.setTenantId(shg.getTenantId());
+							sepdoc.add(documnet);
 
+						}
+						
+
+						shg.setApplicationDocument(sepdoc);
 			repository.createGroup(shg);
 
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
@@ -84,6 +101,23 @@ public class SmidALFService {
 
 			shg.setAuditDetails(
 					auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_UPDATE));
+			// update document to nulm_sep_application_document table
+			List<ALFApplicationDocument> sepdoc = new ArrayList<>();
+			for (ALFApplicationDocument docobj : shg.getApplicationDocument()) {
+
+				ALFApplicationDocument document = new ALFApplicationDocument();
+				document.setDocumnetUuid(UUID.randomUUID().toString());
+				document.setApplicationUuid(shg.getUuid());
+				document.setDocumentType(docobj.getDocumentType());
+				document.setFilestoreId(docobj.getFilestoreId());
+				document.setAuditDetails(
+						auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_CREATE));
+				document.setIsActive(true);
+				document.setTenantId(shg.getTenantId());
+				sepdoc.add(document);
+
+			}
+			shg.setApplicationDocument(sepdoc);
 			
 			repository.updateAlfApplication(shg);
 
