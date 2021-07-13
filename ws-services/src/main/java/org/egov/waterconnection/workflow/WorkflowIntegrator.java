@@ -62,11 +62,16 @@ public class WorkflowIntegrator {
 
 		String activityType = waterConnectionRequest.getWaterConnection().getActivityType();
 		String businessService = getBusinessService(activityType);
-				if(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction().equalsIgnoreCase(WCConstants.ACTION_PAY)) {
-					JSONObject obj = new JSONObject();
-					obj.put("role", "WS_JE_"+waterConnectionRequest.getWaterConnection().getSubdiv());
-					waterConnectionRequest.getWaterConnection().getProcessInstance().setAdditionalDetails(obj);
-				}
+		if (waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
+				.equalsIgnoreCase(WCConstants.ACTION_PAY)) {
+			JSONObject obj = new JSONObject();
+			if (activityType.equalsIgnoreCase(WCConstants.WS_CONVERSION)) {
+				obj.put("role", "WS_SUPERINTENDENT_" + waterConnectionRequest.getWaterConnection().getSubdiv());
+			} else {
+				obj.put("role", "WS_JE_" + waterConnectionRequest.getWaterConnection().getSubdiv());
+			}
+			waterConnectionRequest.getWaterConnection().getProcessInstance().setAdditionalDetails(obj);
+		}
 		ProcessInstance processInstance = ProcessInstance.builder()
 				.businessId(waterConnectionRequest.getWaterConnection().getApplicationNo())
 				.tenantId(property.getTenantId())
