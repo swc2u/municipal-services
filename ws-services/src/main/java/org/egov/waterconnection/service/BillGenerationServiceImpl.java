@@ -144,9 +144,9 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 					.equalsIgnoreCase(WCConstants.CONNECTION_EXCHANGE)) {
 
 				for (WaterConnection application : connections) {
-					WaterConnectionRequest waterConnectionRequest = WaterConnectionRequest.builder()
-							.requestInfo(billGenerationRequest.getRequestInfo()).waterConnection(application).build();
-					Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
+			//		WaterConnectionRequest waterConnectionRequest = WaterConnectionRequest.builder()
+			//				.requestInfo(billGenerationRequest.getRequestInfo()).waterConnection(application).build();
+				//	Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
 					HashMap<String, Object> addDetail = mapper.convertValue(application.getAdditionalDetails(),
 							HashMap.class);
 					for (WaterApplication applicationList : application.getWaterApplicationList()) {
@@ -156,14 +156,14 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 									+ fixedLengthString(application.getSubdiv(), 2)
 									+ fixedLengthString(application.getCcCode(), 2)
 									+ fixedLengthString(application.getLedgerGroup(), 4)
-									+ fixedLengthString(property.getAddress().getLocality().getCode(), 20)
+									+ fixedLengthString(application.getWaterProperty().getSectorNo(), 20)
 									+ getbillcycle(monthFormat.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
 									+ fixedLengthString(application.getBillGroup(), 1) + fixedLengthString("", 2));
 							
 							writer.println("0001"+ fixedLengthString(application.getConnectionNo()
 											.substring(application.getConnectionNo().length() - 6), 6)
 									+ fixedLengthString(application.getConnectionHolders()== null?"":application.getConnectionHolders().get(0).getName(), 30)
-									+ fixedLengthString(property.getAddress().getPlotNo(), 10)
+									+ fixedLengthString(application.getWaterProperty().getPlotNo(), 10)
 									+ fixedLengthString(application.getWaterProperty().getUsageCategory(), 2)
 									+ fixedLengthString(
 											format.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())), 8)
@@ -186,9 +186,9 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 			} else {
 
 				for (WaterConnection application : connections) {
-					WaterConnectionRequest waterConnectionRequest = WaterConnectionRequest.builder()
-							.requestInfo(billGenerationRequest.getRequestInfo()).waterConnection(application).build();
-					Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
+				//	WaterConnectionRequest waterConnectionRequest = WaterConnectionRequest.builder()
+				//			.requestInfo(billGenerationRequest.getRequestInfo()).waterConnection(application).build();
+				//	Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
 					HashMap<String, Object> addDetail = mapper.convertValue(application.getAdditionalDetails(),
 							HashMap.class);
 					for (WaterApplication applicationList : application.getWaterApplicationList()) {
@@ -197,8 +197,8 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 									+ getbillcycle(monthFormat.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
 									+ application.getBillGroup() + fixedLengthString(application.getConnectionNo(), 14)
 									+ fixedLengthString(application.getConnectionHolders().get(0).getName(), 30)
-									+ fixedLengthString(property.getAddress().getPlotNo(), 10)
-									+ fixedLengthString(property.getAddress().getLocality().getCode(), 20)
+									+ fixedLengthString(application.getWaterProperty().getPlotNo(), 10)
+									+ fixedLengthString(application.getWaterProperty().getSectorNo(), 20)
 									+ fixedLengthString(application.getWaterProperty().getUsageCategory(), 2)
 									+ fixedLengthString("", 7) + fixedLengthString("", 4)
 									+ fixedLengthString(application.getSanctionedCapacity(), 7));
