@@ -61,7 +61,7 @@ public class SmidALFService {
 					auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_CREATE));
 			// idgen service call to genrate event id
 			IdGenerationResponse id = idgenrepository.getId(request.getRequestInfo(), shg.getTenantId(),
-					config.getSmidShgIdgenName(), config.getSmidShgIdgenFormat(), 1);
+					config.getAlfIdgenName(), config.getAlfIdgenFormat(), 1);
 			if (id.getIdResponses() != null && id.getIdResponses().get(0) != null)
 				shg.setId(id.getIdResponses().get(0).getId());
 			else

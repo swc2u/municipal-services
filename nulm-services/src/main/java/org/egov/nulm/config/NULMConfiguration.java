@@ -99,6 +99,12 @@ public class NULMConfiguration {
 
 	@Value("${egov.idgen.nulm.susvrenew.idformat}")
 	private String susvRenewApplicationNumberIdgenFormat;
+	
+	@Value("${egov.idgen.nulm.alf.idname}")
+	private String alfIdgenName;
+	
+	@Value("${egov.idgen.nulm.alf.idformat}")
+	private String alfIdgenFormat;
 
 	
 	@Value("${nulm.businessservice}")
