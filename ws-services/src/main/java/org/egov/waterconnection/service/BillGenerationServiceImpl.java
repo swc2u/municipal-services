@@ -120,6 +120,11 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 		SearchCriteria criteria = new SearchCriteria();
 		criteria.setAppFromDate(billGenerationRequest.getBillGeneration().getFromDate());
 		criteria.setAppToDate(billGenerationRequest.getBillGeneration().getToDate());
+		if (billGenerationRequest.getBillGeneration().getDataExchangeType()
+				.equalsIgnoreCase(WCConstants.CONNECTION_EXCHANGE)) {
+			criteria.setApplicationType(WCConstants.WS_NEWCONNECTION);	
+		}
+		
 		List<WaterConnection> connections = waterServiceImpl.getWaterConnectionsList(criteria,
 				billGenerationRequest.getRequestInfo());
 		SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy");
