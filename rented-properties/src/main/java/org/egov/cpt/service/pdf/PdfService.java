@@ -115,12 +115,13 @@ public class PdfService {
 		 
         File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
          
-		   JasperCompileManager.compileReportToFile(
-				   file.getAbsolutePath(), // the path to the jrxml file to compile
-				   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
-
-		// Compile the Jasper report from .jrxml to .japser
-		return report;
+        
+        // Compile the Jasper report from .jrxml to .japser
+//		   JasperCompileManager.compileReportToFile(
+//				   file.getAbsolutePath(), // the path to the jrxml file to compile
+//				   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
+		
+        return report;
 	}
 
 	private void enrichParams(RequestInfo requestInfo, Map<String, Object> parameters, String tenantId) {
