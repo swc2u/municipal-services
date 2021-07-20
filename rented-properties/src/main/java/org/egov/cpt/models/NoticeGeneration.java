@@ -101,6 +101,9 @@ public class NoticeGeneration {
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
 	
+	@JsonProperty("ownerName")
+	private String ownerName;
+	
 	public NoticeGeneration addApplicationDocumentsItem(Document applicationDocumentsItem) {
 		if (this.applicationDocuments == null) {
 			this.applicationDocuments = new ArrayList<>();
