@@ -31,7 +31,7 @@ public class NULMQueryBuilder {
 			" NA.is_active, NA.created_by, NA.created_time, NA.last_modified_by, NA.last_modified_time, adhaar_number,date_of_opening_account,\r\n" + 
 			" alf_formated_through,array_to_json(array_agg(json_build_object('documentType',ND.document_type,'filestoreId',ND.filestore_id,'documnetUuid',ND.document_uuid,'isActive',ND.is_active,\r\n" + 
 			" 'tenantId',ND.tenant_id,'applicationUuid',ND.application_uuid) ))as document FROM nulm_smid_alf_details NA \r\n" + 
-			" left  join nulm_alf_application_document ND on NA.uuid=ND.application_uuid and NA.tenant_id=ND.tenant_id  where NA.id=(case when ?  <>'' then ?  else NA.id end) and NA.created_by=(case when ?  <>'' then ?  else NA.created_by end) AND NA.tenant_id=(case when ?  <>'' then ?  else NA.tenant_id end) \r\n" + 
+			" left  join nulm_alf_application_document ND on NA.uuid=ND.application_uuid and NA.tenant_id=ND.tenant_id  AND ND.is_active='true'  where NA.id=(case when ?  <>'' then ?  else NA.id end) and NA.created_by=(case when ?  <>'' then ?  else NA.created_by end) AND NA.tenant_id=(case when ?  <>'' then ?  else NA.tenant_id end) \r\n" + 
 			"  and NA.is_active='true'  AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD')\r\n" + 
 			" >= CASE WHEN ?<>'' THEN DATE(?) ELSE TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END\r\n" + 
 			" AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <= CASE WHEN ?<>'' THEN DATE(?) ELSE \r\n" + 
