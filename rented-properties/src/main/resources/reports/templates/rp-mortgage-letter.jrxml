@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rp-mortgage-letter" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9cf2e684-e9da-44bd-82e1-4ccb485a2eea">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="Localization" class="java.util.Map"/>
+	<parameter name="property" class="org.egov.cpt.models.Property"/>
+	<parameter name="applicant" class="org.egov.cpt.models.MortgageApplicant"/>
+	<parameter name="mgApplication" class="org.egov.cpt.models.Mortgage"/>
+	<parameter name="grantDetails" class="org.egov.cpt.models.MortgageApprovedGrantDetails"/>
+	<parameter name="CITY_WATER_MARK_PATH" class="java.lang.Object"/>
+	<parameter name="CITY_FOOTER_LEFT_PATH" class="java.lang.Object"/>
+	<parameter name="CITY_FOOTER_RIGHT_PATH" class="java.lang.Object"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="479" height="30" uuid="1b5f5c16-7212-426e-be41-5d6213584561"/>
+				<textElement textAlignment="Center">
+					<font fontName="Cambay" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[नगर निगम चण्डीगढ़/MUNICIPAL CORPORATION, CHANDIGARH]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="55" width="479" height="24" uuid="a4ddcd5b-1ed4-47fd-8c65-8817dd13d9b5"/>
+				<textElement textAlignment="Center">
+					<font fontName="Cambay" size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[(Colony Branch)]]></text>
+			</staticText>
+			<image>
+				<reportElement x="489" y="5" width="60" height="60" uuid="1f3f7000-b7c9-425b-800f-e6c3ef16f182"/>
+				<imageExpression><![CDATA[$P{CITY_WATER_MARK_PATH}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="0" y="30" width="479" height="25" uuid="afd9c684-c2a1-4f7c-a025-d818075b6317"/>
+				<textElement textAlignment="Center">
+					<font fontName="Cambay" size="12"/>
+				</textElement>
+				<text><![CDATA[(New Delux Building, Sector-17, UT Chandigarh)  0172-5021503]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="534" splitType="Stretch">
+			<staticText>
+				<reportElement x="11" y="10" width="100" height="30" uuid="5fdb64e2-1fed-4d17-8ef5-6de2c7f379e4"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="379" y="10" width="174" height="30" uuid="deee56e8-efdf-4ab5-ad42-5e72102ed747"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_DATE_OF_APPROVAL_LABEL") +" : "+ new SimpleDateFormat("dd/MM/yyyy").format($P{mgApplication}.getAuditDetails().getLastModifiedTime())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="52" y="40" width="100" height="20" uuid="597a9eb6-8f70-40f8-9011-ceb6440dd2f0"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["The Head,"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="52" y="62" width="228" height="20" uuid="a4508548-1c37-49da-b29c-9f4b7c3715a8"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Name of Financial Institute,"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="52" y="84" width="100" height="20" uuid="d419b8cb-2250-4c68-bfe1-e281ca33aac0"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Chandigarh."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="52" y="109" width="300" height="20" uuid="c6dd7de5-f8a3-43c7-8fb9-43cbe78c00dc"/>
+				<textElement markup="html">
+					<font fontName="Cambay" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Memo no/Allotment number <b>"+ $P{mgApplication}.getAllotmentNumber()+"</b>"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="52" y="132" width="228" height="20" uuid="09d28dce-84da-4404-85d6-7b0433803321"/>
+				<textElement markup="html">
+					<font fontName="Cambay" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Dated <b>"+new SimpleDateFormat("dd/MM/yyyy").format($P{mgApplication}.getAllotmentStartDate())+"</b>"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="81" y="170" width="448" height="20" uuid="5137d46e-945d-4aff-8aca-2da634b93e19"/>
+				<textElement>
+					<font fontName="Cambay" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Lien against the property."]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="12" y="170" width="66" height="20" uuid="d7f0e010-1c67-4c1f-9c8c-2c0e8548a3c5"/>
+				<textElement>
+					<font fontName="Cambay" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Subject :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="201" width="473" height="29" uuid="9418c372-26fa-4569-a921-b9f19737dea4"/>
+				<textElement markup="html">
+					<font fontName="Cambay" size="11" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Reference your letter No. <b>"+$P{grantDetails}.getSanctionLetterNumber() +"</b> dated <b>" +new SimpleDateFormat("dd/MM/yyyy").format($P{grantDetails}.getSanctionDate())+ "</b> on the subject cited above."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="12" y="250" width="541" height="70" uuid="15fa5e7b-3413-45a6-9249-b6ea8b961054"/>
+				<textElement markup="html">
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["	The lien is hereby noted in respect of property i.e. Transit Site No. <b>"+$P{property}.getTransitNumber() +", "+$P{Localization}.get($P{property}.getColony())+ "</b> owner Sh/Smt  <b>"+$P{applicant}.getName()+ "</b> on account of loan of Rs. <b>"+$P{grantDetails}.getMortgageAmount()+"</b> raised from (Bank) subject to the condition that the 1 st charge will be in favour of Govt. against the property. "]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="12" y="339" width="187" height="20" uuid="82a62dc9-e294-42cc-8e9d-c2fa260a8671"/>
+				<textElement markup="html">
+					<font fontName="Cambay" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Endst. No. _______________]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="410" y="340" width="120" height="20" uuid="4a22c216-373b-4dbf-9ac0-27db22dab3a8"/>
+				<textElement>
+					<font fontName="Cambay" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dated ____________]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="12" y="379" width="541" height="20" uuid="80626d9e-0b2c-42c2-9046-01a21af63eba"/>
+				<textElement markup="html">
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["A copy is forwarded to Sh/Smt <b>"+$P{applicant}.getName()+"</b> owner ,Transit site No. <b>"+$P{property}.getTransitNumber()+", "+$P{Localization}.get($P{property}.getColony())+"</b>"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="422" y="437" width="130" height="65" uuid="7f00962a-39ff-4b54-8f3c-261016b3a566"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Superintendent(C),\nMunicipal Corporation,\nChandigarh."]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="105" splitType="Stretch">
+			<image>
+				<reportElement x="8" y="28" width="60" height="60" uuid="53505e3f-fdff-49a7-8a37-6edabb786cfe"/>
+				<imageExpression><![CDATA[$P{CITY_FOOTER_LEFT_PATH}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="78" y="30" width="399" height="43" uuid="49e76364-f935-4303-8a75-6f1a3c251344"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Cambay" size="13"/>
+				</textElement>
+				<text><![CDATA[नगर निगम चण्डीगढ़/MUNICIPAL CORPORATION, CHANDIGARH]]></text>
+			</staticText>
+			<image>
+				<reportElement x="480" y="23" width="60" height="60" uuid="136bc490-eec8-4195-94c3-15671fc6f7ec"/>
+				<imageExpression><![CDATA[$P{CITY_FOOTER_RIGHT_PATH}]]></imageExpression>
+			</image>
+		</band>
+	</pageFooter>
+</jasperReport>

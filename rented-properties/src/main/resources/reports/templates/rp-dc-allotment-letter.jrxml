@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rp-dc-allotment-letter" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="db4a5065-2526-491b-a69c-6a23b76866c5">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="Localization" class="java.util.Map"/>
+	<parameter name="property" class="org.egov.cpt.models.Property"/>
+	<parameter name="applicant" class="org.egov.cpt.models.Applicant"/>
+	<parameter name="dcApplication" class="org.egov.cpt.models.DuplicateCopy"/>
+	<parameter name="CITY_WATER_MARK_PATH" class="java.lang.Object"/>
+	<parameter name="CITY_FOOTER_LEFT_PATH" class="java.lang.Object"/>
+	<parameter name="CITY_FOOTER_RIGHT_PATH" class="java.lang.Object"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<image>
+				<reportElement x="490" y="14" width="64" height="64" uuid="4ca57c9e-2ca6-407d-9b47-6bff81b2b89e"/>
+				<imageExpression><![CDATA[$P{CITY_WATER_MARK_PATH}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="2" y="0" width="479" height="30" uuid="deb4e955-a91e-4b2a-9c15-069adc9e4410"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Cambay" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[नगर निगम चण्डीगढ़/MUNICIPAL CORPORATION, CHANDIGARH]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="54" width="479" height="25" uuid="e5574f0f-6017-4822-9ff4-0e6e7908c5d3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Cambay" size="13" isBold="true"/>
+				</textElement>
+				<text><![CDATA[(Colony Branch)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="30" width="479" height="24" uuid="6e6bc48a-4bc2-4b82-89b5-d1fec70ab4cd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Cambay" size="13" isBold="false"/>
+				</textElement>
+				<text><![CDATA[(New Delux Building, Sector-17, UT Chandigarh)  0172-5021503]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="550" splitType="Stretch">
+			<staticText>
+				<reportElement x="25" y="10" width="100" height="30" uuid="56a515f8-0e2c-4030-b2ad-d9d2eb7ad1ca"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="400" y="10" width="200" height="30" uuid="652ef356-11da-4f6d-9fcc-2010baa98d9e"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_DATE_OF_APPROVAL_LABEL") +" : "+ new SimpleDateFormat("dd/MM/yyyy").format($P{dcApplication}.getAuditDetails().getLastModifiedTime())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="36" y="40" width="100" height="20" uuid="ff77ad7e-680f-4d53-a424-8fdec23d9e24"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{applicant}.getName()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="36" y="62" width="100" height="20" uuid="b227fa4f-4e72-4249-882c-36b5e0ca0eac"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get($P{property}.getColony())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="36" y="84" width="100" height="20" uuid="ce4004c7-6ea7-4f21-ad6c-70d0b3b2ed38"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{property}.getArea()+", " +$P{property}.getPincode()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="36" y="109" width="200" height="20" uuid="7455bc28-8f5e-4808-9b63-116e61dfea62"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Memo no/Allotment number "+ $P{dcApplication}.getAllotmentNumber()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="36" y="132" width="100" height="20" uuid="6a119a7c-3729-4b99-aaa8-671cc7a61869"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Dated "+new SimpleDateFormat("dd/MM/yyyy").format($P{dcApplication}.getAllotmentStartDate())]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="10" y="170" width="70" height="20" uuid="8e27a952-1c36-4c3c-a0a3-8376dafeee75"/>
+				<textElement>
+					<font fontName="Cambay" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Subject :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="170" width="450" height="50" uuid="0b46e626-b9ad-412b-bba8-23015e73ec5e"/>
+				<textElement>
+					<font fontName="Cambay" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Supply of duplicate copy of Allotment letter of Transit Site No "+$P{property}.getTransitNumber()+ ", "+$P{Localization}.get($P{property}.getColony())+", "+$P{property}.getArea()+", issued by the Estate Office/Municipal Corporation,Chandigarh."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="236" width="450" height="20" uuid="2536fc06-1943-4ebd-83d3-5ee7db89d393"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Reference your application/request date "+new SimpleDateFormat("dd/MM/yyyy").format($P{dcApplication}.getAuditDetails().getCreatedTime()) +" on the subject cited above."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="270" width="450" height="120" uuid="88dc1ffc-cdfa-481e-bf72-e2268eea0be6"/>
+				<textElement markup="html">
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["The duplicate Allotment Letter No. <b>"+$P{dcApplication}.getAllotmentNumber() + "</b> dated "+new SimpleDateFormat("dd/MM/yyyy").format($P{dcApplication}.getAllotmentStartDate()) + " in respect of Transit Site No. <b>"+$P{property}.getTransitNumber()+", "+$P{Localization}.get($P{property}.getColony())+", "+$P{property}.getArea()+"</b> allotted to Sh./Smt. <b>"+$P{applicant}.getName()+ "</b> is herebyattached, duly attested."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="444" y="400" width="130" height="150" uuid="caff11cf-149e-434d-9507-b354d543a4b2"/>
+				<textElement>
+					<font fontName="Cambay" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Superintendent(C),\nMunicipal Corporation,\nChandigarh."]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="105" splitType="Stretch">
+			<image>
+				<reportElement x="8" y="28" width="60" height="60" uuid="53505e3f-fdff-49a7-8a37-6edabb786cfe"/>
+				<imageExpression><![CDATA[$P{CITY_FOOTER_LEFT_PATH}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="78" y="30" width="399" height="43" uuid="49e76364-f935-4303-8a75-6f1a3c251344"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Cambay" size="13" isBold="false"/>
+				</textElement>
+				<text><![CDATA[नगर निगम चण्डीगढ़/MUNICIPAL CORPORATION, CHANDIGARH]]></text>
+			</staticText>
+			<image>
+				<reportElement x="480" y="23" width="60" height="60" uuid="136bc490-eec8-4195-94c3-15671fc6f7ec"/>
+				<imageExpression><![CDATA[$P{CITY_FOOTER_RIGHT_PATH}]]></imageExpression>
+			</image>
+		</band>
+	</pageFooter>
+</jasperReport>
