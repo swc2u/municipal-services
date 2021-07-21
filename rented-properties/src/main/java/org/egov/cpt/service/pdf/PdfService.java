@@ -111,9 +111,9 @@ public class PdfService {
 
 		final JasperReport report = JasperCompileManager.compileReport(stream);
 		
-//      Compile the Jasper report from .jrxml to .japser
+        // Compile the Jasper report from .jrxml to .japser
 //		ClassLoader classLoader = getClass().getClassLoader();
-//      File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
+//        File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
 //		   JasperCompileManager.compileReportToFile(
 //				   file.getAbsolutePath(), // the path to the jrxml file to compile
 //				   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
