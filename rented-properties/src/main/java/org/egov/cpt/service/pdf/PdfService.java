@@ -111,12 +111,9 @@ public class PdfService {
 
 		final JasperReport report = JasperCompileManager.compileReport(stream);
 		
-		ClassLoader classLoader = getClass().getClassLoader();
-		 
-        File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
-         
-        
         // Compile the Jasper report from .jrxml to .japser
+//		ClassLoader classLoader = getClass().getClassLoader();
+//        File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
 //		   JasperCompileManager.compileReportToFile(
 //				   file.getAbsolutePath(), // the path to the jrxml file to compile
 //				   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
@@ -144,7 +141,6 @@ public class PdfService {
 		parameters.put(PTConstants.FOOTER_RIGHT_PATH, getCityLogoAsBytes(PTConstants.FOOTER_RIGHT_PATH));
 		parameters.put(PTConstants.LOGO_PATH, getCityLogoAsBytes(PTConstants.LOGO_PATH));
 
-
 	}
 
 	public List<HashMap<String, String>> createPdfReport(PdfSearchCriteria searchCriteria, PropertyRequest propertyRequest) throws JRException {
@@ -160,20 +156,14 @@ public class PdfService {
 		//setting common params
 		enrichParams(propertyRequest.getRequestInfo(),parameters,searchCriteria.getTenantId());
 
-
 		//setting current owner
 		parameters.put("Owner", propertyRequest.getProperties().get(0).getOwners().get(0));
 
 		HashMap<String, String> loclaizationMap = (HashMap<String, String>) parameters.get(LOCALIZATION);
 		parameters.put("colony", loclaizationMap.get(propertyRequest.getProperties().get(0).getColony()));
 
-
 		// Filling the report with the employee data and additional parameters information.
 		final JasperPrint print = JasperFillManager.fillReport(report, parameters, source);
-
-		//		final String filePath = "C:/Users/transerve/Documents/";
-		//		// Export the report to a PDF file.
-		//		JasperExportManager.exportReportToPdfFile(print, filePath + "RP_report.pdf");
 
 		final ReportRequest reportInput = new ReportRequest(findPDFTtemplate(searchCriteria.getKey()), parameters,
 				ReportDataSourceType.JAVABEAN);
@@ -210,14 +200,12 @@ public class PdfService {
 		HashMap<String, String> loclaizationMap = (HashMap<String, String>) parameters.get(LOCALIZATION);
 		parameters.put("colony", loclaizationMap.get(accountStatementRequest.getProperties().get(0).getColony()));
 
-
 		//setting account statement
 		parameters.put(PROPERTY, accountStatementRequest.getProperties().get(0));
 
 		parameters.put("RentAccountStatements", source);
 
 		parameters.put("MonthlyRent",accountStatementRequest.getProperties().get(0).getDemands().get(0).getCollectionPrincipal());
-
 
 		// Filling the report with the employee data and additional parameters information.
 		final JasperPrint print = JasperFillManager.fillReport(report, parameters, source);
@@ -227,7 +215,6 @@ public class PdfService {
 		List<HashMap<String, String>> fileStoreResp;
 		try {
 			fileStoreResp = saveFile(print,searchCriteria.getKey(),searchCriteria.getTenantId());
-
 
 		} catch (IOException e1) {
 			throw new CustomException("FILE STORE ERROR","Error while storing file");
@@ -244,7 +231,6 @@ public class PdfService {
 
 	public List<HashMap<String, String>> createPdfReport(PdfSearchCriteria searchCriteria, DuplicateCopyRequest dcRequest) throws JRException {
 		final JasperReport report = createReport(searchCriteria);
-		JRBeanCollectionDataSource source =null;
 
 		// Adding the additional parameters to the pdf.
 		final Map<String, Object> parameters = new HashMap<>();
@@ -266,19 +252,16 @@ public class PdfService {
 						fileStoreId(document.get(i).getFileStoreId()).tenantId(document.get(0).getTenantId()).build());
 				File f = new File(filePath);
 				String newPath =f.getPath().replace(f.getParent()+"\\", "");
-				String fileName = newPath.replace(newPath.substring(newPath.indexOf("?")),"").substring(13).replace("%20", " ");
+				String fileName = newPath.replace(newPath.substring(newPath.indexOf("?")),"").substring(13).replace("%20", " ").replace("%28","(").replace("%29",")");
 
 				parameters.put("document"+(i+1), loclaizationMap.get("RP_"+document.get(i).getDocumentType())+"\n <b>"+fileName+"</b>");
 			}
 		}
-		source = new JRBeanCollectionDataSource(dcRequest.getDuplicateCopyApplications()); 
 
 		parameters.put("dcApplication", dcRequest.getDuplicateCopyApplications().get(0));
 
-
 		// Filling the report with the employee data and additional parameters information.
 		final JasperPrint print = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
-
 
 		final ReportRequest reportInput = new ReportRequest(findPDFTtemplate(searchCriteria.getKey()), parameters,
 				ReportDataSourceType.JAVABEAN);
@@ -302,7 +285,6 @@ public class PdfService {
 	}
 	public List<HashMap<String, String>> createPdfReport(PdfSearchCriteria searchCriteria, MortgageRequest mgRequest) throws JRException {
 		final JasperReport report = createReport(searchCriteria);
-		JRBeanCollectionDataSource source =null;
 
 		// Adding the additional parameters to the pdf.
 		final Map<String, Object> parameters = new HashMap<>();
@@ -322,7 +304,7 @@ public class PdfService {
 					fileStoreId(document.get(i).getFileStoreId()).tenantId(document.get(0).getTenantId()).build());
 			File f = new File(filePath);
 			String newPath =f.getPath().replace(f.getParent()+"\\", "");
-			String fileName = newPath.replace(newPath.substring(newPath.indexOf("?")),"").substring(13).replace("%20", " ");
+			String fileName = newPath.replace(newPath.substring(newPath.indexOf("?")),"").substring(13).replace("%20", " ").replace("%28","(").replace("%29",")");
 
 			parameters.put("document"+(i+1), loclaizationMap.get("RP_"+document.get(i).getDocumentType())+"\n <b>"+fileName+"</b>");
 		}
@@ -357,7 +339,6 @@ public class PdfService {
 	}
 	public List<HashMap<String, String>> createPdfReport(PdfSearchCriteria searchCriteria, OwnershipTransferRequest otRequest) throws JRException {
 		final JasperReport report = createReport(searchCriteria);
-		JRBeanCollectionDataSource source =null;
 
 		// Adding the additional parameters to the pdf.
 		final Map<String, Object> parameters = new HashMap<>();
@@ -438,16 +419,12 @@ public class PdfService {
 
 		// Filling the report with the employee data and additional parameters information.
 		final JasperPrint print = JasperFillManager.fillReport(report, parameters, source);
-		//		final String filePath = "C:/Users/transerve/Documents/";
-		//		// Export the report to a PDF file.
-		//		JasperExportManager.exportReportToPdfFile(print, filePath + "RP_receipt_report.pdf");
-
+		
 		final ReportRequest reportInput = new ReportRequest(findPDFTtemplate(searchCriteria.getKey()), parameters,
 				ReportDataSourceType.JAVABEAN);
 		List<HashMap<String, String>> fileStoreResp;
 		try {
 			fileStoreResp = saveFile(print,searchCriteria.getKey(),searchCriteria.getTenantId());
-
 
 		} catch (IOException e1) {
 			throw new CustomException("FILE STORE ERROR","Error while storing file");
@@ -471,8 +448,6 @@ public class PdfService {
 
 		enrichParams(noticeRequest.getRequestInfo(),parameters,searchCriteria.getTenantId());
 
-		//setting colon localization
-
 		parameters.put("notice", noticeRequest.getNoticeApplications().get(0));
 		parameters.put(PROPERTY, noticeRequest.getNoticeApplications().get(0).getProperty());
 
@@ -486,7 +461,6 @@ public class PdfService {
 		try {
 			fileStoreResp = saveFile(print,searchCriteria.getKey(),searchCriteria.getTenantId());
 
-
 		} catch (IOException e1) {
 			throw new CustomException("FILE STORE ERROR","Error while storing file");
 		}
@@ -496,6 +470,7 @@ public class PdfService {
 		} catch (JRException | IOException e) {
 			throw new CustomException("EXCEPTION_IN_REPORT_CREATION", "EXCEPTION_IN_REPORT_CREATION"+e);
 		}
+		
 		return fileStoreResp;
 	}
 
