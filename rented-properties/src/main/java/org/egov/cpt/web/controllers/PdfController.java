@@ -25,10 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 
-@Slf4j
 @RestController
 @RequestMapping("/pdf")
 public class PdfController {
@@ -36,7 +34,6 @@ public class PdfController {
 	@Autowired
 	private PdfService pdfServcie;
 
-	
 	List<HashMap<String, String>> response;
 
 	/**
@@ -51,8 +48,7 @@ public class PdfController {
 		try {
 			response = pdfServcie.createPdfReport(searchCriteria,propertyRequest);
 		} catch (final Exception e) {
-			log.error("Some error has occured while preparing the employee pdf report.");
-			e.printStackTrace();
+			throw new CustomException("ERROR IN PDF GENERATION","Error while creating PDF"+e);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -62,8 +58,7 @@ public class PdfController {
 		try {
 			response = pdfServcie.createPdfReport(searchCriteria,accountStatementRequest);
 		} catch (final Exception e) {
-			log.error("Some error has occured while preparing the employee pdf report.");
-			e.printStackTrace();
+			throw new CustomException("ERROR IN PDF GENERATION","Error while creating PDF"+e);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -79,8 +74,7 @@ public class PdfController {
 		try {
 			response = pdfServcie.createPdfReport(searchCriteria,dcRequest);
 		} catch (final Exception e) {
-			log.error("Some error has occured while preparing the employee pdf report.");
-			e.printStackTrace();
+			throw new CustomException("ERROR IN PDF GENERATION","Error while creating PDF"+e);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -95,8 +89,7 @@ public class PdfController {
 		try {
 			response = pdfServcie.createPdfReport(searchCriteria,mgRequest);
 		} catch (final Exception e) {
-			log.error("Some error has occured while preparing the employee pdf report.");
-			e.printStackTrace();
+			throw new CustomException("ERROR IN PDF GENERATION","Error while creating PDF"+e);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -111,8 +104,7 @@ public class PdfController {
 		try {
 			response= pdfServcie.createPdfReport(searchCriteria,otRequest);
 		} catch (final Exception e) {
-			log.error("Some error has occured while preparing the employee pdf report.");
-			e.printStackTrace();
+			throw new CustomException("ERROR IN PDF GENERATION","Error while creating PDF"+e);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -127,8 +119,7 @@ public class PdfController {
 		try {
 			response=pdfServcie.createPdfReport(searchCriteria,receiptRequest);
 		} catch (final Exception e) {
-			log.error("Some error has occured while preparing the employee pdf report.");
-			e.printStackTrace();
+			throw new CustomException("ERROR IN PDF GENERATION","Error while creating PDF"+e);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -138,7 +129,7 @@ public class PdfController {
 		try {
 			response = pdfServcie.createPdfReport(searchCriteria,noticeRequest);
 		} catch (JRException e) {
-			throw new CustomException("ERROR IN PDF GENERATION","Error while creating PDF");
+			throw new CustomException("ERROR IN PDF GENERATION","Error while creating PDF"+e);
 		}
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
