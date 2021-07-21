@@ -77,6 +77,7 @@ public class DemandService {
 		paymentData.setConsumerCode(sb.toString());
 		if (!(payment.getPayment() == null)) {
 			List<Demand> demands = new LinkedList<>();
+			System.out.println("RequestInfo"+payment.getRequestInfo());
 			Map<String, Long> taxPeriods = getTaxPeriods(payment.getRequestInfo(), paymentData);
 			List<Demand> demandsData = searchDemand(paymentData.getTenantId(), paymentData.getConsumerCode(),
 					payment.getRequestInfo(), paymentData.getServicename());
@@ -121,6 +122,7 @@ public class DemandService {
 	
 		StringBuilder url = new StringBuilder(config.getBillingSearchHost());
 		url.append("tenantId="+paymentData.getTenantId()).append("&service="+paymentData.getServicename());
+		System.out.println("RequestInfo1"+RequestInfoWrapper.builder().requestInfo(requestInfo).build());
 		Object result = fetchResult(url,RequestInfoWrapper.builder().requestInfo(requestInfo).build());
 		TaxPeriodResponse response = null;
 		try {
