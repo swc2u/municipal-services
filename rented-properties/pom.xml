@@ -147,17 +147,13 @@
 		</dependency>
 		<dependency>
 			<groupId>com.egov.font.rented-properties</groupId>
-			<artifactId>fonts-extention</artifactId>
+			<artifactId>fonts-extention-cambay</artifactId>
 			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/src/main/resources/reports/fonts-extention-cambay.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.egov.font.rented-properties</groupId>
 			<artifactId>fonts-extention-roboto</artifactId>
 			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/src/main/resources/reports/fonts-extention-roboto.jar</systemPath>
 		</dependency>
 
 		<!-- REPORTS END -->
