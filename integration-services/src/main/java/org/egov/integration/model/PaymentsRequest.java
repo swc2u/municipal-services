@@ -31,9 +31,7 @@ import lombok.ToString;
 @ToString
 public class PaymentsRequest {
 	@JsonProperty("RequestInfo")
-	@NotNull
-	@Valid
-	private RequestInfo requestInfo = null;
+	private RequestInfo requestInfo;
 
 	@JsonProperty("Payments")
 	@Valid

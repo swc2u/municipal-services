@@ -25,6 +25,8 @@ public class FinanceController {
 
 	@PostMapping(value = "/_generate")
 	public ResponseEntity<ResponseInfoWrapper> generate(@Valid @RequestBody PaymentsRequest request) {
+		System.out.println("request"+request);
+		System.out.println("requestInfo"+request.getRequestInfo());
 		return service.generate(request);
 	}
 
