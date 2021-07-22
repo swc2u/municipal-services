@@ -17,7 +17,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
+@Slf4j
 @RequestMapping("/report/v1")
 public class ReportController {
 	private final ReportService service;
@@ -30,6 +33,7 @@ public class ReportController {
 
 	@PostMapping(value = "/_generate")
 	public ResponseEntity<ResponseInfoWrapper> getData( @RequestBody ReportRequest request) throws JSONException, ParseException {
+		log.info("reqC"+request.getRequestInfo());
 		 ResponseEntity<ResponseInfoWrapper> rs=null;
 		if(request.getRequestBody().getServiceType().equalsIgnoreCase(ModuleNameConstants.SERVICETYPEGENERIC))
 		{
