@@ -4,6 +4,7 @@ import java.text.ParseException;
 
 import javax.validation.Valid;
 
+import org.egov.integration.common.ModuleNameConstants;
 import org.egov.integration.model.ReportRequest;
 import org.egov.integration.model.ResponseInfoWrapper;
 import org.egov.integration.service.FinanceService;
@@ -29,7 +30,12 @@ public class ReportController {
 
 	@PostMapping(value = "/_generate")
 	public ResponseEntity<ResponseInfoWrapper> getData(@Valid @RequestBody ReportRequest request) throws JSONException, ParseException {
-		return service.getData(request);
+		 ResponseEntity<ResponseInfoWrapper> rs=null;
+		if(request.getRequestBody().getServiceType().equalsIgnoreCase(ModuleNameConstants.SERVICETYPEGENERIC))
+		{
+			rs= service.getData(request);
+		}
+		return rs;
 	}
 
 	

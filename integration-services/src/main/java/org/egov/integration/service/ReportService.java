@@ -86,7 +86,7 @@ public class ReportService {
 					response.put(ModuleNameConstants.applicantId, userInfo.get("applicationId"));
 					response.put(ModuleNameConstants.applicantSector, userInfo.get("sector"));
 					response.put(ModuleNameConstants.applicantSumbmissionDate, date);
-
+					response.put(ModuleNameConstants.MODULENAME, ModuleNameConstants.PETNOC);
 				}
 			}
 		}
@@ -101,9 +101,8 @@ public class ReportService {
 					String startDateString = userInfo.get("createdtime").toString().replaceAll("\"", "");
 				    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 				    SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
-				  
-					response.put(ModuleNameConstants.applicantId, userInfo.get("service_request_id"
-							+ ""));
+				    response.put(ModuleNameConstants.MODULENAME, ModuleNameConstants.HORTICULTURE);
+					response.put(ModuleNameConstants.applicantId, userInfo.get("service_request_id"));
 					response.put(ModuleNameConstants.applicantSector, userInfo.get("locality"));
 					response.put(ModuleNameConstants.applicantSumbmissionDate, sdf2.format(sdf.parse(startDateString)));
 
@@ -131,7 +130,7 @@ public class ReportService {
 					response.put(ModuleNameConstants.applicantId, userInfo.get("challanId"));
 					response.put(ModuleNameConstants.applicantSector ,userInfo.get("sector"));
 					response.put(ModuleNameConstants.applicantSumbmissionDate, date);
-
+					response.put(ModuleNameConstants.MODULENAME, ModuleNameConstants.ECHALLAN);
 				}
 			}
 
