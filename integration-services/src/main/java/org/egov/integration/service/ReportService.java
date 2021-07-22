@@ -49,6 +49,7 @@ public class ReportService {
 
 		DisplayColumns redata = PreApplicationRunnerImpl.getSqlQuery(request.getRequestBody().getModuleName());
 		StringBuilder url = new StringBuilder(config.getOPMSHost()).append(redata.getEndPoint());
+		System.out.println("urlda "+ url);
 		JSONObject dataPayload = new JSONObject();
 		JSONObject resData1 = new JSONObject();
 		Gson gson = new Gson();
@@ -93,15 +94,15 @@ public class ReportService {
 		if (request.getRequestBody().getModuleName().equalsIgnoreCase(ModuleNameConstants.HORTICULTURE)) {
 			requests = new RequestData(request.getRequestInfo(), request.getRequestBody().getModuleName(), fromdate,
 					todate, null, null);
-
+			System.out.println("url " + url);
 			JsonNode result = fetchResult(url, requests);
 
 			if (result != null) {
 				for (JsonNode userInfo : result.get("services")) {
 					String startDateString = userInfo.get("createdtime").toString().replaceAll("\"", "");
-				    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-				    SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
-				    response.put(ModuleNameConstants.MODULENAME, ModuleNameConstants.HORTICULTURE);
+					SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+					SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+					response.put(ModuleNameConstants.MODULENAME, ModuleNameConstants.HORTICULTURE);
 					response.put(ModuleNameConstants.applicantId, userInfo.get("service_request_id"));
 					response.put(ModuleNameConstants.applicantSector, userInfo.get("locality"));
 					response.put(ModuleNameConstants.applicantSumbmissionDate, sdf2.format(sdf.parse(startDateString)));
@@ -128,7 +129,7 @@ public class ReportService {
 					LocalDate date = Instant.ofEpochMilli(userInfo.get("createdTime").longValue())
 							.atZone(ZoneId.systemDefault()).toLocalDate();
 					response.put(ModuleNameConstants.applicantId, userInfo.get("challanId"));
-					response.put(ModuleNameConstants.applicantSector ,userInfo.get("sector"));
+					response.put(ModuleNameConstants.applicantSector, userInfo.get("sector"));
 					response.put(ModuleNameConstants.applicantSumbmissionDate, date);
 					response.put(ModuleNameConstants.MODULENAME, ModuleNameConstants.ECHALLAN);
 				}
