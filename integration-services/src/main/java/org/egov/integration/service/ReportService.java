@@ -49,7 +49,7 @@ public class ReportService {
 
 		DisplayColumns redata = PreApplicationRunnerImpl.getSqlQuery(request.getRequestBody().getModuleName());
 		StringBuilder url = new StringBuilder(config.getOPMSHost()).append(redata.getEndPoint());
-		System.out.println("urlda "+ url);
+		
 		JSONObject dataPayload = new JSONObject();
 		JSONObject resData1 = new JSONObject();
 		Gson gson = new Gson();
@@ -77,7 +77,7 @@ public class ReportService {
 			dataPayload.put(redata.getParameter2(), todate);
 			requests = new RequestData(request.getRequestInfo(), request.getRequestBody().getModuleName(), null, null,
 					dataPayload, null);
-
+			log.info("req"+requests);
 			JsonNode result = fetchResult(url, requests);
 
 			if (result != null) {
@@ -94,7 +94,7 @@ public class ReportService {
 		if (request.getRequestBody().getModuleName().equalsIgnoreCase(ModuleNameConstants.HORTICULTURE)) {
 			requests = new RequestData(request.getRequestInfo(), request.getRequestBody().getModuleName(), fromdate,
 					todate, null, null);
-			System.out.println("url " + url);
+			log.info("url " + url);
 			JsonNode result = fetchResult(url, requests);
 
 			if (result != null) {
@@ -118,7 +118,7 @@ public class ReportService {
 			dataPayload.put("siName", "");
 			dataPayload.put("status", "");
 			Object req = gson.fromJson(dataPayload.toString(), Object.class);
-
+			log.info("before call"+request.getRequestInfo());
 			requests = new RequestData(request.getRequestInfo(), request.getRequestBody().getModuleName(), null, null,
 					null, req);
 
