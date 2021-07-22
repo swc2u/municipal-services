@@ -48,7 +48,7 @@ public class ReportService {
 	public ResponseEntity<ResponseInfoWrapper> getData(ReportRequest request) throws JSONException, ParseException {
 
 		DisplayColumns redata = PreApplicationRunnerImpl.getSqlQuery(request.getRequestBody().getModuleName());
-		StringBuilder url = new StringBuilder(config.getOPMSHost()).append(redata.getEndPoint());
+		
 		
 		JSONObject dataPayload = new JSONObject();
 		JSONObject resData1 = new JSONObject();
@@ -73,6 +73,7 @@ public class ReportService {
 		}
 
 		if (request.getRequestBody().getModuleName().equalsIgnoreCase(ModuleNameConstants.PETNOC)) {
+			StringBuilder url = new StringBuilder(config.getOPMSHost()).append(redata.getEndPoint());
 			dataPayload.put(redata.getParameter1(), fromdate);
 			dataPayload.put(redata.getParameter2(), todate);
 			requests = new RequestData(request.getRequestInfo(), request.getRequestBody().getModuleName(), null, null,
@@ -92,6 +93,7 @@ public class ReportService {
 			}
 		}
 		if (request.getRequestBody().getModuleName().equalsIgnoreCase(ModuleNameConstants.HORTICULTURE)) {
+			StringBuilder url = new StringBuilder(config.getHortiHost()).append(redata.getEndPoint());
 			requests = new RequestData(request.getRequestInfo(), request.getRequestBody().getModuleName(), fromdate,
 					todate, null, null);
 			log.info("url " + url);
@@ -111,6 +113,7 @@ public class ReportService {
 			}
 		}
 		if (request.getRequestBody().getModuleName().equalsIgnoreCase(ModuleNameConstants.ECHALLAN)) {
+			StringBuilder url = new StringBuilder(config.getEchallanHost()).append(redata.getEndPoint());
 
 			dataPayload.put("tenantId", "ch.chandigarh");
 			dataPayload.put("encroachmentType", "");

@@ -125,6 +125,12 @@ public class ApiConfiguration {
 	@Value("${egov.service.opms.host}")
 	private String OPMSHost;
 	
+	@Value("${egov.service.echallan.host}")
+	private String echallanHost;
+	
+	@Value("${egov.service.horticulture.host}")
+	private String hortiHost;
+	
 	
 	
 	

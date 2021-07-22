@@ -33,7 +33,7 @@ public class ReportController {
 
 	@PostMapping(value = "/_generate")
 	public ResponseEntity<ResponseInfoWrapper> getData( @RequestBody ReportRequest request) throws JSONException, ParseException {
-		log.info("reqC"+request.getRequestInfo());
+		
 		 ResponseEntity<ResponseInfoWrapper> rs=null;
 		if(request.getRequestBody().getServiceType().equalsIgnoreCase(ModuleNameConstants.SERVICETYPEGENERIC))
 		{
