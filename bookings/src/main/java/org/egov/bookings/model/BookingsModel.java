@@ -463,4 +463,7 @@ public class BookingsModel {
 	@Column(name = "BANK_BRANCH")
 	private String bankBranch;
 	
+	@Column(name="QUANTITY")
+	private BigDecimal quantity;
+	
 }

@@ -134,3 +134,4 @@ ADD COLUMN bank_name varchar(255) NULL,
 ADD COLUMN bank_branch varchar(255) NULL,
 ADD COLUMN transaction_number varchar(255) NULL,
 ADD COLUMN card_number varchar(255) NULL;
+alter table bk_bookings add quantity numeric(19,2) NULL;

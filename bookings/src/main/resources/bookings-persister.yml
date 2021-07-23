@@ -7,7 +7,7 @@ serviceMaps:
    isTransaction: true
    queryMaps:
    
-       - query: INSERT INTO public.bk_bookings(bk_application_number, bk_action, bk_actual_delivery_time, bk_add_special_request_details, bk_address, bk_amount, bk_applicant_contact, bk_applicant_name, bk_application_status, bk_approved_by, bk_area_required, bk_booking_duration, bk_booking_purpose, bk_booking_time, bk_booking_type, bk_booking_venue, bk_category, bk_cgst, bk_cleansing_charges, bk_complete_address, bk_construction_type, bk_contact_no, bk_created_by, bk_current_charges, bk_customer_gst_no, bk_date, bk_date_created, bk_dimension, bk_document_uploaded_url, bk_driver_name, bk_duration, bk_email, bk_ending_date, bk_estimated_delivery_time, bk_facilitation_charges, bk_father_name, bk_from_date, bk_house_no, bk_id_proof,bk_landmark, bk_location, bk_location_change_amount, bk_location_pictures, bk_material_storage_area, bk_mobile_number, bk_module_type, bk_normal_water_failure_request, bk_open_space_location, bk_park_or_community_center, bk_payment_status, bk_plot_sketch, bk_property_owner_name, bk_refund_amount, bk_rent, bk_requirement_area, bk_residence_proof, bk_residential_or_commercial, bk_sector, bk_starting_date, bk_status, bk_status_update_request, bk_surcharge_rent, bk_time, bk_to_date, bk_type, bk_update_status_option, bk_utgst, bk_vehicle_number, bk_venue, bk_vill_city, bk_village, bk_wf_status, business_service, tenant_id, uuid, approver_name, financial_year,bk_remarks) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::date, ?::date, ?, ?, ?, ?, ?, ?::date, ?, ?, ?, ?::date, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::date, ?, ?, ?, ?, ?::date, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+       - query: INSERT INTO public.bk_bookings(bk_application_number, bk_action, bk_actual_delivery_time, bk_add_special_request_details, bk_address, bk_amount, bk_applicant_contact, bk_applicant_name, bk_application_status, bk_approved_by, bk_area_required, bk_booking_duration, bk_booking_purpose, bk_booking_time, bk_booking_type, bk_booking_venue, bk_category, bk_cgst, bk_cleansing_charges, bk_complete_address, bk_construction_type, bk_contact_no, bk_created_by, bk_current_charges, bk_customer_gst_no, bk_date, bk_date_created, bk_dimension, bk_document_uploaded_url, bk_driver_name, bk_duration, bk_email, bk_ending_date, bk_estimated_delivery_time, bk_facilitation_charges, bk_father_name, bk_from_date, bk_house_no, bk_id_proof,bk_landmark, bk_location, bk_location_change_amount, bk_location_pictures, bk_material_storage_area, bk_mobile_number, bk_module_type, bk_normal_water_failure_request, bk_open_space_location, bk_park_or_community_center, bk_payment_status, bk_plot_sketch, bk_property_owner_name, bk_refund_amount, bk_rent, bk_requirement_area, bk_residence_proof, bk_residential_or_commercial, bk_sector, bk_starting_date, bk_status, bk_status_update_request, bk_surcharge_rent, bk_time, bk_to_date, bk_type, bk_update_status_option, bk_utgst, bk_vehicle_number, bk_venue, bk_vill_city, bk_village, bk_wf_status, business_service, tenant_id, uuid, approver_name, financial_year,bk_remarks,bk_bank_account_number,bk_bank_name,bk_ifsc_code,bk_account_type,bk_bank_account_holder, discount, created_date, last_modified_date, bk_nominee_name, refundable_security_money) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::date, ?::date, ?, ?, ?, ?, ?, ?::date, ?, ?, ?, ?::date, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::date, ?, ?, ?, ?, ?::date, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
          basePath: Booking.*
          jsonMaps:
 
@@ -167,6 +167,28 @@ serviceMaps:
          
           - jsonPath: $.Booking.*.bkRemarks
           
+          - jsonPath: $.Booking.*.bkBankAccountNumber
+          
+          - jsonPath: $.Booking.*.bkBankName
+          
+          - jsonPath: $.Booking.*.bkIfscCode
+          
+          - jsonPath: $.Booking.*.bkAccountType
+          
+          - jsonPath: $.Booking.*.bkBankAccountHolder
+          
+          - jsonPath: $.Booking.*.discount
+          
+          - jsonPath: $.Booking.*.createdDate
+          
+          - jsonPath: $.Booking.*.lastModifiedDate
+          
+          - jsonPath: $.Booking.*.bkNomineeName
+          
+          - jsonPath: $.Booking.*.refundableSecurityMoney
+          
+          
+          
           
           
           
@@ -179,6 +201,10 @@ serviceMaps:
 
           - jsonPath: $.Booking.timeslots.*.applicationNumber
           
+
+
+
+
           
           
           
@@ -188,7 +214,7 @@ serviceMaps:
    isTransaction: true
    queryMaps:  
    
-       - query: UPDATE public.bk_bookings SET bk_action=?, bk_actual_delivery_time=?, bk_add_special_request_details=?, bk_address=?, bk_amount=?, bk_applicant_contact=?, bk_applicant_name=?, bk_application_status=?, bk_approved_by=?, bk_area_required=?, bk_booking_duration=?, bk_booking_purpose=?, bk_booking_time=?, bk_booking_type=?, bk_booking_venue=?, bk_category=?, bk_cgst=?, bk_cleansing_charges=?, bk_complete_address=?, bk_construction_type=?, bk_contact_no=?, bk_created_by=?, bk_current_charges=?, bk_customer_gst_no=?, bk_date=?::date, bk_date_created=?::date, bk_dimension=?, bk_document_uploaded_url=?, bk_driver_name=?, bk_duration=?, bk_email=?, bk_ending_date=?::date, bk_estimated_delivery_time=?, bk_facilitation_charges=?, bk_father_name=?, bk_from_date=?::date, bk_house_no=?, bk_id_proof=?, bk_landmark=?, bk_location=?, bk_location_change_amount=?, bk_location_pictures=?, bk_material_storage_area=?, bk_mobile_number=?, bk_module_type=?, bk_normal_water_failure_request=?, bk_open_space_location=?, bk_park_or_community_center=?, bk_payment_status=?, bk_plot_sketch=?, bk_property_owner_name=?, bk_refund_amount=?, bk_rent=?, bk_requirement_area=?, bk_residence_proof=?, bk_residential_or_commercial=?, bk_sector=?, bk_starting_date=?::date, bk_status=?, bk_status_update_request=?, bk_surcharge_rent=?, bk_time=?, bk_to_date=?::date, bk_type=?, bk_update_status_option=?, bk_utgst=?, bk_vehicle_number=?, bk_venue=?, bk_vill_city=?, bk_village=?, bk_wf_status=?, business_service=?, tenant_id=?, uuid=?, approver_name=?, financial_year=?, bk_remarks=? WHERE bk_application_number=?; 
+       - query: UPDATE public.bk_bookings SET bk_action=?, bk_actual_delivery_time=?, bk_add_special_request_details=?, bk_address=?, bk_amount=?, bk_applicant_contact=?, bk_applicant_name=?, bk_application_status=?, bk_approved_by=?, bk_area_required=?, bk_booking_duration=?, bk_booking_purpose=?, bk_booking_time=?, bk_booking_type=?, bk_booking_venue=?, bk_category=?, bk_cgst=?, bk_cleansing_charges=?, bk_complete_address=?, bk_construction_type=?, bk_contact_no=?, bk_created_by=?, bk_current_charges=?, bk_customer_gst_no=?, bk_date=?::date, bk_dimension=?, bk_document_uploaded_url=?, bk_driver_name=?, bk_duration=?, bk_email=?, bk_ending_date=?::date, bk_estimated_delivery_time=?, bk_facilitation_charges=?, bk_father_name=?, bk_from_date=?::date, bk_house_no=?, bk_id_proof=?, bk_landmark=?, bk_location=?, bk_location_change_amount=?, bk_location_pictures=?, bk_material_storage_area=?, bk_mobile_number=?, bk_module_type=?, bk_normal_water_failure_request=?, bk_open_space_location=?, bk_park_or_community_center=?, bk_payment_status=?, bk_plot_sketch=?, bk_property_owner_name=?, bk_refund_amount=?, bk_rent=?, bk_requirement_area=?, bk_residence_proof=?, bk_residential_or_commercial=?, bk_sector=?, bk_starting_date=?::date, bk_status=?, bk_status_update_request=?, bk_surcharge_rent=?, bk_time=?, bk_to_date=?::date, bk_type=?, bk_update_status_option=?, bk_utgst=?, bk_vehicle_number=?, bk_venue=?, bk_vill_city=?, bk_village=?, bk_wf_status=?, business_service=?, tenant_id=?, approver_name=?, financial_year=?, bk_remarks=?, bk_bank_account_number=?,bk_bank_name=?,bk_ifsc_code=?,bk_account_type=?,bk_bank_account_holder=?, last_modified_date=?, bk_nominee_name=?, refundable_security_money=? WHERE bk_application_number=?; 
          basePath: Booking.*
          jsonMaps:
   
@@ -241,8 +267,6 @@ serviceMaps:
            - jsonPath: $.Booking.*.bkCustomerGstNo
           
            - jsonPath: $.Booking.*.bkDate
-          
-           - jsonPath: $.Booking.*.bkDateCreated
           
            - jsonPath: $.Booking.*.bkDimension
           
@@ -338,15 +362,30 @@ serviceMaps:
           
            - jsonPath: $.Booking.*.tenantId
           
-           - jsonPath: $.Booking.*.uuid
-          
            - jsonPath: $.Booking.*.bkApproverName
           
            - jsonPath: $.Booking.*.financialYear
            
            - jsonPath: $.Booking.*.bkRemarks
+           
+           - jsonPath: $.Booking.*.bkBankAccountNumber
+          
+           - jsonPath: $.Booking.*.bkBankName
+          
+           - jsonPath: $.Booking.*.bkIfscCode
+          
+           - jsonPath: $.Booking.*.bkAccountType
+          
+           - jsonPath: $.Booking.*.bkBankAccountHolder
+           
+           - jsonPath: $.Booking.*.lastModifiedDate
+           
+           - jsonPath: $.Booking.*.bkNomineeName
+           
+           - jsonPath: $.Booking.*.refundableSecurityMoney
          
-           - jsonPath: $.Booking.*.bkApplicationNumber       
+           - jsonPath: $.Booking.*.bkApplicationNumber
+       
            
            
            
@@ -368,7 +407,7 @@ serviceMaps:
    isTransaction: true
    queryMaps:
 
-       - query: INSERT INTO public.bk_osujm_new_location (application_number, "action", applicant_address, applicant_name, application_status, area_requirement, business_service, contact, date_created, id_proof, landmark, locality_address, "location", mail_address, sector, tenant_id, uuid, remarks) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?::date, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+       - query: INSERT INTO public.bk_osujm_new_location (application_number, "action", applicant_address, applicant_name, application_status, area_requirement, business_service, contact, date_created, id_proof, landmark, locality_address, "location", mail_address, sector, tenant_id, uuid, remarks, created_date, last_modified_date) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?::date, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
          basePath: NewLocationDetails.*
          jsonMaps:
           - jsonPath: $.NewLocationDetails.*.applicationNumber 
@@ -407,6 +446,10 @@ serviceMaps:
              
           - jsonPath: $.NewLocationDetails.*.remarks
           
+          - jsonPath: $.NewLocationDetails.*.createdDate
+             
+          - jsonPath: $.NewLocationDetails.*.lastModifiedDate
+          
           
           
 
@@ -417,7 +460,7 @@ serviceMaps:
    isTransaction: true
    queryMaps:
        
-       - query: UPDATE public.bk_osujm_new_location SET "action"=?, applicant_address=?, applicant_name=?, application_status=?, area_requirement=?, business_service=?, contact=?, date_created=?::date, id_proof=?, landmark=?, locality_address=?, "location"=?, mail_address=?, sector=?, tenant_id=?, uuid=?, remarks=? WHERE application_number=?;
+       - query: UPDATE public.bk_osujm_new_location SET "action"=?, applicant_address=?, applicant_name=?, application_status=?, area_requirement=?, business_service=?, contact=?, date_created=?::date, id_proof=?, landmark=?, locality_address=?, "location"=?, mail_address=?, sector=?, tenant_id=?, uuid=?, remarks=?, last_modified_date=? WHERE application_number=?;
          basePath: NewLocationDetails.*
          jsonMaps:
 
@@ -455,5 +498,284 @@ serviceMaps:
              
              - jsonPath: $.NewLocationDetails.*.remarks
              
+             - jsonPath: $.NewLocationDetails.*.lastModifiedDate
+             
              - jsonPath: $.NewLocationDetails.*.applicationNumber
-                                            
+             
+             
+             
+ - version: 1.0
+   name: bookings
+   description: Persists the Commercial Ground Dates to be locked
+   fromTopic: save-commercial-ground-lock-dates
+   isTransaction: true
+   queryMaps:
+       
+       - query: INSERT INTO public.bk_commercial_ground_availability_lock (id, booking_venue, from_date, is_locked, to_date, created_date, last_modified_date, venue_type, reason_for_hold, sector) VALUES(?, ?, ?::date, ?,  ?::date, ?, ?, ?, ?, ?);
+         basePath: commercialGrndAvailabilityLock.*
+         jsonMaps:
+
+             - jsonPath: $.commercialGrndAvailabilityLock.*.id
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.bookingVenue
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.fromDate
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.locked
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.toDate
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.createdDate
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.lastModifiedDate
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.venueType
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.reasonForHold
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.sector
+             
+             
+             
+ - version: 1.0
+   name: bookings
+   description: Persists the Commercial Ground Dates to be locked
+   fromTopic: update-commercial-ground-lock-dates
+   isTransaction: true
+   queryMaps:
+       
+       - query: UPDATE public.bk_commercial_ground_availability_lock SET booking_venue=?, from_date=?::date, is_locked=?, to_date=?::date, last_modified_date=?, venue_type=?, reason_for_hold=?, sector=? WHERE id=?;
+         basePath: commercialGrndAvailabilityLock.*
+         jsonMaps:
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.bookingVenue
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.fromDate
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.locked
+             
+             - jsonPath: $.commercialGrndAvailabilityLock.*.toDate
+
+             - jsonPath: $.commercialGrndAvailabilityLock.*.lastModifiedDate
+
+             - jsonPath: $.commercialGrndAvailabilityLock.*.venueType 
+
+             - jsonPath: $.commercialGrndAvailabilityLock.*.reasonForHold
+
+             - jsonPath: $.commercialGrndAvailabilityLock.*.sector             
+      
+             - jsonPath: $.commercialGrndAvailabilityLock.*.id
+             
+             
+ - version: 1.0
+   name: bookings
+   description: Persists the Room Details For Community Booking
+   fromTopic: save-room-details
+   isTransaction: true
+   queryMaps:
+       
+       - query: INSERT INTO public.bk_rooms_model (id, room_application_number, "action", community_application_number, remarks, room_application_status, room_business_service, total_no_of_rooms, type_of_room,last_modified_date, created_date, from_date, to_date, discount, facilation_charge, room_payment_status, room_created_date) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?::date, ?::date, ?::date, ?::date, ?, ?, ?, ?);
+         basePath: Booking.*.roomsModel.*
+         jsonMaps:
+          - jsonPath: $.Booking.roomsModel.*.id
+         
+          - jsonPath: $.Booking.roomsModel.*.roomApplicationNumber
+
+          - jsonPath: $.Booking.roomsModel.*.action
+
+          - jsonPath: $.Booking.roomsModel.*.communityApplicationNumber
+          
+          - jsonPath: $.Booking.roomsModel.*.remarks
+          
+          - jsonPath: $.Booking.roomsModel.*.roomApplicationStatus
+          
+          - jsonPath: $.Booking.roomsModel.*.roomBusinessService
+          
+          - jsonPath: $.Booking.roomsModel.*.totalNoOfRooms
+          
+          - jsonPath: $.Booking.roomsModel.*.typeOfRoom
+          
+          - jsonPath: $.Booking.roomsModel.*.lastModifiedDate
+          
+          - jsonPath: $.Booking.roomsModel.*.createdDate
+          
+          - jsonPath: $.Booking.roomsModel.*.fromDate
+          
+          - jsonPath: $.Booking.roomsModel.*.toDate
+          
+          - jsonPath: $.Booking.roomsModel.*.discount
+          
+          - jsonPath: $.Booking.roomsModel.*.facilationCharge
+          
+          - jsonPath: $.Booking.roomsModel.*.roomPaymentStatus
+          
+          - jsonPath: $.Booking.roomsModel.*.roomCreatedDate
+          
+          
+             
+
+
+
+
+ - version: 1.0
+   name: bookings
+   description: Persists the Room Details For Community Booking
+   fromTopic: update-room-details
+   isTransaction: true
+   queryMaps:
+       
+       - query: UPDATE public.bk_rooms_model SET "action"=?, community_application_number=?, remarks=?, room_application_status=?, room_business_service=?, total_no_of_rooms=?, type_of_room=?, last_modified_date=?::date, from_date=?::date, to_date=?::date, room_application_number=?, discount=?, facilation_charge=?, room_payment_status=?, card_number=?, transaction_number=?, payment_collection_type=?, paid_by=?, payer_name=?, payer_mobile_number=?, cheque_number=?, payment_date=?, ifsc_code=?, bank_name=?, bank_branch=? WHERE id=?;
+
+         basePath: Booking.*.roomsModel.*
+         jsonMaps:
+          - jsonPath: $.Booking.roomsModel.*.action
+
+          - jsonPath: $.Booking.roomsModel.*.communityApplicationNumber
+          
+          - jsonPath: $.Booking.roomsModel.*.remarks
+          
+          - jsonPath: $.Booking.roomsModel.*.roomApplicationStatus
+          
+          - jsonPath: $.Booking.roomsModel.*.roomBusinessService
+          
+          - jsonPath: $.Booking.roomsModel.*.totalNoOfRooms
+          
+          - jsonPath: $.Booking.roomsModel.*.typeOfRoom
+          
+          - jsonPath: $.Booking.roomsModel.*.lastModifiedDate
+          
+          - jsonPath: $.Booking.roomsModel.*.fromDate
+          
+          - jsonPath: $.Booking.roomsModel.*.toDate     
+             
+          - jsonPath: $.Booking.roomsModel.*.roomApplicationNumber
+          
+          - jsonPath: $.Booking.roomsModel.*.discount
+          
+          - jsonPath: $.Booking.roomsModel.*.facilationCharge
+          
+          - jsonPath: $.Booking.roomsModel.*.roomPaymentStatus
+          
+          - jsonPath: $.Booking.roomsModel.*.cardNumber
+           
+          - jsonPath: $.Booking.roomsModel.*.transactionNumber
+           
+          - jsonPath: $.Booking.roomsModel.*.paymentCollectionType
+           
+          - jsonPath: $.Booking.roomsModel.*.paidBy
+           
+          - jsonPath: $.Booking.roomsModel.*.payerName
+           
+          - jsonPath: $.Booking.roomsModel.*.payerMobileNumber
+           
+          - jsonPath: $.Booking.roomsModel.*.chequeNumber
+           
+          - jsonPath: $.Booking.roomsModel.*.paymentDate
+           
+          - jsonPath: $.Booking.roomsModel.*.ifscCode
+           
+          - jsonPath: $.Booking.roomsModel.*.bankName
+           
+          - jsonPath: $.Booking.roomsModel.*.bankBranch
+
+          - jsonPath: $.Booking.roomsModel.*.id  
+          
+
+
+
+
+
+
+             
+ - version: 1.0
+   name: bookings
+   description: Persists the Room Details For Community Booking
+   fromTopic: update-room-status
+   isTransaction: true
+   queryMaps:
+       
+       - query: UPDATE public.bk_rooms_model SET room_status=? WHERE community_application_number=?;
+
+         basePath: Booking.*.roomsModel.*
+         jsonMaps:
+          - jsonPath: $.Booking.roomsModel.*.roomStatus
+
+          - jsonPath: $.Booking.roomsModel.*.communityApplicationNumber
+          
+          
+          
+          
+          
+          
+          
+ - version: 1.0
+   description: Persists the booking card details into db
+   fromTopic: save-booking-card-details
+   isTransaction: true
+   queryMaps:  
+   
+       - query: UPDATE public.bk_bookings SET last_modified_date=?, card_number=?, transaction_number=?, payment_collection_type=?, paid_by=?, payer_name=?, payer_mobile_number=?, cheque_number=?, payment_date=?, ifsc_code=?, bank_name=?, bank_branch=? WHERE bk_application_number=?; 
+         basePath: Booking.*
+         jsonMaps:
+           
+           - jsonPath: $.Booking.*.lastModifiedDate
+           
+           - jsonPath: $.Booking.*.cardNumber
+           
+           - jsonPath: $.Booking.*.transactionNumber
+           
+           - jsonPath: $.Booking.*.paymentCollectionType
+           
+           - jsonPath: $.Booking.*.paidBy
+           
+           - jsonPath: $.Booking.*.payerName
+           
+           - jsonPath: $.Booking.*.payerMobileNumber
+           
+           - jsonPath: $.Booking.*.chequeNumber
+           
+           - jsonPath: $.Booking.*.paymentDate
+           
+           - jsonPath: $.Booking.*.ifscCode
+           
+           - jsonPath: $.Booking.*.bankName
+           
+           - jsonPath: $.Booking.*.bankBranch
+         
+           - jsonPath: $.Booking.*.bkApplicationNumber          
+           
+           
+           
+           
+           
+ - version: 1.0
+   description: Persists the booking lock dates into db
+   fromTopic: save-booking-lock-dates
+   isTransaction: true
+   queryMaps:  
+   
+       - query: INSERT INTO public.bk_booking_lock_dates(id, application_number, booking_type, booking_venue, created_date, last_modified_date, sector, from_date, to_date) VALUES(?, ?, ?, ?, ?, ?, ?, ?::date, ?::date);
+ 
+         basePath: BookingLock.*
+         jsonMaps:
+           
+           - jsonPath: $.BookingLock.*.id
+           
+           - jsonPath: $.BookingLock.*.applicationNumber
+           
+           - jsonPath: $.BookingLock.*.bookingType
+         
+           - jsonPath: $.BookingLock.*.bookingVenue  
+           
+           - jsonPath: $.BookingLock.*.createdDate
+           
+           - jsonPath: $.BookingLock.*.lastModifiedDate
+         
+           - jsonPath: $.BookingLock.*.sector
+           
+           - jsonPath: $.BookingLock.*.fromDate
+           
+           - jsonPath: $.BookingLock.*.toDate
+          
+          
+           
