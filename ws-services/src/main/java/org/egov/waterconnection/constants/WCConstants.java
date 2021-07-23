@@ -305,6 +305,8 @@ public class WCConstants {
 	
 	public static final String WS_ADVICE_FILENAME = "adviceData.txt";
 	
+	public static final String WS_APPLY_FOR_TEMPORARY_CON_BILLING = "APPLY_FOR_TEMPORARY_CONNECTION_BILLING";
+	
 	public static final String WS_APPLY_FOR_TEMPORARY_CON = "APPLY_FOR_TEMPORARY_CONNECTION";
 
 	public static final String WS_APPLY_FOR_TEMP_TEMP_CON = "APPLY_FOR_TEMPORARY_TEMPORARY_CONNECTION";
