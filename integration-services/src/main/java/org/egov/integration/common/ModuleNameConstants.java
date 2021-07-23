@@ -15,7 +15,7 @@ public class ModuleNameConstants {
 	public static final String applicantId = "applicantId";
 	public static final String applicantSector = "applicantSector";
 	public static final String SERVICETYPEGENERIC = "generic";
-	public static final String applicantSumbmissionDate = "applicantSumbmissionDate";
+	public static final String applicantSumbmissionDate = "applicantSubmissionDate";
 	
 }
 
