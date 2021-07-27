@@ -175,7 +175,7 @@ public class BookingsCalculatorServiceImpl implements BookingsCalculatorService 
 
 		case BookingsConstants.BUSINESS_SERVICE_OSBM:
 			BigDecimal osbmAmount = getOsbmAmount(bookingsRequest);
-			
+		
 			for (TaxHeadMasterFields taxHeadEstimate : taxHeadMasterFieldList) {
 				if (taxHeadEstimate.getCode().equals(taxHeadCode1)) {
 					taxHeadEstimate1.add(
@@ -204,10 +204,12 @@ public class BookingsCalculatorServiceImpl implements BookingsCalculatorService 
 			break;
 		case BookingsConstants.BUSINESS_SERVICE_BWT:
 			BigDecimal bwtAmount = taxHeadMasterFieldList.get(0).getTaxAmount();
+			BigDecimal quantity = bookingsRequest.getBookingsModel().getQuantity();
+			BigDecimal totalAmount = bwtAmount.multiply(quantity);
 			for (TaxHeadMasterFields taxHeadEstimate : taxHeadMasterFieldList) {
 				if (taxHeadEstimate.getCode().equals(taxHeadCode1)) {
 					taxHeadEstimate1.add(
-							new TaxHeadEstimate(taxHeadEstimate.getCode(), bwtAmount, taxHeadEstimate.getCategory()));
+							new TaxHeadEstimate(taxHeadEstimate.getCode(), totalAmount, taxHeadEstimate.getCategory()));
 				}
 				/*if (taxHeadEstimate.getCode().equals(taxHeadCode2)) {
 					taxHeadEstimate1.add(new TaxHeadEstimate(taxHeadEstimate.getCode(),
