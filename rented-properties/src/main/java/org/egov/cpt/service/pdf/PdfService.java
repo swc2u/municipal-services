@@ -13,6 +13,7 @@ import org.egov.cpt.models.BillAccountDetailV2;
 import org.egov.cpt.models.Document;
 import org.egov.cpt.models.ExcelSearchCriteria;
 import org.egov.cpt.models.PdfSearchCriteria;
+import org.egov.cpt.models.enums.CollectionPaymentModeEnum;
 import org.egov.cpt.util.FileStoreUtils;
 import org.egov.cpt.util.NotificationUtil;
 import org.egov.cpt.util.PTConstants;
@@ -98,7 +99,7 @@ public class PdfService {
 	private String LOCALIZATION = "Localization";
 
 	private String PROPERTY = "property";
-	
+
 	private static final String TEMPLATE_EXTENSION = ".jrxml";
 
 	public JasperReport createReport(PdfSearchCriteria searchCriteria) throws JRException {
@@ -110,15 +111,15 @@ public class PdfService {
 		final InputStream stream = this.getClass().getResourceAsStream("/reports/templates/"+template);
 
 		final JasperReport report = JasperCompileManager.compileReport(stream);
-		
-        // Compile the Jasper report from .jrxml to .japser
-//		ClassLoader classLoader = getClass().getClassLoader();
-//        File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
-//		   JasperCompileManager.compileReportToFile(
-//				   file.getAbsolutePath(), // the path to the jrxml file to compile
-//				   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
-		
-        return report;
+
+		// Compile the Jasper report from .jrxml to .japser
+		//		ClassLoader classLoader = getClass().getClassLoader();
+		//        File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
+		//		   JasperCompileManager.compileReportToFile(
+		//				   file.getAbsolutePath(), // the path to the jrxml file to compile
+		//				   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
+
+		return report;
 	}
 
 	private void enrichParams(RequestInfo requestInfo, Map<String, Object> parameters, String tenantId) {
@@ -279,9 +280,9 @@ public class PdfService {
 		} catch (JRException | IOException e) {
 			throw new CustomException("EXCEPTION_IN_REPORT_CREATION", "EXCEPTION_IN_REPORT_CREATION"+e);
 		}
-		
+
 		return fileStoreResp;
-		
+
 	}
 	public List<HashMap<String, String>> createPdfReport(PdfSearchCriteria searchCriteria, MortgageRequest mgRequest) throws JRException {
 		final JasperReport report = createReport(searchCriteria);
@@ -311,7 +312,7 @@ public class PdfService {
 
 		// Fetching the employees from the data source.
 		parameters.put("mgApplication", mgRequest.getMortgageApplications().get(0));
-		
+
 		if(mgRequest.getMortgageApplications().get(0).getMortgageApprovedGrantDetails()!=null)
 			parameters.put("grantDetails", mgRequest.getMortgageApplications().get(0).getMortgageApprovedGrantDetails().get(0));
 
@@ -321,7 +322,7 @@ public class PdfService {
 		final ReportRequest reportInput = new ReportRequest(findPDFTtemplate(searchCriteria.getKey()), parameters,
 				ReportDataSourceType.JAVABEAN);
 		List<HashMap<String, String>> fileStoreResp;
-		
+
 		try {
 			fileStoreResp = saveFile(print,searchCriteria.getKey(),searchCriteria.getTenantId());
 		} catch (IOException e1) {
@@ -333,7 +334,7 @@ public class PdfService {
 		} catch (JRException | IOException e) {
 			throw new CustomException("EXCEPTION_IN_REPORT_CREATION", "EXCEPTION_IN_REPORT_CREATION"+e);
 		}
-		
+
 		return fileStoreResp;
 
 	}
@@ -357,7 +358,7 @@ public class PdfService {
 			File f = new File(filePath);
 			String newPath =f.getPath().replace(f.getParent()+"\\", "");
 			String fileName = newPath.replace(newPath.substring(newPath.indexOf("?")),"").substring(13).replace("%20", " ").replace("%28","(").replace("%29",")");
-			
+
 			parameters.put("document"+(i+1), loclaizationMap.get("RP_"+document.get(i).getDocumentType())+"\n <b>"+fileName+"</b>");
 		}
 
@@ -381,7 +382,7 @@ public class PdfService {
 		} catch (JRException | IOException e) {
 			throw new CustomException("EXCEPTION_IN_REPORT_CREATION", "EXCEPTION_IN_REPORT_CREATION"+e);
 		}
-		
+
 		return fileStoreResp;
 
 	}
@@ -405,9 +406,14 @@ public class PdfService {
 		}
 
 		//converting date to IST time
+		String paymentDate;
 		DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy , hh:mm:ss a");
 		formatter.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata")); 
-		String paymentDate =  formatter.format(receiptRequest.getPayments().get(0).getPaymentDetails().get(0).getAuditDetails().getLastModifiedTime());
+		if(receiptRequest.getPayments().get(0).getPaymentMode().equals(CollectionPaymentModeEnum.OFFLINE_NEFT)||receiptRequest.getPayments().get(0).getPaymentMode().equals(CollectionPaymentModeEnum.OFFLINE_RTGS)) {
+			paymentDate =  formatter.format(receiptRequest.getPayments().get(0).getInstrumentDate());
+		}else {
+			paymentDate =  formatter.format(receiptRequest.getPayments().get(0).getPaymentDetails().get(0).getAuditDetails().getLastModifiedTime());
+		}
 		parameters.put("paymentDate", paymentDate);
 
 		if(searchCriteria.getKey().equalsIgnoreCase("rp-payment-receipt")) {
@@ -419,7 +425,7 @@ public class PdfService {
 
 		// Filling the report with the employee data and additional parameters information.
 		final JasperPrint print = JasperFillManager.fillReport(report, parameters, source);
-		
+
 		final ReportRequest reportInput = new ReportRequest(findPDFTtemplate(searchCriteria.getKey()), parameters,
 				ReportDataSourceType.JAVABEAN);
 		List<HashMap<String, String>> fileStoreResp;
@@ -470,7 +476,7 @@ public class PdfService {
 		} catch (JRException | IOException e) {
 			throw new CustomException("EXCEPTION_IN_REPORT_CREATION", "EXCEPTION_IN_REPORT_CREATION"+e);
 		}
-		
+
 		return fileStoreResp;
 	}
 
@@ -527,9 +533,9 @@ public class PdfService {
 		} catch (JRException e) {
 			e.printStackTrace();
 		}
-		
+
 		String stateLevelTenantId = this.getStateLevelTenantId(tenantId);
-		
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(fileInByte.length);
 		baos.write(fileInByte, 0, fileInByte.length);
 		String fileName = String.format("%s-%s.pdf", templatekey,System.currentTimeMillis());
@@ -539,7 +545,7 @@ public class PdfService {
 		baos.close();
 		return fileStoreResponse;
 	}
-	
+
 	private String getStateLevelTenantId(String tenantId) {
 		String[] components = tenantId.split(".");
 		if (components.length == 0) {

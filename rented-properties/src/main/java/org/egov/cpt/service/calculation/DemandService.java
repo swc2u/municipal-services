@@ -2,8 +2,10 @@ package org.egov.cpt.service.calculation;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -519,7 +521,15 @@ public class DemandService {
 
 		else if(!CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.CASH)) {
 			payment.setTransactionNumber(transactionNumber);
-			payment.setInstrumentDate(new DateTime().getMillis());
+			
+			Calendar c = new GregorianCalendar();
+		    c.set(Calendar.HOUR_OF_DAY, 0); //anything 0 - 23
+		    c.set(Calendar.MINUTE, 0);
+		    c.set(Calendar.SECOND, 0);
+		    Date todayDate = c.getTime();
+		    
+			payment.setInstrumentDate(todayDate.getTime());
+			payment.setTransactionDate(new DateTime().getMillis());
 			payment.setInstrumentNumber(transactionNumber);
 		}
 
