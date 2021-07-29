@@ -12,7 +12,6 @@
 		</box>
 	</style>
 	<parameter name="Localization" class="java.util.Map"/>
-	<parameter name="offlinePayemntDetails" class="org.egov.cpt.models.OfflinePaymentDetails"/>
 	<parameter name="payment" class="org.egov.cpt.models.CollectionPayment"/>
 	<parameter name="paymentDetails" class="org.egov.cpt.models.CollectionPaymentDetail"/>
 	<parameter name="CITY_WATER_MARK_PATH" class="java.lang.Object"/>
@@ -21,9 +20,6 @@
 	<parameter name="paymentDate" class="java.lang.String"/>
 	<parameter name="dueAmount" class="java.math.BigDecimal"/>
 	<parameter name="publicationCharge" class="java.math.BigDecimal"/>
-	<field name="transitNumber" class="java.lang.String">
-		<fieldDescription><![CDATA[transitNumber]]></fieldDescription>
-	</field>
 	<title>
 		<band height="79" splitType="Stretch">
 			<textField>
