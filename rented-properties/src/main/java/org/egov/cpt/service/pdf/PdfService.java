@@ -113,11 +113,11 @@ public class PdfService {
 		final JasperReport report = JasperCompileManager.compileReport(stream);
 
 		// Compile the Jasper report from .jrxml to .japser
-		//		ClassLoader classLoader = getClass().getClassLoader();
-		//        File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
-		//		   JasperCompileManager.compileReportToFile(
-		//				   file.getAbsolutePath(), // the path to the jrxml file to compile
-		//				   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
+				ClassLoader classLoader = getClass().getClassLoader();
+		        File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
+				   JasperCompileManager.compileReportToFile(
+						   file.getAbsolutePath(), // the path to the jrxml file to compile
+						   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
 
 		return report;
 	}
@@ -389,9 +389,6 @@ public class PdfService {
 	public List<HashMap<String, String>> createPdfReport(PdfSearchCriteria searchCriteria, PDFPaymentReceiptRequest receiptRequest) throws JRException {
 		final JasperReport report = createReport(searchCriteria);
 
-		// Fetching the employees from the data source.
-		final JRBeanCollectionDataSource source = new JRBeanCollectionDataSource(receiptRequest.getProperties());
-
 		// Adding the additional parameters to the pdf.
 		final Map<String, Object> parameters = new HashMap<>();
 
@@ -401,16 +398,16 @@ public class PdfService {
 		parameters.put("payment", receiptRequest.getPayments().get(0));
 		parameters.put("paymentDetails", receiptRequest.getPayments().get(0).getPaymentDetails().get(0));
 
-		if(!searchCriteria.getKey().equalsIgnoreCase("rp-payment-receipt")) {
-			parameters.put("offlinePayemntDetails", receiptRequest.getProperties().get(0).getOfflinePaymentDetails().get(0));
-		}
+//		if(!searchCriteria.getKey().equalsIgnoreCase("rp-payment-receipt")) {
+//			parameters.put("offlinePayemntDetails", receiptRequest.getProperties().get(0).getOfflinePaymentDetails().get(0));
+//		}
 
 		//converting date to IST time
 		String paymentDate;
 		DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy , hh:mm:ss a");
 		formatter.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata")); 
 		if(receiptRequest.getPayments().get(0).getPaymentMode().equals(CollectionPaymentModeEnum.OFFLINE_NEFT)||receiptRequest.getPayments().get(0).getPaymentMode().equals(CollectionPaymentModeEnum.OFFLINE_RTGS)) {
-			paymentDate =  formatter.format(receiptRequest.getPayments().get(0).getInstrumentDate());
+			paymentDate =  new SimpleDateFormat("dd/MM/yyyy").format(receiptRequest.getPayments().get(0).getInstrumentDate());
 		}else {
 			paymentDate =  formatter.format(receiptRequest.getPayments().get(0).getPaymentDetails().get(0).getAuditDetails().getLastModifiedTime());
 		}
@@ -424,7 +421,7 @@ public class PdfService {
 		}
 
 		// Filling the report with the employee data and additional parameters information.
-		final JasperPrint print = JasperFillManager.fillReport(report, parameters, source);
+		final JasperPrint print = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
 
 		final ReportRequest reportInput = new ReportRequest(findPDFTtemplate(searchCriteria.getKey()), parameters,
 				ReportDataSourceType.JAVABEAN);
