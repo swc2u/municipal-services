@@ -246,7 +246,7 @@ public class SWCalculationConstant {
 
 	public static final String SW_SCRUTINY_FEE = "SW_SCRUTINY_FEE";
 
-	public static final String SW_ONE_TIME_FEE = "SW_ONE_TIME_FEE";
+	public static final String SW_ONE_TIME_FEE = "SEWERAGE_CONNECTION_FEE_PHD4";
 
 	public static final String SW_ROAD_CUTTING_CHARGE = "SW_ROAD_CUTTING_CHARGE";
 
@@ -272,7 +272,7 @@ public class SWCalculationConstant {
 
 	public static final String UNIT_COST_CONST = "unitCost";
 	
-	public static final String ONE_TIME_FEE_SERVICE_FIELD = "SW.ONE_TIME_FEE";
+	public static final String ONE_TIME_FEE_SERVICE_FIELD = "PUBLIC_HEALTH_SERVICES_DIV4";
 	
 	public static final Long expiryDateForOneTimeFee = 347126472000l;
 	

@@ -99,6 +99,12 @@ public class NULMConfiguration {
 
 	@Value("${egov.idgen.nulm.susvrenew.idformat}")
 	private String susvRenewApplicationNumberIdgenFormat;
+	
+	@Value("${egov.idgen.nulm.alf.idname}")
+	private String alfIdgenName;
+	
+	@Value("${egov.idgen.nulm.alf.idformat}")
+	private String alfIdgenFormat;
 
 	
 	@Value("${nulm.businessservice}")
@@ -236,4 +242,12 @@ public class NULMConfiguration {
 	
 	@Value("${persister.update.suhcitizenngoapplication.topic}")
 	private String SuhCitizenNGOApplicationUpdateTopic;
+	
+	@Value("${persister.save.smid.alf.topic}")
+	private String SMIDALFSaveTopic;
+	
+	@Value("${persister.udate.smid.alf.topic}")
+	private String SMIDALFUpdateTopic;
+	
+	
 }

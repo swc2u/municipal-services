@@ -45,10 +45,22 @@ public class WaterApplication {
 
 	@JsonProperty("isFerruleApplicable")
 	private Boolean isFerruleApplicable = true;
+
+	@JsonProperty("isMeterStolen")
+	private Boolean isMeterStolen = false;
 	
 	@JsonProperty("securityCharge")
 	private Double securityCharge = null;
 
+	@JsonProperty("additionalCharges")
+	private Double additionalCharges = null;
+
+	@JsonProperty("constructionCharges")
+	private Double constructionCharges = null;
+
+	@JsonProperty("paymentMode")
+	private String paymentMode;
+	
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
 
@@ -159,5 +171,37 @@ public class WaterApplication {
 
 	public void setTotalAmountPaid(String totalAmountPaid) {
 		this.totalAmountPaid = totalAmountPaid;
+	}
+
+	public Double getAdditionalCharges() {
+		return additionalCharges;
+	}
+
+	public void setAdditionalCharges(Double additionalCharges) {
+		this.additionalCharges = additionalCharges;
+	}
+
+	public Double getConstructionCharges() {
+		return constructionCharges;
+	}
+
+	public void setConstructionCharges(Double constructionCharges) {
+		this.constructionCharges = constructionCharges;
+	}
+
+	public String getPaymentMode() {
+		return paymentMode;
+	}
+
+	public void setPaymentMode(String paymentMode) {
+		this.paymentMode = paymentMode;
+	}
+
+	public Boolean getIsMeterStolen() {
+		return isMeterStolen;
+	}
+
+	public void setIsMeterStolen(Boolean isMeterStolen) {
+		this.isMeterStolen = isMeterStolen;
 	}
 }

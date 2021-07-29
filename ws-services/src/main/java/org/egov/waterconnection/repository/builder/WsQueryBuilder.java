@@ -68,7 +68,7 @@ public class WsQueryBuilder {
 			+ " plumber.name as plumber_name, plumber.licenseno,"
 			+ " plumber.mobilenumber as plumber_mobileNumber, plumber.gender as plumber_gender, plumber.fatherorhusbandname, plumber.correspondenceaddress,"
 			+ " plumber.relationship, " + holderSelectValues
-			+ " application.id as application_id, application.applicationno as app_applicationno, application.activitytype as app_activitytype, application.applicationstatus as app_applicationstatus, application.action as app_action, application.comments as app_comments, application.is_ferrule_applicable as app_ferrule, application.security_charges as app_securitycharge, application.total_amount_paid,"
+			+ " application.id as application_id, application.applicationno as app_applicationno, application.activitytype as app_activitytype, application.applicationstatus as app_applicationstatus, application.action as app_action, application.comments as app_comments, application.is_ferrule_applicable as app_ferrule, application.security_charges as app_securitycharge, application.total_amount_paid, application.additionalcharges, application.constructioncharges, application.outstandingcharges, application.paymentmode, application.ismeterstolen,"
 			+ " application.createdBy as app_createdBy, application.lastModifiedBy as app_lastModifiedBy, application.createdTime as app_createdTime, application.lastModifiedTime as app_lastModifiedTime, "
 			+ " property.id as waterpropertyid, property.usagecategory, property.usagesubcategory,pta.doorno as propertyplotno,pta.locality as propertysectorno "
 			+ " FROM eg_ws_connection conn "
@@ -92,12 +92,12 @@ public class WsQueryBuilder {
 	private static final String NO_OF_CONNECTION_SEARCH_QUERY = "SELECT count(*) FROM eg_ws_connection WHERE";
 	
 	private static final String PAGINATION_WRAPPER = "SELECT * FROM " +
-            "(SELECT *, DENSE_RANK() OVER (ORDER BY app_applicationno desc) offset_ FROM " +
+            "(SELECT *, DENSE_RANK() OVER (ORDER BY conn_id desc) offset_ FROM " +
             "({})" +
             " result) result_offset " +
             "WHERE offset_ > ? AND offset_ <= ?";
 	
-	private static final String ORDER_BY_CLAUSE= " ORDER BY application.createdTime DESC";
+	private static final String ORDER_BY_CLAUSE= " ORDER BY conn.id DESC";
 
 	public static final String GET_PIECHART_DATA = "SELECT id, cccode, divsdiv, consumercode, billcycle, billgroup, subgroup, \r\n" + 
 			"       billtype, name, address, cesscharge, netamount, grossamount, \r\n" + 
@@ -190,6 +190,16 @@ public class WsQueryBuilder {
 			query.append(" conn.ledgergroup = ? ");
 			preparedStatement.add(criteria.getLedgerGroup());
 		}
+		if (!StringUtils.isEmpty(criteria.getSubDivision())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" conn.subdiv = ? ");
+			preparedStatement.add(criteria.getSubDivision());
+		}
+		if (!StringUtils.isEmpty(criteria.getDivision())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" conn.div = ? ");
+			preparedStatement.add(criteria.getDivision());
+		}
 
 		if (!StringUtils.isEmpty(criteria.getConnectionNumber())) {
 			addClauseIfRequired(preparedStatement, query);
@@ -206,6 +216,11 @@ public class WsQueryBuilder {
 			query.append(" application.applicationno = ? ");
 			preparedStatement.add(criteria.getApplicationNumber());
 		}
+		if (!StringUtils.isEmpty(criteria.getApplicationNumberSearch())) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" application.applicationno ilike ? ");
+			preparedStatement.add("%"+criteria.getApplicationNumberSearch());
+		}
 		if (!StringUtils.isEmpty(criteria.getApplicationStatus())) {
 			addClauseIfRequired(preparedStatement, query);
 			query.append(" application.applicationStatus = ? ");
@@ -213,12 +228,12 @@ public class WsQueryBuilder {
 		}
 		if (criteria.getFromDate() != null) {
 			addClauseIfRequired(preparedStatement, query);
-			query.append("  wc.appCreatedDate >= ? ");
+			query.append("  application.createdTime >= ? ");
 			preparedStatement.add(criteria.getFromDate());
 		}
 		if (criteria.getToDate() != null) {
 			addClauseIfRequired(preparedStatement, query);
-			query.append("  wc.appCreatedDate <= ? ");
+			query.append("  application.createdTime <= ? ");
 			preparedStatement.add(criteria.getToDate());
 		}
 		if (criteria.getAppFromDate() != null) {

@@ -8,7 +8,8 @@ public class Charges {
 	private String security;	
 	private String ferrule;
 	private String metertesting;	
-	private String meterfitting;
+	private String meterfitting;	
+	private String stolenmetercharges;
 	public String getSecurity() {
 		return security;
 	}
@@ -32,6 +33,12 @@ public class Charges {
 	}
 	public void setMeterfitting(String meterfitting) {
 		this.meterfitting = meterfitting;
+	}
+	public String getStolenmetercharges() {
+		return stolenmetercharges;
+	}
+	public void setStolenmetercharges(String stolenmetercharges) {
+		this.stolenmetercharges = stolenmetercharges;
 	}
 	
 	
