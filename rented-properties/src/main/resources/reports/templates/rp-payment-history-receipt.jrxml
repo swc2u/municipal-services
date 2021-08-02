@@ -19,6 +19,7 @@
 	<parameter name="CITY_FOOTER_LEFT_PATH" class="java.lang.Object"/>
 	<parameter name="CITY_FOOTER_RIGHT_PATH" class="java.lang.Object"/>
 	<parameter name="paymentDate" class="java.lang.String"/>
+	<parameter name="paymentMode" class="java.lang.String"/>
 	<field name="transitNumber" class="java.lang.String">
 		<fieldDescription><![CDATA[transitNumber]]></fieldDescription>
 	</field>
@@ -124,7 +125,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Roboto" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{payment}.getPaymentMode()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{paymentMode}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="22" y="152" width="257" height="20" uuid="2af48dbb-b94c-4b35-a423-9ac72aa4818a"/>

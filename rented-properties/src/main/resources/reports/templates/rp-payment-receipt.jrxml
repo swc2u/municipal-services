@@ -20,6 +20,7 @@
 	<parameter name="paymentDate" class="java.lang.String"/>
 	<parameter name="dueAmount" class="java.math.BigDecimal"/>
 	<parameter name="publicationCharge" class="java.math.BigDecimal"/>
+	<parameter name="paymentMode" class="java.lang.String"/>
 	<title>
 		<band height="79" splitType="Stretch">
 			<textField>
@@ -185,7 +186,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="Roboto" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{payment}.getPaymentMode()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{paymentMode}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="189" y="312" width="178" height="20" uuid="03179f7b-f76e-4cc0-abed-ef04c7c13793"/>

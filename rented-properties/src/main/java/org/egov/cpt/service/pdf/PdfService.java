@@ -113,11 +113,11 @@ public class PdfService {
 		final JasperReport report = JasperCompileManager.compileReport(stream);
 
 		// Compile the Jasper report from .jrxml to .japser
-//				ClassLoader classLoader = getClass().getClassLoader();
-//		        File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
-//				   JasperCompileManager.compileReportToFile(
-//						   file.getAbsolutePath(), // the path to the jrxml file to compile
-//						   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
+		//				ClassLoader classLoader = getClass().getClassLoader();
+		//		        File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
+		//				   JasperCompileManager.compileReportToFile(
+		//						   file.getAbsolutePath(), // the path to the jrxml file to compile
+		//						   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
 
 		return report;
 	}
@@ -398,9 +398,9 @@ public class PdfService {
 		parameters.put("payment", receiptRequest.getPayments().get(0));
 		parameters.put("paymentDetails", receiptRequest.getPayments().get(0).getPaymentDetails().get(0));
 
-//		if(!searchCriteria.getKey().equalsIgnoreCase("rp-payment-receipt")) {
-//			parameters.put("offlinePayemntDetails", receiptRequest.getProperties().get(0).getOfflinePaymentDetails().get(0));
-//		}
+		//		if(!searchCriteria.getKey().equalsIgnoreCase("rp-payment-receipt")) {
+		//			parameters.put("offlinePayemntDetails", receiptRequest.getProperties().get(0).getOfflinePaymentDetails().get(0));
+		//		}
 
 		//converting date to IST time
 		String paymentDate;
@@ -412,6 +412,10 @@ public class PdfService {
 			paymentDate =  formatter.format(receiptRequest.getPayments().get(0).getPaymentDetails().get(0).getAuditDetails().getLastModifiedTime());
 		}
 		parameters.put("paymentDate", paymentDate);
+
+		parameters.put("paymentMode", receiptRequest.getPayments().get(0).getPaymentMode().equals(CollectionPaymentModeEnum.OFFLINE_NEFT)?"Direct Bank - Vikas Nagar":
+			receiptRequest.getPayments().get(0).getPaymentMode().equals(CollectionPaymentModeEnum.OFFLINE_RTGS)?"Direct Bank - Sec.52-53":
+				receiptRequest.getPayments().get(0).getPaymentMode().toString());
 
 		if(searchCriteria.getKey().equalsIgnoreCase("rp-payment-receipt")) {
 			List<BillAccountDetailV2> billAoccuntDetails = receiptRequest.getPayments().get(0).getPaymentDetails().get(0).getBill().getBillDetails().get(0).getBillAccountDetails();
