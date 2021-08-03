@@ -9,6 +9,7 @@ public class ModuleNameConstants {
 
 	
 	public static final String PETNOC="PETNOC";
+	public static final String SELLMEATNOC="SELLMEATNOC";
 	public static final String MODULENAME="serviceName";
 	public static final String HORTICULTURE="HORTICULTURE";
 	public static final String ECHALLAN = "ECHALLAN";
