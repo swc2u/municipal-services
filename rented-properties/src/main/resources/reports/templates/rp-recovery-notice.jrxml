@@ -78,7 +78,7 @@
 				<textElement markup="styled">
 					<font fontName="Cambay" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Whereas. the function regarding Rehabilitation of Colonies has been transferred bythe Chandigarh Administration to the Municipal Corporation, Chandigarh vide Notifcation No.No. 2/6/Fl(2)-LG-95/12740, dated 28-09-1995 and the Additional Commissioner, MunicipalCorporation, Chandigarh has been appointed as Estate Offcer under the provision of Capitalof Punjab (Development And Regulations) Act 1952, vide Chandigarh Administration\n\nNotifcation bearing No.10/3/2-UTFI(1)/g013/2727 dated 22.03.2013.\n\nWhereas, you have breached the Condition No.1 of Allotment Letter. wherein it has been cleared that -<b>each licensee is required to deposit monthly rent in advance by 10th of month.</b>\n\nAs per Section 14 (5) and 27 (1) (iii) of Licensing of Tenements and Sites and Services in Chandigarh Scheme 1979:-\n\nSection 14 (5) 'The default of payment of any two Installments by the due date, the leaseshall be liable to be cancelled by the competent authority after notice in writing. '\nSection 27(1)(iii) The Competent Authority shall cancel the allotment of site/tenement if it is found If the allottee fails to deposit license fee in spite of the service of notice of demand for aperiod of three months, whether consecutively or otherwise"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Whereas, the function regarding Rehabilitation of Colonies has been transferred by the Chandigarh Administration to the Municipal Corporation, Chandigarh vide Notifcation No. 2/6/Fl(2)-LG-95/12740, dated 28-09-1995 and the Additional Commissioner, Municipal Corporation, Chandigarh has been appointed as Estate Offcer under the provision of Capital of Punjab (Development And Regulations) Act 1952, vide Chandigarh Administration\n\nNotifcation bearing No.10/3/2-UTFI(1)/g013/2727 dated 22.03.2013.\n\nWhereas, you have breached the Condition No.1 of Allotment Letter. wherein it has been cleared that -<b>each licensee is required to deposit monthly rent in advance by 10th of month.</b>\n\nAs per Section 14 (5) and 27 (1) (iii) of Licensing of Tenements and Sites and Services in Chandigarh Scheme 1979:-\n\nSection 14 (5) 'The default of payment of any two Installments by the due date, the lease shall be liable to be cancelled by the competent authority after notice in writing. '\nSection 27(1)(iii) The Competent Authority shall cancel the allotment of site/tenement if it is found If the allottee fails to deposit license fee in spite of the service of notice of demand for a period of three months, whether consecutively or otherwise"]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -122,7 +122,7 @@
 				<textElement textAlignment="Left" markup="styled">
 					<font fontName="Cambay" size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA["<b>Note: -</b>\n\n1. The due amount will be subject to audit\n2. Payment be deposited in Chandigarh State Co-Operative Bank. Vikas Nagar Mauli Jagran,U.T. Chandigarh by cash.\n3. The due amount is subjected to change."]]></textFieldExpression>
+				<textFieldExpression><![CDATA["<b>Note: -</b>\n\n1. The due amount will be subject to audit.\n2. Payment be deposited in Chandigarh State Co-Operative Bank. Vikas Nagar Mauli Jagran,U.T. Chandigarh by cash.\n3. The due amount is subjected to change."]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>
