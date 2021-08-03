@@ -31,7 +31,7 @@
 			<staticText>
 				<reportElement x="2" y="54" width="479" height="25" uuid="e5574f0f-6017-4822-9ff4-0e6e7908c5d3"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Cambay" size="13" isBold="true"/>
+					<font fontName="Cambay" size="13" isBold="true" isItalic="true"/>
 				</textElement>
 				<text><![CDATA[(Colony Branch)]]></text>
 			</staticText>
@@ -121,7 +121,7 @@
 				<textElement markup="html">
 					<font fontName="Cambay" size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA["The duplicate Allotment Letter No. <b>"+$P{dcApplication}.getAllotmentNumber() + "</b> dated "+new SimpleDateFormat("dd/MM/yyyy").format($P{dcApplication}.getAllotmentStartDate()) + " in respect of Transit Site No. <b>"+$P{property}.getTransitNumber()+", "+$P{Localization}.get($P{property}.getColony())+", "+$P{property}.getArea()+"</b> allotted to Sh./Smt. <b>"+$P{applicant}.getName()+ "</b> is herebyattached, duly attested."]]></textFieldExpression>
+				<textFieldExpression><![CDATA["The duplicate Allotment Letter No. <b>"+$P{dcApplication}.getAllotmentNumber() + "</b> dated "+new SimpleDateFormat("dd/MM/yyyy").format($P{dcApplication}.getAllotmentStartDate()) + " in respect of Transit Site No. <b>"+$P{property}.getTransitNumber()+", "+$P{Localization}.get($P{property}.getColony())+", "+$P{property}.getArea()+"</b> allotted to Sh./Smt. <b>"+$P{applicant}.getName()+ "</b> is hereby attached, duly attested."]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="444" y="400" width="130" height="150" uuid="caff11cf-149e-434d-9507-b354d543a4b2"/>
