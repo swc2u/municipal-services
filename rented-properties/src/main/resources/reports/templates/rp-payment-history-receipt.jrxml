@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rp-payment-history-receipt" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b5bfe57c-a5d5-43ac-be96-8db3852ee15f">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<style name="paymentInfo" hTextAlign="Center" hImageAlign="Center" isBold="true">
+		<box topPadding="1" leftPadding="5" bottomPadding="1" rightPadding="5">
+			<pen lineWidth="1.0"/>
+			<topPen lineWidth="1.0"/>
+			<leftPen lineWidth="1.0"/>
+			<bottomPen lineWidth="1.0"/>
+			<rightPen lineWidth="1.0"/>
+		</box>
+	</style>
+	<parameter name="Localization" class="java.util.Map"/>
+	<parameter name="offlinePayemntDetails" class="org.egov.cpt.models.OfflinePaymentDetails"/>
+	<parameter name="payment" class="org.egov.cpt.models.CollectionPayment"/>
+	<parameter name="paymentDetails" class="org.egov.cpt.models.CollectionPaymentDetail"/>
+	<parameter name="CITY_WATER_MARK_PATH" class="java.lang.Object"/>
+	<parameter name="CITY_FOOTER_LEFT_PATH" class="java.lang.Object"/>
+	<parameter name="CITY_FOOTER_RIGHT_PATH" class="java.lang.Object"/>
+	<parameter name="paymentDate" class="java.lang.String"/>
+	<parameter name="paymentMode" class="java.lang.String"/>
+	<field name="transitNumber" class="java.lang.String">
+		<fieldDescription><![CDATA[transitNumber]]></fieldDescription>
+	</field>
+	<title>
+		<band height="82" splitType="Stretch">
+			<textField>
+				<reportElement x="80" y="2" width="460" height="28" uuid="34426ffd-8e2b-4e01-8669-0e41ec5c747f"/>
+				<textElement textAlignment="Center">
+					<font fontName="Roboto" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PDF_HEADER")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="81" y="33" width="459" height="28" uuid="f3eec26e-803f-4424-bddd-315bd63ebe3f"/>
+				<textElement textAlignment="Center">
+					<font fontName="Roboto" size="13"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_RENT_PAYMENT_SUB_HEADER")]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="18" y="0" width="60" height="60" uuid="629612cb-b225-4371-9da3-83f61bd48147"/>
+				<imageExpression><![CDATA[$P{CITY_WATER_MARK_PATH}]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="46" splitType="Stretch">
+			<textField>
+				<reportElement x="21" y="10" width="280" height="28" uuid="bde78716-f896-4899-b4ec-2dc853f1b90a"/>
+				<textElement textAlignment="Left" markup="html">
+					<font fontName="Roboto" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>"+$P{Localization}.get("RP_TRANSIT_SITE") +" : </b>"+$F{transitNumber}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="340" y="10" width="200" height="28" uuid="20d5cfe1-3cc4-4c08-83ce-b999dc280283"/>
+				<textElement textAlignment="Right" markup="html">
+					<font fontName="Roboto" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>"+$P{Localization}.get("RP_RECEIPT_NUMBER_LABEL") +" : </b>"+$P{paymentDetails}.getReceiptNumber()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="415" splitType="Stretch">
+			<textField>
+				<reportElement x="21" y="14" width="180" height="26" uuid="a31ce40a-2fb5-4890-b442-09abaed20165"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYER_INFORMATION_LABEL")]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="21" y="45" width="519" height="20" uuid="bd2caa01-e0bc-4bf7-bc40-0b3e433f5776"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="21" y="65" width="519" height="20" uuid="896257f4-b565-491b-b574-e85dd9c3aa31"/>
+			</rectangle>
+			<textField>
+				<reportElement x="31" y="45" width="173" height="20" uuid="ae6fd1fd-8d02-42c0-8eef-04f8ddf9734f"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYER_NAME_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="216" y="45" width="173" height="20" uuid="a674bbe6-276d-47de-b488-2735f6befd65"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{payment}.getPayerName()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="31" y="65" width="173" height="20" uuid="df31f9ae-d910-40a2-abf1-0fb03849acdf"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYER_MOBILE_NO_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="216" y="65" width="173" height="20" uuid="6d7f7626-3831-4bf0-8ea3-f05f506b8bb2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{payment}.getMobileNumber()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="120" width="173" height="26" uuid="c9d9b786-5959-4f21-a363-4739dbf185ed"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYMENT_INFORMATION_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="paymentInfo" x="22" y="172" width="173" height="20" uuid="856ae2da-4c23-4ac8-9619-14ee38c95e72"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYMENT_MODE_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="paymentInfo" x="22" y="192" width="173" height="20" uuid="5dd77fe5-6c67-4a17-a726-7184821ca088"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{paymentMode}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="paymentInfo" x="22" y="152" width="257" height="20" uuid="2af48dbb-b94c-4b35-a423-9ac72aa4818a"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" markup="styled">
+					<font fontName="Roboto" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>"+$P{Localization}.get("RP_AMOUNT_PAID_LABEL")+" :</b> "+$P{paymentDetails}.getTotalAmountPaid()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="paymentInfo" x="279" y="152" width="261" height="20" uuid="9e516935-aaea-4d38-a3ad-9f1fcb7f4817"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" markup="styled">
+					<font fontName="Roboto" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>"+ $P{Localization}.get("RP_PAYABLE_AMOUNT_ON")+" :</b>  "+$P{paymentDate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="paymentInfo" x="195" y="192" width="185" height="20" uuid="51b484a5-7581-482c-b175-6c46a0628d23"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{payment}.getTransactionNumber()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="paymentInfo" x="195" y="172" width="185" height="20" uuid="c20ce45d-8279-41f8-8335-37895956100d"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_TRANSACTION_ID_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="paymentInfo" x="380" y="192" width="160" height="20" uuid="cd7e20eb-6398-46d1-bcca-12d78d2445ee"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{offlinePayemntDetails}.getBankName()==null?"N/A":$P{offlinePayemntDetails}.getBankName()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="paymentInfo" x="380" y="172" width="160" height="20" uuid="eff0d8fa-868b-4fc0-871b-dcb53060b5d6"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Roboto" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_BANK_NAME_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="273" width="280" height="20" uuid="d1081b70-9887-4f2d-8c95-244d5e81c5b8"/>
+				<textElement>
+					<font fontName="Roboto" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_GENERATED_BY_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="22" y="295" width="150" height="28" uuid="65eacc5f-5fff-4daa-a723-69bbf01069ff"/>
+				<textElement>
+					<font fontName="Roboto" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["System"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="105" splitType="Stretch">
+			<image>
+				<reportElement x="20" y="28" width="60" height="60" uuid="53505e3f-fdff-49a7-8a37-6edabb786cfe"/>
+				<imageExpression><![CDATA[$P{CITY_FOOTER_LEFT_PATH}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="78" y="30" width="399" height="43" uuid="49e76364-f935-4303-8a75-6f1a3c251344"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Cambay" size="12"/>
+				</textElement>
+				<text><![CDATA[नगर निगम चण्डीगढ़/MUNICIPAL CORPORATION, CHANDIGARH]]></text>
+			</staticText>
+			<image>
+				<reportElement x="480" y="23" width="60" height="60" uuid="136bc490-eec8-4195-94c3-15671fc6f7ec"/>
+				<imageExpression><![CDATA[$P{CITY_FOOTER_RIGHT_PATH}]]></imageExpression>
+			</image>
+		</band>
+	</pageFooter>
+</jasperReport>

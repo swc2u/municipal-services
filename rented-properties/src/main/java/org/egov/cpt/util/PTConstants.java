@@ -296,4 +296,10 @@ public class PTConstants {
 	
 	public static final String CLERK_ROLE ="RP_CLERK";
 	public static final String JA_ROLE ="RP_JA";
+	
+	//PDF
+	public static final String LOGO_PATH="CITY_LOGO_PATH";
+	public static final String WATER_MARK_PATH="CITY_WATER_MARK_PATH";
+	public static final String FOOTER_LEFT_PATH="CITY_FOOTER_LEFT_PATH";
+	public static final String FOOTER_RIGHT_PATH="CITY_FOOTER_RIGHT_PATH";
 }
