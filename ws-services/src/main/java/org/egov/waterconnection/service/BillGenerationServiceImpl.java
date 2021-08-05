@@ -122,120 +122,131 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 		criteria.setAppToDate(billGenerationRequest.getBillGeneration().getToDate());
 		if (billGenerationRequest.getBillGeneration().getDataExchangeType()
 				.equalsIgnoreCase(WCConstants.CONNECTION_EXCHANGE)) {
-			criteria.setApplicationType(WCConstants.WS_NEWCONNECTION);	
+			criteria.setApplicationType(WCConstants.WS_NEWCONNECTION);
 		}
-		
+
 		List<WaterConnection> connections = waterServiceImpl.getWaterConnectionsList(criteria,
 				billGenerationRequest.getRequestInfo());
 		SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy");
 		SimpleDateFormat monthFormat = new SimpleDateFormat("MM");
 		List<BillGenerationFile> billFileList = new ArrayList<BillGenerationFile>();
-		 
 
-			if (connections.isEmpty()) {
-				throw new CustomException("FILE_GENERATION_FAILED", "Data may not present");
-			}
+		if (connections.isEmpty()) {
+			throw new CustomException("FILE_GENERATION_FAILED", "Data may not present");
+		}
 
-			try {
-				writer = new PrintWriter(WCConstants.WS_CONNECTION_FILENAME, "UTF-8");
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if (billGenerationRequest.getBillGeneration().getDataExchangeType()
-					.equalsIgnoreCase(WCConstants.CONNECTION_EXCHANGE)) {
+		try {
+			writer = new PrintWriter(WCConstants.WS_CONNECTION_FILENAME, "UTF-8");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (billGenerationRequest.getBillGeneration().getDataExchangeType()
+				.equalsIgnoreCase(WCConstants.CONNECTION_EXCHANGE)) {
 
-				for (WaterConnection application : connections) {
-			//		WaterConnectionRequest waterConnectionRequest = WaterConnectionRequest.builder()
-			//				.requestInfo(billGenerationRequest.getRequestInfo()).waterConnection(application).build();
-				//	Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
-					HashMap<String, Object> addDetail = mapper.convertValue(application.getAdditionalDetails(),
-							HashMap.class);
-					for (WaterApplication applicationList : application.getWaterApplicationList()) {
-						if (WCConstants.ACTIVITY_TYPE_NEW_CONN.contains(applicationList.getActivityType())) {
-							String meterReading =  addDetail.get(WCConstants.INITIAL_METER_READING_CONST) == null ? "" : (((BigDecimal) addDetail.get(WCConstants.INITIAL_METER_READING_CONST)).setScale(0,BigDecimal.ROUND_DOWN)).toString() ;
-							writer.println("UW" + fixedLengthString(application.getDiv(), 1)
-									+ fixedLengthString(application.getSubdiv(), 2)
-									+ fixedLengthString(application.getCcCode(), 2)
-									+ fixedLengthString(application.getLedgerGroup(), 4)
-									+ fixedLengthString(application.getWaterProperty().getSectorNo(), 20)
-									+ getbillcycle(monthFormat.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
-									+ fixedLengthString(application.getBillGroup(), 1) + fixedLengthString("", 2));
-							
-							writer.println("0001"+ fixedLengthString(application.getConnectionNo()
-											.substring(application.getConnectionNo().length() - 6), 6)
-									+ fixedLengthString(application.getConnectionHolders()== null?"":application.getConnectionHolders().get(0).getName(), 30)
-									+ fixedLengthString(application.getWaterProperty().getPlotNo(), 10)
-									+ fixedLengthString(application.getWaterProperty().getUsageCategory(), 2)
-									+ fixedLengthString(
-											format.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())), 8)
-									+ fixedLengthString(application.getProposedPipeSize(), 3)
-									+ fixedLengthString(application.getMeterRentCode(), 2)
-									+ fixedLengthString(application.getMeterId(), 10)
-									+ fixedLengthString(application.getMfrCode(), 3)
-									+ fixedLengthString((application.getMeterDigits()), 2)
-									+ fixedLengthString(getMeterUnit(application.getMeterUnit()), 1)
-									+ fixedLengthString("", 2)
-									+ fixedLengthString(meterReading, 10)
+			for (WaterConnection application : connections) {
+				// WaterConnectionRequest waterConnectionRequest =
+				// WaterConnectionRequest.builder()
+				// .requestInfo(billGenerationRequest.getRequestInfo()).waterConnection(application).build();
+				// Property property =
+				// validateProperty.getOrValidateProperty(waterConnectionRequest);
+				HashMap<String, Object> addDetail = mapper.convertValue(application.getAdditionalDetails(),
+						HashMap.class);
+				for (WaterApplication applicationList : application.getWaterApplicationList()) {
+					if (WCConstants.ACTIVITY_TYPE_NEW_CONN.contains(applicationList.getActivityType())) {
+						String meterReading = addDetail.get(WCConstants.INITIAL_METER_READING_CONST) == null ? ""
+								: (((BigDecimal) addDetail.get(WCConstants.INITIAL_METER_READING_CONST)).setScale(0,
+										BigDecimal.ROUND_DOWN)).toString();
+						writer.println("UW" + fixedLengthString(application.getDiv(), 1)
+								+ fixedLengthString(application.getSubdiv(), 2)
+								+ fixedLengthString(application.getCcCode(), 2)
+								+ fixedLengthString(application.getLedgerGroup(), 4)
+								+ fixedLengthString(application.getWaterProperty().getSectorNo(), 20)
+								+ getbillcycle(monthFormat
+										.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
+								+ fixedLengthString(application.getBillGroup(), 1) + fixedLengthString("", 2));
 
-									+ fixedLengthString(application.getSanctionedCapacity(), 7));
+						writer.println("0001"
+								+ fixedLengthString(application.getConnectionNo()
+										.substring(application.getConnectionNo().length() - 6), 6)
+								+ fixedLengthString(application.getConnectionHolders() == null ? ""
+										: application.getConnectionHolders().get(0).getName(), 30).substring(0, 30)
+								+ fixedLengthString(application.getWaterProperty().getPlotNo(), 10)
+								+ fixedLengthString(application.getWaterProperty().getUsageCategory(), 2)
+								+ fixedLengthString(format
+										.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())), 8)
+								+ fixedLengthString(application.getProposedPipeSize(), 3)
+								+ fixedLengthString(application.getMeterRentCode(), 2)
+								+ fixedLengthString(application.getMeterId(), 10)
+								+ fixedLengthString(application.getMfrCode(), 3)
+								+ fixedLengthString((application.getMeterDigits()), 2)
+								+ fixedLengthString(getMeterUnit(application.getMeterUnit()), 1)
+								+ fixedLengthString("", 2) + fixedLengthString(meterReading, 10)
 
-						}
-
-					}
-				}
-
-			} else {
-
-				for (WaterConnection application : connections) {
-				//	WaterConnectionRequest waterConnectionRequest = WaterConnectionRequest.builder()
-				//			.requestInfo(billGenerationRequest.getRequestInfo()).waterConnection(application).build();
-				//	Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
-					HashMap<String, Object> addDetail = mapper.convertValue(application.getAdditionalDetails(),
-							HashMap.class);
-					for (WaterApplication applicationList : application.getWaterApplicationList()) {
-						if (WCConstants.ACTIVITY_TYPE_81.contains(applicationList.getActivityType())) {
-							writer.println("UW81"
-									+ getbillcycle(monthFormat.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
-									+ application.getBillGroup() + fixedLengthString(application.getConnectionNo(), 14)
-									+ fixedLengthString(application.getConnectionHolders().get(0).getName(), 30)
-									+ fixedLengthString(application.getWaterProperty().getPlotNo(), 10)
-									+ fixedLengthString(application.getWaterProperty().getSectorNo(), 20)
-									+ fixedLengthString(application.getWaterProperty().getUsageCategory(), 2)
-									+ fixedLengthString("", 7) + fixedLengthString("", 4)
-									+ fixedLengthString(application.getSanctionedCapacity(), 7));
-
-						} else if (WCConstants.ACTIVITY_TYPE_82.contains(applicationList.getActivityType())) {
-							String meterReading =  addDetail.get(WCConstants.INITIAL_METER_READING_CONST) == null ? "" : (((BigDecimal) addDetail.get(WCConstants.INITIAL_METER_READING_CONST)).setScale(0,BigDecimal.ROUND_DOWN)).toString() ;
-
-							writer.println("UW82"
-									+ getbillcycle(monthFormat.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
-									+ application.getBillGroup() + fixedLengthString(application.getConnectionNo(), 14)
-									+ fixedLengthString(application.getMeterId(), 10) + fixedLengthString("", 3)
-									+ fixedLengthString(
-											format.format(new Date(application.getConnectionExecutionDate())), 8)
-									+ fixedLengthString(application.getProposedPipeSize(), 3)
-									+ fixedLengthString(application.getMeterRentCode(), 2)
-									+ fixedLengthString((application.getMeterDigits()), 2)
-									+ fixedLengthString(getMeterUnit(application.getMeterUnit()), 1)
-									+ fixedLengthString("", 2) + fixedLengthString("", 1)
-									+ fixedLengthString(meterReading, 10));
-						}
+								+ fixedLengthString(application.getSanctionedCapacity(), 7) + fixedLengthString("", 12)
+								+ "0000");
 
 					}
+
 				}
 			}
 
-			writer.close();
-			BillGenerationFile billFile = billRepository.getFilesStoreUrl(WCConstants.WS_CONNECTION_FILENAME);
+		} else {
 
-			// billRepository.savefileHistory(billFile, bill);
-			billFileList.add(billFile);
+			for (WaterConnection application : connections) {
+				// WaterConnectionRequest waterConnectionRequest =
+				// WaterConnectionRequest.builder()
+				// .requestInfo(billGenerationRequest.getRequestInfo()).waterConnection(application).build();
+				// Property property =
+				// validateProperty.getOrValidateProperty(waterConnectionRequest);
+				HashMap<String, Object> addDetail = mapper.convertValue(application.getAdditionalDetails(),
+						HashMap.class);
+				for (WaterApplication applicationList : application.getWaterApplicationList()) {
+					if (WCConstants.ACTIVITY_TYPE_81.contains(applicationList.getActivityType())) {
+						writer.println("UW81"
+								+ getbillcycle(monthFormat
+										.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
+								+ application.getBillGroup() + fixedLengthString(application.getConnectionNo(), 14)
+								+ fixedLengthString(application.getConnectionHolders().get(0).getName(), 30)
+								+ fixedLengthString(application.getWaterProperty().getPlotNo(), 10)
+								+ fixedLengthString(application.getWaterProperty().getSectorNo(), 20)
+								+ fixedLengthString(application.getWaterProperty().getUsageCategory(), 2)
+								+ fixedLengthString("", 7) + fixedLengthString("", 4)
+								+ fixedLengthString(application.getSanctionedCapacity(), 7));
 
-		 
+					} else if (WCConstants.ACTIVITY_TYPE_82.contains(applicationList.getActivityType())) {
+						String meterReading = addDetail.get(WCConstants.INITIAL_METER_READING_CONST) == null ? ""
+								: (((BigDecimal) addDetail.get(WCConstants.INITIAL_METER_READING_CONST)).setScale(0,
+										BigDecimal.ROUND_DOWN)).toString();
+
+						writer.println("UW82"
+								+ getbillcycle(monthFormat
+										.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
+								+ application.getBillGroup() + fixedLengthString(application.getConnectionNo(), 14)
+								+ fixedLengthString(application.getMeterId(), 10) + fixedLengthString("", 3)
+								+ fixedLengthString(format.format(new Date(application.getConnectionExecutionDate())),
+										8)
+								+ fixedLengthString(application.getProposedPipeSize(), 3)
+								+ fixedLengthString(application.getMeterRentCode(), 2)
+								+ fixedLengthString((application.getMeterDigits()), 2)
+								+ fixedLengthString(getMeterUnit(application.getMeterUnit()), 1)
+								+ fixedLengthString("", 2) + fixedLengthString("", 1)
+								+ fixedLengthString(meterReading, 10));
+					}
+
+				}
+			}
+		}
+
+		writer.close();
+		BillGenerationFile billFile = billRepository.getFilesStoreUrl(WCConstants.WS_CONNECTION_FILENAME);
+
+		// billRepository.savefileHistory(billFile, bill);
+		billFileList.add(billFile);
+
 		return billFileList;
 	}
 
@@ -245,7 +256,7 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 
 	public String getMeterUnit(String string) {
 
-		if(string == null) {
+		if (string == null) {
 			return "";
 		}
 		switch (string) {
@@ -267,25 +278,31 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 	private String getbillcycle(String month) {
 
 		switch (month) {
-		case "01":case "02":
-		
+		case "01":
+		case "02":
+
 			return "01";
-		case "03":case "04":
+		case "03":
+		case "04":
 
 			return "02";
-		case "05":case "06":
+		case "05":
+		case "06":
 
 			return "03";
-		case "07":case "08":
+		case "07":
+		case "08":
 
 			return "04";
-		case "09":case "10":
+		case "09":
+		case "10":
 
 			return "05";
-		case "11":case "12":
+		case "11":
+		case "12":
 
 			return "06";
-			
+
 		default:
 			break;
 		}
@@ -337,11 +354,12 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 
 	@Override
 	public List<BillGeneration> getBillData(BillGenerationRequest billGenerationRequest) {
-		List<BillGeneration> billData = billRepository.getBillData(billGenerationRequest.getBillGeneration());
-		if (billData.isEmpty()) {
-			throw new CustomException("BILL_DATA_NOT_FOUND", "Bill data not available for given consumer code");
-		}
-		return billData;
+		List<BillGeneration> billData;
+		return billData = billRepository.getBillData(billGenerationRequest.getBillGeneration());
+		/*
+		 * if (billData.isEmpty()) { throw new CustomException("BILL_DATA_NOT_FOUND",
+		 * "Bill data not available for given consumer code"); } return billData;
+		 */
 	}
 
 }
