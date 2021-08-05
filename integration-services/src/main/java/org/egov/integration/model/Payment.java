@@ -36,7 +36,6 @@ public class Payment {
     @JsonProperty("totalDue")
     private BigDecimal totalDue;
 
-    
     @NotNull
     @JsonProperty("totalAmountPaid")
     private BigDecimal totalAmountPaid;
@@ -93,6 +92,10 @@ public class Payment {
     @Size(max=1024)
     @JsonProperty("payerAddress")
     private String payerAddress = null;
+    
+    @Size(max=1024)
+    @JsonProperty("narration")
+    private String narration = null;
 
     @Size(max=64)
     @JsonProperty("payerEmail")
@@ -107,7 +110,30 @@ public class Payment {
 
     @JsonProperty("fileStoreId")
     private String fileStoreId;
+    
+    @Size(max=100)
+    @JsonProperty("bankName")
+    private String bankName = null;
 
+    @Size(max=100)
+    @JsonProperty("bankBranch")
+    private String bankBranch = null;
+    
+    @Size(max=100)
+    @JsonProperty("subdivison")
+    private String subdivison = null;
+    
+    @Size(max=1000)
+    @JsonProperty("servicename")
+    private String servicename = null;
+    
+    @Size(max=1000)
+    @JsonProperty("collectedbyname")
+    private String collectedbyname = null;
+    
+    @Size(max=100)
+    @JsonProperty("gstno")
+    private String gstno = null;
 
     public Payment addpaymentDetailsItem(PaymentDetail paymentDetail) {
         if (this.paymentDetails == null) {
@@ -116,8 +142,4 @@ public class Payment {
         this.paymentDetails.add(paymentDetail);
         return this;
     }
-
-
-
-
 }
