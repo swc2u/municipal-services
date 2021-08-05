@@ -145,11 +145,12 @@ public class DemandService {
 		data.setTotalAmountPaid(billResponse.getTotalAmount());
 		paymentDetail.add(data);
 		Payment datas=Payment.builder().tenantId(payments.getTenantId()).totalDue(billResponse.getTotalAmount())
-				.totalAmountPaid(billResponse.getTotalAmount()).transactionDate(payments.getTransactionDate())
+				.totalAmountPaid(billResponse.getTotalAmount()).transactionDate(payments.getTransactionDate()).paymentMode(payments.getPaymentMode())
 				.instrumentDate(payments.getInstrumentDate()).instrumentNumber(payments.getInstrumentNumber()).instrumentStatus(payments.getInstrumentStatus())
-				.ifscCode(payments.getIfscCode()).paidBy(payments.getPaidBy()).mobileNumber(payments.getMobileNumber())
-				.payerName(payments.getPaidBy()).payerAddress(payments.getPayerAddress()).payerEmail(payments.getPayerEmail()).payerId(payment.getRequestInfo().getUserInfo().getId().toString())
-				.paymentStatus(payments.getPaymentStatus()).paymentMode(payments.getPaymentMode()).paymentDetails(paymentDetail).build();
+				.ifscCode(payments.getIfscCode()).paidBy(payments.getPaidBy()).mobileNumber(payments.getMobileNumber()).gstno(payments.getGstno())
+				.bankBranch(payments.getBankBranch()).bankName(payments.getBankName()).collectedbyname(payments.getCollectedbyname())
+				.subdivison(payments.getSubdivison()).servicename(payments.getServicename()).payerName(payments.getPaidBy()).payerAddress(payments.getPayerAddress()).payerEmail(payments.getPayerEmail()).payerId(payment.getRequestInfo().getUserInfo().getId().toString())
+				.paymentStatus(payments.getPaymentStatus()).paymentDetails(paymentDetail).build();
 		return demandRepository.createPayment(payment.getRequestInfo(), datas);
 	}
 
