@@ -580,6 +580,9 @@ public class DemandServiceImpl implements DemandService {
 		case BookingsConstants.BUSINESS_SERVICE_PACC:
 			demands = updateDemandsForPacc(bookingsRequest);
 			break;
+		case BookingsConstants.BUSINESS_SERVICE_BWT:
+			demands = updateDemandsForBWT(bookingsRequest);
+			break;			
 			/*if(config.isDemandFlag()) {
 			demandRepository.updateDemand(bookingsRequest.getRequestInfo(), demands);
 			return;
@@ -743,6 +746,43 @@ public class DemandServiceImpl implements DemandService {
 		}
 		return demands;
 	}
+
+	/**
+	 * SYadav
+	 * this method is used to update demand for water tanker
+	 * @param bookingsRequest
+	 * @return
+	 */
+	private List<Demand> updateDemandsForBWT(BookingsRequest bookingsRequest) {
+		List<Demand> demands = new LinkedList<>();
+		String tenantId = bookingsRequest.getBookingsModel().getTenantId();
+
+		String taxHeadCode1 = BookingsCalculatorConstants.BWT_TAXHEAD_CODE_1;
+
+		String taxHeadCode2 = BookingsCalculatorConstants.BWT_TAXHEAD_CODE_2;
+		
+		List<TaxHeadEstimate> taxHeadEstimate1 = bookingsCalculator.getTaxHeadEstimate(bookingsRequest,
+				taxHeadCode1, taxHeadCode2, "", "", "");
+		
+		RequestInfo requestInfo = bookingsRequest.getRequestInfo();
+
+		List<Demand> searchResult = searchDemand(tenantId,
+				Collections.singleton(bookingsRequest.getBookingsModel().getBkApplicationNumber()), requestInfo,
+				bookingsRequest.getBookingsModel().getFinanceBusinessService());
+
+		Demand demand = searchResult.get(0);
+		List<DemandDetail> demandDetails = demand.getDemandDetails();
+		List<DemandDetail> updatedDemandDetails = getUpdatedDemandDetails(taxHeadEstimate1, demandDetails,BookingsCalculatorConstants.MDMS_ROUNDOFF_TAXHEAD_OSBM);
+		demand.setDemandDetails(updatedDemandDetails);
+		demands.add(demand);
+
+		if (CollectionUtils.isEmpty(searchResult)) {
+			throw new CustomException("INVALID UPDATE", "No demand exists for applicationNumber: "
+					+ bookingsRequest.getBookingsModel().getBkApplicationNumber());
+		}
+		return demands;
+	}	
+	
 
 	private List<Demand> updateDemandsForGfcp(BookingsRequest bookingsRequest) {
 		List<Demand> demands = new LinkedList<>();

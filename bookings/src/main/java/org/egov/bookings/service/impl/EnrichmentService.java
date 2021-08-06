@@ -278,7 +278,8 @@ public class EnrichmentService {
 		} else {
 			if (!bookingsService.isBookingExists(bookingsRequest.getBookingsModel().getBkApplicationNumber())) {
 				demandService.createDemand(bookingsRequest);
-			}
+			} else //this else added for updating BWT demand
+				demandService.updateDemand(bookingsRequest);
 		}
 
 	}
@@ -334,6 +335,7 @@ public class EnrichmentService {
 			bookingsModel.setBkContactNo(bookingsRequest.getBookingsModel().getBkContactNo());
 			bookingsModel.setBkDriverName(bookingsRequest.getBookingsModel().getBkDriverName());
 			bookingsModel.setBkApproverName(bookingsRequest.getBookingsModel().getBkApproverName());
+			bookingsModel.setQuantity(bookingsRequest.getBookingsModel().getQuantity());
 			if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel().getBkPaymentStatus())) {
 				bookingsModel.setBkPaymentStatus(bookingsRequest.getBookingsModel().getBkPaymentStatus());
 			}
