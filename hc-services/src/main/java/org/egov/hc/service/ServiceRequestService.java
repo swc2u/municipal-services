@@ -2204,8 +2204,8 @@ public class ServiceRequestService {
 				roleDetails = new org.json.JSONObject(wfRoles.get(roleCnt).toString());
 				log.info("roleDetails"+roleDetails);
 				Role role = new Role();
-				role.setCode(roleDetails.getString("code"));
-				role.setName(roleDetails.getString("name"));
+				role.setCode(roleDetails.get("code")!=null ? roleDetails.get("code").toString() : "");
+				role.setName(roleDetails.get("name")!=null ? roleDetails.get("name").toString() : "");
 				roleList.add(role);
 
 			}
@@ -2216,6 +2216,7 @@ public class ServiceRequestService {
 		return wfUser;
 	}
 
+	
 
 	private User employeeStoredData(ServiceRequest serviceRequestGetData) {
 
