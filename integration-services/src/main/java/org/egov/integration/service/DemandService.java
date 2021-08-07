@@ -1,5 +1,6 @@
 package org.egov.integration.service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,10 +20,10 @@ import org.egov.integration.config.ApiConfiguration;
 import org.egov.integration.model.BillResponseV2;
 import org.egov.integration.model.BillV2;
 import org.egov.integration.model.OwnerInfo;
-import org.egov.integration.model.PaymentInfo;
 import org.egov.integration.model.Payment;
 import org.egov.integration.model.PaymentDetail;
 import org.egov.integration.model.PaymentDetails;
+import org.egov.integration.model.PaymentInfo;
 import org.egov.integration.model.PaymentsRequest;
 import org.egov.integration.model.RequestInfoWrapper;
 import org.egov.integration.model.TaxPeriodResponse;
@@ -33,11 +34,20 @@ import org.egov.integration.web.models.demand.DemandResponse;
 import org.egov.tracer.model.CustomException;
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -50,7 +60,8 @@ public class DemandService {
 	@Autowired
 	private ApiConfiguration config;
 
-	
+	 @Value("${egov.user.host}")
+	 private String userHost;
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -63,7 +74,7 @@ public class DemandService {
 
 
 
-	public List<Payment> generate(PaymentsRequest payment) {
+	public List<Payment> generate(PaymentsRequest payment) throws JsonParseException, JsonMappingException, IOException {
 		
 		List<PaymentInfo> createCalculations = new LinkedList<>();
 		PaymentInfo paymentData = payment.getPayment();
@@ -74,6 +85,15 @@ public class DemandService {
 		sb.append(paymentData.getServicename());
 		sb.append("_");
 		sb.append(new Date().getTime());
+		JsonNode object =getAccess();
+	    ObjectMapper objectMapper = new ObjectMapper();
+
+	//	User userInfo= objectMapper.readValue(object.get("UserRequest").toString(), User.class);
+	    JsonNode token=object.get("access_token");
+	    JsonNode userData=object.get("UserRequest") ;
+		User userInfo=User.builder().uuid(userData.get("uuid").textValue()).id(Long.parseLong(userData.get("id").toString())).build();
+		RequestInfo res=RequestInfo.builder().authToken(token.textValue()).userInfo(userInfo).build();
+		payment.setRequestInfo(res);
 		paymentData.setConsumerCode(sb.toString());
 		if (!(payment.getPayment() == null)) {
 			List<Demand> demands = new LinkedList<>();
@@ -116,7 +136,30 @@ public class DemandService {
 		return payment1;
 
 	}
+	  private JsonNode getAccess() {
+	        log.info("Fetch access token for register with login flow");
+	        try {
+	            HttpHeaders headers = new HttpHeaders();
+	            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+	            headers.set("Authorization", "Basic ZWdvdi11c2VyLWNsaWVudDplZ292LXVzZXItc2VjcmV0");
+	            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+	            map.add("username", config.getUserName());
+                map.add("password", config.getPassword());
+	            map.add("grant_type", "password");
+	            map.add("scope", "read");
+	            map.add("tenantId", "ch.chandigarh");
+	            map.add("isInternal", "true");
+	            map.add("userType", "EMPLOYEE");
 
+	            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map,
+	                    headers);
+	            return restTemplate.postForEntity(userHost + "/user/oauth/token", request, JsonNode.class).getBody();
+
+	        } catch (Exception e) {
+	            log.error("Error occurred while logging-in via register flow", e);
+	            throw e;
+	        }
+	    }
 	private Map<String, Long> getTaxPeriods(RequestInfo requestInfo, PaymentInfo paymentData) {
 		Map<String, Long> taxPeriods = new HashMap<>();
 	

@@ -131,7 +131,11 @@ public class ApiConfiguration {
 	@Value("${egov.service.horticulture.host}")
 	private String hortiHost;
 	
+	@Value("${egov.service.username}")
+	private String userName;
 	
+	@Value("${egov.service.password}")
+	private String password;
 	
 	
 }
