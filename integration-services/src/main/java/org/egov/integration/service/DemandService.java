@@ -91,7 +91,8 @@ public class DemandService {
 	//	User userInfo= objectMapper.readValue(object.get("UserRequest").toString(), User.class);
 	    JsonNode token=object.get("access_token");
 	    JsonNode userData=object.get("UserRequest") ;
-		User userInfo=User.builder().uuid(userData.get("uuid").textValue()).type(userData.get("type").toString()).id(Long.parseLong(userData.get("id").toString())).build();
+	    log.info("userType "+userData.get("type").textValue());
+		User userInfo=User.builder().uuid(userData.get("uuid").textValue()).type(userData.get("type").textValue()).id(Long.parseLong(userData.get("id").toString())).build();
 		RequestInfo res=RequestInfo.builder().authToken(token.textValue()).userInfo(userInfo).build();
 		payment.setRequestInfo(res);
 		paymentData.setConsumerCode(sb.toString());
