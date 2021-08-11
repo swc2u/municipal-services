@@ -11,6 +11,7 @@ import org.egov.nulm.common.CommonConstants;
 import org.egov.nulm.config.NULMConfiguration;
 import org.egov.nulm.model.NulmSusvRequest;
 import org.egov.nulm.model.SmidShgGroup;
+import org.egov.nulm.model.SuhApplication;
 import org.egov.nulm.model.SusvApplication;
 import org.egov.nulm.producer.Producer;
 import org.egov.nulm.repository.builder.NULMQueryBuilder;
@@ -75,13 +76,43 @@ public class SusvRepository {
 					
 					paramValues.put("createdBy",userId.toString());
 					paramValues.put("applicationId", request.getApplicationId());
-					paramValues.put("applicationStaus","");
+					List<Object> statusEmplyee = new ArrayList<>();
+					if (request.getApplicationStatus() == null) {
+						statusEmplyee.add(SusvApplication.StatusEnum.APPROVED.toString());
+						statusEmplyee.add(SusvApplication.StatusEnum.DRAFTED.toString());
+						statusEmplyee.add(SusvApplication.StatusEnum.REJECTED.toString());
+						statusEmplyee.add(SusvApplication.StatusEnum.CREATED.toString());
+						statusEmplyee.add(SusvApplication.StatusEnum.FORWARDEDTOACMC.toString());
+						statusEmplyee.add(SusvApplication.StatusEnum.FORWARDEDTOJA.toString());
+						statusEmplyee.add(SusvApplication.StatusEnum.FORWARDEDTOSDO.toString());
+						statusEmplyee.add(SusvApplication.StatusEnum.REASSIGNTOJA.toString());
+						statusEmplyee.add(SusvApplication.StatusEnum.REASSIGNTOSDO.toString());
+						statusEmplyee.add(SusvApplication.StatusEnum.REASSIGNTOCITIZEN.toString());
+						
+					} else {
+						statusEmplyee.add(request.getApplicationStatus().toString());
+					}
+					paramValues.put("applicationStaus",statusEmplyee);
 					return susv = namedParameterJdbcTemplate.query(NULMQueryBuilder.GET_SUSV_QUERY, paramValues,
 							susvrowMapper);
 				}
 			}
-			
-			paramValues.put("applicationStaus",SusvApplication.StatusEnum.DRAFTED.toString());
+			List<Object> statusEmplyee = new ArrayList<>();
+			if (request.getApplicationStatus() == null) {
+				statusEmplyee.add(SusvApplication.StatusEnum.APPROVED.toString());
+				statusEmplyee.add(SusvApplication.StatusEnum.REJECTED.toString());
+				statusEmplyee.add(SusvApplication.StatusEnum.CREATED.toString());
+				statusEmplyee.add(SusvApplication.StatusEnum.FORWARDEDTOACMC.toString());
+				statusEmplyee.add(SusvApplication.StatusEnum.FORWARDEDTOJA.toString());
+				statusEmplyee.add(SusvApplication.StatusEnum.FORWARDEDTOSDO.toString());
+				statusEmplyee.add(SusvApplication.StatusEnum.REASSIGNTOJA.toString());
+				statusEmplyee.add(SusvApplication.StatusEnum.REASSIGNTOSDO.toString());
+				statusEmplyee.add(SusvApplication.StatusEnum.REASSIGNTOCITIZEN.toString());
+				
+			} else {
+				statusEmplyee.add(request.getApplicationStatus().toString());
+			}
+			paramValues.put("applicationStaus",statusEmplyee);
 			paramValues.put("createdBy","");
 			paramValues.put("applicationId", request.getApplicationId());
 			return susv = namedParameterJdbcTemplate.query(NULMQueryBuilder.GET_SUSV_QUERY, paramValues, susvrowMapper);
