@@ -445,9 +445,26 @@ public class ApplicationEnrichmentService {
 			double sameHeightOfSideStreetFT = applicationDetails.get("sameHeightOfSideStreet").asDouble();
 			double sameHeightOfSideStreetInch = applicationDetails.get("sameHeightOfSideStreetInch").asDouble();
 			double sameHeightOfSideStreet = sameHeightOfSideStreetFT + (sameHeightOfSideStreetInch / 12);
+			
+			
+			boolean anothertherSideStreet = applicationDetails.get("anotherSideStreet")==null?false:applicationDetails.get("anotherSideStreet").asBoolean();
+			
+			if (anothertherSideStreet) {
+			double sameWidthOfAnotherSideStreetFT = applicationDetails.get("sameWidthOfAnotherSideStreet").asDouble();
+			double sameWidthOfAnotherSideStreetInch = applicationDetails.get("sameWidthOfAnotherSideStreetInch").asDouble();
+			double sameWidthOfAnotherSideStreet = sameWidthOfAnotherSideStreetFT + (sameWidthOfAnotherSideStreetInch / 12);
 
+			double sameHeightOfAnotherSideStreetFT = applicationDetails.get("sameHeightOfAnotherSideStreet").asDouble();
+			double sameHeightOfAnotherSideStreetInch = applicationDetails.get("sameHeightOfAnotherSideStreetInch").asDouble();
+			double sameHeightOfAnotherSideStreet = sameHeightOfAnotherSideStreetFT + (sameHeightOfAnotherSideStreetInch / 12);
+			
+			calculateDevelopmentCharges = ((frontElevationWidth * streetWidth)
+					+ (sameWidthOfSideStreet * sameHeightOfSideStreet)+(sameWidthOfAnotherSideStreet*sameHeightOfAnotherSideStreet)) * (100 / 2);
+			}
+			else {
 			calculateDevelopmentCharges = ((frontElevationWidth * streetWidth)
 					+ (sameWidthOfSideStreet * sameHeightOfSideStreet)) * (100 / 2);
+			}
 
 		} else {
 			calculateDevelopmentCharges = (frontElevationWidth * streetWidth) * (100 / 2);
@@ -466,26 +483,14 @@ public class ApplicationEnrichmentService {
 
 		if (commercialActivity) {
 
-			double groundFloorcommercialActivityFt = applicationDetails.get("groundFloorcommercialActivity").asDouble();
-			double groundFloorcommercialActivityInch = applicationDetails.get("groundFloorcommercialActivityInch")
-					.asDouble();
-			double groundFloorcommercialActivity = groundFloorcommercialActivityFt
-					+ (groundFloorcommercialActivityInch / 12);
+			double groundFloorcommercialActivitySqFt = applicationDetails.get("groundFloorcommercialActivity")==null?0:applicationDetails.get("groundFloorcommercialActivity").asDouble();
 
-			double firstFloorcommercialActivityFt = applicationDetails.get("firstFloorcommercialActivity").asDouble();
-			double firstFloorcommercialActivityInch = applicationDetails.get("firstFloorcommercialActivityInch")
-					.asDouble();
-			double firstFloorcommercialActivity = firstFloorcommercialActivityFt
-					+ (firstFloorcommercialActivityInch / 12);
+			double firstFloorcommercialActivitySqFt = applicationDetails.get("firstFloorcommercialActivity")==null?0:applicationDetails.get("firstFloorcommercialActivity").asDouble();
 
-			double secondFloorcommercialActivityFt = applicationDetails.get("secondFloorcommercialActivity").asDouble();
-			double secondFloorcommercialActivityInch = applicationDetails.get("secondFloorcommercialActivityInch")
-					.asDouble();
-			double secondFloorcommercialActivity = secondFloorcommercialActivityFt
-					+ (secondFloorcommercialActivityInch / 12);
+			double secondFloorcommercialActivitySqFt = applicationDetails.get("secondFloorcommercialActivity")==null?0:applicationDetails.get("secondFloorcommercialActivity").asDouble();
 
-			calculateconversionCharges = ((groundFloorcommercialActivity + firstFloorcommercialActivity
-					+ secondFloorcommercialActivity) / 9) * 2400;
+			calculateconversionCharges = ((groundFloorcommercialActivitySqFt + firstFloorcommercialActivitySqFt
+					+ secondFloorcommercialActivitySqFt) / 9) * 2400;
 
 		}
 
