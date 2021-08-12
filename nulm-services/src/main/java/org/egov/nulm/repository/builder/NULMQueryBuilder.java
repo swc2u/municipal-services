@@ -167,7 +167,7 @@ public class NULMQueryBuilder {
 			+ "'tenantId',tenant_id,'applicationUuid',application_uuid))) as familymembers FROM nulm_susv_renew_familiy_detail GROUP BY application_uuid) NF \n"
 			+ "on SA.application_uuid=NF.application_uuid and SA.tenant_id=NF.tenant_id \n"
 			+ "where SA.application_id=(case when :applicationId  <>'' then :applicationId  else SA.application_id end) and SA.created_by=(case when :createdBy  <>'' then :createdBy  else SA.created_by end) AND SA.tenant_id=:tenantId\n"
-			+ "AND SA.is_active='true'  AND SA.application_status NOT IN(:applicationStaus) and \n"
+			+ "AND SA.is_active='true'  AND SA.application_status  IN(:applicationStaus) and \n"
 			+ "TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') >= CASE WHEN :fromDate <> ''THEN DATE(:fromDate) ELSE\n"
 			+ "TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END\n"
 			+ "AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <= CASE WHEN :toDate <>'' THEN DATE(:toDate) ELSE\n"

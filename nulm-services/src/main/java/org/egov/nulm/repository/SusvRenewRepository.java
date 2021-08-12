@@ -78,11 +78,42 @@ public class SusvRenewRepository {
 
 				paramValues.put("createdBy", userId.toString());
 				paramValues.put("applicationId", request.getApplicationId());
-				paramValues.put("applicationStaus", "");
+				List<Object> statusEmplyee = new ArrayList<>();
+				if (request.getApplicationStatus() == null) {
+					statusEmplyee.add(SusvRenewApplication.StatusEnum.APPROVED.toString());
+					statusEmplyee.add(SusvRenewApplication.StatusEnum.DRAFTED.toString());
+					statusEmplyee.add(SusvRenewApplication.StatusEnum.REJECTED.toString());
+					statusEmplyee.add(SusvRenewApplication.StatusEnum.CREATED.toString());
+					statusEmplyee.add(SusvRenewApplication.StatusEnum.FORWARDEDTOACMC.toString());
+					statusEmplyee.add(SusvRenewApplication.StatusEnum.FORWARDEDTOJA.toString());
+					statusEmplyee.add(SusvRenewApplication.StatusEnum.FORWARDEDTOSDO.toString());
+					statusEmplyee.add(SusvRenewApplication.StatusEnum.REASSIGNTOJA.toString());
+					statusEmplyee.add(SusvRenewApplication.StatusEnum.REASSIGNTOSDO.toString());
+					statusEmplyee.add(SusvRenewApplication.StatusEnum.REASSIGNTOCITIZEN.toString());
+					
+				} else {
+					statusEmplyee.add(request.getApplicationStatus().toString());
+				}
+				paramValues.put("applicationStaus", statusEmplyee);
 				return  namedParameterJdbcTemplate.query(NULMQueryBuilder.GET_SUSV_RENEW_QUERY, paramValues,
 						susvRenewRowMapper);
 			}
-			paramValues.put("applicationStaus", SusvRenewApplication.StatusEnum.DRAFTED.toString());
+			List<Object> statusEmplyee = new ArrayList<>();
+			if (request.getApplicationStatus() == null) {
+				statusEmplyee.add(SusvRenewApplication.StatusEnum.APPROVED.toString());
+				statusEmplyee.add(SusvRenewApplication.StatusEnum.REJECTED.toString());
+				statusEmplyee.add(SusvRenewApplication.StatusEnum.CREATED.toString());
+				statusEmplyee.add(SusvRenewApplication.StatusEnum.FORWARDEDTOACMC.toString());
+				statusEmplyee.add(SusvRenewApplication.StatusEnum.FORWARDEDTOJA.toString());
+				statusEmplyee.add(SusvRenewApplication.StatusEnum.FORWARDEDTOSDO.toString());
+				statusEmplyee.add(SusvRenewApplication.StatusEnum.REASSIGNTOJA.toString());
+				statusEmplyee.add(SusvRenewApplication.StatusEnum.REASSIGNTOSDO.toString());
+				statusEmplyee.add(SusvRenewApplication.StatusEnum.REASSIGNTOCITIZEN.toString());
+				
+			} else {
+				statusEmplyee.add(request.getApplicationStatus().toString());
+			}
+			paramValues.put("applicationStaus",statusEmplyee);
 			paramValues.put("createdBy", "");
 			paramValues.put("applicationId", request.getApplicationId());
 			return namedParameterJdbcTemplate.query(NULMQueryBuilder.GET_SUSV_RENEW_QUERY, paramValues, susvRenewRowMapper);
