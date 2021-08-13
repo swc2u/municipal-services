@@ -600,7 +600,7 @@ public class ApplicationEnrichmentService {
 
 			JsonNode applicationDetails = application.getApplicationDetails();
 
-			BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").toString());
+			BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").asText());
 			TaxHeadEstimate developmentChargesEstimate = new TaxHeadEstimate();
 			developmentChargesEstimate.setEstimateAmount(developmentCharges);
 			developmentChargesEstimate.setCategory(Category.CHARGES);
@@ -609,7 +609,10 @@ public class ApplicationEnrichmentService {
 			estimates.add(developmentChargesEstimate);
 
 			// Conversion charges
-			BigDecimal conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").toString());
+			BigDecimal conversionCharges = BigDecimal.ZERO;
+			if (null != applicationDetails.get("conversionCharges")) {
+				conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").asText());
+			}
 			TaxHeadEstimate conversionChargesEstimate = new TaxHeadEstimate();
 			conversionChargesEstimate.setEstimateAmount(conversionCharges);
 			conversionChargesEstimate.setCategory(Category.CHARGES);

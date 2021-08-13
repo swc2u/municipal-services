@@ -134,10 +134,14 @@ public class ApplicationsNotificationService {
 			if(application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
 					&& application.getApplicationType().contentEquals(PSConstants.NOC)) {
 				JsonNode applicationDetails = application.getApplicationDetails();
-
-				BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").toString());
-
-				BigDecimal conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").toString());
+				BigDecimal developmentCharges = BigDecimal.ZERO;
+				if (null != applicationDetails.get("developmentCharges")) {
+					 developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").asText());
+				}
+				BigDecimal conversionCharges = BigDecimal.ZERO;
+				if (null != applicationDetails.get("conversionCharges")) {
+					conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").asText());
+				}
 
 				BigDecimal scrutinyCharges = BigDecimal.ZERO;
 
@@ -248,7 +252,7 @@ public class ApplicationsNotificationService {
 					enrichedContent = enrichedContent.replace(PSConstants.BB_NOC_DUMMY_FILENO, application.getApplicationDetails().get("property").get("fileNumber").asText());
 				}
 			}
-
+			log.debug("final enriched content : "+enrichedContent);
 			/**
 			 * Send email
 			 */
@@ -257,6 +261,8 @@ public class ApplicationsNotificationService {
 				if (emailConfig.isValid()) {
 					String email = enrichPathPatternsWithApplication(emailConfig.getTo(), applicationJsonString);
 					String subject = enrichPathPatternsWithApplication(emailConfig.getSubject(), applicationJsonString);
+					enrichedContent=enrichedContent.concat(PSConstants.MAIL_SIGNATURE).replace("\n", "<br/>");
+					log.debug("email enriched content : "+enrichedContent);
 					this.notificationService.sendEmail(email, subject, enrichedContent);
 				} else {
 					log.warn("Notifications Invalid email config found {}", emailConfig);
