@@ -201,5 +201,7 @@ public class PSConstants {
 	public static final String BB_NOC_DUMMY_FILENO = "BBNOC-1";
 	
 	public static final String MM_PROPERTY_TYPE_OTHER = "PROPERTY_TYPE.OTHERS";
+	
+	public static final String MAIL_SIGNATURE = "<br/><br/><b>Regards,<br/>Municipal Corporation of Chandigarh<b>";
 
 }
