@@ -239,7 +239,4 @@ public class WSConfiguration {
 
 	@Value("${egov.waterservice.update.billingfilFlag}")
 	private String updateBillfileflag;
-	
-	@Value("${create.ws.metertesting.workflow}")
-	private String wsMeterTesting;
 }
