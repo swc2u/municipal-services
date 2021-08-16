@@ -357,4 +357,6 @@ public class WSCalculationConstant {
 
 	public static final String WS_RESIDENTIAL = "RESIDENTIAL";
 	
+	public static final String WS_METER_TESTING = "WS_METER_TESTING";
+	
 }
