@@ -1486,7 +1486,7 @@
 	
 	"SELLMEATNOC": {
 		"SISM-PAID": {
-			"REVIEWOFSUPERINTENDENT": {
+			"PENDINGAPPROVAL": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1512,7 +1512,7 @@
 			}
 		},
 		"SISM-REASSIGNTOSI": {
-			"REVIEWOFSUPERINTENDENT": {
+			"PENDINGAPPROVAL": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1538,7 +1538,7 @@
 			}
 		},
 		"SISM-RESENT": {
-			"REVIEWOFSUPERINTENDENT": {
+			"PENDINGAPPROVAL": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
@@ -1563,58 +1563,8 @@
 				}
 			}
 		},
-		"SUPERINTENDENT-REVIEWOFSUPERINTENDENT": {
-			"PENDINGAPPROVAL": {
-				"remarks": {
-					"fieldName": "remarks",
-					"mandatory": "true",
-					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
-				},
-				"uploadDocuments": {
-					"fieldName": "uploadDocuments",
-					"mandatory": "false",
-					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
-				}
-			},
-			"REASSIGNTOSI": {
-				"remarks": {
-					"fieldName": "remarks",
-					"mandatory": "true",
-					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
-				},
-				"uploadDocuments": {
-					"fieldName": "uploadDocuments",
-					"mandatory": "false",
-					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
-				}
-			}
-		},
-		"SUPERINTENDENT-REASSIGNTOSUPERINTENDENT": {
-			"PENDINGAPPROVAL": {
-				"remarks": {
-					"fieldName": "remarks",
-					"mandatory": "true",
-					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
-				},
-				"uploadDocuments": {
-					"fieldName": "uploadDocuments",
-					"mandatory": "false",
-					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
-				}
-			},
-			"REASSIGNTOSI": {
-				"remarks": {
-					"fieldName": "remarks",
-					"mandatory": "true",
-					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
-				},
-				"uploadDocuments": {
-					"fieldName": "uploadDocuments",
-					"mandatory": "false",
-					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
-				}
-			}
-		},
+		
+		
 		"MOH-PENDINGAPPROVAL": {
 			"APPROVED": {
 				"remarks": {
@@ -1623,7 +1573,7 @@
 					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
 				}
 			},
-			"REASSIGNTOSUPERINTENDENT": {
+			"REASSIGNTOSI": {
 				"remarks": {
 					"fieldName": "remarks",
 					"mandatory": "true",
