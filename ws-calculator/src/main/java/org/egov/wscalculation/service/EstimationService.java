@@ -385,7 +385,8 @@ public class EstimationService {
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_REACTIVATE)
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_CHANGE_OWNER_INFO)
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_CONVERSION)
-				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)) {
+				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)
+				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_METER_TESTING)) {
 			taxHeadEstimates = getTaxHeadForwaterActivity(criteria, masterData, requestInfo);
 		} else {
 			if (criteria.getWaterConnection().getWaterApplicationType()
@@ -406,7 +407,8 @@ public class EstimationService {
 			Map<String, Object> masterData, RequestInfo requestInfo) {
 		List<TaxHeadEstimate> estimates = new ArrayList<>();
 
-		if (criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)) {
+		if (criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER) 
+				|| criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_METER_TESTING)) {
 
 			JSONArray regularSlab = (JSONArray) masterData.getOrDefault(WSCalculationConstant.WS_REGULAR_CHARGES, null);
 			JSONObject masterSlab = new JSONObject();
@@ -437,14 +439,21 @@ public class EstimationService {
 
 					meterTestingFee = new BigDecimal(
 							mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getMetertesting());
-
-					meterFittingFee = new BigDecimal(
-							mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getMeterfitting());
-					if(criteria.getWaterConnection().getWaterApplication().getIsMeterStolen()) {
-						stolenMeterCharges =  new BigDecimal(
-								mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getStolenmetercharges());
+					
+					
+					//Changes By Bikash Dhal For Updated Activity for 
+							
+					if(criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)) {
 						
+						meterFittingFee = new BigDecimal(
+								mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getMeterfitting());
+						if(criteria.getWaterConnection().getWaterApplication().getIsMeterStolen()) {
+							stolenMeterCharges =  new BigDecimal(
+									mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getStolenmetercharges());
+							
+						}
 					}
+					
 					additionalCharges = new BigDecimal(
 							criteria.getWaterConnection().getWaterApplication().getAdditionalCharges() == null ? 0.0
 									: criteria.getWaterConnection().getWaterApplication().getAdditionalCharges());
