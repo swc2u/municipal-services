@@ -3,17 +3,23 @@ package org.egov.cpt.service.pdf;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.cpt.models.BillAccountDetailV2;
 import org.egov.cpt.models.Document;
 import org.egov.cpt.models.ExcelSearchCriteria;
+import org.egov.cpt.models.OfflinePaymentDetails;
 import org.egov.cpt.models.PdfSearchCriteria;
+import org.egov.cpt.models.Property;
+import org.egov.cpt.models.PropertyCriteria;
 import org.egov.cpt.models.enums.CollectionPaymentModeEnum;
+import org.egov.cpt.repository.PropertyRepository;
 import org.egov.cpt.util.FileStoreUtils;
 import org.egov.cpt.util.NotificationUtil;
 import org.egov.cpt.util.PTConstants;
@@ -87,6 +93,13 @@ public class PdfService {
 	@Value("${city_footer_right_url}")
 	private String city_footer_right_url;
 
+	@Value("${complete_footer_path}")
+	private String complete_footer_path;
+
+	@Value("${complete_header_path}")
+	private String complete_header_path;
+
+
 	@Autowired
 	private NotificationUtil notificationUtil;
 
@@ -95,6 +108,9 @@ public class PdfService {
 
 	@Autowired
 	private ReportViewerUtil  reportViewerUtil;
+
+	@Autowired
+	private PropertyRepository repository;
 
 	private String LOCALIZATION = "Localization";
 
@@ -113,11 +129,11 @@ public class PdfService {
 		final JasperReport report = JasperCompileManager.compileReport(stream);
 
 		// Compile the Jasper report from .jrxml to .japser
-		//				ClassLoader classLoader = getClass().getClassLoader();
-		//		        File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
-		//				   JasperCompileManager.compileReportToFile(
-		//						   file.getAbsolutePath(), // the path to the jrxml file to compile
-		//						   "src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
+//		ClassLoader classLoader = getClass().getClassLoader();
+//		File file = new File(classLoader.getResource("reports/templates/"+template).getFile());
+//		JasperCompileManager.compileReportToFile(
+//				file.getAbsolutePath(), // the path to the jrxml file to compile
+//				"src/main/resources/reports/templates/"+template.replace(".jrxml", "")+".jasper"); // the path and name we want to save the compiled file to
 
 		return report;
 	}
@@ -141,6 +157,9 @@ public class PdfService {
 		parameters.put(PTConstants.FOOTER_LEFT_PATH, getCityLogoAsBytes(PTConstants.FOOTER_LEFT_PATH));
 		parameters.put(PTConstants.FOOTER_RIGHT_PATH, getCityLogoAsBytes(PTConstants.FOOTER_RIGHT_PATH));
 		parameters.put(PTConstants.LOGO_PATH, getCityLogoAsBytes(PTConstants.LOGO_PATH));
+		parameters.put(PTConstants.COMPLETE_HEADER_PATH, getCityLogoAsBytes(PTConstants.COMPLETE_HEADER_PATH));
+		parameters.put(PTConstants.COMPLETE_FOOTER_PATH, getCityLogoAsBytes(PTConstants.COMPLETE_FOOTER_PATH));
+
 
 	}
 
@@ -392,15 +411,33 @@ public class PdfService {
 		// Adding the additional parameters to the pdf.
 		final Map<String, Object> parameters = new HashMap<>();
 
+		JRBeanCollectionDataSource source =null;
+
+		if(receiptRequest.getProperties()!=null && !receiptRequest.getProperties().isEmpty()) {
+			source = new JRBeanCollectionDataSource(receiptRequest.getProperties());
+		}else {
+			source = new JRBeanCollectionDataSource(receiptRequest.getPayments());
+		}
+
 		enrichParams(receiptRequest.getRequestInfo(),parameters,searchCriteria.getTenantId());
 
 		//setting payment details
 		parameters.put("payment", receiptRequest.getPayments().get(0));
 		parameters.put("paymentDetails", receiptRequest.getPayments().get(0).getPaymentDetails().get(0));
 
-		//		if(!searchCriteria.getKey().equalsIgnoreCase("rp-payment-receipt")) {
-		//			parameters.put("offlinePayemntDetails", receiptRequest.getProperties().get(0).getOfflinePaymentDetails().get(0));
-		//		}
+		if(!searchCriteria.getKey().equalsIgnoreCase("rp-payment-receipt") && receiptRequest.getProperties()!=null) {
+			parameters.put("transitNumber", receiptRequest.getProperties().get(0).getTransitNumber());
+
+			List<OfflinePaymentDetails> offlinePaymentDetailsFromDB = repository.getPropertyOfflinePaymentDetails(
+					PropertyCriteria.builder().propertyId(receiptRequest.getProperties().get(0).getId()).limit(1l).build());
+
+			if(offlinePaymentDetailsFromDB != null && !offlinePaymentDetailsFromDB.isEmpty()) {
+				Optional<OfflinePaymentDetails> offlinePaymentDetails = offlinePaymentDetailsFromDB.stream().filter(opd->opd.getTransactionNumber().equalsIgnoreCase(receiptRequest.getPayments().get(0).getTransactionNumber())).findAny();
+
+				if(offlinePaymentDetails.isPresent())
+					parameters.put("offlinePayemntDetails", offlinePaymentDetails.get());
+			}
+		}
 
 		//converting date to IST time
 		String paymentDate;
@@ -425,7 +462,7 @@ public class PdfService {
 		}
 
 		// Filling the report with the employee data and additional parameters information.
-		final JasperPrint print = JasperFillManager.fillReport(report, parameters, new JREmptyDataSource());
+		final JasperPrint print = JasperFillManager.fillReport(report, parameters, source);
 
 		final ReportRequest reportInput = new ReportRequest(findPDFTtemplate(searchCriteria.getKey()), parameters,
 				ReportDataSourceType.JAVABEAN);
@@ -600,6 +637,12 @@ public class PdfService {
 			break;
 		case PTConstants.FOOTER_RIGHT_PATH:
 			logo_http_url = this.city_footer_right_url;
+			break;
+		case PTConstants.COMPLETE_HEADER_PATH:
+			logo_http_url = this.complete_header_path;
+			break;
+		case PTConstants.COMPLETE_FOOTER_PATH:
+			logo_http_url = this.complete_footer_path;
 			break;
 		default:
 			logo_http_url = this.city_logo_url;

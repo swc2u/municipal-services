@@ -68,14 +68,14 @@
 			<textField>
 				<reportElement x="80" y="0" width="440" height="30" uuid="6d4f576d-1fba-4f40-abba-cb3fcbad941c"/>
 				<textElement textAlignment="Center">
-					<font fontName="Cambay" size="14" isBold="true"/>
+					<font size="14" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Provisional Statement of Transit site no. "+ $P{property}.getTransitNumber()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="80" y="30" width="440" height="25" uuid="9b3eabf7-2e2d-4e17-bff1-f3ce824cb4e1"/>
 				<textElement textAlignment="Center">
-					<font fontName="Cambay" size="14" isBold="true"/>
+					<font size="14" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{colony}]]></textFieldExpression>
 			</textField>
@@ -108,35 +108,35 @@
 			<staticText>
 				<reportElement x="10" y="0" width="270" height="24" uuid="4832d9ad-6d52-4e32-ba1e-6c71192fd34b"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ Name]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="10" y="26" width="270" height="24" uuid="d94ace90-d44c-46d4-865c-548f7338f5cf"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ Date of Allotment As Per Lease Deed]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="11" y="52" width="269" height="24" uuid="36adc97b-ee7d-42fd-99b8-08aa4bab85c5"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ Transit Site No]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="10" y="76" width="270" height="24" uuid="6c8c208d-5dea-46ad-8331-4a7ec2009d5e"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ Area]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="10" y="102" width="270" height="24" uuid="37f73ef5-1d0b-45b8-961b-cf7f9a246f6a"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ Rent per sq yd]]></text>
 			</staticText>
@@ -146,7 +146,7 @@
 			<staticText>
 				<reportElement x="11" y="161" width="270" height="24" uuid="22676761-a54e-4fac-8be2-67d0021e14a4"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ Yr. Rent (increase as per Clause 4 of Lease Deed)]]></text>
 			</staticText>
@@ -156,7 +156,7 @@
 			<staticText>
 				<reportElement x="10" y="125" width="270" height="36" uuid="a046c1de-964e-4100-b409-17a1e473e472"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ Security Advance Taken By o/o BDPO
  U.T.Interest]]></text>
@@ -170,77 +170,77 @@
 			<staticText>
 				<reportElement x="11" y="187" width="269" height="24" uuid="12366fe8-7eec-475a-971c-d1309d0c51a3"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ Monthly Rent ]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="10" y="211" width="260" height="28" uuid="8d2735d7-488d-452a-a887-4b52b3541a25"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ Interest ]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="284" y="0" width="270" height="26" uuid="8f864406-a283-45ed-bac4-c24cf5401e2e"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Owner}.getOwnerDetails().getName()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="282" y="75" width="270" height="26" uuid="85171671-5af2-4bc5-810d-7c59556493bb"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{property}.getPropertyDetails().getArea() +" sq.yd"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="282" y="99" width="270" height="26" uuid="54d6dc82-2889-4e51-99c9-bc517cef979f"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new BigDecimal($P{MonthlyRent}/Double.valueOf($P{property}.getPropertyDetails().getArea())).setScale(2, BigDecimal.ROUND_HALF_DOWN)]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="281" y="125" width="270" height="37" uuid="7787144f-c455-4d56-b10e-afa069baa5a6"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="283" y="160" width="270" height="26" uuid="6d431039-cb5b-4f43-b7aa-33ba0cc89a5f"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{property}.getPropertyDetails().getRentIncrementPercentage() +" %"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="283" y="185" width="270" height="26" uuid="d4013af8-c7e1-4969-866f-ec959dd90d48"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{MonthlyRent}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="283" y="212" width="268" height="26" uuid="3d06b794-1420-4bb4-beca-bc79e9e52664"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{property}.getPropertyDetails().getInterestRate() +" % P.A as per clause 15 of Lease Deed"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="284" y="27" width="270" height="26" uuid="69f359a7-5aa4-4269-b344-f5b93d1c0dfb"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy").format($P{Owner}.getOwnerDetails().getAllotmentStartdate())]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="283" y="51" width="270" height="26" uuid="09ac5750-d471-41e4-a10c-6b472ef9d212"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{property}.getTransitNumber()]]></textFieldExpression>
 			</textField>
@@ -261,7 +261,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="60" height="30" uuid="e052912f-afd5-483a-ac5b-fba3903b7739"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11" isBold="true"/>
+									<font size="11" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Date]]></text>
 							</staticText>
@@ -270,7 +270,7 @@
 							<textField textAdjust="StretchHeight">
 								<reportElement x="0" y="0" width="60" height="30" uuid="1cc0e234-505e-43e0-80f5-85ae94bfd95b"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11"/>
+									<font size="11"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
 							</textField>
@@ -282,7 +282,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="60" height="30" uuid="e0c6f9f6-08a6-4d17-a72d-61991ab44319"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11" isBold="true"/>
+									<font size="11" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Amount
 (₹)]]></text>
@@ -292,7 +292,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="60" height="30" uuid="f6eb8d55-12b8-43ee-bc22-9c257e6a2d52"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11"/>
+									<font size="11"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{amount}]]></textFieldExpression>
 							</textField>
@@ -304,7 +304,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="65" height="30" uuid="61f30576-f8fe-479c-b04d-7bb99257610e"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11" isBold="true"/>
+									<font size="11" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Type(payment)]]></text>
 							</staticText>
@@ -313,7 +313,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="65" height="30" uuid="80a8fde7-bd56-4001-89e5-0a245dffdbb7"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11"/>
+									<font size="11"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{typeP}]]></textFieldExpression>
 							</textField>
@@ -325,7 +325,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="65" height="30" uuid="68bbbb7b-4e54-4c31-bcba-20a6d4d036a8"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11" isBold="true"/>
+									<font size="11" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Type(Rent)
 ]]></text>
@@ -335,7 +335,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="65" height="30" uuid="4df166a6-4943-44fb-88c3-1a8c22114714"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11"/>
+									<font size="11"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{typeR}]]></textFieldExpression>
 							</textField>
@@ -347,7 +347,7 @@
 							<staticText>
 								<reportElement x="0" y="0" width="65" height="30" uuid="b4a90f0f-1cd1-4a83-b7ee-5f160e25ea7a"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11" isBold="true"/>
+									<font size="11" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Principal
 Due (₹)]]></text>
@@ -357,7 +357,7 @@ Due (₹)]]></text>
 							<textField>
 								<reportElement x="0" y="0" width="65" height="30" uuid="85426271-6d73-45d1-9d8e-2d2926be0884"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11"/>
+									<font size="11"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{remainingPrincipal}]]></textFieldExpression>
 							</textField>
@@ -369,7 +369,7 @@ Due (₹)]]></text>
 							<staticText>
 								<reportElement x="0" y="0" width="65" height="30" uuid="ec73f0b1-fff2-46dd-a051-6901c44b771d"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11" isBold="true"/>
+									<font size="11" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Interest
 Due (₹)]]></text>
@@ -379,7 +379,7 @@ Due (₹)]]></text>
 							<textField>
 								<reportElement x="0" y="0" width="65" height="30" uuid="00e6b188-f6b2-4ce3-becf-d052b65bac3d"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11"/>
+									<font size="11"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{remainingInterest}]]></textFieldExpression>
 							</textField>
@@ -391,7 +391,7 @@ Due (₹)]]></text>
 							<staticText>
 								<reportElement x="0" y="0" width="60" height="30" uuid="bffb7de4-85f0-4998-9560-7116f17d65a7"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11" isBold="true"/>
+									<font size="11" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Total
 Due (₹)]]></text>
@@ -401,7 +401,7 @@ Due (₹)]]></text>
 							<textField>
 								<reportElement x="0" y="0" width="60" height="30" uuid="8462b9dd-68e1-4374-ac86-5a3408746d96"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11"/>
+									<font size="11"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{dueAmount}]]></textFieldExpression>
 							</textField>
@@ -413,7 +413,7 @@ Due (₹)]]></text>
 							<staticText>
 								<reportElement x="0" y="0" width="50" height="30" uuid="cd5f766c-29c6-4e07-8078-a0afcc22c1e4"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11" isBold="true"/>
+									<font size="11" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Account
 Balance
@@ -425,7 +425,7 @@ Balance
 							<textField>
 								<reportElement x="0" y="0" width="50" height="30" uuid="3b3e017b-36a2-4c68-9a25-605e274026d4"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11"/>
+									<font size="11"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{remainingBalance}]]></textFieldExpression>
 							</textField>
@@ -437,7 +437,7 @@ Balance
 							<staticText>
 								<reportElement x="0" y="0" width="50" height="30" uuid="82f134f1-da29-4a3f-8c45-a0a41bb4bab8"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11" isBold="true"/>
+									<font size="11" isBold="true"/>
 								</textElement>
 								<text><![CDATA[Receipt
 Number
@@ -448,7 +448,7 @@ Number
 							<textField>
 								<reportElement x="0" y="0" width="50" height="30" uuid="fcd26e9b-27f0-4e40-b31b-8cca1a836809"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font fontName="Cambay" size="11"/>
+									<font size="11"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{receiptNo}]]></textFieldExpression>
 							</textField>

@@ -15,8 +15,7 @@
 	<parameter name="payment" class="org.egov.cpt.models.CollectionPayment"/>
 	<parameter name="paymentDetails" class="org.egov.cpt.models.CollectionPaymentDetail"/>
 	<parameter name="CITY_WATER_MARK_PATH" class="java.lang.Object"/>
-	<parameter name="CITY_FOOTER_LEFT_PATH" class="java.lang.Object"/>
-	<parameter name="CITY_FOOTER_RIGHT_PATH" class="java.lang.Object"/>
+	<parameter name="COMPLETE_FOOTER_PATH" class="java.lang.Object"/>
 	<parameter name="paymentDate" class="java.lang.String"/>
 	<parameter name="dueAmount" class="java.math.BigDecimal"/>
 	<parameter name="publicationCharge" class="java.math.BigDecimal"/>
@@ -26,7 +25,7 @@
 			<textField>
 				<reportElement x="80" y="30" width="370" height="28" uuid="bc7fa61e-bd5b-4913-a5c5-c2c04b824fcd"/>
 				<textElement textAlignment="Center">
-					<font fontName="Roboto" size="13" isBold="true"/>
+					<font size="13" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYMENT_RECEIPT_LABEL")]]></textFieldExpression>
 			</textField>
@@ -37,14 +36,14 @@
 			<textField>
 				<reportElement x="81" y="1" width="369" height="28" uuid="4dbcb10d-35c8-4d44-9f90-c6e668729bf0"/>
 				<textElement textAlignment="Center">
-					<font fontName="Roboto" size="16" isBold="true"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PDF_HEADER")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="451" y="3" width="109" height="60" uuid="35c5e273-de2c-499c-b96e-4229be853cf6"/>
 				<textElement textAlignment="Center" markup="html">
-					<font fontName="Roboto" size="10" isBold="true"/>
+					<font size="10" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_RECEIPT_NUMBER_LABEL") +" <br/>"+$P{paymentDetails}.getReceiptNumber()]]></textFieldExpression>
 			</textField>
@@ -53,16 +52,16 @@
 	<pageHeader>
 		<band height="38" splitType="Stretch">
 			<textField>
-				<reportElement x="12" y="5" width="280" height="28" uuid="28658568-2a8c-40b2-b341-853430bb138d"/>
+				<reportElement x="12" y="5" width="368" height="28" uuid="28658568-2a8c-40b2-b341-853430bb138d"/>
 				<textElement textAlignment="Left" markup="html">
-					<font fontName="Roboto" size="12" isBold="false"/>
+					<font size="12" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["<b>"+$P{Localization}.get("RP_APPLICATION_NUMBER_LABEL") +" : </b>"+$P{paymentDetails}.getBill().getConsumerCode()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="387" y="10" width="161" height="28" uuid="ff33d43f-2208-45cd-a832-1d29ca40c168"/>
 				<textElement textAlignment="Left" markup="html">
-					<font fontName="Roboto" size="12" isBold="false"/>
+					<font size="12" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["<b>"+$P{Localization}.get("RP_PAYMENT_DATE_LABEL") +" : </b>"+new SimpleDateFormat("dd/MM/yyyy").format($P{payment}.getTransactionDate())]]></textFieldExpression>
 			</textField>
@@ -76,28 +75,28 @@
 			<textField>
 				<reportElement x="13" y="16" width="179" height="22" uuid="5301494e-de3a-4266-aa21-d1e052069eb1"/>
 				<textElement>
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_APPLICATION_DETAILS_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="13" y="40" width="269" height="20" uuid="264b4244-23b5-4d65-9384-7e982fffeae0"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" markup="styled">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["<b>"+$P{Localization}.get("RP_APPLICATION_TYPE_LABEL") +"</b>\t\t"+$P{paymentDetails}.getReceiptType()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="282" y="40" width="265" height="20" uuid="363075ff-19e0-48a3-9b71-04feba8d4ee5"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" markup="styled">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["<b>"+$P{Localization}.get("RP_SERVICE_TYPE_LABEL") +"</b>\t\t"+$P{Localization}.get("RP_"+$P{paymentDetails}.getBusinessService().replace(".","_"))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="18" y="128" width="181" height="20" uuid="f1abcfcf-390f-4ee5-9986-0a0c61d39155"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYER_MOBILE_NO_LABEL")]]></textFieldExpression>
 			</textField>
@@ -107,154 +106,154 @@
 			<textField>
 				<reportElement x="19" y="107" width="178" height="20" uuid="5d92cbda-c66c-408d-a57c-21be92b9cd46"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYER_NAME_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="216" y="128" width="170" height="20" uuid="a7438f90-26fb-4f13-9d0f-6b4a52116418"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{payment}.getMobileNumber()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="216" y="107" width="178" height="20" uuid="0cf89b3a-009d-4e17-a413-d887d432044a"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{payment}.getPayerName()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="14" y="76" width="180" height="26" uuid="b611b5aa-637a-47f6-a5ea-93d45f50ca47"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYER_INFORMATION_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="14" y="168" width="180" height="26" uuid="1a96f79c-9c29-4cec-a6ec-a17f807ce95c"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYABLE_RENT_PAYMENT_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="12" y="199" width="178" height="20" uuid="9d1a086f-fcf8-4605-8564-5bc685c1871d"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_CHARGES_DUES_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="190" y="199" width="178" height="20" uuid="8f6bc99d-f2d5-4ea5-9840-08481cbd1b2b"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PUBLICATION_CHARGES")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="368" y="199" width="179" height="20" uuid="599e644f-6759-4cad-b7f0-6f88b02d13e7"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_RENT_TOTALAMOUNT_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="12" y="219" width="178" height="20" uuid="84818238-17e1-4752-9a6b-d2f038ecf55f"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{dueAmount}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="190" y="219" width="178" height="20" uuid="03cdf974-f2e0-48da-81ff-219d2344d4a0"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{publicationCharge}==null?"N/A":$P{publicationCharge}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="368" y="219" width="179" height="20" uuid="cab1fb62-ce4f-40bf-be24-7a63dbd888dd"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{paymentDetails}.getTotalAmountPaid()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="11" y="332" width="178" height="20" uuid="432a993c-7acf-4d49-acc4-d88745486d57"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{paymentMode}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="189" y="312" width="178" height="20" uuid="03179f7b-f76e-4cc0-abed-ef04c7c13793"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_TRANSACTION_ID_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="367" y="332" width="180" height="20" uuid="dd9df865-d815-402b-888a-a11d3ba1e50d"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{paymentDate}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="10" y="258" width="180" height="26" uuid="6b1a3b78-1fe4-400a-aed5-308c060378ce"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYMENT_INFORMATION_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="367" y="312" width="180" height="20" uuid="d6029da4-c40f-4047-8629-74a842567e47"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYABLE_AMOUNT_ON")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="11" y="292" width="536" height="20" uuid="f76f76f3-a875-4486-be90-13f0b92dc7e0"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle" markup="styled">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["<b>"+$P{Localization}.get("RP_AMOUNT_PAID_LABEL")+" :</b>\t\t"+$P{paymentDetails}.getTotalAmountPaid()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="189" y="332" width="178" height="20" uuid="4c605aca-ea4c-4da8-8dd3-ff26709cca4b"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{payment}.getTransactionNumber()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement style="paymentInfo" x="11" y="312" width="178" height="20" uuid="80f97d2a-2a73-4b0f-a0d7-87a4c16e62aa"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PAYMENT_MODE_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="12" y="415" width="280" height="20" uuid="a67e2b93-f183-4b70-92f7-b57f7f8ec0eb"/>
 				<textElement>
-					<font fontName="Roboto" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_GENERATED_BY_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="12" y="437" width="150" height="28" uuid="a1e8d5e3-7fa8-4e1f-8f05-dc875980969d"/>
 				<textElement>
-					<font fontName="Roboto" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA["System"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="12" y="493" width="535" height="30" uuid="c182dbb1-5285-4e9c-9c2b-4f6145aaa773"/>
 				<textElement>
-					<font fontName="Roboto" size="9" isBold="true"/>
+					<font size="9" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Note: 1."+$P{Localization}.get("RP_SUBJECT_TO_REALIZATION")+" 2. "+$P{Localization}.get("RP_NOT_PROOF_OF_PROPERTY")+" 3. "+$P{Localization}.get("RP_COMPUTER_GENERATED_DOCUMENT")]]></textFieldExpression>
 			</textField>
@@ -263,19 +262,8 @@
 	<pageFooter>
 		<band height="105" splitType="Stretch">
 			<image>
-				<reportElement x="8" y="28" width="60" height="60" uuid="53505e3f-fdff-49a7-8a37-6edabb786cfe"/>
-				<imageExpression><![CDATA[$P{CITY_FOOTER_LEFT_PATH}]]></imageExpression>
-			</image>
-			<staticText>
-				<reportElement x="78" y="30" width="399" height="43" uuid="49e76364-f935-4303-8a75-6f1a3c251344"/>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="Cambay" size="13"/>
-				</textElement>
-				<text><![CDATA[नगर निगम चण्डीगढ़/MUNICIPAL CORPORATION, CHANDIGARH]]></text>
-			</staticText>
-			<image>
-				<reportElement x="480" y="23" width="60" height="60" uuid="136bc490-eec8-4195-94c3-15671fc6f7ec"/>
-				<imageExpression><![CDATA[$P{CITY_FOOTER_RIGHT_PATH}]]></imageExpression>
+				<reportElement x="8" y="28" width="542" height="60" uuid="53505e3f-fdff-49a7-8a37-6edabb786cfe"/>
+				<imageExpression><![CDATA[$P{COMPLETE_FOOTER_PATH}]]></imageExpression>
 			</image>
 		</band>
 	</pageFooter>
