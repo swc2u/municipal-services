@@ -386,7 +386,7 @@ public class EstimationService {
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_CHANGE_OWNER_INFO)
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_CONVERSION)
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)
-				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_METER_TESTING)) {
+				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_METER_TESTING_ACTIVITY)) {
 			taxHeadEstimates = getTaxHeadForwaterActivity(criteria, masterData, requestInfo);
 		} else {
 			if (criteria.getWaterConnection().getWaterApplicationType()
@@ -408,7 +408,7 @@ public class EstimationService {
 		List<TaxHeadEstimate> estimates = new ArrayList<>();
 
 		if (criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER) 
-				|| criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_METER_TESTING)) {
+				|| criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_METER_TESTING_ACTIVITY)) {
 
 			JSONArray regularSlab = (JSONArray) masterData.getOrDefault(WSCalculationConstant.WS_REGULAR_CHARGES, null);
 			JSONObject masterSlab = new JSONObject();
