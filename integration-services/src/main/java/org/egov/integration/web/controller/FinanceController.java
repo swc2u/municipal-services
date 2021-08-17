@@ -1,5 +1,7 @@
 package org.egov.integration.web.controller;
 
+import java.io.IOException;
+
 import javax.validation.Valid;
 
 import org.egov.integration.model.PaymentsRequest;
@@ -11,6 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,10 +32,7 @@ public class FinanceController {
 
 
 	@PostMapping(value = "/_generate")
-	public ResponseEntity<ResponseInfoWrapper> generate(@Valid @RequestBody PaymentsRequest request) {
-		log.info("request"+request);
-		log.info("authToke"+request.getRequestInfo().getAuthToken());
-		log.info("requestInfo"+request.getRequestInfo());
+	public ResponseEntity<ResponseInfoWrapper> generate(@Valid @RequestBody PaymentsRequest request) throws JsonParseException, JsonMappingException, IOException {
 		return service.generate(request);
 	}
 

@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.integration.PreApplicationRunnerImpl;
@@ -14,12 +16,12 @@ import org.egov.integration.common.CommonConstants;
 import org.egov.integration.common.ModuleNameConstants;
 import org.egov.integration.config.ApiConfiguration;
 import org.egov.integration.model.DisplayColumns;
+import org.egov.integration.model.ReportModel;
 import org.egov.integration.model.ReportRequest;
 import org.egov.integration.model.RequestData;
 import org.egov.integration.model.ResponseInfoWrapper;
 import org.egov.tracer.model.ServiceCallException;
 import org.json.JSONException;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -55,7 +57,8 @@ public class ReportService {
 		Gson gson = new Gson();
 		long fromdate = 0;
 		long todate = 0;
-		JSONArray responseArray = new JSONArray();
+		List<ReportModel> responseArray=new ArrayList<>();
+	//	JSONArray responseArray = new JSONArray();
 		RequestData requests = new RequestData();
 		if (redata.getParameter1Format().equalsIgnoreCase("Long")) {
 			ZonedDateTime zdt = LocalDate.now(ZoneId.of("Etc/UTC")).atTime(LocalTime.MIDNIGHT)
@@ -72,7 +75,7 @@ public class ReportService {
 
 		}
 
-		if (request.getRequestBody().getModuleName().equalsIgnoreCase(ModuleNameConstants.PETNOC)) {
+		if (request.getRequestBody().getModuleName().equalsIgnoreCase(ModuleNameConstants.OPMS)) {
 			StringBuilder url = new StringBuilder(config.getOPMSHost()).append(redata.getEndPoint());
 			dataPayload.put(redata.getParameter1(), fromdate);
 			dataPayload.put(redata.getParameter2(), todate);
@@ -85,15 +88,12 @@ public class ReportService {
 				for (JsonNode userInfo : result.get("nocApplicationDetail")) {
 					LocalDate date = Instant.ofEpochMilli(userInfo.get("createdTime").asLong())
 							.atZone(ZoneId.systemDefault()).toLocalDate();
-					JSONObject response=new JSONObject();
-					response.put(ModuleNameConstants.applicantId, userInfo.get("applicationId"));
-					response.put(ModuleNameConstants.applicantSector, userInfo.get("sector"));
-					response.put(ModuleNameConstants.applicantSumbmissionDate, date);
-					response.put(ModuleNameConstants.MODULENAME, ModuleNameConstants.PETNOC);
-					responseArray.add(response);
+					ReportModel response=ReportModel.builder().applicantId(userInfo.get("applicationId")).applicantSector(userInfo.get("sector"))
+							.applicantSubmissionDate(date.toString()).serviceName( ModuleNameConstants.PETNOC).build();
+				responseArray.add(response);
 				}
 			}
-		/*	requests = new RequestData(request.getRequestInfo(), ModuleNameConstants.SELLMEATNOC, null, null,
+			requests = new RequestData(request.getRequestInfo(), ModuleNameConstants.SELLMEATNOC, null, null,
 					dataPayload, null);
 			log.info("req" + requests);
 			JsonNode resultSellMeat = fetchResult(url, requests);
@@ -101,14 +101,26 @@ public class ReportService {
 				for (JsonNode userInfo : resultSellMeat.get("nocApplicationDetail")) {
 					LocalDate date = Instant.ofEpochMilli(userInfo.get("createdTime").asLong())
 							.atZone(ZoneId.systemDefault()).toLocalDate();
-					JSONObject response=new JSONObject();
-					response.put(ModuleNameConstants.applicantId, userInfo.get("applicationId"));
-					response.put(ModuleNameConstants.applicantSector, userInfo.get("sector"));
-					response.put(ModuleNameConstants.applicantSumbmissionDate, date);
-					response.put(ModuleNameConstants.MODULENAME, ModuleNameConstants.SELLMEATNOC);
+					ReportModel response=ReportModel.builder().applicantId(userInfo.get("applicationId")).applicantSector(userInfo.get("sector"))
+							.applicantSubmissionDate(date.toString()).serviceName( ModuleNameConstants.SELLMEATNOC).build();
+					
 					responseArray.add(response);
 				}
-			}*/
+			}
+			requests = new RequestData(request.getRequestInfo(), ModuleNameConstants.ADVERTISEMENTNOC, null, null,
+					dataPayload, null);
+			log.info("req" + requests);
+			JsonNode resultAdv= fetchResult(url, requests);
+			if (resultAdv != null) {
+				for (JsonNode userInfo : resultAdv.get("nocApplicationDetail")) {
+					LocalDate date = Instant.ofEpochMilli(userInfo.get("createdTime").asLong())
+							.atZone(ZoneId.systemDefault()).toLocalDate();
+					ReportModel response=ReportModel.builder().applicantId(userInfo.get("applicationId")).applicantSector(userInfo.get("sector"))
+							.applicantSubmissionDate(date.toString()).serviceName( ModuleNameConstants.ADVERTISEMENTNOC).build();
+					
+					responseArray.add(response);
+				}
+			}
 		}
 		if (request.getRequestBody().getModuleName().equalsIgnoreCase(ModuleNameConstants.HORTICULTURE)) {
 			StringBuilder url = new StringBuilder(config.getHortiHost()).append(redata.getEndPoint());
@@ -122,11 +134,9 @@ public class ReportService {
 					String startDateString = userInfo.get("createdtime").toString().replaceAll("\"", "");
 					SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 					SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
-					JSONObject response=new JSONObject();
-					response.put(ModuleNameConstants.MODULENAME, ModuleNameConstants.HORTICULTURE);
-					response.put(ModuleNameConstants.applicantId, userInfo.get("service_request_id"));
-					response.put(ModuleNameConstants.applicantSector, userInfo.get("locality"));
-					response.put(ModuleNameConstants.applicantSumbmissionDate, sdf2.format(sdf.parse(startDateString)));
+					ReportModel response=ReportModel.builder().applicantId(userInfo.get("service_request_id")).applicantSector(userInfo.get("locality"))
+							.applicantSubmissionDate(sdf2.format(sdf.parse(startDateString))).serviceName( ModuleNameConstants.HORTICULTURE).build();
+				
 					responseArray.add(response);
 				}
 			}
@@ -150,11 +160,8 @@ public class ReportService {
 				for (JsonNode userInfo : result.get("ResponseBody")) {
 					LocalDate date = Instant.ofEpochMilli(userInfo.get("createdTime").longValue())
 							.atZone(ZoneId.systemDefault()).toLocalDate();
-					JSONObject response=new JSONObject();
-					response.put(ModuleNameConstants.applicantId, userInfo.get("challanId"));
-					response.put(ModuleNameConstants.applicantSector, userInfo.get("sector"));
-					response.put(ModuleNameConstants.applicantSumbmissionDate, date);
-					response.put(ModuleNameConstants.MODULENAME, ModuleNameConstants.ECHALLAN);
+					ReportModel response=ReportModel.builder().applicantId(userInfo.get("challanId")).applicantSector(userInfo.get("sector"))
+							.applicantSubmissionDate(date.toString()).serviceName( ModuleNameConstants.ECHALLAN).build();
 					responseArray.add(response);
 				}
 			}
@@ -163,7 +170,7 @@ public class ReportService {
 
 		return new ResponseEntity<>(ResponseInfoWrapper.builder()
 				.responseInfo(ResponseInfo.builder().status(CommonConstants.SUCCESS).build())
-				.responseBody(gson.fromJson(responseArray.toString(), Object.class)).build(), HttpStatus.OK);
+				.responseBody(responseArray).build(), HttpStatus.OK);
 	}
 
 	public JsonNode fetchResult(StringBuilder uri, Object request) {

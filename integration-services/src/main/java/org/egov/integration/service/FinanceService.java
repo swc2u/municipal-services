@@ -1,5 +1,6 @@
 package org.egov.integration.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.egov.common.contract.response.ResponseInfo;
@@ -15,6 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,7 +40,7 @@ public class FinanceService {
 		this.config = config;
 	}	
 	
-	public ResponseEntity<ResponseInfoWrapper> generate(PaymentsRequest req) {
+	public ResponseEntity<ResponseInfoWrapper> generate(PaymentsRequest req) throws JsonParseException, JsonMappingException, IOException {
 		try {		
 		 List<Payment> payment=demandService.generate(req);
 			return new ResponseEntity<>(ResponseInfoWrapper.builder()
