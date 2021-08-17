@@ -211,7 +211,7 @@ public class ApplicationEnrichmentService {
 
 			}
 
-			if (application.getState().contains(PSConstants.BB_NOC_PENDING_AC_APPROVAL)) {
+			if (application.getState().contains(PSConstants.BB_NOC_PENDING_DRAFSMAN_CALCULATION)) {
 
 				// Development Charges
 				BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").asText());
