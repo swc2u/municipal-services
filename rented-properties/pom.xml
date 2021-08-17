@@ -145,16 +145,16 @@
 			<artifactId>jfreechart</artifactId>
 			<version>1.0.19</version>
 		</dependency>
-		<dependency>
-			<groupId>com.egov.font.rented-properties</groupId>
-			<artifactId>fonts-extention-cambay</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.egov.font.rented-properties</groupId>
-			<artifactId>fonts-extention-roboto</artifactId>
-			<version>1.0</version>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.egov.font.rented-properties</groupId> -->
+<!-- 			<artifactId>fonts-extention-cambay</artifactId> -->
+<!-- 			<version>1.0</version> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.egov.font.rented-properties</groupId> -->
+<!-- 			<artifactId>fonts-extention-roboto</artifactId> -->
+<!-- 			<version>1.0</version> -->
+<!-- 		</dependency> -->
 
 		<!-- REPORTS END -->
 
