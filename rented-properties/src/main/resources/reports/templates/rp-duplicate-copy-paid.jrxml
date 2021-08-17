@@ -14,9 +14,8 @@
 	<parameter name="property" class="org.egov.cpt.models.Property"/>
 	<parameter name="applicant" class="org.egov.cpt.models.Applicant"/>
 	<parameter name="dcApplication" class="org.egov.cpt.models.DuplicateCopy"/>
-	<parameter name="CITY_WATER_MARK_PATH" class="java.lang.Object"/>
-	<parameter name="CITY_FOOTER_LEFT_PATH" class="java.lang.Object"/>
-	<parameter name="CITY_FOOTER_RIGHT_PATH" class="java.lang.Object"/>
+	<parameter name="COMPLETE_HEADER_PATH" class="java.lang.Object"/>
+	<parameter name="COMPLETE_FOOTER_PATH" class="java.lang.Object"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -25,42 +24,21 @@
 	</background>
 	<title>
 		<band height="146" splitType="Stretch">
-			<staticText>
-				<reportElement x="0" y="0" width="479" height="30" uuid="6646ba00-d62b-4113-b095-00beeadc8bc4"/>
-				<textElement textAlignment="Center">
-					<font fontName="Cambay" size="14" isBold="true"/>
-				</textElement>
-				<text><![CDATA[नगर निगम चण्डीगढ़/MUNICIPAL CORPORATION, CHANDIGARH]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="0" y="30" width="479" height="20" uuid="e260da51-bf74-4889-8042-c587013b90ad"/>
-				<textElement textAlignment="Center">
-					<font fontName="Cambay" size="12"/>
-				</textElement>
-				<text><![CDATA[(New Delux Building, Sector-17, UT Chandigarh)  0172-5021503]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="0" y="50" width="479" height="20" uuid="11eec0e9-b58f-4bf7-873c-fdf71a0b94e8"/>
-				<textElement textAlignment="Center">
-					<font fontName="Cambay" size="12" isBold="true" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[(Colony Branch)]]></text>
-			</staticText>
 			<image>
-				<reportElement x="482" y="7" width="60" height="60" uuid="157fbaa8-dbdb-4582-9ee3-636dfd2ed103"/>
-				<imageExpression><![CDATA[$P{CITY_WATER_MARK_PATH}]]></imageExpression>
+				<reportElement x="54" y="0" width="502" height="79" uuid="4ca57c9e-2ca6-407d-9b47-6bff81b2b89e"/>
+				<imageExpression><![CDATA[$P{COMPLETE_HEADER_PATH}]]></imageExpression>
 			</image>
 			<textField>
 				<reportElement x="0" y="81" width="479" height="24" uuid="b933f862-7c3a-4da5-bf38-907da81c6697"/>
 				<textElement textAlignment="Center">
-					<font fontName="Cambay" size="12" isBold="false"/>
+					<font size="12" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_APPLICATION_FOR_DUPLICATE_HEADER")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="105" width="479" height="40" uuid="1757fe20-33ed-4632-997f-b7398d2f2020"/>
 				<textElement textAlignment="Center">
-					<font fontName="Cambay" size="12" isBold="false"/>
+					<font size="12" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_HOME_SEARCH_RESULTS_APP_NO_LABEL") + $P{dcApplication}.getApplicationNumber()]]></textFieldExpression>
 			</textField>
@@ -77,91 +55,91 @@
 			<textField>
 				<reportElement x="9" y="306" width="131" height="20" uuid="674a40b6-9699-4a84-855f-8ed568094ce4"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="12" isBold="true"/>
+					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_APPLICANT_DETAILS")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="19" y="418" width="147" height="30" uuid="650f60dd-a7bf-4f19-ae23-e2f1e08d032c"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{applicant}.getAdhaarNumber()!=null?$P{applicant}.getAdhaarNumber():"N/A"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="19" y="358" width="131" height="30" uuid="5014778a-9837-4b03-9a8f-46c53229ab44"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{applicant}.getName()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="19" y="393" width="131" height="20" uuid="bfaa877e-4696-45b1-84b9-af3d41d4398a"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_AADHAR_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="306" y="355" width="131" height="20" uuid="07135d62-7228-4ba7-9089-295af818f7f0"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get($P{applicant}.getRelationship())]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="306" y="390" width="131" height="20" uuid="892d39f8-e91d-4292-af0d-d663c9f215c4"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_OWNER_DETAILS_EMAIL_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="19" y="331" width="131" height="20" uuid="4b715c6f-9caf-41ef-b971-804199da92bf"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_APPLICANT_NAME_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="306" y="331" width="131" height="20" uuid="ea84c4e7-0094-4282-91c4-e2874def7264"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_RELATIONSHIP_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="306" y="415" width="164" height="30" uuid="90d2e77f-b1fe-4f93-b774-b0f7a3ebe203"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{applicant}.getEmail()!=null?$P{applicant}.getEmail():"N/A"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="166" y="331" width="130" height="20" uuid="37fa4607-752c-437f-944c-535ad58dfd87"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_FATHER_HUSBANDS_NAME_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="166" y="358" width="131" height="30" uuid="eb1ce42f-b5c5-4cb5-86fe-250cabe57692"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{applicant}.getGuardian()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="447" y="331" width="96" height="20" uuid="f9897ed6-e202-4a13-816a-1fd854d13fd2"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_MOBILE_NO_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="447" y="356" width="96" height="20" uuid="1892ab75-626e-45b4-9d22-ed851e063b65"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{applicant}.getPhone()]]></textFieldExpression>
 			</textField>
@@ -171,35 +149,35 @@
 			<textField>
 				<reportElement x="9" y="10" width="124" height="20" uuid="a98e5d40-ddb6-418c-a717-e06f80083fe8"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="12" isBold="true"/>
+					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_FEE_ESTIMATE_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="9" y="40" width="124" height="20" uuid="9919e220-729d-43d1-8c35-8e70078aed2c"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_CHARGES_DUE_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="286" y="40" width="84" height="20" uuid="3af2fb80-6987-46f7-83cc-e494706f2938"/>
 				<textElement textAlignment="Right">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{applicant}.getFeeAmount()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="9" y="89" width="124" height="20" uuid="7352c778-8d17-42fc-95f0-5605f7513501"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_TOTAL_AMOUNT")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="286" y="87" width="84" height="20" uuid="1a98d64f-f457-43c3-bf52-1e9173b46e32"/>
 				<textElement textAlignment="Right">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{applicant}.getFeeAmount()]]></textFieldExpression>
 			</textField>
@@ -209,77 +187,77 @@
 			<textField>
 				<reportElement x="418" y="40" width="124" height="20" uuid="4974276f-b8dc-4076-b67e-0cdeecc117e3"/>
 				<textElement textAlignment="Right">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_TOTAL_AMOUNT")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="418" y="70" width="125" height="20" uuid="32e8e405-8966-4343-b0b8-564d1a0cbcb3"/>
 				<textElement textAlignment="Right">
-					<font fontName="Cambay" size="12" isBold="true"/>
+					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Rs "+$P{applicant}.getFeeAmount()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="203" y="259" width="137" height="20" uuid="5abc3a8b-0cf6-439b-92f2-c4b8d70778f4"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new BigDecimal(($P{property}.getRentSummary().getBalancePrincipal()+$P{property}.getRentSummary().getBalanceInterest())-$P{property}.getRentSummary().getBalanceAmount()).setScale(2, BigDecimal.ROUND_HALF_DOWN)]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="23" y="259" width="138" height="20" uuid="a98f0080-7deb-48ec-9913-d1fbaeb83832"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{property}.getPincode()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="203" y="199" width="138" height="20" uuid="5dff0b86-8d4b-465e-a00f-ef12f3667a09"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get($P{property}.getColony())]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="23" y="174" width="138" height="20" uuid="78f6359b-69f1-4782-aeae-63a73bedfd28"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_SITE_PLOT_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="203" y="174" width="138" height="20" uuid="fcb6663a-014e-4772-a55b-ab47baf26f3b"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_COLONY_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="23" y="199" width="138" height="20" uuid="03fb2e5d-863d-4af0-8289-05f6b8251df8"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11" isBold="true"/>
+					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{property}.getTransitNumber()]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="203" y="234" width="138" height="20" uuid="6a37f6d2-e01e-40ee-ad70-a21b8aa11809"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("report.rp.totaldue")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="8" y="144" width="138" height="20" uuid="a98e2dfb-fbf0-4ed0-957e-16a8ebad7607"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="12" isBold="true"/>
+					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PROPERTY_DETAILS_HEADER")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="23" y="234" width="138" height="20" uuid="8bb4aed6-f211-48b5-a352-2cb85c371ee4"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="11"/>
+					<font size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PINCODE_LABEL")]]></textFieldExpression>
 			</textField>
@@ -288,19 +266,8 @@
 	<pageFooter>
 		<band height="105" splitType="Stretch">
 			<image>
-				<reportElement x="8" y="28" width="60" height="60" uuid="53505e3f-fdff-49a7-8a37-6edabb786cfe"/>
-				<imageExpression><![CDATA[$P{CITY_FOOTER_LEFT_PATH}]]></imageExpression>
-			</image>
-			<staticText>
-				<reportElement x="78" y="30" width="399" height="43" uuid="49e76364-f935-4303-8a75-6f1a3c251344"/>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="Cambay" size="13"/>
-				</textElement>
-				<text><![CDATA[नगर निगम चण्डीगढ़/MUNICIPAL CORPORATION, CHANDIGARH]]></text>
-			</staticText>
-			<image>
-				<reportElement x="480" y="23" width="60" height="60" uuid="136bc490-eec8-4195-94c3-15671fc6f7ec"/>
-				<imageExpression><![CDATA[$P{CITY_FOOTER_RIGHT_PATH}]]></imageExpression>
+				<reportElement x="8" y="28" width="542" height="60" uuid="53505e3f-fdff-49a7-8a37-6edabb786cfe"/>
+				<imageExpression><![CDATA[$P{COMPLETE_FOOTER_PATH}]]></imageExpression>
 			</image>
 		</band>
 	</pageFooter>
@@ -312,63 +279,63 @@
 			<textField>
 				<reportElement x="8" y="57" width="303" height="20" uuid="da7455b2-440b-4c89-8716-03aec196dbf7"/>
 				<textElement textAlignment="Left">
-					<font fontName="Cambay" size="12" isBold="true"/>
+					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Localization}.get("RP_DOCUMENTS_LABEL")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="280" y="192" width="130" height="100" uuid="e16d444a-768c-47d9-8b7d-460458ea15e6"/>
 				<textElement textAlignment="Left" markup="html">
-					<font fontName="Cambay" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{document7}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="9" y="83" width="129" height="100" uuid="ee959f55-df91-4e73-85ae-572111718d32"/>
 				<textElement textAlignment="Left" markup="html">
-					<font fontName="Cambay" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{document1}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="9" y="192" width="129" height="100" uuid="cca88a3b-7125-44e5-a0eb-06b7581c1bbb"/>
 				<textElement textAlignment="Left" markup="html">
-					<font fontName="Cambay" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{document5}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="144" y="83" width="130" height="100" uuid="c10d1b73-50e5-4a10-ad64-f7f18ae58bb4"/>
 				<textElement textAlignment="Left" markup="html">
-					<font fontName="Cambay" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{document2}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="417" y="192" width="130" height="100" uuid="fafa1eeb-907a-4cdd-84ce-1c9355a3f3df"/>
 				<textElement textAlignment="Left" markup="html">
-					<font fontName="Cambay" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{document8}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="417" y="83" width="130" height="100" uuid="82304a6e-4fc6-4cf3-8702-67ea2ddb7535"/>
 				<textElement textAlignment="Left" markup="html">
-					<font fontName="Cambay" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{document4}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="280" y="83" width="130" height="100" uuid="651d5630-7209-48b2-bfce-02dcd1620014"/>
 				<textElement textAlignment="Left" markup="html">
-					<font fontName="Cambay" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{document3}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="144" y="192" width="130" height="100" uuid="b0355044-e6de-40a8-a4d6-5d5e4a953e9e"/>
 				<textElement textAlignment="Left" markup="html">
-					<font fontName="Cambay" size="11" isBold="false"/>
+					<font size="11" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{document6}]]></textFieldExpression>
 			</textField>
