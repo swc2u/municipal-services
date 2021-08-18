@@ -171,7 +171,7 @@ public class WorkflowIntegrator {
 			return config.getBusinessServiceTubewellValue();
 		case WCConstants.WS_UPDATE_METER_INFO:
 			return config.getBusinessServiceupdateMeterValue();
-		case WCConstants.WS_METER_TESTING:
+		case WCConstants.WS_METER_TESTING_ACTIVITY:
 			return config.getWsMeterTesting();
 		}
 		return "";
