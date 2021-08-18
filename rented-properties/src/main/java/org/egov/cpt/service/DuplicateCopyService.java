@@ -229,6 +229,7 @@ public class DuplicateCopyService {
 		dcApplicationFromDB.setBankName(dcApplicationFromRequest.getBankName());
 		dcApplicationFromDB.setPaymentAmount(dcApplicationFromRequest.getPaymentAmount());
 		dcApplicationFromDB.setPaymentMode(dcApplicationFromRequest.getPaymentMode());
+		dcApplicationFromDB.setTransactionDate(dcApplicationFromRequest.getTransactionDate());
 
 		/**
 		 * Create egov user if not already present.
@@ -257,7 +258,7 @@ public class DuplicateCopyService {
 			Owner owner = Owner.builder().ownerDetails(ownerDetail).tenantId(applicant.getTenantId()).build();
 
 			demandService.createCashPayment(dcRequest.getRequestInfo(), dcApplicationFromDB.getPaymentAmount(),dcApplicationFromDB.getTransactionId(),
-					bills.get(0).getId(), owner, dcApplicationFromDB.getBillingBusinessService(),dcApplicationFromDB.getPaymentMode());
+					bills.get(0).getId(), owner, dcApplicationFromDB.getBillingBusinessService(),dcApplicationFromDB.getPaymentMode(),dcApplicationFromDB.getTransactionDate());
 
 			dcRequest.setDuplicateCopyApplications(Collections.singletonList(dcApplicationFromDB));
 			producer.push(config.getUpdateDuplicateCopyTopic(), dcRequest);

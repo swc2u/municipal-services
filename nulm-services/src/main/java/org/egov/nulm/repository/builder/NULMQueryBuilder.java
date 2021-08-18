@@ -27,6 +27,16 @@ public class NULMQueryBuilder {
 			+ " TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END and "
 			+ "UPPER(NA.name) like concat('%',case when UPPER(?)<>'' then UPPER(?) else UPPER(NA.name) end,'%') AND  NA.application_status<>?  group by NA.application_uuid    ORDER BY created_time desc";
 
+	public static final String GET_ALF_APPLICATION_QUERY ="SELECT  NA.uuid,  NA.id,  NA.date_of_formation,  NA.name,  NA.registeration_date,  NA.address,account_number,  NA.bank_name,  NA.branch_name,  NA.contact_number, NA.tenant_id,\r\n" + 
+			" NA.is_active, NA.created_by, NA.created_time, NA.last_modified_by, NA.last_modified_time, adhaar_number,date_of_opening_account,\r\n" + 
+			" alf_formated_through,array_to_json(array_agg(json_build_object('documentType',ND.document_type,'filestoreId',ND.filestore_id,'documnetUuid',ND.document_uuid,'isActive',ND.is_active,\r\n" + 
+			" 'tenantId',ND.tenant_id,'applicationUuid',ND.application_uuid) ))as document FROM nulm_smid_alf_details NA \r\n" + 
+			" left  join nulm_alf_application_document ND on NA.uuid=ND.application_uuid and NA.tenant_id=ND.tenant_id  AND ND.is_active='true'  where NA.id=(case when ?  <>'' then ?  else NA.id end) and NA.created_by=(case when ?  <>'' then ?  else NA.created_by end) AND NA.tenant_id=(case when ?  <>'' then ?  else NA.tenant_id end) \r\n" + 
+			"  and NA.is_active='true'  AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD')\r\n" + 
+			" >= CASE WHEN ?<>'' THEN DATE(?) ELSE TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END\r\n" + 
+			" AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <= CASE WHEN ?<>'' THEN DATE(?) ELSE \r\n" + 
+			" TO_DATE(TO_CHAR(TO_TIMESTAMP(NA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END  group by NA.uuid ORDER BY created_time desc;";
+	
 	public static final String GET_SEP_DOCUMENT_QUERY = "SELECT count(*) \n"
 			+ "        FROM public.nulm_sep_application_document \n"
 			+ "        WHERE application_uuid=? and tenant_id=? and filestore_id=? and document_type=? and is_active='true'; ";
@@ -142,13 +152,13 @@ public class NULMQueryBuilder {
 			+ "'tenantId',tenant_id,'applicationUuid',application_uuid))) as familymembers FROM nulm_susv_familiy_detail GROUP BY application_uuid) NF \n"
 			+ "on SA.application_uuid=NF.application_uuid and SA.tenant_id=NF.tenant_id \n"
 			+ "where SA.application_id=(case when :applicationId  <>'' then :applicationId  else SA.application_id end) and SA.created_by=(case when :createdBy  <>'' then :createdBy  else SA.created_by end) AND SA.tenant_id=:tenantId\n"
-			+ "AND SA.is_active='true'  AND SA.application_status NOT IN(:applicationStaus) and \n"
+			+ "AND SA.is_active='true'  AND SA.application_status  IN(:applicationStaus) and \n"
 			+ "TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') >= CASE WHEN :fromDate <> ''THEN DATE(:fromDate) ELSE\n"
 			+ "TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END\n"
 			+ "AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <= CASE WHEN :toDate <>'' THEN DATE(:toDate) ELSE\n"
 			+ "TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END  AND UPPER(SA.name_of_applicant) like concat('%',case when UPPER(:nameOfApplicant)<>'' then UPPER(:nameOfApplicant) else UPPER(SA.name_of_applicant) end,'%')  ORDER BY created_time desc";
 
-	public static final String GET_SUSV_RENEW_QUERY = "SELECT SA.application_uuid, SA.application_id, "
+	public static final String GET_SUSV_RENEW_QUERY = "SELECT SA.application_uuid, SA.application_id,SA.susv_applicaton_id, "
 			+ "SA.looking_for,SA.application_status, SA.name_of_street_vendor,SA.cov_no, SA.residential_address,SA.change_of_location, SA.proposed_address,SA.name_of_proposed_new_street_vendor,SA.tenant_id,SA.is_active, SA.created_by,\n"
 			+ "SA.created_time, SA.last_modified_by, SA.last_modified_time,ND.document,NF.familymembers\n"
 			+ "FROM public.nulm_susv_renew_application_detail SA  left join (SELECT count(application_uuid) docs, application_uuid,max(tenant_id) tenant_id, array_to_json(array_agg(json_build_object('documentType',document_type,'filestoreId',filestore_id,'documnetUuid',document_uuid,'isActive',is_active, \n"
@@ -157,7 +167,7 @@ public class NULMQueryBuilder {
 			+ "'tenantId',tenant_id,'applicationUuid',application_uuid))) as familymembers FROM nulm_susv_renew_familiy_detail GROUP BY application_uuid) NF \n"
 			+ "on SA.application_uuid=NF.application_uuid and SA.tenant_id=NF.tenant_id \n"
 			+ "where SA.application_id=(case when :applicationId  <>'' then :applicationId  else SA.application_id end) and SA.created_by=(case when :createdBy  <>'' then :createdBy  else SA.created_by end) AND SA.tenant_id=:tenantId\n"
-			+ "AND SA.is_active='true'  AND SA.application_status NOT IN(:applicationStaus) and \n"
+			+ "AND SA.is_active='true'  AND SA.application_status  IN(:applicationStaus) and \n"
 			+ "TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') >= CASE WHEN :fromDate <> ''THEN DATE(:fromDate) ELSE\n"
 			+ "TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') END\n"
 			+ "AND  TO_DATE(TO_CHAR(TO_TIMESTAMP(SA.created_time / 1000), 'YYYY-MM-DD'),'YYYY-MM-DD') <= CASE WHEN :toDate <>'' THEN DATE(:toDate) ELSE\n"

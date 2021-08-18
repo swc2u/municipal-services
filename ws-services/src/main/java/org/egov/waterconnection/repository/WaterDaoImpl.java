@@ -64,17 +64,16 @@ public class WaterDaoImpl implements WaterDao {
 		if (query == null)
 			return Collections.emptyList();
 //		if (log.isDebugEnabled()) {
-			StringBuilder str = new StringBuilder("Water query: ").append(query);
-			log.info(str.toString());
+	//		StringBuilder str = new StringBuilder("Water query: ").append(query);
+//			log.info(str.toString());
 //		}
 		List<WaterConnection> waterConnectionList = jdbcTemplate.query(query, preparedStatement.toArray(),
 				waterRowMapper);
 		
 		if (waterConnectionList == null) {
 			return Collections.emptyList();
-		}else {
-			log.info("Water search result size:{}",waterConnectionList.size());
 		}
+
 		return waterConnectionList;
 	}
 

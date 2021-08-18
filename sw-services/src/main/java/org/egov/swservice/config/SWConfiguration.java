@@ -30,7 +30,13 @@ public class SWConfiguration {
 
     @Value("${egov.idgen.scid.format}")
     private String sewerageIdGenFormat;
-    
+ // System User
+ 	@Value("${ws.system.user.uuid}")
+ 	private String systemUserUUID;
+ 	
+ 	@Value("${ws.system.user.id}")
+ 	private String systemUserID;
+ 	
     @Value("${egov.idgen.scapid.name}")
     private String sewerageApplicationIdGenName;
 

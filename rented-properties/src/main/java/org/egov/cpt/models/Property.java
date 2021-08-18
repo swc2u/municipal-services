@@ -261,6 +261,9 @@ public class Property {
 	
 	@JsonProperty("paymentMode")
 	private String paymentMode;
+	
+	@JsonProperty("transactionDate")
+	private Long transactionDate;
 
 	@JsonProperty("billingBusinessService")
 	@Size(max = 256, message = "Billing business service must be between 0 and 256 characters in length")

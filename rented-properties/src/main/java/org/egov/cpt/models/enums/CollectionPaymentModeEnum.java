@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum CollectionPaymentModeEnum {
-    CASH("CASH"), CHEQUE("CHEQUE"), DD("DD"), ONLINE("ONLINE"), CARD("CARD");
+    CASH("CASH"), CHEQUE("CHEQUE"), DD("DD"), ONLINE("ONLINE"), CARD("CARD"),OFFLINE_NEFT("OFFLINE_NEFT"),OFFLINE_RTGS("OFFLINE_RTGS");
 
     private String value;
 

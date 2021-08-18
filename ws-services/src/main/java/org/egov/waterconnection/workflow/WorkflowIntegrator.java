@@ -40,10 +40,10 @@ public class WorkflowIntegrator {
 
 	@Autowired
 	private ObjectMapper mapper;
-	
+
 	@Autowired
 	private RestTemplate rest;
-	
+
 	@Autowired
 	private WaterServicesUtil wsUtil;
 
@@ -62,19 +62,25 @@ public class WorkflowIntegrator {
 
 		String activityType = waterConnectionRequest.getWaterConnection().getActivityType();
 		String businessService = getBusinessService(activityType);
-				if(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction().equalsIgnoreCase(WCConstants.ACTION_PAY)) {
-					JSONObject obj = new JSONObject();
-					obj.put("role", "WS_JE_"+waterConnectionRequest.getWaterConnection().getSubdiv());
-					waterConnectionRequest.getWaterConnection().getProcessInstance().setAdditionalDetails(obj);
-				}
+		if (waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
+				.equalsIgnoreCase(WCConstants.ACTION_PAY)) {
+			JSONObject obj = new JSONObject();
+			if (activityType.equalsIgnoreCase(WCConstants.WS_CONVERSION)||activityType.equalsIgnoreCase(WCConstants.WS_TEMPORARY_DISCONNECTION)) {
+				obj.put("role", "WS_SUPERINTENDENT_" + waterConnectionRequest.getWaterConnection().getSubdiv());
+			} else {
+				obj.put("role", "WS_JE_" + waterConnectionRequest.getWaterConnection().getSubdiv());
+			}
+			waterConnectionRequest.getWaterConnection().getProcessInstance().setAdditionalDetails(obj);
+		}
 		ProcessInstance processInstance = ProcessInstance.builder()
 				.businessId(waterConnectionRequest.getWaterConnection().getApplicationNo())
-				.tenantId(property.getTenantId())
-				.businessService(businessService).moduleName(MODULENAMEVALUE).additionalDetails(waterConnectionRequest.getWaterConnection().getProcessInstance().getAdditionalDetails())
+				.tenantId(property.getTenantId()).businessService(businessService).moduleName(MODULENAMEVALUE)
+				.additionalDetails(
+						waterConnectionRequest.getWaterConnection().getProcessInstance().getAdditionalDetails())
 				.action(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()).build();
-	
+
 		if (!StringUtils.isEmpty(waterConnectionRequest.getWaterConnection().getProcessInstance())) {
-			if ((waterConnectionRequest.getWaterConnection().getProcessInstance().getAssignee()) !=null) {
+			if ((waterConnectionRequest.getWaterConnection().getProcessInstance().getAssignee()) != null) {
 				processInstance
 						.setAssignee(waterConnectionRequest.getWaterConnection().getProcessInstance().getAssignee());
 			}
@@ -92,7 +98,7 @@ public class WorkflowIntegrator {
 		try {
 			log.info("Process Instance request is : " + mapper.writeValueAsString(processInstance));
 		} catch (JsonProcessingException e1) {
-			log.error("Failed to log ProcessInstance : " , e1);
+			log.error("Failed to log ProcessInstance : ", e1);
 		}
 		List<ProcessInstance> processInstances = new ArrayList<>();
 		processInstances.add(processInstance);
@@ -104,7 +110,7 @@ public class WorkflowIntegrator {
 									.processInstances(processInstances).build(),
 							Map.class),
 					ProcessInstanceResponse.class);
-			
+
 		} catch (HttpClientErrorException e) {
 			/*
 			 * extracting message from client error exception
@@ -136,33 +142,37 @@ public class WorkflowIntegrator {
 			}
 		});
 	}
-	
+
 	public String getBusinessService(String activityType) {
 
 		switch (activityType) {
-			case WCConstants.WS_NEWCONNECTION:
-			case WCConstants.WS_APPLY_FOR_REGULAR_CON:				
-				return config.getBusinessServiceValue();
-			case WCConstants.WS_APPLY_FOR_TEMPORARY_CON:				
-				return config.getBusinessServiceTemporaryValue();	
-			case WCConstants.WS_APPLY_FOR_TEMP_TEMP_CON:				
-				return config.getBusinessServiceTempToTempValue();
-			case WCConstants.WS_APPLY_FOR_TEMP_REGULAR_CON:				
-				return config.getBusinessServiceTempToRegularValue();			
-			case WCConstants.WS_PERMANENT_DISCONNECTION:
-				return config.getBusinessServiceDisconnectionValue();	
-			case WCConstants.WS_TEMPORARY_DISCONNECTION:
-				return config.getBusinessServiceTempdisconnectValue();	
-			case WCConstants.WS_REACTIVATE:
-				return config.getBusinessServicereactivateValue();
-			case WCConstants.WS_CHANGE_OWNER_INFO:
-				return config.getBusinessServiceRenameValue();
-			case WCConstants.WS_CONVERSION:
-				return config.getBusinessServiceConversionValue();
-			case WCConstants.WS_NEW_TUBEWELL_CONNECTION:
-				return config.getBusinessServiceTubewellValue();
-			case WCConstants.WS_UPDATE_METER_INFO:
-				return config.getBusinessServiceupdateMeterValue();
+		case WCConstants.WS_NEWCONNECTION:
+		case WCConstants.WS_APPLY_FOR_REGULAR_CON:
+			return config.getBusinessServiceValue();
+		case WCConstants.WS_APPLY_FOR_TEMPORARY_CON:
+			return config.getBusinessServiceTemporaryValue();
+		case WCConstants.WS_APPLY_FOR_TEMPORARY_CON_BILLING:
+			return config.getBusinessServiceTempBillingValue();
+		case WCConstants.WS_APPLY_FOR_TEMP_TEMP_CON:
+			return config.getBusinessServiceTempToTempValue();
+		case WCConstants.WS_APPLY_FOR_TEMP_REGULAR_CON:
+			return config.getBusinessServiceTempToRegularValue();
+		case WCConstants.WS_PERMANENT_DISCONNECTION:
+			return config.getBusinessServiceDisconnectionValue();
+		case WCConstants.WS_TEMPORARY_DISCONNECTION:
+			return config.getBusinessServiceTempdisconnectValue();
+		case WCConstants.WS_REACTIVATE:
+			return config.getBusinessServicereactivateValue();
+		case WCConstants.WS_CHANGE_OWNER_INFO:
+			return config.getBusinessServiceRenameValue();
+		case WCConstants.WS_CONVERSION:
+			return config.getBusinessServiceConversionValue();
+		case WCConstants.WS_NEW_TUBEWELL_CONNECTION:
+			return config.getBusinessServiceTubewellValue();
+		case WCConstants.WS_UPDATE_METER_INFO:
+			return config.getBusinessServiceupdateMeterValue();
+		case WCConstants.WS_METER_TESTING_ACTIVITY:
+			return config.getWsMeterTesting();
 		}
 		return "";
 	}

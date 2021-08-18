@@ -214,7 +214,7 @@ public class PTConstants {
 	// Mortgage ACTION_STATUS combinations for notification
 
 	public static final String MG_ACTION_STATUS_INITIATED = "INITIATE_MG_DRAFTED";
-	public static final String MG_ACTION_STATUS_SUBMIT = "SUBMIT_MG_PENDINGCLVERIFICATION";
+	public static final String MG_ACTION_STATUS_SUBMIT = "SUBMIT_MG_PENDINGCLORJAVERIFICATION";
 	public static final String MG_ACTION_STATUS_REJECTED = "REJECT_MG_REJECTED";
 	public static final String MG_ACTION_STATUS_SENDBACK = "SENDBACK_TO_CITIZEN_MG_PENDINGCLARIFICATION";
 	public static final String MG_ACTION_STATUS_MORTGAGE_APPROVED = "APPROVE_MG_PENDINGGRANTDETAIL";
@@ -296,4 +296,13 @@ public class PTConstants {
 	
 	public static final String CLERK_ROLE ="RP_CLERK";
 	public static final String JA_ROLE ="RP_JA";
+	
+	//PDF
+	public static final String LOGO_PATH="CITY_LOGO_PATH";
+	public static final String WATER_MARK_PATH="CITY_WATER_MARK_PATH";
+	public static final String FOOTER_LEFT_PATH="CITY_FOOTER_LEFT_PATH";
+	public static final String FOOTER_RIGHT_PATH="CITY_FOOTER_RIGHT_PATH";
+	public static final String COMPLETE_HEADER_PATH = "COMPLETE_HEADER_PATH";
+	public static final String COMPLETE_FOOTER_PATH = "COMPLETE_FOOTER_PATH";
+	
 }

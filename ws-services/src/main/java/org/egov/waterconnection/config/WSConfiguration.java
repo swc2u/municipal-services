@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
-@AllArgsConstructor
+@Setter@AllArgsConstructor
 @NoArgsConstructor
 @Builder
 
@@ -26,6 +25,14 @@ public class WSConfiguration {
 
 	@Value("${egov.waterservice.pagination.max.limit}")
 	private Integer maxLimit;
+	
+
+	// System User
+	@Value("${ws.system.user.uuid}")
+	private String systemUserUUID;
+	
+	@Value("${ws.system.user.id}")
+	private String systemUserID;
 
 	// IDGEN
 	@Value("${egov.idgen.wcid.name}")
@@ -209,6 +216,9 @@ public class WSConfiguration {
 	@Value("${create.ws.conversion.workflow.name}")
 	private String businessServiceConversionValue;
 
+	@Value("${create.ws.tempconnbilling.workflow.name}")
+	private String businessServiceTempBillingValue;
+
 	@Value("${create.ws.tubewell.workflow.name}")
 	private String businessServiceTubewellValue;
 	
@@ -229,4 +239,9 @@ public class WSConfiguration {
 
 	@Value("${egov.waterservice.update.billingfilFlag}")
 	private String updateBillfileflag;
+	
+	@Value("${create.ws.metertesting.workflow}")
+	private String wsMeterTesting;
+	
+	
 }

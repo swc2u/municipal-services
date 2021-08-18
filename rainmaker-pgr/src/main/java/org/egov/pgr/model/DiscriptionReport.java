@@ -34,4 +34,7 @@ public class DiscriptionReport {
 	 private Long slaendtime;
 	 private String source;
 	 private Long createdtime ;
+	 private String feedback;
+	 private String rating;
+	 private String comments;
 }

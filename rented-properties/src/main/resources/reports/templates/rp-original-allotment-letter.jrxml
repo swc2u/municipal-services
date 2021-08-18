@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rp_original_allotment_letter" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="63914c4b-059b-4ec7-99b9-1e374ed2e236">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="COMPLETE_HEADER_PATH" class="java.lang.Object"/>
+	<parameter name="COMPLETE_FOOTER_PATH" class="java.lang.Object"/>
+	<parameter name="Owner" class="org.egov.cpt.models.Owner"/>
+	<parameter name="colony" class="java.lang.String"/>
+	<field name="transitNumber" class="java.lang.String">
+		<fieldDescription><![CDATA[transitNumber]]></fieldDescription>
+	</field>
+	<field name="PropertyDetails" class="org.egov.cpt.models.PropertyDetails">
+		<fieldDescription><![CDATA[propertyDetails]]></fieldDescription>
+	</field>
+	<title>
+		<band height="79" splitType="Stretch">
+			<image>
+				<reportElement x="54" y="0" width="502" height="79" uuid="4ca57c9e-2ca6-407d-9b47-6bff81b2b89e"/>
+				<imageExpression><![CDATA[$P{COMPLETE_HEADER_PATH}]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<detail>
+		<band height="567" splitType="Stretch">
+			<staticText>
+				<reportElement x="20" y="6" width="110" height="60" uuid="b5686dde-3112-48e5-ae2a-716e7240afd2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[From
+The Estate Offcer,
+UT.. Chandigarh.]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="20" y="95" width="360" height="85" uuid="cb525ffb-1c9d-49f4-a76e-afdaa027f28b"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Owner}.getOwnerDetails().getName()+"\n"+$P{colony}+"\n"+$F{PropertyDetails}.getAddress().getArea()+", "+$F{PropertyDetails}.getAddress().getPincode()+"\n"+"Memo no/Allotment number : "+$P{Owner}.getAllotmenNumber()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="19" y="75" width="77" height="20" uuid="a5e985eb-e8b6-4e3c-a0ea-7bc0c952c8d3"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="20" y="189" width="532" height="19" uuid="7b08eb5f-7980-45a5-a63e-aef424c77081"/>
+				<textElement markup="html">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Subject: </b> Allotment of transit site in <b>"+ $P{colony}+"</b> on license hold basis."]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="19" y="342" width="532" height="225" uuid="a6c0a666-37a0-4cdc-99f7-c8390d185049"/>
+				<textElement textAlignment="Left">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[1. The license shall pay by 10th of every month a sum of Rs. lot, towards rent in advance without any demand: If the licensee fails to pay the monthly rent or instalment within the prescribed period, he is liable to pay the penalty of Rs. per month.
+
+2. The licensee shall also construct a toilet on the site within three months of the allotment. In case the toilet is not constructed within the said period of three months, the Competent Authority may grant an extension of one month on payment of a fee of Rs. 100.
+
+3. The superstructure on the site shall be constructed within a period of nine months from the date of 
+allotment. In case the construction is not completed within the said period of nine months, the competent authority may grant an extension of three months on the payment of fee of Rs. 500 per month.
+
+4.The transit site shall be used for residential purposes only and for no other purpose.
+
+5.The licensee shall not sublet, assign or otherwise part with possession of the transit site or any part thereof in favour of any person whatsoever.]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="20" y="210" width="532" height="62" uuid="23aa67a1-1687-4fb4-b731-ea77a702c1c3"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="11" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Reference your application dated "+ new SimpleDateFormat("dd/MM/yyyy").format($P{Owner}.getOwnerDetails().getAllotmentStartdate()) +" for the allotment of transit site on license hold basis in lieu of your Jhuggi No. _______________"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="20" y="276" width="532" height="57" uuid="1b771b44-012a-4dde-b254-3130a76c7212"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" markup="html">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["You have been allotted transit site No. <b>"+ $F{transitNumber} +"</b> in <b>"+ $P{colony} +"</b>, on licence basis for a period of five years from the date of allotment on a nominal premium of Rs. ________ besides monthly rent of Rs.100 /- on the following conditions :—"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="105" splitType="Stretch">
+			<image>
+				<reportElement x="8" y="28" width="542" height="60" uuid="53505e3f-fdff-49a7-8a37-6edabb786cfe"/>
+				<imageExpression><![CDATA[$P{COMPLETE_FOOTER_PATH}]]></imageExpression>
+			</image>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="609" splitType="Stretch">
+			<staticText>
+				<reportElement x="19" y="6" width="534" height="594" uuid="b94b8949-974e-49a5-be66-cbba319783ca"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[
+6. (i) The licence in respect of the transit site shall be liable to be terminated in case of breach/non-compliance of the terms and conditions of .Tenements and sites and Services Chandigarh scheme, 1979,n as amended from time to time. The licensee shall be bound by the provisions of Capital of Punjab (Development and Regulations) Act, 1952 and Rule. made thereunder. from time to time. (ii).The allotment site should be bound by the the licence shall be bound by the terms and conditions of the allotment letter 
+and licensing of tenements and sites and services in Chandigarh scheme,1979 as amended wide notifcation 9th December 1997
+
+7. if it is found that the licence has been obtained by licence of the transit site by furnishing false information or by suppressing facts the licence shall be liable to be cancelled by the estate offcer
+
+8. The allotment of the transit site shall stand cancelled if the licensee fails to vacate the site in the labor colony within 21 days from the date of allotment of the transit site.
+
+9. The licensee shall keep the transit site in a clean and sanitary condition.
+
+10. The terms of the present licence shall be for fve years from the date of allotment, unless thi licence is sooner determined by the Estate Offcer for the) breach of any of the terms and conditions of the allotment or for Violation of Capital of Punjab (Development and Regulation) Act, 1952 and the Rules made thereunder.
+
+11. The licensee shall not without the prior permission of the Estate Offcer mortgage the licence hold rights in the transit site besides the superstructure in order to secure a loan for the construction of building on the said site from any of the Scheduled banks or Financial Institutions.
+
+12. The licensee shall not deviate in any manner from the layout plan to alter the size of the transit site whether by sub-division or amalgamation or otherwise.
+
+13. Compensation for the pucca superstructure constructed on the site shall be paid to the allottee, if he surrenders the site voluntarily and the superstructure has been constructed in accordance with the approved design/plan. No compensation shall be paid to the allottee, if his licence is cancelled for violation of any of the terms and conditions of the licence or pucca superstructure is not constructed in accordance with the sanctioned plan.
+
+14. The licensee shall have to execute licence deed on the non-judicial stamp papers worth Rs. 3 in the prescribed form within 10 days.
+
+15. No fragmentation or amalgamation of site shall be permitted in any Manner.
+
+16.The licensee shall not be entitled to execute. General Power of V Attorney/Special Power of Attorney in respect of affairs of the site in any manner except with the prior permission of the Competent Authority.]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

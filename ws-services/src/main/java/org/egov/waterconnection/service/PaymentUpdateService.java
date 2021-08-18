@@ -7,6 +7,7 @@ import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.Role;
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
 import org.egov.waterconnection.config.WSConfiguration;
@@ -93,8 +94,10 @@ public class PaymentUpdateService {
 			}
 			if (!isServiceMatched)
 				return;
+			if(!"EARLY_RECONC_JOB".equalsIgnoreCase(paymentRequest.getRequestInfo().getUserInfo().getUuid())) {
 			paymentRequest.getRequestInfo().setUserInfo(fetchUser(
 					paymentRequest.getRequestInfo().getUserInfo().getUuid(), paymentRequest.getRequestInfo()));
+			}
 			for (PaymentDetail paymentDetail : paymentRequest.getPayment().getPaymentDetails()) {
 				log.info("Consuming Business Service : {}" , paymentDetail.getBusinessService());
 				if (paymentDetail.getBusinessService().equalsIgnoreCase(config.getReceiptBusinessservice())) {
@@ -115,22 +118,8 @@ public class PaymentUpdateService {
 					}
 					
 					for (WaterConnection waterConnection : waterConnections) {
-						if(WCConstants.APPLICATION_TYPE_TEMPORARY.equalsIgnoreCase(waterConnection.getWaterApplicationType())){
-							waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY);
-						
-						}else if(WCConstants.APPLICATION_TYPE_REGULAR.equalsIgnoreCase(waterConnection.getWaterApplicationType())){
-							if(WCConstants.WS_NEWCONNECTION.equalsIgnoreCase(waterConnection.getActivityType())
-									|| WCConstants.WS_APPLY_FOR_REGULAR_CON.equalsIgnoreCase(waterConnection.getActivityType())){
-								if(WCConstants.STATUS_PENDING_FOR_PAYMENT.equalsIgnoreCase(waterConnection.getApplicationStatus())){
-									waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY);
-								}else {
-									waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY);
-								}
-							}else {
-								waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY);
-							}
+						waterConnection.getProcessInstance().setAction(WCConstants.ACTION_PAY);
 						}
-					}
 					WaterConnectionRequest waterConnectionRequest = WaterConnectionRequest.builder()
 							.waterConnection(connection).requestInfo(paymentRequest.getRequestInfo())
 							.build();
@@ -141,7 +130,12 @@ public class PaymentUpdateService {
 					}
 					
 					Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
-					
+					if(paymentRequest.getRequestInfo().getUserInfo().getType().equals("SYSTEM")) {
+						paymentRequest.getRequestInfo().getUserInfo().setId(Long.valueOf(config.getSystemUserID()));
+						paymentRequest.getRequestInfo().getUserInfo().setUuid(config.getSystemUserUUID());
+						Role role = Role.builder().code("SYSTEM").build();
+						paymentRequest.getRequestInfo().getUserInfo().getRoles().add(role);
+					} 
 					wfIntegrator.callWorkFlow(waterConnectionRequest, property);
 					enrichmentService.enrichFileStoreIds(waterConnectionRequest);
 					

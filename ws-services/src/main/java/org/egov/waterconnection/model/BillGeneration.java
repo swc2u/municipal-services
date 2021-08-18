@@ -30,6 +30,9 @@ public class BillGeneration {
 	@JsonProperty("ccCode")
 	private String ccCode = null;
 
+	@JsonProperty("dataExchangeType")
+	private String dataExchangeType = null;
+	
 	@JsonProperty("divSdiv")
 	private String divSdiv = null;
 
@@ -126,6 +129,9 @@ public class BillGeneration {
 	
 	  @JsonProperty("totalAmountPaid")
 	    private String totalAmountPaid;
+
+	  @JsonProperty("ledgerGroup")
+	    private String ledgerGroup;
 	  
 	@JsonProperty("paymentStatus")
 	private String paymentStatus = null;

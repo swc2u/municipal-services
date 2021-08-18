@@ -2,8 +2,10 @@ package org.egov.cpt.service.calculation;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -38,6 +40,7 @@ import org.egov.cpt.repository.ServiceRequestRepository;
 import org.egov.cpt.util.PTConstants;
 import org.egov.cpt.util.PropertyUtil;
 import org.egov.tracer.model.CustomException;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -499,7 +502,7 @@ public class DemandService {
 	 * @return
 	 */
 	public Object createCashPayment(RequestInfo requestInfo, Double paymentAmount,String transactionNumber, String billId,  Owner owner,
-			String billingBusinessService,String paymentMode) {
+			String billingBusinessService,String paymentMode,Long transactionDate) {
 		String tenantId = owner.getTenantId();
 		OwnerDetails ownerDetails = owner.getOwnerDetails();
 		CollectionPaymentDetail paymentDetail = CollectionPaymentDetail.builder().tenantId(tenantId)
@@ -510,10 +513,23 @@ public class DemandService {
 				.paidBy("COUNTER").mobileNumber(ownerDetails.getPhone())
 				.paymentDetails(Collections.singletonList(paymentDetail))
 				.build();
-
-		if(!CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.CASH)) {
+		if(CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.OFFLINE_NEFT) || CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.OFFLINE_RTGS)) {
 			payment.setTransactionNumber(transactionNumber);
-			payment.setInstrumentDate(new Date().getTime());
+			payment.setInstrumentDate(transactionDate);
+			payment.setInstrumentNumber(transactionNumber);
+		}
+
+		else if(!CollectionPaymentModeEnum.fromValue(paymentMode).equals(CollectionPaymentModeEnum.CASH)) {
+			payment.setTransactionNumber(transactionNumber);
+			
+			Calendar c = new GregorianCalendar();
+		    c.set(Calendar.HOUR_OF_DAY, 0); //anything 0 - 23
+		    c.set(Calendar.MINUTE, 0);
+		    c.set(Calendar.SECOND, 0);
+		    Date todayDate = c.getTime();
+		    
+			payment.setInstrumentDate(todayDate.getTime());
+			payment.setTransactionDate(new DateTime().getMillis());
 			payment.setInstrumentNumber(transactionNumber);
 		}
 

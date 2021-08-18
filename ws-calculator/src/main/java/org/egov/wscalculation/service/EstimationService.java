@@ -385,11 +385,12 @@ public class EstimationService {
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_REACTIVATE)
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_CHANGE_OWNER_INFO)
 				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_CONVERSION)
-				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)) {
+				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)
+				|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_METER_TESTING_ACTIVITY)) {
 			taxHeadEstimates = getTaxHeadForwaterActivity(criteria, masterData, requestInfo);
 		} else {
 			if (criteria.getWaterConnection().getWaterApplicationType()
-					.equalsIgnoreCase(WSCalculationConstant.WS_TEMP_CONNECTION_TYPE)) {
+					.equalsIgnoreCase(WSCalculationConstant.WS_TEMP_CONNECTION_TYPE)|| activityType.equalsIgnoreCase(WSCalculationConstant.WS_APPLY_FOR_TEMP_REGULAR_CON)) {
 				taxHeadEstimates = getTaxHeadForFeeEstimationForTempAppCon(criteria, masterData, requestInfo);
 			} else {
 				taxHeadEstimates = getTaxHeadForRegularConnection(criteria, masterData, requestInfo);
@@ -406,7 +407,8 @@ public class EstimationService {
 			Map<String, Object> masterData, RequestInfo requestInfo) {
 		List<TaxHeadEstimate> estimates = new ArrayList<>();
 
-		if(criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)) {
+		if (criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER) 
+				|| criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_METER_TESTING_ACTIVITY)) {
 
 			JSONArray regularSlab = (JSONArray) masterData.getOrDefault(WSCalculationConstant.WS_REGULAR_CHARGES, null);
 			JSONObject masterSlab = new JSONObject();
@@ -426,79 +428,132 @@ public class EstimationService {
 				} catch (IOException e) {
 					throw new CustomException("Parsing Exception", " Billing Slab can not be parsed!");
 				}
- 
+
 				BigDecimal meterTestingFee = BigDecimal.ZERO;
 				BigDecimal meterFittingFee = BigDecimal.ZERO;
+				BigDecimal stolenMeterCharges = BigDecimal.ZERO;
+				BigDecimal additionalCharges = BigDecimal.ZERO;
+				BigDecimal constructionCharges = BigDecimal.ZERO;
 
 				if (mappingBillingSlab != null) {
 
-					 
-					meterTestingFee = new BigDecimal(mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getMetertesting());
+					meterTestingFee = new BigDecimal(
+							mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getMetertesting());
+					
+					
+					//Changes By Bikash Dhal For Updated Activity for 
+							
+					if(criteria.getWaterConnection().getActivityType().equalsIgnoreCase(WSCalculationConstant.WS_UPDATEMETER)) {
+						
+						meterFittingFee = new BigDecimal(
+								mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getMeterfitting());
+						if(criteria.getWaterConnection().getWaterApplication().getIsMeterStolen()) {
+							stolenMeterCharges =  new BigDecimal(
+									mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getStolenmetercharges());
+							
+						}
+					}
+					
+					additionalCharges = new BigDecimal(
+							criteria.getWaterConnection().getWaterApplication().getAdditionalCharges() == null ? 0.0
+									: criteria.getWaterConnection().getWaterApplication().getAdditionalCharges());
 
-					meterFittingFee = new BigDecimal(mappingBillingSlab.get(0).getMeterUpdateCharges().get(0).getMeterfitting());
+					constructionCharges = new BigDecimal(
+							criteria.getWaterConnection().getWaterApplication().getConstructionCharges() == null ? 0.0
+									: criteria.getWaterConnection().getWaterApplication().getConstructionCharges());
 
 				}
 
-				 
 				if (!(meterTestingFee.compareTo(BigDecimal.ZERO) == 0))
 					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_METER_TESTING_CHARGE)
 							.estimateAmount(meterTestingFee.setScale(2, 2)).build());
 				if (!(meterFittingFee.compareTo(BigDecimal.ZERO) == 0))
 					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_METER_CHARGE)
 							.estimateAmount(meterFittingFee.setScale(2, 2)).build());
+				if (!(stolenMeterCharges.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_SALES_METER)
+							.estimateAmount(stolenMeterCharges.setScale(2, 2)).build());
+				if (!(additionalCharges.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_ADDITIONAL_CHARGE)
+							.estimateAmount(additionalCharges.setScale(2, 2)).build());
+				if (!(constructionCharges.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_CONSTRUCTION_CHARGE)
+							.estimateAmount(constructionCharges.setScale(2, 2)).build());
 
 			}
 			addAdhocPenalityAndRebate(estimates, criteria.getWaterConnection());
 			return estimates;
-		}else {
-		JSONArray regularSlab = (JSONArray) masterData.getOrDefault(WSCalculationConstant.WS_WATER_ACTIVITY, null);
-		JSONObject masterSlab = new JSONObject();
+		} else {
+			JSONArray regularSlab = (JSONArray) masterData.getOrDefault(WSCalculationConstant.WS_WATER_ACTIVITY, null);
+			JSONObject masterSlab = new JSONObject();
 
-		if (regularSlab != null) {
-			masterSlab.put("waterActivity", regularSlab);
-			JSONArray filteredMasters = JsonPath.read(masterSlab,
-					"$.waterActivity[?(@.code=='" + criteria.getWaterConnection().getActivityType() + "')]");
-			JSONObject charge = mapper.convertValue(filteredMasters.get(0), JSONObject.class);
-			BigDecimal unitCost = BigDecimal.ZERO;
-			unitCost = new BigDecimal(charge.getAsNumber(WSCalculationConstant.UNIT_COST_CONST).toString());
+			if (regularSlab != null) {
+				masterSlab.put("waterActivity", regularSlab);
+				JSONArray filteredMasters = JsonPath.read(masterSlab,
+						"$.waterActivity[?(@.code=='" + criteria.getWaterConnection().getActivityType() + "')]");
+				JSONObject charge = mapper.convertValue(filteredMasters.get(0), JSONObject.class);
+				BigDecimal unitCost = BigDecimal.ZERO;
+				unitCost = new BigDecimal(charge.getAsNumber(WSCalculationConstant.UNIT_COST_CONST).toString());
 
-			BigDecimal securityFee = BigDecimal.ZERO;
+				BigDecimal securityFee = BigDecimal.ZERO;
 
-			securityFee = new BigDecimal(
-					criteria.getWaterConnection().getWaterApplication().getSecurityCharge() == null ? 0.0
-							: criteria.getWaterConnection().getWaterApplication().getSecurityCharge());
+				BigDecimal additionalCharges = BigDecimal.ZERO;
+				BigDecimal constructionCharges = BigDecimal.ZERO;
+				securityFee = new BigDecimal(
+						criteria.getWaterConnection().getWaterApplication().getSecurityCharge() == null ? 0.0
+								: criteria.getWaterConnection().getWaterApplication().getSecurityCharge());
 
-			if (!(securityFee.compareTo(BigDecimal.ZERO) == 0))
-				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_SECURITY_CHARGE)
-						.estimateAmount(securityFee.setScale(2, 2)).build());
-			/*
-			 * if (criteria.getWaterConnection().getAdditionalDetails() != null) {
-			 * HashMap<String, Object> additionalDetails = mapper
-			 * .convertValue(criteria.getWaterConnection().getAdditionalDetails(),
-			 * HashMap.class); if
-			 * ((additionalDetails.getOrDefault(WSCalculationConstant.ADHOC_PENALTY, null)
-			 * != null || additionalDetails.getOrDefault(WSCalculationConstant.ADHOC_REBATE,
-			 * null) != null) && (WSCalculationConstant.WS_ADDON_PENDING_STATUS
-			 * .equalsIgnoreCase(criteria.getWaterConnection().getApplicationStatus()) ||
-			 * WSCalculationConstant.WS_STATUS_PENDING_FOR_CMR
-			 * .equalsIgnoreCase(criteria.getWaterConnection().getApplicationStatus()))) {
-			 * addAdhocPenalityAndRebate(estimates, criteria.getWaterConnection()); } else {
-			 * estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.
-			 * WS_FORM_FEE) .estimateAmount(unitCost.setScale(2, 2)).build());
-			 * addAdhocPenalityAndRebate(estimates, criteria.getWaterConnection());
-			 * 
-			 * } } else
-			 */
+				additionalCharges = new BigDecimal(
+						criteria.getWaterConnection().getWaterApplication().getAdditionalCharges() == null ? 0.0
+								: criteria.getWaterConnection().getWaterApplication().getAdditionalCharges());
 
-			if (!(unitCost.compareTo(BigDecimal.ZERO) == 0)) {
-				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_FORM_FEE)
-						.estimateAmount(unitCost.setScale(2, 2)).build());
+				constructionCharges = new BigDecimal(
+						criteria.getWaterConnection().getWaterApplication().getConstructionCharges() == null ? 0.0
+								: criteria.getWaterConnection().getWaterApplication().getConstructionCharges());
 
+				if (!(securityFee.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_SECURITY_CHARGE)
+							.estimateAmount(securityFee.setScale(2, 2)).build());
+
+				if (!(additionalCharges.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_ADDITIONAL_CHARGE)
+							.estimateAmount(additionalCharges.setScale(2, 2)).build());
+
+				if (!(constructionCharges.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_CONSTRUCTION_CHARGE)
+							.estimateAmount(constructionCharges.setScale(2, 2)).build());
+
+				if (criteria.getWaterConnection().getActivityType()
+						.equalsIgnoreCase(WSCalculationConstant.WS_PERMANENT_DISCONNECTION)
+						|| criteria.getWaterConnection().getActivityType()
+								.equalsIgnoreCase(WSCalculationConstant.WS_TEMPORARY_DISCONNECTION)) {
+					if (!(unitCost.compareTo(BigDecimal.ZERO) == 0)) {
+						estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_DISCONNECTION_FEE)
+								.estimateAmount(unitCost.setScale(2, 2)).build());
+					}
+				}
+				else	if (criteria.getWaterConnection().getActivityType()
+							.equalsIgnoreCase(WSCalculationConstant.WS_CHANGE_OWNER_INFO)) {
+						if (!(unitCost.compareTo(BigDecimal.ZERO) == 0)) {
+							estimates.add(TaxHeadEstimate.builder()
+									.taxHeadCode(WSCalculationConstant.WS_UPDATE_CONNECTION_HOLDER)
+									.estimateAmount(unitCost.setScale(2, 2)).build());
+						}
+					
+				}
+				else	if (criteria.getWaterConnection().getActivityType()
+						.equalsIgnoreCase(WSCalculationConstant.WS_REACTIVATE)) {
+					if (!(unitCost.compareTo(BigDecimal.ZERO) == 0)) {
+						estimates.add(TaxHeadEstimate.builder()
+								.taxHeadCode(WSCalculationConstant.WS_TEMPORARY_CONN_FEE)
+								.estimateAmount(unitCost.setScale(2, 2)).build());
+					}
+				
 			}
-			// addAdhocPenalityAndRebate(estimates, criteria.getWaterConnection());
-		}
+				// addAdhocPenalityAndRebate(estimates, criteria.getWaterConnection());
+			}
 
-		return estimates;
+			return estimates;
 		}
 	}
 
@@ -529,11 +584,11 @@ public class EstimationService {
 
 			billingSlabs = mappingBillingSlab.stream().filter(slab -> {
 				String propertyString = property.getUsageCategory().split("\\.")[0];
-				if(property.getUsageCategory().split("\\.")[0].equalsIgnoreCase(WSCalculationConstant.WS_RESIDENTIAL)) {
+				if (property.getUsageCategory().split("\\.")[0]
+						.equalsIgnoreCase(WSCalculationConstant.WS_RESIDENTIAL)) {
 					propertyString = property.getUsageCategory();
 				}
-				boolean isBuildingTypeMatching = slab.getBuildingType()
-						.equalsIgnoreCase(propertyString);// property.usagecategory
+				boolean isBuildingTypeMatching = slab.getBuildingType().equalsIgnoreCase(propertyString);// property.usagecategory
 
 				return isBuildingTypeMatching;
 			}).collect(Collectors.toList());
@@ -557,12 +612,31 @@ public class EstimationService {
 
 			}
 			BigDecimal formFee = BigDecimal.ZERO;
+			BigDecimal additionalCharges = BigDecimal.ZERO;
+			BigDecimal constructionCharges = BigDecimal.ZERO;
 			if (multiplier != null) {
 
 				formFee = new BigDecimal(multiplier);
 			}
+
+			additionalCharges = new BigDecimal(
+					criteria.getWaterConnection().getWaterApplication().getAdditionalCharges() == null ? 0.0
+							: criteria.getWaterConnection().getWaterApplication().getAdditionalCharges());
+
+			constructionCharges = new BigDecimal(
+					criteria.getWaterConnection().getWaterApplication().getConstructionCharges() == null ? 0.0
+							: criteria.getWaterConnection().getWaterApplication().getConstructionCharges());
+
+			if (!(additionalCharges.compareTo(BigDecimal.ZERO) == 0))
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_ADDITIONAL_CHARGE)
+						.estimateAmount(additionalCharges.setScale(2, 2)).build());
+
+			if (!(constructionCharges.compareTo(BigDecimal.ZERO) == 0))
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_CONSTRUCTION_CHARGE)
+						.estimateAmount(constructionCharges.setScale(2, 2)).build());
+
 			if (!(formFee.compareTo(BigDecimal.ZERO) == 0))
-				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_FORM_FEE)
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_TEMPORARY_CONN_FEE)
 						.estimateAmount(formFee.setScale(2, 2)).build());
 
 			return estimates;
@@ -572,9 +646,27 @@ public class EstimationService {
 			List<TaxHeadEstimate> estimates = new ArrayList<>();
 			BigDecimal securityFee = BigDecimal.ZERO;
 
+			BigDecimal additionalCharges = BigDecimal.ZERO;
+			BigDecimal constructionCharges = BigDecimal.ZERO;
 			securityFee = new BigDecimal(
 					criteria.getWaterConnection().getWaterApplication().getSecurityCharge() == null ? 0.0
 							: criteria.getWaterConnection().getWaterApplication().getSecurityCharge());
+
+			additionalCharges = new BigDecimal(
+					criteria.getWaterConnection().getWaterApplication().getAdditionalCharges() == null ? 0.0
+							: criteria.getWaterConnection().getWaterApplication().getAdditionalCharges());
+
+			constructionCharges = new BigDecimal(
+					criteria.getWaterConnection().getWaterApplication().getConstructionCharges() == null ? 0.0
+							: criteria.getWaterConnection().getWaterApplication().getConstructionCharges());
+
+			if (!(additionalCharges.compareTo(BigDecimal.ZERO) == 0))
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_ADDITIONAL_CHARGE)
+						.estimateAmount(additionalCharges.setScale(2, 2)).build());
+
+			if (!(constructionCharges.compareTo(BigDecimal.ZERO) == 0))
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_CONSTRUCTION_CHARGE)
+						.estimateAmount(constructionCharges.setScale(2, 2)).build());
 
 			if (!(securityFee.compareTo(BigDecimal.ZERO) == 0))
 				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_SECURITY_CHARGE)
@@ -598,17 +690,18 @@ public class EstimationService {
 			} catch (IOException e) {
 				throw new CustomException("Parsing Exception", " Billing Slab can not be parsed!");
 			}
-			
+
 			List<BillingSlab> billingSlabs = null;
 			billingSlabs = mappingBillingSlab.stream().filter(slab -> {
 				String propertyString = property.getUsageCategory().split("\\.")[0];
-				if(property.getUsageCategory().split("\\.")[0].equalsIgnoreCase(WSCalculationConstant.WS_RESIDENTIAL)) {
+				if (property.getUsageCategory().split("\\.")[0]
+						.equalsIgnoreCase(WSCalculationConstant.WS_RESIDENTIAL)) {
 					propertyString = property.getUsageCategory();
-					
-				}
-				return  slab.getBuildingType().equalsIgnoreCase(propertyString);// property.usagecategory
 
-			}).collect(Collectors.toList());	
+				}
+				return slab.getBuildingType().equalsIgnoreCase(propertyString);// property.usagecategory
+
+			}).collect(Collectors.toList());
 
 			Double multiplier = 0.0;
 			for (Slab slabs : billingSlabs.get(0).getSlabs()) {
@@ -628,6 +721,8 @@ public class EstimationService {
 
 			}
 			BigDecimal formFee = BigDecimal.ZERO;
+			BigDecimal additionalCharges = BigDecimal.ZERO;
+			BigDecimal constructionCharges = BigDecimal.ZERO;
 			if (multiplier != null) {
 				if (multiplier == 0) {
 
@@ -638,10 +733,32 @@ public class EstimationService {
 					formFee = new BigDecimal(multiplier * property.getSuperBuiltUpArea());
 				}
 			}
-			if (!(formFee.compareTo(BigDecimal.ZERO) == 0))
-				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_FORM_FEE)
-						.estimateAmount(formFee.setScale(2, 2)).build());
 
+			additionalCharges = new BigDecimal(
+					criteria.getWaterConnection().getWaterApplication().getAdditionalCharges() == null ? 0.0
+							: criteria.getWaterConnection().getWaterApplication().getAdditionalCharges());
+
+			constructionCharges = new BigDecimal(
+					criteria.getWaterConnection().getWaterApplication().getConstructionCharges() == null ? 0.0
+							: criteria.getWaterConnection().getWaterApplication().getConstructionCharges());
+
+			if (!(additionalCharges.compareTo(BigDecimal.ZERO) == 0))
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_ADDITIONAL_CHARGE)
+						.estimateAmount(additionalCharges.setScale(2, 2)).build());
+
+			if (!(constructionCharges.compareTo(BigDecimal.ZERO) == 0))
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_CONSTRUCTION_CHARGE)
+						.estimateAmount(constructionCharges.setScale(2, 2)).build());
+
+			if (multiplier == 0) {
+				if (!(formFee.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_TEMPORARY_COTRACT_FEE)
+							.estimateAmount(formFee.setScale(2, 2)).build());
+			} else {
+				if (!(formFee.compareTo(BigDecimal.ZERO) == 0))
+					estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_TEMPORARY_CONN_FEE)
+							.estimateAmount(formFee.setScale(2, 2)).build());
+			}
 			return estimates;
 		}
 	}
@@ -673,12 +790,23 @@ public class EstimationService {
 			BigDecimal ferruleFee = BigDecimal.ZERO;
 			BigDecimal meterTestingFee = BigDecimal.ZERO;
 			BigDecimal meterFittingFee = BigDecimal.ZERO;
+			BigDecimal additionalCharges = BigDecimal.ZERO;
+			BigDecimal constructionCharges = BigDecimal.ZERO;
 
 			if (mappingBillingSlab != null) {
 
 				securityFee = new BigDecimal(
 						criteria.getWaterConnection().getWaterApplication().getSecurityCharge() == null ? 0.0
 								: criteria.getWaterConnection().getWaterApplication().getSecurityCharge());
+
+				additionalCharges = new BigDecimal(
+						criteria.getWaterConnection().getWaterApplication().getAdditionalCharges() == null ? 0.0
+								: criteria.getWaterConnection().getWaterApplication().getAdditionalCharges());
+
+				constructionCharges = new BigDecimal(
+						criteria.getWaterConnection().getWaterApplication().getConstructionCharges() == null ? 0.0
+								: criteria.getWaterConnection().getWaterApplication().getConstructionCharges());
+
 				if (criteria.getWaterConnection().getWaterApplication().getIsFerruleApplicable()) {
 					ferruleFee = new BigDecimal(mappingBillingSlab.get(0).getCharges().get(0).getFerrule());
 				}
@@ -700,6 +828,12 @@ public class EstimationService {
 			if (!(meterFittingFee.compareTo(BigDecimal.ZERO) == 0))
 				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_METER_CHARGE)
 						.estimateAmount(meterFittingFee.setScale(2, 2)).build());
+			if (!(additionalCharges.compareTo(BigDecimal.ZERO) == 0))
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_ADDITIONAL_CHARGE)
+						.estimateAmount(additionalCharges.setScale(2, 2)).build());
+			if (!(constructionCharges.compareTo(BigDecimal.ZERO) == 0))
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_CONSTRUCTION_CHARGE)
+						.estimateAmount(constructionCharges.setScale(2, 2)).build());
 
 		}
 		addAdhocPenalityAndRebate(estimates, criteria.getWaterConnection());

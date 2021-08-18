@@ -101,7 +101,8 @@ public class SusvService {
 
 			}
 			susvApplication.setApplicationDocument(susvdoc);
-			susvApplication.getSusvApplicationFamilyDetails().stream().forEach(element -> {
+			if(susvApplication.getSusvApplicationFamilyDetails()!=null && !susvApplication.getSusvApplicationFamilyDetails().isEmpty())
+			{susvApplication.getSusvApplicationFamilyDetails().stream().forEach(element -> {
 				element.setUuid(UUID.randomUUID().toString());
 				element.setApplicationUuid(susvid);
 				element.setIsActive(true);
@@ -110,6 +111,7 @@ public class SusvService {
 						auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_CREATE));
 
 			});
+			}
 			if (!susvApplication.getAction().toString()
 					.equalsIgnoreCase(SusvApplication.StatusEnum.DRAFTED.toString())) {
 				// workflow service call to integrate nulm workflow

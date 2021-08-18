@@ -112,11 +112,6 @@ public class PropertyValidator {
 					errorMap.put("INVALID OWNER NAME", "Owner Name is not valid");
 				}
 
-				if (!isNotNullValid(owner.getOwnerDetails().getPosessionStartdate())) {
-					errorMap.put("INVALID POSESSION START DATE",
-							"Posession Start date is not valid for user : " + owner.getOwnerDetails().getName());
-				}
-
 				if (!isNotNullValid(owner.getOwnerDetails().getAllotmentStartdate())) {
 					errorMap.put("INVALID ALLOTMENT START DATE",
 							"Allotment Start date is not valid for user : " + owner.getOwnerDetails().getName());
@@ -446,7 +441,7 @@ public class PropertyValidator {
 	 */
 	private Boolean isEmailValid(String email) {
 
-		String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
+		String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w-]+\\.)+[\\w]+[\\w]$";
 
 		if (email == "" || email == null)
 			return true;

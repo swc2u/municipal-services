@@ -22,7 +22,7 @@ public class WSCalculationConstant {
 
 	public static final String SERVICE_FIELD_VALUE_WS = "WS";
 	
-	public static final String ONE_TIME_FEE_SERVICE_FIELD = "WS.ONE_TIME_FEE";
+	public static final String ONE_TIME_FEE_SERVICE_FIELD = "PUBLIC_HEALTH_SERVICES_DIV2";
 
 	public static final String WS_TAX = "WS_TAX";
 
@@ -235,6 +235,14 @@ public class WSCalculationConstant {
 	 * Fee Estimation Configuration
 	 */
 	public static final String WS_FORM_FEE = "WS_FORM_FEE";
+	
+	public static final String WS_TEMPORARY_CONN_FEE = "CONNECTION_CHARGES_WATER_SUPPLY_PHD2";
+	
+	public static final String WS_TEMPORARY_COTRACT_FEE = "CONST_CHARGES_WATER_SUPPLY_PHD2";
+	
+	public static final String WS_DISCONNECTION_FEE = "DISCONNECTION_CHARGES_WATER_SUPPLY_PHD2";
+	
+	public static final String WS_UPDATE_CONNECTION_HOLDER = "PROPERTY_TRANSFER_CHARGESCHANGE_OF_OWNERSHIP_PHD2";
 
 	public static final String WS_SCRUTINY_FEE = "WS_SCRUTINY_FEE";
 
@@ -242,9 +250,15 @@ public class WSCalculationConstant {
 
 	public static final String WS_ROAD_CUTTING_CHARGE = "WS_ROAD_CUTTING_CHARGE";
 
-	public static final String WS_METER_CHARGE = "WS_METER_CHARGE";
+	public static final String WS_METER_CHARGE = "LABOUR_CHARGES_WATER_SUPPLY_PHD2";
+
+	public static final String WS_SALES_METER = "SALES_WATER_METER_PHD2";
 	
-	public static final String WS_SECURITY_CHARGE = "WS_SECURITY_CHARGE";
+	public static final String WS_SECURITY_CHARGE = "SECURITY_DEPOSIT_WATER_METER_PHD2";
+
+	public static final String WS_ADDITIONAL_CHARGE = "WATER_CHARGES_PHD2";
+
+	public static final String WS_CONSTRUCTION_CHARGE = "OTHER_CHARGES_PHD2";
 	
 	public static final String WS_OTHER_CHARGE = "WS_OTHER_CHARGE";
 	
@@ -301,11 +315,11 @@ public class WSCalculationConstant {
 	
 	public static final String TAX_PERCENTAGE = "taxPercentage";
 	
-	public static final String WS_METER_TESTING_CHARGE = "WS_METER_TESTING_CHARGE";
+	public static final String WS_METER_TESTING_CHARGE = "TESTING_CHARGES_PHD2";
 
 	public static final String WS_METER_FITTING_CHARGE = "WS_METER_FITTING_CHARGE";
 
-	public static final String WS_FERRULE_CHARGE = "WS_FERRULE_CHARGE";
+	public static final String WS_FERRULE_CHARGE = "FERRULE_CHARGES_WATER_SUPPLY_PHD2";
 	
 	public static final String WS_TEMP_CONNECTION_TYPE = "TEMPORARY";
 
@@ -342,5 +356,7 @@ public class WSCalculationConstant {
 	public static final String payment_cheque = "CHEQUE";
 
 	public static final String WS_RESIDENTIAL = "RESIDENTIAL";
+	
+	public static final String WS_METER_TESTING_ACTIVITY = "APPLY_FOR_METER_TESTING";
 	
 }

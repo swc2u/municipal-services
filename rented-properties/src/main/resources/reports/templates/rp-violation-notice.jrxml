@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rp-recovery-notice" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="7b926c4d-88c7-4dc1-95f7-8c09036dd958">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="Localization" class="java.util.Map"/>
+	<parameter name="property" class="org.egov.cpt.models.Property"/>
+	<parameter name="notice" class="org.egov.cpt.models.NoticeGeneration"/>
+	<parameter name="COMPLETE_HEADER_PATH" class="java.lang.Object"/>
+	<parameter name="COMPLETE_FOOTER_PATH" class="java.lang.Object"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<image>
+				<reportElement x="54" y="0" width="502" height="79" uuid="4ca57c9e-2ca6-407d-9b47-6bff81b2b89e"/>
+				<imageExpression><![CDATA[$P{COMPLETE_HEADER_PATH}]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<detail>
+		<band height="614" splitType="Stretch">
+			<staticText>
+				<reportElement x="17" y="4" width="77" height="20" uuid="283e774d-0fea-49b9-b628-791ec61ad4d6"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="39" y="30" width="261" height="70" uuid="cdfae5e9-1ff3-4153-b32a-809ec84eeba9"/>
+				<textElement markup="styled">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{notice}.getOwnerName()+"\n s/o "+$P{notice}.getGuardian()+"\nTransit Site No <b>"+$P{property}.getTransitNumber()+"</b>\n"+$P{Localization}.get($P{property}.getColony())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="11" y="148" width="533" height="40" uuid="a58368ad-a3c1-4485-90be-7c4050fde3b9"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Subject: Regarding Allotment of Transit Site No.  "+$P{property}.getTransitNumber()+", "+$P{Localization}.get($P{property}.getColony())+" on license hold basis. "]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="12" y="201" width="532" height="40" uuid="b514eb29-53be-44c3-a39a-136b300f0f39"/>
+				<textElement markup="styled">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Whereas Transit Site No. <b>"+$P{property}.getTransitNumber()+"</b> in Rehabilitation Colony, Chandigarh was allotted to you on license hold basis vide Allotment Letter No. <b>"+$P{notice}.getAllotmentNumber()+"</b> ALC dated "+new SimpleDateFormat("dd/MM/yyyy").format($P{notice}.getMemoDate())+" ."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="12" y="250" width="532" height="360" uuid="0fe80604-bfb6-4760-9371-3ddf6d5e27ac"/>
+				<textElement markup="styled">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Whereas. the function regarding Rehabilitation of Colonies has been transferred by the Chandigarh Administration to the Municipal Corporation, Chandigarh vide Notifcation No. 2/6/Fl(2)-LG-95/12740, dated 28-09-1995 and the Additional Commissioner, Municipal Corporation, Chandigarh has been appointed as Estate Offcer under the provision of Capital of Punjab (Development And Regulations) Act 1952, vide Chandigarh Administration\n\nNotifcation bearing No.10/3/2-UTFI(1)/g013/2727 dated 22.03.2013.Whereas, the provisions of Allotment letter is as under: -\n\nClause No. 4: The transit site shall be used for residential purposes only and for no other purpose.\n\nClause No. 5: The licensee shall not sublet, assign or otherwise part with possession of the transit site or any part thereof in favour of any person whatsoever.\n\nClause No. 6: (i) The license in respect of the transit site shall be liable to be terminated in case ofbreach/non-compliance of the terms and conditions of “Tenements and sites and Services ChandigarhScheme,1979”, as amended from time to time. The licensee shall be bound by the provisions of Capital of Punjab (Development and Regulations) Act, 1952 and Rules made thereunder, horn time to time. \n\n(ii) The licensee shall be bound by the terms and conditions of the allotment letter and Licensing of Tenements and sites and services in Chandigarh Scheme, 1979 as amended,— vide notifcation dated 9th December 1997."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="40" y="90" width="261" height="40" uuid="6c594103-762e-420b-8060-4c10495322ac"/>
+				<textElement markup="styled">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Memo no/Allotment number <b>"+$P{notice}.getAllotmentNumber()+"</b>\nDated <b>"+new SimpleDateFormat("dd/MM/yyyy").format($P{notice}.getMemoDate())+"</b>"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="105" splitType="Stretch">
+			<image>
+				<reportElement x="8" y="28" width="542" height="60" uuid="53505e3f-fdff-49a7-8a37-6edabb786cfe"/>
+				<imageExpression><![CDATA[$P{COMPLETE_FOOTER_PATH}]]></imageExpression>
+			</image>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="600" splitType="Stretch">
+			<textField>
+				<reportElement x="11" y="20" width="533" height="420" uuid="d9e89b45-4b50-4a4f-8f21-a72a1eb4cc08"/>
+				<textElement markup="styled">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Clause No, 12: The licensee shall not deviate in any manner from the layout plan to alter the size of the transit site whether by sub-division or amalgamation or otherwise\n\nClause No, 15: No fragmentation or amalgamation of site shall be permitted in any manner.\n\nClause No, 16: The licensee shall not be entitled to execute General Power of Attorney/Special power of Attorney in respect of affairs of the site in any manner except with the prior permission of the Competent Authority.\n\n<b>"+ $P{Localization}.get("RP_VIOLATION_COMMENTS_HEADER")+"</b> : "+$P{notice}.getViolations() + "\n\nIt has been found that you have done the above said violations and breached the terms and conditions of allotment and Licensing of Tenements and Sites and Services Scheme 1979.\n\nYou are hereby served with this notice to remove the violations within 30 days from the issuance of this notice, failing which further action shall be initiated against you in accordance with the terms and conditions of allotment/Scheme and law."]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

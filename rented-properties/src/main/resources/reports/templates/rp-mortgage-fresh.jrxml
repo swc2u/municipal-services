@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.17.0.final using JasperReports Library version 6.17.0-6d93193241dd8cc42629e188b94f9e0bc5722efd  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="rp-mortgage-fresh" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="46c8bbb7-1bff-498f-8061-abe89bfb30d1">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="document1" class="java.lang.String"/>
+	<parameter name="document2" class="java.lang.String"/>
+	<parameter name="document3" class="java.lang.String"/>
+	<parameter name="Localization" class="java.util.Map"/>
+	<parameter name="property" class="org.egov.cpt.models.Property"/>
+	<parameter name="applicant" class="org.egov.cpt.models.MortgageApplicant"/>
+	<parameter name="mgApplication" class="org.egov.cpt.models.Mortgage"/>
+	<parameter name="COMPLETE_HEADER_PATH" class="java.lang.Object"/>
+	<parameter name="COMPLETE_FOOTER_PATH" class="java.lang.Object"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="155" splitType="Stretch">
+			<image>
+				<reportElement x="54" y="0" width="502" height="79" uuid="4ca57c9e-2ca6-407d-9b47-6bff81b2b89e"/>
+				<imageExpression><![CDATA[$P{COMPLETE_HEADER_PATH}]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="5" y="126" width="548" height="27" uuid="bc5a1a27-a879-4c4e-87c9-4a2fb2f5bd37"/>
+				<textElement textAlignment="Center">
+					<font size="13" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_HOME_SEARCH_RESULTS_APP_NO_LABEL") + $P{mgApplication}.getApplicationNumber()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="5" y="97" width="548" height="29" uuid="98574bb1-4a0d-4c0f-8a28-69f1082a5731"/>
+				<textElement textAlignment="Center">
+					<font size="13" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_APPLICATION_FOR_MORTGAGE_HEADER")]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="459" splitType="Stretch">
+			<rectangle>
+				<reportElement x="3" y="11" width="548" height="107" uuid="443d278b-ad72-4ddf-8fe4-9171317de0cd"/>
+			</rectangle>
+			<textField>
+				<reportElement x="14" y="16" width="140" height="25" uuid="a98e2dfb-fbf0-4ed0-957e-16a8ebad7607"/>
+				<textElement textAlignment="Left">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PROPERTY_DETAILS_HEADER")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="23" y="44" width="131" height="20" uuid="78f6359b-69f1-4782-aeae-63a73bedfd28"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_SITE_PLOT_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="23" y="69" width="131" height="20" uuid="03fb2e5d-863d-4af0-8289-05f6b8251df8"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{property}.getTransitNumber()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="400" y="69" width="131" height="20" uuid="a98f0080-7deb-48ec-9913-d1fbaeb83832"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{property}.getPincode()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="400" y="44" width="131" height="20" uuid="8bb4aed6-f211-48b5-a352-2cb85c371ee4"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_PINCODE_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="203" y="69" width="131" height="20" uuid="5dff0b86-8d4b-465e-a00f-ef12f3667a09"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get($P{property}.getColony())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="203" y="44" width="131" height="20" uuid="fcb6663a-014e-4772-a55b-ab47baf26f3b"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_COLONY_LABEL")]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="4" y="131" width="548" height="169" uuid="106958a0-15bb-422e-a982-9dcd486606d3"/>
+			</rectangle>
+			<textField>
+				<reportElement x="13" y="136" width="131" height="20" uuid="674a40b6-9699-4a84-855f-8ed568094ce4"/>
+				<textElement textAlignment="Left">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_APPLICANT_DETAILS")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="254" width="150" height="20" uuid="650f60dd-a7bf-4f19-ae23-e2f1e08d032c"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{applicant}.getAdhaarNumber()!=null?$P{applicant}.getAdhaarNumber():"N/A"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="23" y="188" width="131" height="40" uuid="5014778a-9837-4b03-9a8f-46c53229ab44"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{applicant}.getName()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="229" width="131" height="20" uuid="bfaa877e-4696-45b1-84b9-af3d41d4398a"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_AADHAR_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="185" width="131" height="20" uuid="07135d62-7228-4ba7-9089-295af818f7f0"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{applicant}.getRelationship()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="23" y="230" width="131" height="20" uuid="892d39f8-e91d-4292-af0d-d663c9f215c4"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_OWNER_DETAILS_EMAIL_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="23" y="161" width="131" height="20" uuid="4b715c6f-9caf-41ef-b971-804199da92bf"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_APPLICANT_NAME_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="161" width="131" height="20" uuid="ea84c4e7-0094-4282-91c4-e2874def7264"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_RELATIONSHIP_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="23" y="254" width="147" height="40" uuid="90d2e77f-b1fe-4f93-b774-b0f7a3ebe203"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{applicant}.getEmail()!=null?$P{applicant}.getEmail():"N/A"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="170" y="161" width="130" height="20" uuid="37fa4607-752c-437f-944c-535ad58dfd87"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_FATHER_HUSBANDS_NAME_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="170" y="188" width="131" height="40" uuid="eb1ce42f-b5c5-4cb5-86fe-250cabe57692"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{applicant}.getGuardian()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="451" y="161" width="96" height="20" uuid="f9897ed6-e202-4a13-816a-1fd854d13fd2"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_MOBILE_NO_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="451" y="186" width="96" height="20" uuid="1892ab75-626e-45b4-9d22-ed851e063b65"/>
+				<textElement textAlignment="Left">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{applicant}.getPhone()]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="5" y="311" width="548" height="140" uuid="42ae4a5e-b4f9-484e-b1d3-976109a4addf"/>
+			</rectangle>
+			<textField>
+				<reportElement x="14" y="316" width="276" height="20" uuid="da7455b2-440b-4c89-8716-03aec196dbf7"/>
+				<textElement textAlignment="Left">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Localization}.get("RP_DOCUMENTS_LABEL")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="193" y="341" width="161" height="100" uuid="020c89ba-6c8a-4da8-b010-40270c189f31"/>
+				<textElement textAlignment="Left" markup="styled">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{document2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="370" y="341" width="161" height="100" uuid="2c66fa28-fa60-4459-9317-8fda3ac4ccc0"/>
+				<textElement textAlignment="Left" markup="styled">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{document3}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="19" y="341" width="161" height="100" uuid="b01be7cd-db64-4bdc-8623-31e703ef1e34"/>
+				<textElement textAlignment="Left" markup="styled">
+					<font size="11" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{document1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="105" splitType="Stretch">
+			<image>
+				<reportElement x="8" y="28" width="542" height="60" uuid="53505e3f-fdff-49a7-8a37-6edabb786cfe"/>
+				<imageExpression><![CDATA[$P{COMPLETE_FOOTER_PATH}]]></imageExpression>
+			</image>
+		</band>
+	</pageFooter>
+</jasperReport>

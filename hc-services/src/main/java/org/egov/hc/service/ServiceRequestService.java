@@ -2195,16 +2195,17 @@ public class ServiceRequestService {
 			wfUser.setUserName(wfAssigner.getString("userName"));
 		else
 			wfUser.setUserName("");
-
+		log.info("assigner"+wfAssigner);
 		org.json.JSONArray wfRoles = wfAssigner.getJSONArray("roles");
 		List<Role> roleList = new ArrayList();
 		if (null != wfRoles) {
 			org.json.JSONObject roleDetails = null;
 			for (int roleCnt = 0; roleCnt < wfRoles.length(); roleCnt++) {
 				roleDetails = new org.json.JSONObject(wfRoles.get(roleCnt).toString());
+				log.info("roleDetails"+roleDetails);
 				Role role = new Role();
-				role.setCode(roleDetails.getString("code"));
-				role.setName(roleDetails.getString("name"));
+				role.setCode(roleDetails.get("code")!=null ? roleDetails.get("code").toString() : "");
+				role.setName(roleDetails.get("name")!=null ? roleDetails.get("name").toString() : "");
 				roleList.add(role);
 
 			}
@@ -2214,6 +2215,8 @@ public class ServiceRequestService {
 		}
 		return wfUser;
 	}
+
+	
 
 	private User employeeStoredData(ServiceRequest serviceRequestGetData) {
 

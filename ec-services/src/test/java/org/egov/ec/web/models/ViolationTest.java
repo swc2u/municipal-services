@@ -960,9 +960,7 @@ public class ViolationTest {
 			
 			@Test
 			public void testGetToDate_1() throws Exception {
-				Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
-						null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-						null, null, null,"", null, null);
+				Violation fixture =  new Violation();
 
 				Date result = fixture.getToDate();
 
@@ -971,9 +969,7 @@ public class ViolationTest {
 			
 			@Test
 			public void testSetFromDate_1() throws Exception {
-				Violation fixture =  new Violation("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", null,
-						null, null, null, null, "", "", new Boolean(true), null, new Long(1L), "", new Long(1L), null, null,
-						null, null, null,"", null, null);
+				Violation fixture =  new Violation();
 				Date fromDate = null;
 				fixture.setFromDate(fromDate);
 

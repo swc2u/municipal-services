@@ -27,6 +27,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 		WaterConnection currentWaterConnection = new WaterConnection();
 		while (rs.next()) {
 			String applicationNo = rs.getString("connection_Id");
+
 			if (connectionListMap.getOrDefault(applicationNo, null) == null) {
 				currentWaterConnection = new WaterConnection();
 				currentWaterConnection.setTenantId(rs.getString("tenantid"));
@@ -37,13 +38,17 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 				currentWaterConnection.setMeterInstallationDate(rs.getLong("meterInstallationDate"));
 				currentWaterConnection.setId(rs.getString("connection_Id"));
 				
-				/*currentWaterConnection.setApplicationNo(rs.getString("applicationNo"));
-				currentWaterConnection.setApplicationStatus(rs.getString("applicationstatus"));
-				currentWaterConnection.processInstance(ProcessInstance.builder().action((rs.getString("action"))).build());*/
-				
 				currentWaterConnection.setApplicationNo(rs.getString("app_applicationno"));
-				currentWaterConnection.setApplicationStatus(rs.getString("app_applicationstatus"));
-				currentWaterConnection.processInstance(ProcessInstance.builder().action((rs.getString("app_action"))).build());
+				currentWaterConnection.setApplicationStatus(rs.getString("applicationstatus"));
+				currentWaterConnection.processInstance(ProcessInstance.builder().action((rs.getString("action"))).build());
+				
+				/*
+				 * currentWaterConnection.setApplicationNo(rs.getString("app_applicationno"));
+				 * currentWaterConnection.setApplicationStatus(rs.getString(
+				 * "app_applicationstatus"));
+				 * currentWaterConnection.processInstance(ProcessInstance.builder().action((rs.
+				 * getString("app_action"))).build());
+				 */
 				
 				currentWaterConnection.setStatus(StatusEnum.fromValue(rs.getString("status")));
 				currentWaterConnection.setConnectionNo(rs.getString("connectionNo"));
@@ -81,6 +86,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
                 currentWaterConnection.setMeterUnit(rs.getString("meterUnit"));
                 currentWaterConnection.setSanctionedCapacity(rs.getString("sanctionedCapacity"));
 
+                currentWaterConnection.setProposedLastMeterReading(rs.getBigDecimal("proposed_lastmeterreading"));
                 currentWaterConnection.setProposedInitialMeterReading(rs.getBigDecimal("proposed_initialmeterreading"));
 				currentWaterConnection.setProposedMeterInstallationDate(rs.getLong("proposed_meterinstallationdate"));
 
@@ -100,6 +106,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 				additionalDetails.put(WCConstants.ADHOC_REBATE_REASON, rs.getString("adhocrebatereason"));
 				additionalDetails.put(WCConstants.ADHOC_REBATE_COMMENT, rs.getString("adhocrebatecomment"));
 				additionalDetails.put(WCConstants.INITIAL_METER_READING_CONST, rs.getBigDecimal("initialmeterreading"));
+				additionalDetails.put(WCConstants.LAST_METER_READING_CONST, rs.getBigDecimal("lastmeterreading"));
 				additionalDetails.put(WCConstants.APP_CREATED_DATE, rs.getBigDecimal("appCreatedDate"));
 				additionalDetails.put(WCConstants.DETAILS_PROVIDED_BY, rs.getString("detailsprovidedby"));
 				additionalDetails.put(WCConstants.ESTIMATION_FILESTORE_ID, rs.getString("estimationfileStoreId"));
@@ -128,6 +135,10 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 					app.setIsFerruleApplicable(rs.getBoolean("app_ferrule"));
 					app.setSecurityCharge(rs.getDouble("app_securitycharge"));
 					app.setTotalAmountPaid(rs.getString("total_amount_paid"));
+					app.setAdditionalCharges(rs.getDouble("additionalcharges"));
+					app.setConstructionCharges(rs.getDouble("constructioncharges"));
+					app.setPaymentMode(rs.getString("paymentmode"));
+					app.setIsMeterStolen(rs.getBoolean("ismeterstolen"));
 					AuditDetails auditdetails1 = AuditDetails.builder()
 		                    .createdBy(rs.getString("app_createdBy"))
 		                    .createdTime(rs.getLong("app_createdTime"))
@@ -183,6 +194,10 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 			app.setSecurityCharge(rs.getDouble("app_securitycharge"));
 			app.setTotalAmountPaid(rs.getString("total_amount_paid"));
 
+			app.setAdditionalCharges(rs.getDouble("additionalcharges"));
+			app.setConstructionCharges(rs.getDouble("constructioncharges"));
+			app.setPaymentMode(rs.getString("paymentmode"));
+			app.setIsMeterStolen(rs.getBoolean("ismeterstolen"));
 			AuditDetails auditdetails1 = AuditDetails.builder()
                    .createdBy(rs.getString("app_createdBy"))
                    .createdTime(rs.getLong("app_createdTime"))

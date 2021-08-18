@@ -131,6 +131,9 @@ public class WaterConnection extends Connection {
 	@JsonProperty("proposedInitialMeterReading")
 	private BigDecimal proposedInitialMeterReading = null;
 	
+	@JsonProperty("proposedLastMeterReading")
+	private BigDecimal proposedLastMeterReading = null;
+	
 	
 	public String getContractValue() {
 		return contractValue;
@@ -159,7 +162,7 @@ public class WaterConnection extends Connection {
 	 * @return waterSource
 	 **/
 	@ApiModelProperty(required = true, value = "It is a namespaced master data, defined in MDMS")
-	@Size(min = 2, max = 64)
+//	@Size(min = 2, max = 64)
 	public String getWaterSource() {
 		return waterSource;
 	}
@@ -180,7 +183,7 @@ public class WaterConnection extends Connection {
 	 **/
 	@ApiModelProperty(value = "Unique id of the meter.")
 
-	@Size(min = 2, max = 64)
+	//@Size(min = 2, max = 64)
 	public String getMeterId() {
 		return meterId;
 	}
@@ -558,5 +561,13 @@ public class WaterConnection extends Connection {
 
 	public void setProposedInitialMeterReading(BigDecimal proposedInitialMeterReading) {
 		this.proposedInitialMeterReading = proposedInitialMeterReading;
+	}
+
+	public BigDecimal getProposedLastMeterReading() {
+		return proposedLastMeterReading;
+	}
+
+	public void setProposedLastMeterReading(BigDecimal proposedLastMeterReading) {
+		this.proposedLastMeterReading = proposedLastMeterReading;
 	}
 }

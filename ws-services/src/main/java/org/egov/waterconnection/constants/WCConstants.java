@@ -169,10 +169,10 @@ public class WCConstants {
 	public static final List<String> DOCUMENT_PENDING_FROM_CITIZEN_MESSAGE = Collections
 	.unmodifiableList(Arrays.asList("SEND_BACK_TO_CITIZEN_FOR_ROADCUT_NOC", "SEND_BACK_TO_CITIZEN"));
 	
-	public static final String WS_PAYMENT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your payment for New <Service> connection against the application <Application number> has been been succesfully recorded. Please submit previously filled physical copies of document at concerned Public Health Division Office,Chandigarh  <Action Button>Download Application</Action Button>";// Download your receipt using this link <receipt download link>.
-	public static final String WS_REJECT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for New <Service> connection against the application <Application number> has been been rejected.  <Action Button>Download Application</Action Button>";
-	public static final String WS_RESUBMIT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for New <Service> connection against the application <Application number> is incomplete.Please re-submit the documents.  <Action Button>Download Application</Action Button>";
-	public static final String WS_SUBMIT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for New <Service> connection against the application <Application number> has been been succesfully submitted.  <Action Button>Download Application</Action Button>";
+	public static final String WS_PAYMENT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your payment for application <Application number> has been been succesfully recorded. Please submit previously filled physical copies of document at concerned Public Health Division Office,Chandigarh  <Action Button>Download Application</Action Button>";// Download your receipt using this link <receipt download link>.
+	public static final String WS_REJECT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for application <Application number> has been been rejected.  <Action Button>Download Application</Action Button>";
+	public static final String WS_RESUBMIT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for application <Application number> is incomplete.Please re-submit the documents.  <Action Button>Download Application</Action Button>";
+	public static final String WS_SUBMIT_MESSAGE_NOTIFICATION ="Dear <Owner Name> , Your request for application <Application number> has been been succesfully submitted.  <Action Button>Download Application</Action Button>";
     public static final String DEFAULT_OBJECT_MODIFIED_SMS_MSG = "Dear <Owner Name>, Your Application <Application number>  for a New <Service> Connection has been edited. For more details, please log in to <mseva URL> or download <mseva app link>.";
 
     public static final String DEFAULT_OBJECT_MODIFIED_APP_MSG = "Dear <Owner Name>, Your Application <Application number>  for a New <Service> Connection has been edited. Click here for more details <View History Link>.";
@@ -193,6 +193,8 @@ public class WCConstants {
 	
 	public static final String INITIAL_METER_READING_CONST = "initialMeterReading";
 	
+	public static final String LAST_METER_READING_CONST = "lastMeterReading";
+	
 	public static final String SUBMIT_APPLICATION_CONST = "SUBMIT_APPLICATION";
 	
 	public static final String DETAILS_PROVIDED_BY = "detailsProvidedBy";
@@ -207,12 +209,18 @@ public class WCConstants {
 	
 	public static final List<String> ADDITIONAL_OBJ_CONSTANT = Collections
 			.unmodifiableList(Arrays.asList(ADHOC_PENALTY, ADHOC_REBATE, ADHOC_PENALTY_REASON, ADHOC_PENALTY_COMMENT,
-					ADHOC_REBATE_REASON, ADHOC_REBATE_COMMENT, INITIAL_METER_READING_CONST, DETAILS_PROVIDED_BY,
+					ADHOC_REBATE_REASON, ADHOC_REBATE_COMMENT, INITIAL_METER_READING_CONST,LAST_METER_READING_CONST, DETAILS_PROVIDED_BY,
 					APP_CREATED_DATE, ESTIMATION_FILESTORE_ID, SANCTION_LETTER_FILESTORE_ID, ESTIMATION_DATE_CONST));
 
 	public static final List<String> EDIT_NOTIFICATION_STATE = Collections.unmodifiableList(Arrays.asList(ACTION_INITIATE, SUBMIT_APPLICATION_CONST, ACTION_PAY));
 	
 	public static final List<String> IGNORE_CLASS_ADDED = Collections.unmodifiableList(Arrays.asList("PlumberInfo"));
+
+	public static final List<String> ACTIVITY_TYPE_81 = Collections.unmodifiableList(Arrays.asList("CONNECTION_CONVERSION","UPDATE_CONNECTION_HOLDER_INFO","APPLY_FOR_TEMPORARY_REGULAR_CONNECTION"));
+
+	public static final List<String> ACTIVITY_TYPE_82 = Collections.unmodifiableList(Arrays.asList("UPDATE_METER_INFO","REACTIVATE_CONNECTION"));
+
+	public static final List<String> ACTIVITY_TYPE_NEW_CONN = Collections.unmodifiableList(Arrays.asList("NEW_WS_CONNECTION"));
 	
 	public static final String SELF = "SELF";
 	
@@ -289,7 +297,15 @@ public class WCConstants {
 
 	public static final String WS_BILLING_FILENAME = "billingData.txt";
 
-	public static final String WS_CONNECTION_FILENAME = "connectionData.csv";
+	public static final String WS_CONNECTION_FILENAME = "connectionData.txt";
+
+	public static final String CONNECTION_EXCHANGE = "CONNECTION";
+	
+	public static final String ADVICE_EXCHANGE = "ADVICE";
+	
+	public static final String WS_ADVICE_FILENAME = "adviceData.txt";
+	
+	public static final String WS_APPLY_FOR_TEMPORARY_CON_BILLING = "APPLY_FOR_TEMPORARY_CONNECTION_BILLING";
 	
 	public static final String WS_APPLY_FOR_TEMPORARY_CON = "APPLY_FOR_TEMPORARY_CONNECTION";
 
@@ -300,4 +316,5 @@ public class WCConstants {
 	public static final String ACTION_VERIFY_AND_FORWARD_PAYMENT = "VERIFY_AND_FORWARD_FOR_PAYMENT";
 
 	public static final Set<String> APPROVED_ACTIONS =  Stream.of("TUBEWELL_CONNECTION_ACTIVATED", "CONNECTION_TARIFF_CHANGED","CONNECTION_REACTIVATED","CONNECTION_UPDATED","TEMPORARY_CONNECTION_CLOSED","CONNECTION_CLOSED","CONNECTION_EXTENDED","CONNECTION_TYPE_CHANGED","CONNECTION_ACTIVATED").collect(Collectors.toSet());
+	public static final String WS_METER_TESTING_ACTIVITY = "APPLY_FOR_METER_TESTING";
 }

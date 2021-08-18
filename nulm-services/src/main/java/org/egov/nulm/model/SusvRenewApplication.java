@@ -30,6 +30,9 @@ public class SusvRenewApplication {
 
 	@JsonProperty("applicationId")
 	private String applicationId;
+	
+	@JsonProperty("susvApplicationId")
+	private String susvApplicationId;
 
 	@JsonProperty("tenantId")
 	private String tenantId;

@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
+
 @Service
 @Slf4j
 public class BillingService {
@@ -44,7 +45,7 @@ public class BillingService {
 
 	@Autowired
 	private ObjectMapper mapper;
-	
+
 	@Autowired
 	private WSCalculationUtil wSCalculationUtil;
 
@@ -54,78 +55,71 @@ public class BillingService {
 	@Autowired
 	private DemandService demandService;
 
-
-
-	
-
-
-	public List<BillGeneration> getBillingEstimation(BillGenerationRequest billGenerationRequest){
+	public List<BillGeneration> getBillingEstimation(BillGenerationRequest billGenerationRequest) {
 		List<BillGeneration> billList = new ArrayList<BillGeneration>();
-		BillGeneration bill = billingRepository.getBillingEstimation(billGenerationRequest.getBillGeneration().getConsumerCode());
-		if(bill == null) {
+		BillGeneration bill = billingRepository
+				.getBillingEstimation(billGenerationRequest.getBillGeneration().getConsumerCode());
+		if (bill == null) {
 			return billList;
 		}
-		bill.setConsumerCode(bill.getDivSdiv()+bill.getConsumerCode());
+		bill.setConsumerCode(bill.getDivSdiv() + bill.getConsumerCode());
 		Map<String, Object> masterMap = masterDataService.loadMasterData(billGenerationRequest.getRequestInfo(),
 				billGenerationRequest.getBillGeneration().getTenantId());
-		
-		
-		String paymentMode =billGenerationRequest.getBillGeneration().getPaymentMode();
+
+		String paymentMode = billGenerationRequest.getBillGeneration().getPaymentMode();
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
 		SimpleDateFormat dateFormatter1 = new SimpleDateFormat("yyyy-MM-dd");
 		Date todayDate = null;
-		Date	dueDateCheque = null;
-		Date	dueDateCash = null;
+		Date dueDateCheque = null;
+		Date dueDateCash = null;
 		try {
-			todayDate = dateFormatter.parse(dateFormatter.format(new Date() ));
-		
+			todayDate = dateFormatter.parse(dateFormatter.format(new Date()));
+
 			dueDateCheque = dateFormatter1.parse(bill.getDueDateCheque());
 			dueDateCash = dateFormatter1.parse(bill.getDueDateCash());
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if(paymentMode.equalsIgnoreCase(WSCalculationConstant.payment_cheque)) {
-			if(todayDate.compareTo(dueDateCheque) > 0) {
-				
-           enrichWaterCalculation(billGenerationRequest,bill,masterMap,true);
+		if (paymentMode.equalsIgnoreCase(WSCalculationConstant.payment_cheque)) {
+			if (todayDate.compareTo(dueDateCheque) > 0) {
 
-				}else {
-			  enrichWaterCalculation(billGenerationRequest,bill,masterMap,false);
-			
-				}	
+				enrichWaterCalculation(billGenerationRequest, bill, masterMap, true);
+
+			} else {
+				enrichWaterCalculation(billGenerationRequest, bill, masterMap, false);
+
 			}
-			else {
-				if(todayDate.compareTo(dueDateCash) > 0) {
-					
-					  enrichWaterCalculation(billGenerationRequest,bill,masterMap,true);
-					
-				}else {
-					  enrichWaterCalculation(billGenerationRequest,bill,masterMap,false);
-				}
-}
-		if(billGenerationRequest.getBillGeneration().isGenerateDemand()) {
+		} else {
+			if (todayDate.compareTo(dueDateCash) > 0) {
+
+				enrichWaterCalculation(billGenerationRequest, bill, masterMap, true);
+
+			} else {
+				enrichWaterCalculation(billGenerationRequest, bill, masterMap, false);
+			}
+		}
+		if (billGenerationRequest.getBillGeneration().isGenerateDemand()) {
 			List<Calculation> calculations = new ArrayList<Calculation>();
 			bill.getCalculation().setTenantId(billGenerationRequest.getBillGeneration().getTenantId());
 			calculations.add(bill.getCalculation());
 
 			demandService.generateDemand(billGenerationRequest.getRequestInfo(), calculations, masterMap, true);
-			
+
 		}
-		 billList.add(bill);
-		
+		billList.add(bill);
+
 		return billList;
 	}
 
-	private void enrichWaterCalculation(BillGenerationRequest billGenerationRequest, BillGeneration bill, Map<String, Object> masterMap, boolean isPenalty) {
-		
-		
-		
+	private void enrichWaterCalculation(BillGenerationRequest billGenerationRequest, BillGeneration bill,
+			Map<String, Object> masterMap, boolean isPenalty) {
+
 		WaterConnection connection = calculatorUtil.getWaterConnection(billGenerationRequest.getRequestInfo(),
 				bill.getConsumerCode(), billGenerationRequest.getBillGeneration().getTenantId());
-		
+
 		if (connection == null) {
-			throw new CustomException("CONNECTION_NOT_FOUND","water connection not found for consumer id ");
+			throw new CustomException("CONNECTION_NOT_FOUND", "water connection not found for consumer id ");
 		} else {
 
 			List<TaxHeadEstimate> estimates = new ArrayList<>();
@@ -133,39 +127,42 @@ public class BillingService {
 			estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_CHARGE)
 					.estimateAmount(new BigDecimal(bill.getNetAmount())).build());
 
-			if(isPenalty) {	
-				 estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.
-						 WS_TIME_PENALTY) .estimateAmount(new BigDecimal(bill.getSurcharge())).build());
+			if (isPenalty) {
+				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_TIME_PENALTY)
+						.estimateAmount(new BigDecimal(bill.getSurcharge())).build());
 			}
 			Map<String, List> estimatesAndBillingSlabs = new HashMap<>();
 			estimatesAndBillingSlabs.put("estimates", estimates);
 			Calculation calculation = getCalculation(estimatesAndBillingSlabs, masterMap, bill, connection);
-			CalculationCriteria criteria= CalculationCriteria.builder().waterConnection(connection).from(bill.getFromDate()).to(bill.getToDate()).build();
+			CalculationCriteria criteria = CalculationCriteria.builder().waterConnection(connection)
+					.from(bill.getFromDate()).to(bill.getToDate()).build();
 			ArrayList<?> billingFrequencyMap = (ArrayList<?>) masterMap
 					.get(WSCalculationConstant.Billing_Period_Master);
 			masterDataService.enrichBillingPeriod(criteria, billingFrequencyMap, masterMap);
-		//	enrichBillingPeriod(bill, masterMap,billGenerationRequest.getRequestInfo());
+			// enrichBillingPeriod(bill, masterMap,billGenerationRequest.getRequestInfo());
 			bill.setCalculation(calculation);
-		
+
+		}
+
 	}
 
-}
-	
-
-	public Map<String, Object> enrichBillingPeriod(BillGeneration billGeneration, Map<String, Object> masterMap, RequestInfo requestInfo) {
+	public Map<String, Object> enrichBillingPeriod(BillGeneration billGeneration, Map<String, Object> masterMap,
+			RequestInfo requestInfo) {
 
 		Map<String, Object> billingPeriod = new HashMap<>();
-		List<Map<String, Object>> taxPeriods =	(List<Map<String, Object>>) masterMap.get(WSCalculationConstant.TAXPERIOD_MASTER_KEY);
+		List<Map<String, Object>> taxPeriods = (List<Map<String, Object>>) masterMap
+				.get(WSCalculationConstant.TAXPERIOD_MASTER_KEY);
 		JsonNode node = mapper.convertValue(taxPeriods.get(0), JsonNode.class);
 		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, node.get("fromDate"));
 		billingPeriod.put(WSCalculationConstant.ENDING_DATE_APPLICABLES,
 				System.currentTimeMillis() + WSCalculationConstant.APPLICATION_FEE_DEMAND_END_DATE);
-		billingPeriod.put(WSCalculationConstant.Demand_Expiry_Date_String, WSCalculationConstant.APPLICATION_FEE_DEMAND_EXP_DATE);
-		
+		billingPeriod.put(WSCalculationConstant.Demand_Expiry_Date_String,
+				WSCalculationConstant.APPLICATION_FEE_DEMAND_EXP_DATE);
+
 		masterMap.put(WSCalculationConstant.BILLING_PERIOD, billingPeriod);
 		return masterMap;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Calculation getCalculation(Map<String, List> estimatesAndBillingSlabs, Map<String, Object> masterMap,
 			BillGeneration billGeneration, WaterConnection connection) {
@@ -222,8 +219,8 @@ public class BillingService {
 
 		Calculation cal = Calculation.builder().totalAmount(totalAmount).taxAmount(taxAmt).penalty(penalty)
 				.exemption(exemption).charge(waterCharge).fee(fee).rebate(rebate).tenantId(billGeneration.getTenantId())
-				.taxHeadEstimates(estimates).connectionNo(billGeneration.getBillGenerationId()).waterConnection(connection)
-				.build();
+				.taxHeadEstimates(estimates).connectionNo(billGeneration.getBillGenerationId())
+				.waterConnection(connection).build();
 
 		return cal;
 	}
