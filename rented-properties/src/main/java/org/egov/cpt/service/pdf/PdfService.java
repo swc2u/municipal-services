@@ -648,10 +648,12 @@ public class PdfService {
 			break; 
 
 		}
-		ClassLoader classLoader = getClass().getClassLoader();
+//		ClassLoader classLoader = getClass().getClassLoader();
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+//		InputStream is = classloader.getResourceAsStream("test.csv");
 		URL file = null;
 		try {
-			file = new File(classLoader.getResource("images/"+logo_http_url).getFile()).toURI().toURL();
+			file = new File(classloader.getResource("images/"+logo_http_url).getFile()).toURI().toURL();
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
