@@ -156,7 +156,7 @@ public class ApplicationService {
 
 		if (application.getBranchType().contentEquals(PSConstants.APPLICATION_BUILDING_BRANCH)
 				&& application.getApplicationType().contentEquals(PSConstants.NOC)) {
-			if (application.getState().contains(PSConstants.BB_NOC_PENDING_AC_APPROVAL)) {
+			if (application.getState().contains(PSConstants.BB_NOC_PENDING_DRAFSMAN_CALCULATION)) {
 				demandService.generateDemand(requestInfo, Collections.singletonList(application));
 			}
 		} else if (state.contains(PSConstants.EM_STATE_PENDING_DA_FEE)) {

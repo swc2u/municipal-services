@@ -28,7 +28,7 @@ public class NotificationService {
     }
 
     public void sendEmail(String email, String subject, String body) {
-        this.sendEmail(email, subject, body, false);
+        this.sendEmail(email, subject, body, true);
     }
 
     public void sendEmail(String email, String subject, String body, boolean isHTML) {
