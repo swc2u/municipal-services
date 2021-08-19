@@ -3,7 +3,6 @@ package org.egov.cpt.service.pdf;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,6 @@ import org.egov.cpt.models.Document;
 import org.egov.cpt.models.ExcelSearchCriteria;
 import org.egov.cpt.models.OfflinePaymentDetails;
 import org.egov.cpt.models.PdfSearchCriteria;
-import org.egov.cpt.models.Property;
 import org.egov.cpt.models.PropertyCriteria;
 import org.egov.cpt.models.enums.CollectionPaymentModeEnum;
 import org.egov.cpt.repository.PropertyRepository;
@@ -67,6 +65,7 @@ import net.sf.jasperreports.export.SimpleXlsExporterConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -627,29 +626,36 @@ public class PdfService {
 		String logo_http_url = null;
 		switch(logoPath) {
 		case PTConstants.LOGO_PATH:
-			logo_http_url = this.city_logo_url;
+			logo_http_url = "logo.png";
 			break;
 		case PTConstants.WATER_MARK_PATH:
-			logo_http_url = this.city_watermark_url;
+			logo_http_url = "logo_watermark.png";
 			break;
 		case PTConstants.FOOTER_LEFT_PATH:
-			logo_http_url = this.city_footer_left_url;
+			logo_http_url = "logo.png";
 			break;
 		case PTConstants.FOOTER_RIGHT_PATH:
-			logo_http_url = this.city_footer_right_url;
+			logo_http_url = "logo.png";
 			break;
 		case PTConstants.COMPLETE_HEADER_PATH:
-			logo_http_url = this.complete_header_path;
+			logo_http_url = "complete_header.PNG";
 			break;
 		case PTConstants.COMPLETE_FOOTER_PATH:
-			logo_http_url = this.complete_footer_path;
+			logo_http_url = "complete_footer.PNG";
 			break;
 		default:
 			logo_http_url = this.city_logo_url;
 			break; 
 
 		}
-		byte[] cityLogo = httpImageAsByteArray(logo_http_url);
+		ClassLoader classLoader = getClass().getClassLoader();
+		URL file = null;
+		try {
+			file = new File(classLoader.getResource("images/"+logo_http_url).getFile()).toURI().toURL();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		byte[] cityLogo = httpImageAsByteArray(file.toString());
 		return cityLogo;
 	}
 
