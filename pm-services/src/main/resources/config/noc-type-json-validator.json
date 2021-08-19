@@ -183,6 +183,10 @@
       "remarks":{
          "mandatory":"false",
          "validateRegularExp":""
+      },
+      "mobileNumber":{
+         "mandatory":"true",
+         "validateRegularExp":"(0/91)?[1-9][0-9]{9}"
       }
    },
    "ADVERTISEMENTNOC":{
