@@ -87,11 +87,11 @@ public class PdfService {
 	@Value("${city_watermark_url}")
 	private String city_watermark_url;
 
-	@Value("${city_footer_left_url}")
-	private String city_footer_left_url;
-
-	@Value("${city_footer_right_url}")
-	private String city_footer_right_url;
+//	@Value("${city_footer_left_url}")
+//	private String city_footer_left_url;
+//
+//	@Value("${city_footer_right_url}")
+//	private String city_footer_right_url;
 
 	@Value("${complete_footer_path}")
 	private String complete_footer_path;
@@ -627,22 +627,22 @@ public class PdfService {
 		String logo_http_url = null;
 		switch(logoPath) {
 		case PTConstants.LOGO_PATH:
-			logo_http_url = "logo.png";
+			logo_http_url = this.city_logo_url;
 			break;
 		case PTConstants.WATER_MARK_PATH:
-			logo_http_url = "logo_watermark.png";
+			logo_http_url = this.city_watermark_url;
 			break;
-		case PTConstants.FOOTER_LEFT_PATH:
-			logo_http_url = "logo.png";
-			break;
-		case PTConstants.FOOTER_RIGHT_PATH:
-			logo_http_url = "logo.png";
-			break;
+//		case PTConstants.FOOTER_LEFT_PATH:
+//			logo_http_url = this.city_footer_left_url;
+//			break;
+//		case PTConstants.FOOTER_RIGHT_PATH:
+//			logo_http_url = this.city_footer_right_url;
+//			break;
 		case PTConstants.COMPLETE_HEADER_PATH:
-			logo_http_url = "complete_header.PNG";
+			logo_http_url = this.complete_header_path;
 			break;
 		case PTConstants.COMPLETE_FOOTER_PATH:
-			logo_http_url = "complete_footer.PNG";
+			logo_http_url = this.complete_footer_path;
 			break;
 		default:
 			logo_http_url = this.city_logo_url;
@@ -650,17 +650,11 @@ public class PdfService {
 
 		}
 		InputStream stream = this.getClass().getResourceAsStream("/images/"+logo_http_url);
-//		URL file = null;
-//		try {
-//			file = new File(classloader.getResource("images/"+logo_http_url).getFile()).toURI().toURL();
-//		} catch (MalformedURLException e) {
-//			e.printStackTrace();
-//		}
 		byte[] cityLogo = null;
 		try {
 			cityLogo = IOUtils.toByteArray(stream);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new CustomException("ERROR IN IMAGE STREAM READING","error in image stream reading: "+e);
 		}
 		return cityLogo;
 	}
