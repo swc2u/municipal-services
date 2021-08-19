@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
 
+import org.apache.commons.io.IOUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.cpt.models.BillAccountDetailV2;
 import org.egov.cpt.models.Document;
@@ -648,16 +649,19 @@ public class PdfService {
 			break; 
 
 		}
-//		ClassLoader classLoader = getClass().getClassLoader();
-		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-//		InputStream is = classloader.getResourceAsStream("test.csv");
-		URL file = null;
+		InputStream stream = this.getClass().getResourceAsStream("/images/"+logo_http_url);
+//		URL file = null;
+//		try {
+//			file = new File(classloader.getResource("images/"+logo_http_url).getFile()).toURI().toURL();
+//		} catch (MalformedURLException e) {
+//			e.printStackTrace();
+//		}
+		byte[] cityLogo = null;
 		try {
-			file = new File(classloader.getResource("images/"+logo_http_url).getFile()).toURI().toURL();
-		} catch (MalformedURLException e) {
+			cityLogo = IOUtils.toByteArray(stream);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		byte[] cityLogo = httpImageAsByteArray(file.toString());
 		return cityLogo;
 	}
 
