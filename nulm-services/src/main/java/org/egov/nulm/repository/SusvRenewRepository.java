@@ -94,6 +94,7 @@ public class SusvRenewRepository {
 				} else {
 					statusEmplyee.add(request.getApplicationStatus().toString());
 				}
+				paramValues.put("covNo", request.getCovNo());
 				paramValues.put("applicationStaus", statusEmplyee);
 				return  namedParameterJdbcTemplate.query(NULMQueryBuilder.GET_SUSV_RENEW_QUERY, paramValues,
 						susvRenewRowMapper);
@@ -113,6 +114,7 @@ public class SusvRenewRepository {
 			} else {
 				statusEmplyee.add(request.getApplicationStatus().toString());
 			}
+			paramValues.put("covNo", request.getCovNo());
 			paramValues.put("applicationStaus",statusEmplyee);
 			paramValues.put("createdBy", "");
 			paramValues.put("applicationId", request.getApplicationId());
