@@ -1382,5 +1382,88 @@ public class BookingsServiceImpl implements BookingsService {
 		}
 		return bookingsRequest.getBookingsModel();
 	}
+
+
+	
+	@Override
+	public BookingsModel updatePayment(BookingsRequest bookingsRequest) {
+
+//		bookingLockService.deleteLockDates(bookingsRequest.getBookingsModel().getBkApplicationNumber());
+		String businessService = bookingsRequest.getBookingsModel().getBusinessService();
+		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
+		bookingsRequest.getBookingsModel().setLastModifiedDate(formatter.format(new java.util.Date()));
+		if (BookingsConstants.APPLY.equals(bookingsRequest.getBookingsModel().getBkAction())
+				&& !BookingsConstants.BUSINESS_SERVICE_GFCP.equals(businessService))
+			enrichmentService.enrichBookingsAssignee(bookingsRequest);
+		
+		if (BookingsConstants.APPLY.equals(bookingsRequest.getBookingsModel().getBkAction()) && (BookingsConstants.BUSINESS_SERVICE_OSBM.equals(businessService) || BookingsConstants.BUSINESS_SERVICE_OSUJM.equals(businessService))) {
+			BookingsModel booking = bookingsRepository.findByBkApplicationNumber(bookingsRequest.getBookingsModel().getBkApplicationNumber());
+			enrichmentService.enrichAssignee(bookingsRequest, booking);
+		}
+		
+//		if (config.getIsExternalWorkFlowEnabled())
+//			workflowIntegrator.callWorkFlow(bookingsRequest);
+
+		BookingsModel bookingsModel = null;
+		if (!BookingsConstants.APPLY.equals(bookingsRequest.getBookingsModel().getBkAction())
+				&& BookingsConstants.BUSINESS_SERVICE_OSBM.equals(businessService)) {
+
+			bookingsModel = enrichmentService.enrichOsbmDetails(bookingsRequest);
+			bookingsRequest.setBookingsModel(bookingsModel);
+	//		BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+	//		bookingsProducer.push(config.getUpdateBookingTopic(), kafkaBookingRequest);
+			bookingsModel = bookingsRepository.save(bookingsModel);
+
+		}
+
+		else if (!BookingsConstants.APPLY.equals(bookingsRequest.getBookingsModel().getBkAction())
+				&& BookingsConstants.BUSINESS_SERVICE_BWT.equals(businessService)) {
+
+			bookingsModel = enrichmentService.enrichBwtDetails(bookingsRequest);
+			bookingsRequest.setBookingsModel(bookingsModel);
+		//	BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+		//	bookingsProducer.push(config.getUpdateBookingTopic(), kafkaBookingRequest);
+			bookingsModel = bookingsRepository.save(bookingsModel);
+
+		} else if (!BookingsConstants.APPLY.equals(bookingsRequest.getBookingsModel().getBkAction())
+				&& BookingsConstants.BUSINESS_SERVICE_OSUJM.equals(businessService)) {
+			bookingsModel = enrichmentService.enrichOsujmDetails(bookingsRequest);
+			bookingsRequest.setBookingsModel(bookingsModel);
+		//	BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+		//	bookingsProducer.push(config.getUpdateBookingTopic(), kafkaBookingRequest);
+			bookingsModel = bookingsRepository.save(bookingsModel);
+			if (BookingsConstants.PAY.equals(bookingsRequest.getBookingsModel().getBkAction())) {
+				config.setJurisdictionLock(true);
+			}
+		} else {
+			if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel().getBkPaymentStatus())) {
+				bookingsRequest.getBookingsModel()
+						.setBkPaymentStatus(bookingsRequest.getBookingsModel().getBkPaymentStatus());
+			}
+		//	BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+		//	bookingsProducer.push(config.getUpdateBookingTopic(), kafkaBookingRequest);
+			bookingsModel = bookingsRepository.save(bookingsRequest.getBookingsModel());
+			if (BookingsConstants.APPLY.equals(bookingsRequest.getBookingsModel().getBkAction())
+					&& BookingsConstants.BUSINESS_SERVICE_GFCP.equals(businessService)) {
+				config.setCommercialLock(true);
+			}
+		}
+//		String bookingType = bookingsRequest.getBookingsModel().getBkBookingType();
+//		if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel())) {
+//			Map<String, MdmsJsonFields> mdmsJsonFieldsMap = mdmsJsonField(bookingsRequest);
+//			if (!BookingsFieldsValidator.isNullOrEmpty(mdmsJsonFieldsMap)) {
+//				bookingsRequest.getBookingsModel()
+//						.setBkBookingType(mdmsJsonFieldsMap.get(bookingsRequest.getBookingsModel().getBkBookingType()).getModifiedName());
+//				String applicantName = bookingsRequest.getBookingsModel().getBkApplicantName().trim();
+//				if (!BookingsFieldsValidator.isNullOrEmpty(applicantName)) {
+//					bookingsRequest.getBookingsModel().setBkApplicantName(applicantName.split(" ")[0]);
+//				}
+//				bookingsProducer.push(config.getUpdateBookingSMSTopic(), bookingsRequest);
+//			}
+//		}
+//		bookingsRequest.getBookingsModel().setBkBookingType(bookingType);
+		return bookingsRequest.getBookingsModel();
+	
+	}
 	
 }

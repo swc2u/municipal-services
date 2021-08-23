@@ -107,6 +107,26 @@ public class BookingsController {
 		return ResponseEntity.ok(rs);
 	}
 	
+	@PostMapping("update/payment")
+	private ResponseEntity<?> updateBookingforPayment(
+			@RequestBody BookingsRequest bookingsRequest) {
+		
+		bookingsFieldsValidator.validateUpdateBookingRequest(bookingsRequest);
+		BookingsModel bookingsModel = bookingsService.updatePayment(bookingsRequest);
+		ResponseModel rs = new ResponseModel();
+		if (bookingsModel == null) {
+			rs.setStatus("400");
+			rs.setMessage("Failure while creating booking");
+			rs.setData(bookingsModel);
+		} else {
+			rs.setStatus("200");
+			rs.setMessage("Data submitted successfully");
+			rs.setData(bookingsModel);
+		}
+		
+		return ResponseEntity.ok(rs);
+	}	
+	
 
 	
 		
