@@ -965,4 +965,6 @@ public class BookingsConstants {
 	public static final String PACC_ACTION_APPROVE_CLERK_DEO = "APPROVE_CLERK_DEO";
 	
 	public static final int TEN_MINUTES = 10;
+	
+	public static final String BUSINESS_SERVICE_OSBM_PAYMENT = "BOOKING_BRANCH_SERVICES.MANUAL_OPEN_SPACE";
 }

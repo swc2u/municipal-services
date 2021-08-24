@@ -142,4 +142,6 @@ public interface BookingsService {
 	 * @return the bookings model
 	 */
 	public BookingsModel saveCardDetails(BookingsRequest bookingsRequest);
+	
+	public BookingsModel updatePayment(BookingsRequest bookingsRequest);
 }
