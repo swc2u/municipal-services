@@ -214,6 +214,7 @@ public class SusvService {
 				susvdoc.add(document);
 			}
 			susvApplication.setApplicationDocument(susvdoc);
+			if (susvApplication.getSusvApplicationFamilyDetails() != null) {
 			susvApplication.getSusvApplicationFamilyDetails().stream().forEach(element -> {
 				element.setUuid(UUID.randomUUID().toString());
 				element.setApplicationUuid(susvApplication.getApplicationUuid());
@@ -223,6 +224,7 @@ public class SusvService {
 						auditDetailsUtil.getAuditDetails(request.getRequestInfo(), CommonConstants.ACTION_CREATE));
 
 			});
+			}
 			if (!susvApplication.getAction().toString()
 					.equalsIgnoreCase(SusvApplication.StatusEnum.DRAFTED.toString())) {
 				// workflow service call to integrate tender workflow
