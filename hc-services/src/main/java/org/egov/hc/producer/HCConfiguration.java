@@ -194,5 +194,10 @@ public class HCConfiguration {
 		@Value("${egov.hc.sla.daysconfig}")
 		private int slaDays;
 
+		@Value("${egov.hc.sms.template}")
+		private String Template;
+		
+	
+
 
 }

@@ -26,6 +26,7 @@ import org.egov.hc.consumer.HCNotificationConsumer;
 import org.egov.hc.contract.AuditDetails;
 import org.egov.hc.contract.RequestInfoWrapper;
 import org.egov.hc.contract.ResponseInfoWrapper;
+import org.egov.hc.contract.SMSRequest;
 import org.egov.hc.contract.ServiceRequest;
 import org.egov.hc.contract.ServiceResponse;
 import org.egov.hc.model.ActionHistory;
@@ -2835,6 +2836,25 @@ public class ServiceRequestService {
 				log.info("Service request delete document : " + infoWrapper);
 
 				hCProducer.push(hcConfiguration.getDeleteDocTopic(), infoWrapper);
+			}
+			return new ResponseEntity<>(ServiceRequest.builder()
+					.responseInfo(ResponseInfo.builder().status("Success").build()).responseBody(infoWrapper).build(),
+					HttpStatus.OK);
+		}
+
+
+		public ResponseEntity<?> sendMail(ServiceRequest serviceRequest) {
+			RequestInfoWrapper infoWrapper = new RequestInfoWrapper();
+			for(ServiceRequestData sc :serviceRequest.getServices()) {
+			
+			String smsTemplate = hcConfiguration.getTemplate();
+			smsTemplate = smsTemplate.replace("<service_request_id>", serviceRequest.getServices().get(0).getService_request_id());
+			smsTemplate = smsTemplate.replace("<service_request_type>",serviceRequest.getServices().get(0).getServiceType());
+			log.info(smsTemplate);
+			SMSRequest smsRequest = new SMSRequest(sc.getContactNumber(), smsTemplate);
+			hCProducer.push(hcConfiguration.getSmsNotifTopic(), smsRequest);
+			log.info("sending message to "+sc.getContactNumber());
+			log.info("sms data pushed to kafka");
 			}
 			return new ResponseEntity<>(ServiceRequest.builder()
 					.responseInfo(ResponseInfo.builder().status("Success").build()).responseBody(infoWrapper).build(),
