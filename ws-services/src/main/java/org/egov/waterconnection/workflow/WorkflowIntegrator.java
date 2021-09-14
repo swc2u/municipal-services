@@ -65,9 +65,9 @@ public class WorkflowIntegrator {
 		if (waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
 				.equalsIgnoreCase(WCConstants.ACTION_PAY)) {
 			JSONObject obj = new JSONObject();
-			//For any workflow if after payment application goes to superintendent than add the activity 
+			//For any workflow if after payment application goes to superintendent than add the activity WS_CHANGE_OWNER_INFO
 			if (activityType.equalsIgnoreCase(WCConstants.WS_CONVERSION)||activityType.equalsIgnoreCase(WCConstants.WS_TEMPORARY_DISCONNECTION)
-					||activityType.equalsIgnoreCase(WCConstants.WS_PERMANENT_DISCONNECTION)) {
+					||activityType.equalsIgnoreCase(WCConstants.WS_PERMANENT_DISCONNECTION) ||activityType.equalsIgnoreCase(WCConstants.WS_CHANGE_OWNER_INFO)) {
 				obj.put("role", "WS_SUPERINTENDENT_" + waterConnectionRequest.getWaterConnection().getSubdiv());
 			} else {
 				obj.put("role", "WS_JE_" + waterConnectionRequest.getWaterConnection().getSubdiv());
