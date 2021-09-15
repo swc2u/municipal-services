@@ -162,8 +162,8 @@ public class ServiceController {
 				return service.delectDocument(serviceRequest, requestHeader);		
 	}
 	
-	@RequestMapping(value = "/_send", method = RequestMethod.POST)
-	public ResponseEntity<?> sendMail(@RequestBody ServiceRequest serviceRequest) 
+	@RequestMapping(value = "/_sendSMS", method = RequestMethod.POST)
+	public ResponseEntity<?> sendMail(@RequestBody ServiceRequest serviceRequest,@RequestHeader("User-Agent") String requestHeader) 
 	{
 		
 		return service.sendMail(serviceRequest);
