@@ -1,6 +1,8 @@
 package org.egov.ps.validator;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +12,15 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.annotation.ApplicationValidator;
 import org.egov.ps.model.Application;
 import org.egov.ps.model.ApplicationCriteria;
+import org.egov.ps.model.Owner;
 import org.egov.ps.model.Property;
 import org.egov.ps.model.PropertyCriteria;
+import org.egov.ps.model.PropertyDetails;
+import org.egov.ps.producer.Producer;
 import org.egov.ps.repository.ApplicationRepository;
 import org.egov.ps.repository.PropertyRepository;
 import org.egov.ps.service.MDMSService;
+import org.egov.ps.service.PropertyEnrichmentService;
 import org.egov.ps.service.calculation.IEstateRentCollectionService;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.validator.application.OwnerValidator;
@@ -23,6 +29,7 @@ import org.egov.ps.web.contracts.EstateAccount;
 import org.egov.ps.web.contracts.EstateDemand;
 import org.egov.ps.web.contracts.EstatePayment;
 import org.egov.ps.web.contracts.EstateRentSummary;
+import org.egov.ps.web.contracts.PropertyRequest;
 import org.egov.tracer.model.CustomException;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +45,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 
+import ch.qos.logback.core.joran.action.Action;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 
@@ -67,6 +75,21 @@ public class ApplicationValidatorService {
 
 	@Autowired
 	private IEstateRentCollectionService estateRentCollectionService;
+	
+	@Autowired
+	PropertyValidator propertyValidator;
+	
+	@Autowired
+	private PropertyEnrichmentService enrichmentService;
+
+	@Autowired
+	private Producer producer;
+	
+	@Autowired
+	PropertyRepository repository;
+	
+	@Autowired
+	private org.egov.ps.config.Configuration config;
 
 	@Autowired
 	ApplicationValidatorService(ApplicationContext context, MDMSService mdmsService,
@@ -93,8 +116,34 @@ public class ApplicationValidatorService {
 	public void validateCreateRequest(ApplicationRequest request) {
 		List<Application> applications = request.getApplications();
 		for (Application application : applications) {
-			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) 
-				continue;
+			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) {
+				PropertyDetails  newPropertyDetails = PropertyDetails.builder()
+						.branchType(PSConstants.BUILDING_BRANCH)
+						.houseNumber(application.getApplicationDetails().get("property").get("propertyDetails").get("houseNumber").asText())
+						.village(application.getApplicationDetails().get("property").get("propertyDetails").get("village").asText())
+						.mohalla(application.getApplicationDetails().get("property").get("propertyDetails").get("mohalla").asText())
+						.owners(new ArrayList<Owner>())
+						.build();
+				Property newProperty = Property.builder().propertyMasterOrAllotmentOfSite("PROPERTY_MASTER").fileNumber(application.getApplicationDetails().get("property").get("fileNumber").asText())
+						.sectorNumber(application.getApplicationDetails().get("property").get("sectorNumber").asText())
+						.category(application.getApplicationDetails().get("property").get("category").asText())
+						.subCategory(application.getApplicationDetails().get("property").get("subCategory").asText()).action("")
+						.propertyDetails(newPropertyDetails)
+						.tenantId(application.getTenantId())
+						.build();
+				PropertyRequest propertyRequest = PropertyRequest.builder().requestInfo(request.getRequestInfo()).properties(Collections.singletonList(newProperty)).build();
+				
+				propertyValidator.validateCreateRequest(propertyRequest);
+				// bifurcate demand
+				enrichmentService.enrichPropertyRequest(propertyRequest);
+				producer.push(config.getSavePropertyTopic(), propertyRequest);
+				
+				PropertyCriteria criteria = PropertyCriteria.builder().fileNumber(application.getApplicationDetails().get("property").get("fileNumber").asText()).limit(1l).build();
+				List<Property> properties = repository.getProperties(criteria);
+				System.out.println(properties.get(0));
+				
+//				producer.push(config.getUpdatePropertyTopic(), request);
+			}
 			String propertyId = application.getProperty().getId();
 			validatePropertyExists(request.getRequestInfo(), propertyId, application);
 			JsonNode applicationDetails = application.getApplicationDetails();
