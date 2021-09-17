@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -116,13 +117,36 @@ public class RentDemandGenerationService {
 		Comparator<RentDemand> compare = Comparator.comparing(RentDemand::getGenerationDate);
 		Optional<RentDemand> firstDemand = demands.stream().collect(Collectors.minBy(compare));
 		List<Long> dateList = demands.stream().map(demand -> demand.getGenerationDate()).collect(Collectors.toList());
-		Date date = Date.from(Instant.now());
-		if (!isMonthIncluded(dateList, date)) {
-			counter.getAndIncrement();
-			generateRentDemand(property, firstDemand.get(), getFirstDateOfMonth(date), demands, property.getPayments(),
-					property.getRentAccount());
-		}
+		
+		List<Date> allMonthDemandDatesTillCurrentMonth = new ArrayList<>();
+		Collections.sort(dateList);
+		allMonthDemandDatesTillCurrentMonth = getAllRemainingDates(dateList.get(dateList.size()-1));
+		
+//		Date date = Date.from(Instant.now());
+		allMonthDemandDatesTillCurrentMonth.stream().forEach(date->{
+			if (!isMonthIncluded(dateList, date)) {
+				counter.getAndIncrement();
+				generateRentDemand(property, firstDemand.get(), getFirstDateOfMonth(date), demands, property.getPayments(),
+						property.getRentAccount());
+			}
+		});
 		return counter;
+	}
+	
+	private List<Date> getAllRemainingDates(long propertyBillingDate) {
+		List<Date> allMonthDemandDatesTillCurrentMonth = new ArrayList<>();
+		Calendar beginCalendar = Calendar.getInstance();
+		Calendar finishCalendar = Calendar.getInstance();
+
+		beginCalendar.setTime(new Date(propertyBillingDate));
+		finishCalendar.setTime(new Date());
+
+		while (beginCalendar.before(finishCalendar)) {
+			// add one month to date per loop
+			allMonthDemandDatesTillCurrentMonth.add(beginCalendar.getTime());
+			beginCalendar.add(Calendar.MONTH, 1);
+		}
+		return allMonthDemandDatesTillCurrentMonth;
 	}
 
 	private void generateRentDemand(Property property, RentDemand firstDemand, Date date,
