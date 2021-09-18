@@ -2849,7 +2849,7 @@ public class ServiceRequestService {
 			
 			String smsTemplate = hcConfiguration.getTemplate();
 			smsTemplate = smsTemplate.replace("<service_request_id>", serviceRequest.getServices().get(0).getService_request_id());
-			smsTemplate = smsTemplate.replace("<service_request_type>",serviceRequest.getServices().get(0).getServiceType());
+		//	smsTemplate = smsTemplate.replace("<service_request_type>",serviceRequest.getServices().get(0).getServiceType());
 			log.info(smsTemplate);
 			SMSRequest smsRequest = new SMSRequest(sc.getContactNumber(), smsTemplate);
 			hCProducer.push(hcConfiguration.getSmsNotifTopic(), smsRequest);
