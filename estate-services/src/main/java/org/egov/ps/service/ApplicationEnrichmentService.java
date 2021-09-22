@@ -15,7 +15,6 @@ import org.egov.ps.model.ApplicationCriteria;
 import org.egov.ps.model.Document;
 import org.egov.ps.model.Owner;
 import org.egov.ps.model.Property;
-import org.egov.ps.model.PropertyCriteria;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.model.calculation.Category;
 import org.egov.ps.model.calculation.TaxHeadEstimate;
