@@ -89,8 +89,7 @@ public class ApplicationEnrichmentService {
 				: applicationDetails.get("owner");
 
 		if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
-				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)
-				&& application.getProperty() == null) {
+				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)) {
 			final ObjectMapper mapper = new ObjectMapper();
 			final ObjectNode transferorDetails = mapper.createObjectNode();
 
@@ -144,16 +143,12 @@ public class ApplicationEnrichmentService {
 
 	private void enrichPropertyDetails(Application application) {
 		Property property=null;
-		if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
+		if (!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
 				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)
-				&& application.getProperty() == null) {
-			property = propertyRepository.fetchDummyProperty(
-					PropertyCriteria.builder().fileNumber(PSConstants.BB_NOC_DUMMY_FILENO).limit(1l).build());
-		}else {
-
+				&& application.getProperty().getPropertyDetails()!=null)) {
 			property = propertyRepository.findPropertyById(application.getProperty().getId());
+			application.setProperty(property);
 		}
-		application.setProperty(property);
 	}
 
 	public void enrichUpdateApplication(ApplicationRequest request) {

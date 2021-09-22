@@ -1,11 +1,14 @@
 package org.egov.ps.validator;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.text.Document;
@@ -120,34 +123,7 @@ public class ApplicationValidatorService {
 		List<Application> applications = request.getApplications();
 		for (Application application : applications) {
 			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) {
-				PropertyDetails  newPropertyDetails = PropertyDetails.builder()
-						.branchType(PSConstants.BUILDING_BRANCH)
-						.houseNumber(application.getApplicationDetails().get("property").get("propertyDetails").get("houseNumber").asText())
-						.village(application.getApplicationDetails().get("property").get("propertyDetails").get("village").asText())
-						.mohalla(application.getApplicationDetails().get("property").get("propertyDetails").get("mohalla").asText())
-						.owners(new ArrayList<Owner>())
-						.build();
-				Property newProperty = Property.builder().propertyMasterOrAllotmentOfSite("PROPERTY_MASTER").fileNumber(application.getApplicationDetails().get("property").get("fileNumber").asText())
-						.sectorNumber(application.getApplicationDetails().get("property").get("sectorNumber").asText())
-						.category(application.getApplicationDetails().get("property").get("category").asText())
-						.subCategory(application.getApplicationDetails().get("property").get("subCategory").asText()).action("")
-						.propertyDetails(newPropertyDetails)
-						.tenantId(application.getTenantId())
-						.action(PSConstants.ES_APPROVE)
-						.build();
-				PropertyRequest propertyRequest = PropertyRequest.builder().requestInfo(request.getRequestInfo()).properties(Collections.singletonList(newProperty)).build();
-
-				propertyValidator.validateCreateRequest(propertyRequest);
-				enrichmentService.enrichPropertyRequest(propertyRequest);
-				propertyRequest.getProperties().get(0).setState(PSConstants.PM_APPROVED);
-				producer.push(config.getSavePropertyTopic(), propertyRequest);
-
-				PropertyCriteria criteria = PropertyCriteria.builder().fileNumber(application.getApplicationDetails().get("property").get("fileNumber").asText().toUpperCase()).limit(1l).build();
-				List<Property> properties = repository.getProperties(criteria);
-				if(properties!=null || !properties.isEmpty())
-					application.setProperty(properties.get(0));
-				else
-					application.setProperty(propertyRequest.getProperties().get(0));
+				saveProperty(application,request.getRequestInfo());
 			}
 			else {
 				String propertyId = application.getProperty().getId();
@@ -174,6 +150,41 @@ public class ApplicationValidatorService {
 				}
 			}
 		}
+	}
+
+	private void saveProperty(Application application, RequestInfo requestInfo) {
+		PropertyDetails  newPropertyDetails = PropertyDetails.builder()
+				.branchType(PSConstants.BUILDING_BRANCH)
+				.houseNumber(application.getApplicationDetails().get("property").get("propertyDetails").get("houseNumber").asText())
+				.village(application.getApplicationDetails().get("property").get("propertyDetails").get("village").asText())
+				.mohalla(application.getApplicationDetails().get("property").get("propertyDetails").get("mohalla").asText())
+				.owners(new ArrayList<Owner>())
+				.areaSqft(application.getApplicationDetails().get("property").get("propertyDetails").get("areaSqft")!=null?BigDecimal.valueOf(application.getApplicationDetails().get("property").get("propertyDetails").get("areaSqft").asDouble()) :BigDecimal.ZERO)
+				.build();
+		Property newProperty = Property.builder().propertyMasterOrAllotmentOfSite("PROPERTY_MASTER").fileNumber(application.getApplicationDetails().get("property").get("fileNumber").asText())
+				.sectorNumber(application.getApplicationDetails().get("property").get("sectorNumber").asText())
+				.category(application.getApplicationDetails().get("property").get("category").asText())
+				.subCategory(application.getApplicationDetails().get("property").get("subCategory")==null?"":application.getApplicationDetails().get("property").get("subCategory").asText())
+				.action("")
+				.siteNumber(application.getApplicationDetails().get("property").get("siteNumber").asText())
+				.propertyDetails(newPropertyDetails)
+				.tenantId(application.getTenantId())
+				.action(PSConstants.ES_APPROVE)
+				.build();
+		PropertyRequest propertyRequest = PropertyRequest.builder().requestInfo(requestInfo).properties(Collections.singletonList(newProperty)).build();
+
+		propertyValidator.validateCreateRequest(propertyRequest);
+		enrichmentService.enrichPropertyRequest(propertyRequest);
+		propertyRequest.getProperties().get(0).setState(PSConstants.ES_APPROVED);
+		producer.push(config.getSavePropertyTopic(), propertyRequest);
+
+		PropertyCriteria criteria = PropertyCriteria.builder().fileNumber(application.getApplicationDetails().get("property").get("fileNumber").asText().toUpperCase()).limit(1l).build();
+		List<Property> properties = repository.getProperties(criteria);
+		if(!properties.isEmpty() && properties!=null)
+			application.setProperty(properties.get(0));
+		else
+			application.setProperty(propertyRequest.getProperties().get(0));
+
 	}
 
 	private void validateSharePercentage(Application application, RequestInfo requestInfo) {
@@ -364,36 +375,14 @@ public class ApplicationValidatorService {
 
 	public void validateUpdateRequest(ApplicationRequest applicationRequest) {
 		for (Application application : applicationRequest.getApplications()) {
+			List<org.egov.ps.model.Document> ownerDocs= application.getApplicationDocuments();
 			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
 					&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)) {
 				Property property = propertyRepository.findPropertyById(application.getProperty().getId());
-				if(property.getPropertyDetails().getOwners()==null || property.getPropertyDetails().getOwners().isEmpty()) {
-					OwnerDetails  newPropertyOwnerDetails = OwnerDetails.builder()
-							.ownerName(application.getApplicationDetails().get("owner").get("name").asText())
-							.guardianName(application.getApplicationDetails().get("owner").get("ownerDetails").get("guardianName").asText())
-							.guardianRelation(application.getApplicationDetails().get("owner").get("ownerDetails").get("relation").asText())
-							.address(application.getApplicationDetails().get("owner").get("ownerDetails").get("address").asText())
-							.mobileNumber(application.getApplicationDetails().get("owner").get("ownerDetails").get("mobileNumber").asText())
-							.isCurrentOwner(application.getApplicationDetails().get("owner").get("isCurrentOwner").asBoolean())
-							.possesionDate(application.getApplicationDetails().get("owner").get("isCurrentOwner").asLong())
-							.ownerDocuments(application.getApplicationDocuments())
-							.build();
-					Owner newPropertyOwner = Owner.builder().share(application.getApplicationDetails().get("owner").get("share").asDouble())
-							.ownerDetails(newPropertyOwnerDetails)
-							.build();
-					property.getPropertyDetails().setOwners(Collections.singletonList(newPropertyOwner));
-				}else {
-					property.getPropertyDetails().getOwners().get(0).getOwnerDetails().setOwnerDocuments(application.getApplicationDocuments());
+				if(property==null) {
+					saveProperty(application,applicationRequest.getRequestInfo());
 				}
-				
-					PropertyRequest propertyRequest = PropertyRequest.builder().requestInfo(applicationRequest.getRequestInfo()).properties(Collections.singletonList(property)).build();
-					
-					propertyValidator.validateUpdateRequest(propertyRequest);
-					enrichmentService.enrichPropertyRequest(propertyRequest);
-					producer.push(config.getUpdatePropertyTopic(), propertyRequest);
-					Property updatedProperty = propertyRepository.findPropertyById(application.getProperty().getId());
-					application.setProperty(updatedProperty);
-				}
+			}
 
 			validateApplicationIdExistsInDB(application.getId());
 
@@ -424,6 +413,52 @@ public class ApplicationValidatorService {
 			log.warn("The application id to be updated does not exist {}", applicationId);
 			throw new CustomException("APPLICATION NOT FOUND",
 					"The application id to be updated does not exist " + applicationId);
+		}
+	}
+
+	public void updateNOCPropertyDetails(Application application, RequestInfo requestInfo) {
+		Property property = propertyRepository.findPropertyById(application.getProperty().getId());
+		if(property==null) {
+			saveProperty(application,requestInfo);
+			property = application.getProperty();
+		}
+		Set<org.egov.ps.model.Document> ownerDocs= new HashSet<>();
+		application.getApplicationDocuments().forEach(doc->{
+			ownerDocs.add(doc);
+		});
+
+		if(ownerDocs.size()>=8 && (property.getPropertyDetails().getOwners()==null || property.getPropertyDetails().getOwners().isEmpty())) {
+			OwnerDetails  newPropertyOwnerDetails = OwnerDetails.builder()
+					.ownerName(application.getApplicationDetails().get("owner").get("name").asText())
+					.guardianName(application.getApplicationDetails().get("owner").get("ownerDetails").get("guardianName").asText())
+					.guardianRelation(application.getApplicationDetails().get("owner").get("ownerDetails").get("relation").asText())
+					.address(application.getApplicationDetails().get("owner").get("ownerDetails").get("address").asText())
+					.mobileNumber(application.getApplicationDetails().get("owner").get("ownerDetails").get("mobileNumber").asText())
+					.isCurrentOwner(application.getApplicationDetails().get("owner").get("isCurrentOwner").asBoolean())
+					.possesionDate(application.getApplicationDetails().get("owner").get("isCurrentOwner").asLong())
+					.build();
+
+			ownerDocs.forEach(ownDoc->{
+				ownDoc.setId(null);
+				ownDoc.setReferenceId(null);
+			});
+
+			List<org.egov.ps.model.Document> ownerDocList = new ArrayList<org.egov.ps.model.Document>();
+			ownerDocList.addAll(ownerDocs);
+			newPropertyOwnerDetails.setOwnerDocuments(ownerDocList);
+			Owner newPropertyOwner = Owner.builder().share(application.getApplicationDetails().get("owner").get("share").asDouble())
+					.ownerDetails(newPropertyOwnerDetails)
+					.build();
+			property.getPropertyDetails().setOwners(Collections.singletonList(newPropertyOwner));
+
+			PropertyRequest propertyRequest = PropertyRequest.builder().requestInfo(requestInfo).properties(Collections.singletonList(property)).build();
+
+			propertyValidator.validateUpdateRequest(propertyRequest);
+			enrichmentService.enrichPropertyRequest(propertyRequest);
+			producer.push(config.getUpdatePropertyTopic(), propertyRequest);
+			Property updatedProperty = propertyRepository.findPropertyById(application.getProperty().getId());
+			application.setProperty(updatedProperty);
+
 		}
 	}
 }
