@@ -2,7 +2,6 @@ package org.egov.ps.validator;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.swing.text.Document;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.annotation.ApplicationValidator;
@@ -51,7 +48,6 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 
-import ch.qos.logback.core.joran.action.Action;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 
@@ -375,7 +371,6 @@ public class ApplicationValidatorService {
 
 	public void validateUpdateRequest(ApplicationRequest applicationRequest) {
 		for (Application application : applicationRequest.getApplications()) {
-			List<org.egov.ps.model.Document> ownerDocs= application.getApplicationDocuments();
 			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
 					&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)) {
 				Property property = propertyRepository.findPropertyById(application.getProperty().getId());
@@ -435,7 +430,7 @@ public class ApplicationValidatorService {
 					.address(application.getApplicationDetails().get("owner").get("ownerDetails").get("address").asText())
 					.mobileNumber(application.getApplicationDetails().get("owner").get("ownerDetails").get("mobileNumber").asText())
 					.isCurrentOwner(application.getApplicationDetails().get("owner").get("isCurrentOwner").asBoolean())
-					.possesionDate(application.getApplicationDetails().get("owner").get("isCurrentOwner").asLong())
+					.possesionDate(application.getApplicationDetails().get("owner").get("possessionDate")==null?null:application.getApplicationDetails().get("owner").get("possessionDate").asLong())
 					.build();
 
 			ownerDocs.forEach(ownDoc->{
