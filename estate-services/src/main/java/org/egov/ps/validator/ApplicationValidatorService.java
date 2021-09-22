@@ -166,7 +166,7 @@ public class ApplicationValidatorService {
 				.category(application.getApplicationDetails().get("property").get("category").asText())
 				.subCategory(application.getApplicationDetails().get("property").get("subCategory")==null?"":application.getApplicationDetails().get("property").get("subCategory").asText())
 				.action("")
-				.siteNumber(application.getApplicationDetails().get("property").get("siteNumber").asText())
+				.siteNumber(application.getApplicationDetails().get("property").get("siteNumber")==null?null:application.getApplicationDetails().get("property").get("siteNumber").asText())
 				.propertyDetails(newPropertyDetails)
 				.tenantId(application.getTenantId())
 				.action(PSConstants.ES_APPROVE)
