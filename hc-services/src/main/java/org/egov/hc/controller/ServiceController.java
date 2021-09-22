@@ -44,7 +44,7 @@ public class ServiceController {
 	 * @param ServiceReqRequest
 	 * 
 	 * @author Dhanaji Patil
-	 */
+	 */ 
 	@RequestMapping(value = "/_create", method = RequestMethod.POST)
 	public ResponseEntity<?> create(@RequestBody ServiceRequest serviceRequest,
 			@RequestHeader("User-Agent") String request) throws JSONException, InterruptedException {
@@ -161,6 +161,17 @@ public class ServiceController {
 					
 				return service.delectDocument(serviceRequest, requestHeader);		
 	}
+	
+	@RequestMapping(value = "/_sendSMS", method = RequestMethod.POST)
+	public ResponseEntity<?> sendMail(@RequestBody ServiceRequest serviceRequest,@RequestHeader("User-Agent") String requestHeader) 
+	{
+		
+		return service.sendMail(serviceRequest);
+		
+	
+		
+	}
+	
 	
 	
 }

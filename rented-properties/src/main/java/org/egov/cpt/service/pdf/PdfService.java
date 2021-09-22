@@ -3,20 +3,19 @@ package org.egov.cpt.service.pdf;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
 
+import org.apache.commons.io.IOUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.cpt.models.BillAccountDetailV2;
 import org.egov.cpt.models.Document;
 import org.egov.cpt.models.ExcelSearchCriteria;
 import org.egov.cpt.models.OfflinePaymentDetails;
 import org.egov.cpt.models.PdfSearchCriteria;
-import org.egov.cpt.models.Property;
 import org.egov.cpt.models.PropertyCriteria;
 import org.egov.cpt.models.enums.CollectionPaymentModeEnum;
 import org.egov.cpt.repository.PropertyRepository;
@@ -67,6 +66,7 @@ import net.sf.jasperreports.export.SimpleXlsExporterConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -87,11 +87,11 @@ public class PdfService {
 	@Value("${city_watermark_url}")
 	private String city_watermark_url;
 
-	@Value("${city_footer_left_url}")
-	private String city_footer_left_url;
-
-	@Value("${city_footer_right_url}")
-	private String city_footer_right_url;
+//	@Value("${city_footer_left_url}")
+//	private String city_footer_left_url;
+//
+//	@Value("${city_footer_right_url}")
+//	private String city_footer_right_url;
 
 	@Value("${complete_footer_path}")
 	private String complete_footer_path;
@@ -632,12 +632,12 @@ public class PdfService {
 		case PTConstants.WATER_MARK_PATH:
 			logo_http_url = this.city_watermark_url;
 			break;
-		case PTConstants.FOOTER_LEFT_PATH:
-			logo_http_url = this.city_footer_left_url;
-			break;
-		case PTConstants.FOOTER_RIGHT_PATH:
-			logo_http_url = this.city_footer_right_url;
-			break;
+//		case PTConstants.FOOTER_LEFT_PATH:
+//			logo_http_url = this.city_footer_left_url;
+//			break;
+//		case PTConstants.FOOTER_RIGHT_PATH:
+//			logo_http_url = this.city_footer_right_url;
+//			break;
 		case PTConstants.COMPLETE_HEADER_PATH:
 			logo_http_url = this.complete_header_path;
 			break;
@@ -649,7 +649,13 @@ public class PdfService {
 			break; 
 
 		}
-		byte[] cityLogo = httpImageAsByteArray(logo_http_url);
+		InputStream stream = this.getClass().getResourceAsStream("/images/"+logo_http_url);
+		byte[] cityLogo = null;
+		try {
+			cityLogo = IOUtils.toByteArray(stream);
+		} catch (IOException e) {
+			throw new CustomException("ERROR IN IMAGE STREAM READING","error in image stream reading: "+e);
+		}
 		return cityLogo;
 	}
 
