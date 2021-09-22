@@ -146,6 +146,14 @@ public class ApplicationService {
 				.forEach(application -> updateApplication(applicationRequest.getRequestInfo(), application));
 
 		producer.push(config.getUpdateApplicationTopic(), applicationRequest);
+		
+		applicationRequest.getApplications().forEach(application -> {
+		if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
+				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)) {
+			validator.updateNOCPropertyDetails(application,applicationRequest.getRequestInfo());
+		}
+		});
+		
 		applicationNotificationService.processNotifications(applicationRequest);
 		return applicationRequest.getApplications();
 	}
