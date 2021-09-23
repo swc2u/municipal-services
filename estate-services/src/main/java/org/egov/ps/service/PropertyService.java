@@ -257,7 +257,7 @@ public class PropertyService {
 			}
 		}
 		producer.push(config.getUpdatePropertyTopic(), request);
-		if (!property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA)
+		if ((!property.getPropertyDetails().getBranchType().contentEquals(PSConstants.MANI_MAJRA) && !property.getPropertyDetails().getBranchType().contentEquals(PSConstants.BUILDING_BRANCH))
 				&& !property.getPropertyDetails().getPropertyType().equalsIgnoreCase(PSConstants.MM_PROPERTY_TYPE_OTHER)) {
 			processRentSummary(request);
 		}
