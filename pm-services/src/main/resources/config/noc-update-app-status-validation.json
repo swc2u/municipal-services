@@ -747,7 +747,22 @@
 					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
 				}
 			},"EDITEDATDMEE": {
-				"isAnyChangeInRoadCutEstimation": {
+			"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				},
+								"isAnyChangeInRoadCutEstimation": {
 					"fieldName": "isAnyChangeInRoadCutEstimation",
 					"mandatory": "false",
 					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
@@ -771,7 +786,22 @@
 		},
 		"DMEE-EDITEDATDMEE": {
 			"EDITEDATDMEE": {
-				"isAnyChangeInRoadCutEstimation": {
+			"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				},
+								"isAnyChangeInRoadCutEstimation": {
 					"fieldName": "isAnyChangeInRoadCutEstimation",
 					"mandatory": "false",
 					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
@@ -828,7 +858,22 @@
 					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
 				}
 			},"EDITEDATDMEE": {
-				"isAnyChangeInRoadCutEstimation": {
+			"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				},
+								"isAnyChangeInRoadCutEstimation": {
 					"fieldName": "isAnyChangeInRoadCutEstimation",
 					"mandatory": "false",
 					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
