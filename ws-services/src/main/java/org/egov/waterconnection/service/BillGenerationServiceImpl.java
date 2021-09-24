@@ -156,38 +156,43 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 				HashMap<String, Object> addDetail = mapper.convertValue(application.getAdditionalDetails(),
 						HashMap.class);
 				for (WaterApplication applicationList : application.getWaterApplicationList()) {
+					
+					//System.out.println("Connection no--> "+application.getConnectionNo()+"Application no--->"+applicationList.getApplicationNo());
+					
 					if (WCConstants.ACTIVITY_TYPE_NEW_CONN.contains(applicationList.getActivityType())) {
 						String meterReading = addDetail.get(WCConstants.INITIAL_METER_READING_CONST) == null ? ""
 								: (((BigDecimal) addDetail.get(WCConstants.INITIAL_METER_READING_CONST)).setScale(0,
 										BigDecimal.ROUND_DOWN)).toString();
 						writer.println("UW" + fixedLengthString(application.getDiv(), 1)
 								+ fixedLengthString(application.getSubdiv(), 2)
-								+ fixedLengthString(application.getCcCode(), 2)
+								+ fixedLengthStringPreFixZero(application.getCcCode(), 2)//changed
 								+ fixedLengthString(application.getLedgerGroup(), 4)
 								+ fixedLengthString(application.getWaterProperty().getSectorNo(), 20)
 								+ getbillcycle(monthFormat
 										.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())))
-								+ fixedLengthString(application.getBillGroup(), 1) + fixedLengthString("", 2));
+								+ fixedLengthString(application.getBillGroup(), 1)
+								+ fixedLengthString("", 2));
 
 						writer.println("0001"
 								+ fixedLengthString(application.getConnectionNo()
-										.substring(application.getConnectionNo().length() - 6), 6)
+										.substring(7,13), 6)//changed length-6 to 7
 								+ fixedLengthString(application.getConnectionHolders() == null ? ""
 										: application.getConnectionHolders().get(0).getName(), 30).substring(0, 30)
 								+ fixedLengthString(application.getWaterProperty().getPlotNo(), 10)
-								+ fixedLengthString(application.getWaterProperty().getUsageCategory(), 2)
+								+ fixedLengthStringPreFixZero(application.getWaterProperty().getUsageCategory(), 2)
 								+ fixedLengthString(format
 										.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())), 8)
-								+ fixedLengthString(application.getProposedPipeSize(), 3)
+								+ fixedLengthStringPreFixZero(application.getProposedPipeSize(), 3)//changed
 								+ fixedLengthString(application.getMeterRentCode(), 2)
 								+ fixedLengthString(application.getMeterId(), 10)
 								+ fixedLengthString(application.getMfrCode(), 3)
 								+ fixedLengthString((application.getMeterDigits()), 2)
 								+ fixedLengthString(getMeterUnit(application.getMeterUnit()), 1)
-								+ fixedLengthString("", 2) + fixedLengthString(meterReading, 10)
-
-								+ fixedLengthString(application.getSanctionedCapacity(), 7) + fixedLengthString("", 12)
-								+ "0000");
+								+ fixedLengthString("", 2) 
+								+ fixedLengthStringPreFixZero(meterReading, 10)
+								+ fixedLengthStringPreFixZero(application.getSanctionedCapacity(), 7) 
+								+ fixedLengthString("", 12)
+								+ "0000");//Issue
 
 					}
 
@@ -361,5 +366,11 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 		 * "Bill data not available for given consumer code"); } return billData;
 		 */
 	}
+	
+	
+	public String fixedLengthStringPreFixZero(String string, int length) {
+		return String.format("%1$" + length + "s", (string == null ? " " : string)).replace(" ", "0");
+	}
+
 
 }
