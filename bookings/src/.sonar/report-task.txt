@@ -1,0 +1,5 @@
+projectKey=org.sonarqube:booking-Application
+serverUrl=http://localhost:9000
+dashboardUrl=http://localhost:9000/dashboard/index/org.sonarqube:booking-Application
+ceTaskId=AXuCTmNjrAZ9x8jWHva5
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AXuCTmNjrAZ9x8jWHva5

@@ -108,6 +108,32 @@ public class ParkAndCommunityController {
 
 		return ResponseEntity.ok(rs);
 	}
+	
+	
+	/**
+	 * Update park and community booking.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @return the response entity
+	 */
+	@PostMapping("update/payment")
+	private ResponseEntity<?> updateParkAndCommunityBookingData(@RequestBody BookingsRequest bookingsRequest) {
+
+		bookingsFieldsValidator.validatePAndCBookingRequest(bookingsRequest);
+		BookingsModel bookingsModel = parkAndCommunityService.updateParkAndCommunityBookingData(bookingsRequest);
+		ResponseModel rs = new ResponseModel();
+		if (bookingsModel == null) {
+			rs.setStatus("400");
+			rs.setMessage("Error while Updating Park And Community Booking");
+			rs.setData(bookingsModel);
+		} else {
+			rs.setStatus("200");
+			rs.setMessage("Park And Community Booking Updated Successfully ");
+			rs.setData(bookingsModel);
+		}
+
+		return ResponseEntity.ok(rs);
+	}
 
 	/**
 	 * Fetch park community master.

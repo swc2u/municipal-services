@@ -41,6 +41,9 @@ public class PaymentUpdateService {
 	
 	@Autowired
 	private BookingsService bookingsService;
+	
+	@Autowired
+	ParkAndCommunityService parkAndCommunityService;
 
 	@Autowired
 	private ServiceRequestRepository serviceRequestRepository;
@@ -77,7 +80,7 @@ public class PaymentUpdateService {
 			for (PaymentDetail paymentDetail : paymentRequest.getPayment().getPaymentDetails()) {
 				log.info("Consuming Business Service: {}", paymentDetail.getBusinessService());
 				if (paymentDetail.getBusinessService().equalsIgnoreCase(BookingsConstants.BUSINESS_SERVICE_OSBM_PAYMENT)) {
-					System.out.println("Inside if statement...");
+					System.out.println("Going to work for OSBM");
 					BookingsModel bookingsModel = bookingRepository.findByBkApplicationNumber(paymentDetail.getBill().getConsumerCode());
 					BookingsRequest bookingsRequest = new BookingsRequest();
 					if(paymentRequest.getRequestInfo().getUserInfo().getUserName()==null){
@@ -88,6 +91,54 @@ public class PaymentUpdateService {
 					bookingsRequest.setBookingsModel(bookingsModel);
 					bookingsService.update(bookingsRequest);
 				}
+				if (paymentDetail.getBusinessService().equalsIgnoreCase(BookingsConstants.BUSINESS_SERVICE_PACC_PAYMENT)) {
+					System.out.println("Going to work for PACC");
+					BookingsModel bookingsModel = bookingRepository.findByBkApplicationNumber(paymentDetail.getBill().getConsumerCode());
+					BookingsRequest bookingsRequest = new BookingsRequest();
+					if(paymentRequest.getRequestInfo().getUserInfo().getUserName()==null){
+						System.out.println("Compiling user info...");
+						paymentRequest.getRequestInfo().setUserInfo(fetchUser(bookingsModel.getUuid(), paymentRequest.getRequestInfo()));
+					}
+					bookingsRequest.setRequestInfo(paymentRequest.getRequestInfo());
+					bookingsRequest.setBookingsModel(bookingsModel);
+					parkAndCommunityService.updateParkAndCommunityBooking(bookingsRequest);
+				}
+				if (paymentDetail.getBusinessService().equalsIgnoreCase(BookingsConstants.BUSINESS_SERVICE_WT_PAYMENT)) {
+					System.out.println("Going to work for WT");
+					BookingsModel bookingsModel = bookingRepository.findByBkApplicationNumber(paymentDetail.getBill().getConsumerCode());
+					BookingsRequest bookingsRequest = new BookingsRequest();
+					if(paymentRequest.getRequestInfo().getUserInfo().getUserName()==null){
+						System.out.println("Compiling user info...");
+						paymentRequest.getRequestInfo().setUserInfo(fetchUser(bookingsModel.getUuid(), paymentRequest.getRequestInfo()));
+					}
+					bookingsRequest.setRequestInfo(paymentRequest.getRequestInfo());
+					bookingsRequest.setBookingsModel(bookingsModel);
+					bookingsService.update(bookingsRequest);
+				}
+				if (paymentDetail.getBusinessService().equalsIgnoreCase(BookingsConstants.BUSINESS_SERVICE_CGB_PAYMENT)) {
+					System.out.println("Going to work for Commercial Ground Booking");
+					BookingsModel bookingsModel = bookingRepository.findByBkApplicationNumber(paymentDetail.getBill().getConsumerCode());
+					BookingsRequest bookingsRequest = new BookingsRequest();
+					if(paymentRequest.getRequestInfo().getUserInfo().getUserName()==null){
+						System.out.println("Compiling user info...");
+						paymentRequest.getRequestInfo().setUserInfo(fetchUser(bookingsModel.getUuid(), paymentRequest.getRequestInfo()));
+					}
+					bookingsRequest.setRequestInfo(paymentRequest.getRequestInfo());
+					bookingsRequest.setBookingsModel(bookingsModel);
+					bookingsService.update(bookingsRequest);
+				}
+				if (paymentDetail.getBusinessService().equalsIgnoreCase(BookingsConstants.BUSINESS_SERVICE_OPEN_SPACE_PAYMENT)) {
+					System.out.println("Going to work for Open Space Booking");
+					BookingsModel bookingsModel = bookingRepository.findByBkApplicationNumber(paymentDetail.getBill().getConsumerCode());
+					BookingsRequest bookingsRequest = new BookingsRequest();
+					if(paymentRequest.getRequestInfo().getUserInfo().getUserName()==null){
+						System.out.println("Compiling user info...");
+						paymentRequest.getRequestInfo().setUserInfo(fetchUser(bookingsModel.getUuid(), paymentRequest.getRequestInfo()));
+					}
+					bookingsRequest.setRequestInfo(paymentRequest.getRequestInfo());
+					bookingsRequest.setBookingsModel(bookingsModel);
+					bookingsService.update(bookingsRequest);
+				}				
 			}
 
 		} catch (Exception ex) {
