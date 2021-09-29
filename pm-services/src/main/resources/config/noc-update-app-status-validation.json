@@ -900,6 +900,63 @@
 				}
 			}
 		},
+		"DMCE-EDITEDATDMCE": {
+			"EDITEDATDMCE": {
+			"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				},
+								"isAnyChangeInRoadCutEstimation": {
+					"fieldName": "isAnyChangeInRoadCutEstimation",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"amount": {
+					"fieldName": "amount",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
+				"gstAmount": {
+					"fieldName": "gstAmount",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
+				"performanceBankGuaranteeCharges": {
+					"fieldName": "performanceBankGuaranteeCharges",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9. ]+$"
+				}
+			},
+			
+			"VERIFYCHDCE L2": {
+				"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			}
+		},
 		"DMEE-REASSIGNTODMEE": {
 			"VERIFYHDMEE L2": {
 				"remarks": {
@@ -1527,6 +1584,42 @@
 					"mandatory": "false",
 					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
 				}
+			},"EDITEDATDMCE": {
+			"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				},
+								"isAnyChangeInRoadCutEstimation": {
+					"fieldName": "isAnyChangeInRoadCutEstimation",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"amount": {
+					"fieldName": "amount",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
+				"gstAmount": {
+					"fieldName": "gstAmount",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
+				"performanceBankGuaranteeCharges": {
+					"fieldName": "performanceBankGuaranteeCharges",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9. ]+$"
+				}
 			}
 		},
 		"DMCE-REASSIGNTODMCE": {
@@ -1545,6 +1638,42 @@
 					"fieldName": "uploadDocuments",
 					"mandatory": "false",
 					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				}
+			},"EDITEDATDMCE": {
+			"remarks": {
+					"fieldName": "remarks",
+					"mandatory": "true",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"assignee": {
+					"fieldName": "remarks",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9- ]{1,128}$"
+				},
+				"uploadDocuments": {
+					"fieldName": "uploadDocuments",
+					"mandatory": "false",
+					"validateRegularExp": "\\[\\{\"fileStoreId\":\"(.*?)\"\\}\\]"
+				},
+								"isAnyChangeInRoadCutEstimation": {
+					"fieldName": "isAnyChangeInRoadCutEstimation",
+					"mandatory": "false",
+					"validateRegularExp": "^[a-zA-Z0-9.',\n\r ]{1,128}$"
+				},
+				"amount": {
+					"fieldName": "amount",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
+				"gstAmount": {
+					"fieldName": "gstAmount",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9. ]+$"
+				},
+				"performanceBankGuaranteeCharges": {
+					"fieldName": "performanceBankGuaranteeCharges",
+					"mandatory": "true",
+					"validateRegularExp": "^[0-9. ]+$"
 				}
 			}
 		},
