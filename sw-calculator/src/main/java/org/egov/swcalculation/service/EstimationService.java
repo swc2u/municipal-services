@@ -347,11 +347,14 @@ public class EstimationService {
 
 		Double charge = 0.0;
 		Double landArea;
-
+		
+	
 		if (SWCalculationConstant.LAND_AREA_CATEGORY.contains(property.getUsageCategory())) {
-			landArea = property.getSuperBuiltUpArea();
-		} else {
+			//landArea = property.getSuperBuiltUpArea();
 			landArea = property.getLandArea();
+		} else {
+			//landArea = property.getLandArea();
+			landArea = property.getSuperBuiltUpArea();
 		}
 
 		for (Slab slabs : billingSlabs.get(0).getSlabs()) {
