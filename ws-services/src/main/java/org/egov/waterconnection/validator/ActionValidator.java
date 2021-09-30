@@ -72,4 +72,16 @@ public class ActionValidator {
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
 	}
+	
+	
+	//Validating length and Null for Conneciton Number
+	private void validateConnectionNoForRibbon(WaterConnectionRequest request) {
+		if (WCConstants.WS_NEWCONNECTION.equalsIgnoreCase(request.getWaterConnection().getActivityType())
+				&& WCConstants.ACTION_INITIATE.equalsIgnoreCase(request.getWaterConnection().getProcessInstance().getAction())				
+				&& request.getWaterConnection().getApplicationNo() != null
+				&& request.getWaterConnection().getApplicationNo().length()<WCConstants.MAX_LENGTH) {
+			throw new CustomException("INVALID STATUS",
+					"Status cannot be INITIATE when application document are provided");
+		}
+	}
 }

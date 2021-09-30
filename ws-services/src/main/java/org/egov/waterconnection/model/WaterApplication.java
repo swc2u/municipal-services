@@ -48,6 +48,9 @@ public class WaterApplication {
 	@JsonProperty("paymentMode")
 	private String paymentMode;
 	
+	@JsonProperty("application_code")
+	private String application_code=null;
+	
 	@JsonProperty("auditDetails")
 	private AuditDetails auditDetails = null;
 
@@ -206,4 +209,14 @@ public class WaterApplication {
 	public void setIsMeterStolen(Boolean isMeterStolen) {
 		this.isMeterStolen = isMeterStolen;
 	}
+
+	public String getApplication_code() {
+		return application_code;
+	}
+
+	public void setApplication_code(String application_code) {
+		this.application_code = application_code;
+	}
+	
+	
 }

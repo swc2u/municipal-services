@@ -15,7 +15,6 @@ import org.egov.ps.model.ApplicationCriteria;
 import org.egov.ps.model.Document;
 import org.egov.ps.model.Owner;
 import org.egov.ps.model.Property;
-import org.egov.ps.model.PropertyCriteria;
 import org.egov.ps.model.calculation.Calculation;
 import org.egov.ps.model.calculation.Category;
 import org.egov.ps.model.calculation.TaxHeadEstimate;
@@ -89,8 +88,7 @@ public class ApplicationEnrichmentService {
 				: applicationDetails.get("owner");
 
 		if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
-				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)
-				&& application.getProperty() == null) {
+				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)) {
 			final ObjectMapper mapper = new ObjectMapper();
 			final ObjectNode transferorDetails = mapper.createObjectNode();
 
@@ -144,16 +142,12 @@ public class ApplicationEnrichmentService {
 
 	private void enrichPropertyDetails(Application application) {
 		Property property=null;
-		if (application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
+		if (!(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
 				&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)
-				&& application.getProperty() == null) {
-			property = propertyRepository.fetchDummyProperty(
-					PropertyCriteria.builder().fileNumber(PSConstants.BB_NOC_DUMMY_FILENO).limit(1l).build());
-		}else {
-
+				&& application.getProperty().getPropertyDetails()!=null)) {
 			property = propertyRepository.findPropertyById(application.getProperty().getId());
+			application.setProperty(property);
 		}
-		application.setProperty(property);
 	}
 
 	public void enrichUpdateApplication(ApplicationRequest request) {
@@ -211,7 +205,7 @@ public class ApplicationEnrichmentService {
 
 			}
 
-			if (application.getState().contains(PSConstants.BB_NOC_PENDING_AC_APPROVAL)) {
+			if (application.getState().contains(PSConstants.BB_NOC_PENDING_DRAFSMAN_CALCULATION)) {
 
 				// Development Charges
 				BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").asText());
@@ -445,9 +439,26 @@ public class ApplicationEnrichmentService {
 			double sameHeightOfSideStreetFT = applicationDetails.get("sameHeightOfSideStreet").asDouble();
 			double sameHeightOfSideStreetInch = applicationDetails.get("sameHeightOfSideStreetInch").asDouble();
 			double sameHeightOfSideStreet = sameHeightOfSideStreetFT + (sameHeightOfSideStreetInch / 12);
+			
+			
+			boolean anothertherSideStreet = applicationDetails.get("anotherSideStreet")==null?false:applicationDetails.get("anotherSideStreet").asBoolean();
+			
+			if (anothertherSideStreet) {
+			double sameWidthOfAnotherSideStreetFT = applicationDetails.get("sameWidthOfAnotherSideStreet").asDouble();
+			double sameWidthOfAnotherSideStreetInch = applicationDetails.get("sameWidthOfAnotherSideStreetInch").asDouble();
+			double sameWidthOfAnotherSideStreet = sameWidthOfAnotherSideStreetFT + (sameWidthOfAnotherSideStreetInch / 12);
 
+			double sameHeightOfAnotherSideStreetFT = applicationDetails.get("sameHeightOfAnotherSideStreet").asDouble();
+			double sameHeightOfAnotherSideStreetInch = applicationDetails.get("sameHeightOfAnotherSideStreetInch").asDouble();
+			double sameHeightOfAnotherSideStreet = sameHeightOfAnotherSideStreetFT + (sameHeightOfAnotherSideStreetInch / 12);
+			
+			calculateDevelopmentCharges = ((frontElevationWidth * streetWidth)
+					+ (sameWidthOfSideStreet * sameHeightOfSideStreet)+(sameWidthOfAnotherSideStreet*sameHeightOfAnotherSideStreet)) * (100 / 2);
+			}
+			else {
 			calculateDevelopmentCharges = ((frontElevationWidth * streetWidth)
 					+ (sameWidthOfSideStreet * sameHeightOfSideStreet)) * (100 / 2);
+			}
 
 		} else {
 			calculateDevelopmentCharges = (frontElevationWidth * streetWidth) * (100 / 2);
@@ -466,26 +477,14 @@ public class ApplicationEnrichmentService {
 
 		if (commercialActivity) {
 
-			double groundFloorcommercialActivityFt = applicationDetails.get("groundFloorcommercialActivity").asDouble();
-			double groundFloorcommercialActivityInch = applicationDetails.get("groundFloorcommercialActivityInch")
-					.asDouble();
-			double groundFloorcommercialActivity = groundFloorcommercialActivityFt
-					+ (groundFloorcommercialActivityInch / 12);
+			double groundFloorcommercialActivitySqFt = applicationDetails.get("groundFloorcommercialActivity")==null?0:applicationDetails.get("groundFloorcommercialActivity").asDouble();
 
-			double firstFloorcommercialActivityFt = applicationDetails.get("firstFloorcommercialActivity").asDouble();
-			double firstFloorcommercialActivityInch = applicationDetails.get("firstFloorcommercialActivityInch")
-					.asDouble();
-			double firstFloorcommercialActivity = firstFloorcommercialActivityFt
-					+ (firstFloorcommercialActivityInch / 12);
+			double firstFloorcommercialActivitySqFt = applicationDetails.get("firstFloorcommercialActivity")==null?0:applicationDetails.get("firstFloorcommercialActivity").asDouble();
 
-			double secondFloorcommercialActivityFt = applicationDetails.get("secondFloorcommercialActivity").asDouble();
-			double secondFloorcommercialActivityInch = applicationDetails.get("secondFloorcommercialActivityInch")
-					.asDouble();
-			double secondFloorcommercialActivity = secondFloorcommercialActivityFt
-					+ (secondFloorcommercialActivityInch / 12);
+			double secondFloorcommercialActivitySqFt = applicationDetails.get("secondFloorcommercialActivity")==null?0:applicationDetails.get("secondFloorcommercialActivity").asDouble();
 
-			calculateconversionCharges = ((groundFloorcommercialActivity + firstFloorcommercialActivity
-					+ secondFloorcommercialActivity) / 9) * 2400;
+			calculateconversionCharges = ((groundFloorcommercialActivitySqFt + firstFloorcommercialActivitySqFt
+					+ secondFloorcommercialActivitySqFt) / 9) * 2400;
 
 		}
 
@@ -595,7 +594,7 @@ public class ApplicationEnrichmentService {
 
 			JsonNode applicationDetails = application.getApplicationDetails();
 
-			BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").toString());
+			BigDecimal developmentCharges = new BigDecimal(applicationDetails.get("developmentCharges").asText());
 			TaxHeadEstimate developmentChargesEstimate = new TaxHeadEstimate();
 			developmentChargesEstimate.setEstimateAmount(developmentCharges);
 			developmentChargesEstimate.setCategory(Category.CHARGES);
@@ -604,7 +603,10 @@ public class ApplicationEnrichmentService {
 			estimates.add(developmentChargesEstimate);
 
 			// Conversion charges
-			BigDecimal conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").toString());
+			BigDecimal conversionCharges = BigDecimal.ZERO;
+			if (null != applicationDetails.get("conversionCharges")) {
+				conversionCharges = new BigDecimal(applicationDetails.get("conversionCharges").asText());
+			}
 			TaxHeadEstimate conversionChargesEstimate = new TaxHeadEstimate();
 			conversionChargesEstimate.setEstimateAmount(conversionCharges);
 			conversionChargesEstimate.setCategory(Category.CHARGES);

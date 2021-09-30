@@ -139,6 +139,7 @@ public class WaterRowMapper implements ResultSetExtractor<List<WaterConnection>>
 					app.setConstructionCharges(rs.getDouble("constructioncharges"));
 					app.setPaymentMode(rs.getString("paymentmode"));
 					app.setIsMeterStolen(rs.getBoolean("ismeterstolen"));
+					app.setApplication_code(rs.getString("application_code"));
 					AuditDetails auditdetails1 = AuditDetails.builder()
 		                    .createdBy(rs.getString("app_createdBy"))
 		                    .createdTime(rs.getLong("app_createdTime"))

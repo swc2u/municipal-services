@@ -1,20 +1,29 @@
 package org.egov.ps.validator;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.ps.annotation.ApplicationValidator;
 import org.egov.ps.model.Application;
 import org.egov.ps.model.ApplicationCriteria;
+import org.egov.ps.model.Owner;
+import org.egov.ps.model.OwnerDetails;
 import org.egov.ps.model.Property;
 import org.egov.ps.model.PropertyCriteria;
+import org.egov.ps.model.PropertyDetails;
+import org.egov.ps.producer.Producer;
 import org.egov.ps.repository.ApplicationRepository;
 import org.egov.ps.repository.PropertyRepository;
 import org.egov.ps.service.MDMSService;
+import org.egov.ps.service.PropertyEnrichmentService;
 import org.egov.ps.service.calculation.IEstateRentCollectionService;
 import org.egov.ps.util.PSConstants;
 import org.egov.ps.validator.application.OwnerValidator;
@@ -23,6 +32,7 @@ import org.egov.ps.web.contracts.EstateAccount;
 import org.egov.ps.web.contracts.EstateDemand;
 import org.egov.ps.web.contracts.EstatePayment;
 import org.egov.ps.web.contracts.EstateRentSummary;
+import org.egov.ps.web.contracts.PropertyRequest;
 import org.egov.tracer.model.CustomException;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +79,21 @@ public class ApplicationValidatorService {
 	private IEstateRentCollectionService estateRentCollectionService;
 
 	@Autowired
+	PropertyValidator propertyValidator;
+
+	@Autowired
+	private PropertyEnrichmentService enrichmentService;
+
+	@Autowired
+	private Producer producer;
+
+	@Autowired
+	PropertyRepository repository;
+
+	@Autowired
+	private org.egov.ps.config.Configuration config;
+
+	@Autowired
 	ApplicationValidatorService(ApplicationContext context, MDMSService mdmsService,
 			PropertyRepository propertyRepository, ObjectMapper objectMapper, OwnerValidator ownerValidator) {
 		this.context = context;
@@ -93,32 +118,69 @@ public class ApplicationValidatorService {
 	public void validateCreateRequest(ApplicationRequest request) {
 		List<Application> applications = request.getApplications();
 		for (Application application : applications) {
-			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) 
-				continue;
-			String propertyId = application.getProperty().getId();
-			validatePropertyExists(request.getRequestInfo(), propertyId, application);
-			JsonNode applicationDetails = application.getApplicationDetails();
-			if (application.getModuleType().equalsIgnoreCase(PSConstants.OWNERSHIP_TRANSFER)) {
-				validateSharePercentage(application, request.getRequestInfo());
+			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH) && application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && application.getProperty()== null) {
+				saveProperty(application,request.getRequestInfo());
 			}
-			try {
-				String applicationDetailsString = this.objectMapper.writeValueAsString(applicationDetails);
-				Configuration conf = Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS);
-				DocumentContext applicationObjectContext = JsonPath.using(conf).parse(applicationDetailsString);
-				Map<String, List<String>> errorMap;
-				errorMap = this.performValidationsFromMDMS(application.getMDMSModuleName(), applicationObjectContext,
-						request.getRequestInfo(), application.getTenantId(), propertyId);
-
-				if (!errorMap.isEmpty()) {
-					throw new CustomException("INVALID_FIELDS", "Please enter the valid fields " + errorMap.toString());
+			else {
+				String propertyId = application.getProperty().getId();
+				validatePropertyExists(request.getRequestInfo(), propertyId, application);
+				JsonNode applicationDetails = application.getApplicationDetails();
+				if (application.getModuleType().equalsIgnoreCase(PSConstants.OWNERSHIP_TRANSFER)) {
+					validateSharePercentage(application, request.getRequestInfo());
 				}
-			} catch (JsonProcessingException e) {
-				log.error("Can not parse Json fie", e);
-			} catch (Exception e) {
-				log.error("Exception", e);
-			}
+				try {
+					String applicationDetailsString = this.objectMapper.writeValueAsString(applicationDetails);
+					Configuration conf = Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS);
+					DocumentContext applicationObjectContext = JsonPath.using(conf).parse(applicationDetailsString);
+					Map<String, List<String>> errorMap;
+					errorMap = this.performValidationsFromMDMS(application.getMDMSModuleName(), applicationObjectContext,
+							request.getRequestInfo(), application.getTenantId(), propertyId);
 
+					if (!errorMap.isEmpty()) {
+						throw new CustomException("INVALID_FIELDS", "Please enter the valid fields " + errorMap.toString());
+					}
+				} catch (JsonProcessingException e) {
+					log.error("Can not parse Json fie", e);
+				} catch (Exception e) {
+					log.error("Exception", e);
+				}
+			}
 		}
+	}
+
+	private void saveProperty(Application application, RequestInfo requestInfo) {
+		PropertyDetails  newPropertyDetails = PropertyDetails.builder()
+				.branchType(PSConstants.BUILDING_BRANCH)
+				.houseNumber(application.getApplicationDetails().get("property").get("propertyDetails").get("houseNumber").asText())
+				.village(application.getApplicationDetails().get("property").get("propertyDetails").get("village").asText())
+				.mohalla(application.getApplicationDetails().get("property").get("propertyDetails").get("mohalla").asText())
+				.owners(new ArrayList<Owner>())
+				.areaSqft(application.getApplicationDetails().get("property").get("propertyDetails").get("areaSqft")!=null?BigDecimal.valueOf(application.getApplicationDetails().get("property").get("propertyDetails").get("areaSqft").asDouble()) :BigDecimal.ZERO)
+				.build();
+		Property newProperty = Property.builder().propertyMasterOrAllotmentOfSite("PROPERTY_MASTER").fileNumber(application.getApplicationDetails().get("property").get("fileNumber").asText())
+				.sectorNumber(application.getApplicationDetails().get("property").get("sectorNumber").asText())
+				.category(application.getApplicationDetails().get("property").get("category").asText())
+				.subCategory(application.getApplicationDetails().get("property").get("subCategory")==null?"":application.getApplicationDetails().get("property").get("subCategory").asText())
+				.action("")
+				.siteNumber(application.getApplicationDetails().get("property").get("siteNumber")==null?null:application.getApplicationDetails().get("property").get("siteNumber").asText())
+				.propertyDetails(newPropertyDetails)
+				.tenantId(application.getTenantId())
+				.action(PSConstants.ES_APPROVE)
+				.build();
+		PropertyRequest propertyRequest = PropertyRequest.builder().requestInfo(requestInfo).properties(Collections.singletonList(newProperty)).build();
+
+		propertyValidator.validateCreateRequest(propertyRequest);
+		enrichmentService.enrichPropertyRequest(propertyRequest);
+		propertyRequest.getProperties().get(0).setState(PSConstants.ES_APPROVED);
+		producer.push(config.getSavePropertyTopic(), propertyRequest);
+
+		PropertyCriteria criteria = PropertyCriteria.builder().fileNumber(application.getApplicationDetails().get("property").get("fileNumber").asText().toUpperCase()).limit(1l).build();
+		List<Property> properties = repository.getProperties(criteria);
+		if(!properties.isEmpty() && properties!=null)
+			application.setProperty(properties.get(0));
+		else
+			application.setProperty(propertyRequest.getProperties().get(0));
+
 	}
 
 	private void validateSharePercentage(Application application, RequestInfo requestInfo) {
@@ -130,20 +192,20 @@ public class ApplicationValidatorService {
 			property.getPropertyDetails().getOwners().forEach(ownerFromDb -> {
 				JsonNode transferor = (application.getApplicationDetails().get("transferor") != null)
 						? application.getApplicationDetails().get("transferor")
-						: application.getApplicationDetails().get("owner");
-				if (ownerFromDb.getId().equals(transferor.get("id").asText())) {
-					JsonNode transferee = application.getApplicationDetails().get("transferee");
-					double percentageTransfered = transferee.get("percentageOfShareTransferred").asDouble();
-					if (ownerFromDb.getShare() < percentageTransfered) {
-						throw new CustomException("INVALID_SHARE", String.format("Your current share is %.0f"
-								+ "%% and you can't transfer more than which you have", ownerFromDb.getShare()));
-					}
-				}
+								: application.getApplicationDetails().get("owner");
+						if (ownerFromDb.getId().equals(transferor.get("id").asText())) {
+							JsonNode transferee = application.getApplicationDetails().get("transferee");
+							double percentageTransfered = transferee.get("percentageOfShareTransferred").asDouble();
+							if (ownerFromDb.getShare() < percentageTransfered) {
+								throw new CustomException("INVALID_SHARE", String.format("Your current share is %.0f"
+										+ "%% and you can't transfer more than which you have", ownerFromDb.getShare()));
+							}
+						}
 			});
 
 		});
 	}
-	
+
 	private void validatePropertyExists(RequestInfo requestInfo, String propertyId, Application application) {
 		Property property = propertyRepository.findPropertyById(propertyId);
 		if (property == null) {
@@ -153,7 +215,7 @@ public class ApplicationValidatorService {
 		List<String> propertyDetailsIds = new ArrayList<>();
 		propertyDetailsIds.add(property.getPropertyDetails().getId());
 		property.getPropertyDetails()
-				.setEstateAccount(propertyRepository.getPropertyEstateAccountDetails(propertyDetailsIds));
+		.setEstateAccount(propertyRepository.getPropertyEstateAccountDetails(propertyDetailsIds));
 
 		if (!property.getState().contentEquals(PSConstants.PM_APPROVED)
 				&& !property.getState().contentEquals(PSConstants.ES_PM_EB_APPROVED)
@@ -189,14 +251,14 @@ public class ApplicationValidatorService {
 				property.getPropertyDetails().getPaymentConfig().getIsIntrestApplicable(),
 				property.getPropertyDetails().getPaymentConfig().getRateOfInterest().doubleValue());
 		Double rentDue = estateRentSummary.getBalanceRent() + estateRentSummary.getBalanceGST()
-				+ estateRentSummary.getBalanceGSTPenalty() + estateRentSummary.getBalanceRentPenalty();
+		+ estateRentSummary.getBalanceGSTPenalty() + estateRentSummary.getBalanceRentPenalty();
 		return rentDue;
 	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, List<String>> performValidationsFromMDMS(final String applicationType,
 			DocumentContext applicationObject, RequestInfo RequestInfo, final String tenantId, final String propertyId)
-			throws JSONException {
+					throws JSONException {
 		List<Map<String, Object>> fieldConfigurations = this.mdmsService.getApplicationConfig(applicationType,
 				RequestInfo, tenantId);
 		Map<String, List<String>> errorsMap = new HashMap<String, List<String>>();
@@ -310,9 +372,13 @@ public class ApplicationValidatorService {
 	public void validateUpdateRequest(ApplicationRequest applicationRequest) {
 		for (Application application : applicationRequest.getApplications()) {
 			if(application.getBranchType().equalsIgnoreCase(PSConstants.APPLICATION_BUILDING_BRANCH)
-					&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC) && 
-					application.getProperty().getFileNumber().equalsIgnoreCase(PSConstants.BB_NOC_DUMMY_FILENO)) 
-				continue;
+					&& application.getApplicationType().equalsIgnoreCase(PSConstants.NOC)) {
+				Property property = propertyRepository.findPropertyById(application.getProperty().getId());
+				if(property==null) {
+					saveProperty(application,applicationRequest.getRequestInfo());
+				}
+			}
+
 			validateApplicationIdExistsInDB(application.getId());
 
 			if (application.getApplicationType().contains(PSConstants.APPLICATION_TYPE_NDC)
@@ -323,7 +389,7 @@ public class ApplicationValidatorService {
 				if (!CollectionUtils.isEmpty(property.getPropertyDetails().getEstatePayments())
 						&& property.getPropertyDetails().getEstateAccount() != null
 						&& property.getPropertyDetails().getPaymentConfig() != null && property.getPropertyDetails()
-								.getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
+						.getPropertyType().equalsIgnoreCase(PSConstants.ES_PM_LEASEHOLD)) {
 					rentDue = getRentDue(property);
 				}
 
@@ -342,6 +408,52 @@ public class ApplicationValidatorService {
 			log.warn("The application id to be updated does not exist {}", applicationId);
 			throw new CustomException("APPLICATION NOT FOUND",
 					"The application id to be updated does not exist " + applicationId);
+		}
+	}
+
+	public void updateNOCPropertyDetails(Application application, RequestInfo requestInfo) {
+		Property property = propertyRepository.findPropertyById(application.getProperty().getId());
+		if(property==null) {
+			saveProperty(application,requestInfo);
+			property = application.getProperty();
+		}
+		Set<org.egov.ps.model.Document> ownerDocs= new HashSet<>();
+		application.getApplicationDocuments().forEach(doc->{
+			ownerDocs.add(doc);
+		});
+
+		if(ownerDocs.size()>=8 && (property.getPropertyDetails().getOwners()==null || property.getPropertyDetails().getOwners().isEmpty())) {
+			OwnerDetails  newPropertyOwnerDetails = OwnerDetails.builder()
+					.ownerName(application.getApplicationDetails().get("owner").get("name").asText())
+					.guardianName(application.getApplicationDetails().get("owner").get("ownerDetails").get("guardianName").asText())
+					.guardianRelation(application.getApplicationDetails().get("owner").get("ownerDetails").get("relation").asText())
+					.address(application.getApplicationDetails().get("owner").get("ownerDetails").get("address").asText())
+					.mobileNumber(application.getApplicationDetails().get("owner").get("ownerDetails").get("mobileNumber").asText())
+					.isCurrentOwner(application.getApplicationDetails().get("owner").get("isCurrentOwner").asBoolean())
+					.possesionDate(application.getApplicationDetails().get("owner").get("possessionDate")==null?null:application.getApplicationDetails().get("owner").get("possessionDate").asLong())
+					.build();
+
+			ownerDocs.forEach(ownDoc->{
+				ownDoc.setId(null);
+				ownDoc.setReferenceId(null);
+			});
+
+			List<org.egov.ps.model.Document> ownerDocList = new ArrayList<org.egov.ps.model.Document>();
+			ownerDocList.addAll(ownerDocs);
+			newPropertyOwnerDetails.setOwnerDocuments(ownerDocList);
+			Owner newPropertyOwner = Owner.builder().share(application.getApplicationDetails().get("owner").get("share").asDouble())
+					.ownerDetails(newPropertyOwnerDetails)
+					.build();
+			property.getPropertyDetails().setOwners(Collections.singletonList(newPropertyOwner));
+
+			PropertyRequest propertyRequest = PropertyRequest.builder().requestInfo(requestInfo).properties(Collections.singletonList(property)).build();
+
+			propertyValidator.validateUpdateRequest(propertyRequest);
+			enrichmentService.enrichPropertyRequest(propertyRequest);
+			producer.push(config.getUpdatePropertyTopic(), propertyRequest);
+			Property updatedProperty = propertyRepository.findPropertyById(application.getProperty().getId());
+			application.setProperty(updatedProperty);
+
 		}
 	}
 }
