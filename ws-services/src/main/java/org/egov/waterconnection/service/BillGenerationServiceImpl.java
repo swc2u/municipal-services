@@ -179,12 +179,12 @@ public class BillGenerationServiceImpl implements BillGenerationService {
 								+ fixedLengthString(application.getConnectionHolders() == null ? ""
 										: application.getConnectionHolders().get(0).getName(), 30).substring(0, 30)
 								+ fixedLengthString(application.getWaterProperty().getPlotNo(), 10)
-								+ fixedLengthStringPreFixZero(application.getWaterProperty().getUsageCategory(), 2)
+								+ fixedLengthString(application.getWaterProperty().getUsageCategory(), 2)
 								+ fixedLengthString(format
-										.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())), 8)
-								+ fixedLengthStringPreFixZero(application.getProposedPipeSize(), 3)//changed
-								+ fixedLengthString(application.getMeterRentCode(), 2)
-								+ fixedLengthString(application.getMeterId(), 10)
+										.format(new Date(applicationList.getAuditDetails().getLastModifiedTime())), 8)//56
+								+ fixedLengthStringPreFixZero(application.getProposedPipeSize(), 3)//changed//59
+								+ fixedLengthString(application.getMeterRentCode(), 2)//61
+								+ fixedLengthString(application.getMeterId(), 10)//COnfusion
 								+ fixedLengthString(application.getMfrCode(), 3)
 								+ fixedLengthString((application.getMeterDigits()), 2)
 								+ fixedLengthString(getMeterUnit(application.getMeterUnit()), 1)
