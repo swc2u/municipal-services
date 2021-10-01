@@ -45,7 +45,7 @@ public class RoomsServiceImpl implements RoomsService {
 
 	/** The Constant LOGGER. */
 	private static final Logger LOGGER = LogManager.getLogger( RoomsServiceImpl.class.getName() );
-	
+
 	@Autowired
 	private EnrichmentService enrichmentService;
 
@@ -60,17 +60,17 @@ public class RoomsServiceImpl implements RoomsService {
 
 	@Autowired
 	private BookingsProducer bookingsProducer;
-	
+
 	@Autowired
 	private RoomsRepository roomsRepository; 
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	/** The bookings service. */
 	@Autowired
 	private BookingsService bookingsService;
-	
+
 	/** The bookings utils. */
 	@Autowired
 	private BookingsUtils bookingsUtils;
@@ -78,10 +78,10 @@ public class RoomsServiceImpl implements RoomsService {
 	/** The park community hall V 1 master repository. */
 	@Autowired
 	private ParkCommunityHallV1MasterRepository parkCommunityHallV1MasterRepository;
-	
+
 	@Autowired
 	private BookingsFieldsValidator bookingsFieldsValidator;
-	
+
 	@Override
 	public BookingsModel createRoomForCommunityBooking(BookingsRequest bookingsRequest) {
 		BookingsModel bookingObject = new BookingsModel();
@@ -99,11 +99,11 @@ public class RoomsServiceImpl implements RoomsService {
 		enrichmentService.generateDemandForRoom(bookingsRequest);
 		if (config.getIsExternalWorkFlowEnabled()) {
 			if (!flag)
-			workflowIntegrator.callRoomWorkFlow(bookingsRequest);
+				workflowIntegrator.callRoomWorkFlow(bookingsRequest);
 		}
 		BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
 		if(!flag)
-		bookingsProducer.push(config.getSaveRoomDetails(), kafkaBookingRequest);
+			bookingsProducer.push(config.getSaveRoomDetails(), kafkaBookingRequest);
 		else {
 			bookingsProducer.push(config.getUpdateRoomDetails(), kafkaBookingRequest);	
 		}
@@ -169,15 +169,15 @@ public class RoomsServiceImpl implements RoomsService {
 					break;
 				}
 			}
-			
+
 		}
 		for (RoomsModel roomModelForAC : bookingsRequest.getBookingsModel().getRoomsModel()) {
 			if(BookingsConstants.AC.equals(roomModelForAC.getTypeOfRoom())) {
-			BigDecimal days = enrichmentService.extractDaysBetweenTwoDates(roomModelForAC.getFromDate(),
-					roomModelForAC.getToDate());
-			finalAmount = acAmount.multiply(BigDecimal.valueOf(Double.valueOf(roomModelForAC.getTotalNoOfRooms())));
-			finalAmount = finalAmount.multiply(days);
-			
+				BigDecimal days = enrichmentService.extractDaysBetweenTwoDates(roomModelForAC.getFromDate(),
+						roomModelForAC.getToDate());
+				finalAmount = acAmount.multiply(BigDecimal.valueOf(Double.valueOf(roomModelForAC.getTotalNoOfRooms())));
+				finalAmount = finalAmount.multiply(days);
+
 			}
 		}
 		if (!BookingsFieldsValidator.isNullOrEmpty(roomMasterModelListForNONAC)) {
@@ -206,10 +206,10 @@ public class RoomsServiceImpl implements RoomsService {
 		}
 		for (RoomsModel roomModelForNonAC : bookingsRequest.getBookingsModel().getRoomsModel()) {
 			if(BookingsConstants.NON_AC.equals(roomModelForNonAC.getTypeOfRoom())) {
-			BigDecimal days = enrichmentService.extractDaysBetweenTwoDates(roomModelForNonAC.getFromDate(),
-					roomModelForNonAC.getToDate());
-			BigDecimal amountForTotalNoOfRooms = nonAcAmount.multiply(BigDecimal.valueOf(Double.valueOf(roomModelForNonAC.getTotalNoOfRooms())));
-			finalAmount = finalAmount.add(amountForTotalNoOfRooms.multiply(days));
+				BigDecimal days = enrichmentService.extractDaysBetweenTwoDates(roomModelForNonAC.getFromDate(),
+						roomModelForNonAC.getToDate());
+				BigDecimal amountForTotalNoOfRooms = nonAcAmount.multiply(BigDecimal.valueOf(Double.valueOf(roomModelForNonAC.getTotalNoOfRooms())));
+				finalAmount = finalAmount.add(amountForTotalNoOfRooms.multiply(days));
 			}
 		}
 		return finalAmount;
@@ -226,8 +226,8 @@ public class RoomsServiceImpl implements RoomsService {
 		}
 
 	}
-	
-	
+
+
 	@Override
 	public BookingsModel updateRoomForCommunityBooking(BookingsRequest bookingsRequest) {
 		boolean flag = isRoomBookingExists(bookingsRequest.getBookingsModel().getRoomsModel().get(0).getRoomApplicationNumber());
@@ -236,7 +236,7 @@ public class RoomsServiceImpl implements RoomsService {
 			workflowIntegrator.callRoomWorkFlow(bookingsRequest);
 		}
 		BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
-			bookingsProducer.push(config.getUpdateRoomDetails(), kafkaBookingRequest);	
+		bookingsProducer.push(config.getUpdateRoomDetails(), kafkaBookingRequest);	
 		//br.save(bookingsRequest.getBookingsModel());
 		if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel().getRoomsModel())) {
 			String applicantName = bookingsRequest.getBookingsModel().getBkApplicantName().trim();
@@ -247,6 +247,26 @@ public class RoomsServiceImpl implements RoomsService {
 		}
 		return bookingsRequest.getBookingsModel();
 	}
+
+	@Override
+	public BookingsModel updateRoomForCommunityBookingData(BookingsRequest bookingsRequest) {
+		boolean flag = isRoomBookingExists(bookingsRequest.getBookingsModel().getRoomsModel().get(0).getRoomApplicationNumber());
+		enrichmentService.enrichRoomDetails(bookingsRequest,flag);
+		//	if (config.getIsExternalWorkFlowEnabled()) {
+		//		workflowIntegrator.callRoomWorkFlow(bookingsRequest);
+		//	}
+		BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+		bookingsProducer.push(config.getUpdateRoomDetails(), kafkaBookingRequest);	
+		//	roomsRepository.save(bookingsRequest.getBookingsModel());
+		if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel().getRoomsModel())) {
+			String applicantName = bookingsRequest.getBookingsModel().getBkApplicantName().trim();
+			if (!BookingsFieldsValidator.isNullOrEmpty(applicantName)) {
+				bookingsRequest.getBookingsModel().setBkApplicantName(applicantName.split(" ")[0]);
+			}
+			bookingsProducer.push(config.getUpdateRoomBookingSMSTopic(), bookingsRequest);
+		}
+		return bookingsRequest.getBookingsModel();
+	}	
 
 	/**
 	 * Community center room availbility fetch.
@@ -287,7 +307,7 @@ public class RoomsServiceImpl implements RoomsService {
 		}
 		return typesOfRoomMap;
 	}
-	
+
 	/**
 	 * Gets the all type of community center rooms.
 	 *
@@ -337,7 +357,7 @@ public class RoomsServiceImpl implements RoomsService {
 		}
 		return typesOfRoomMap;
 	}
-	
+
 	/**
 	 * Calculate available room.
 	 *

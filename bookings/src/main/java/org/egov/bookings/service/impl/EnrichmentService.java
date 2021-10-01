@@ -336,6 +336,10 @@ public class EnrichmentService {
 			bookingsModel.setBkDriverName(bookingsRequest.getBookingsModel().getBkDriverName());
 			bookingsModel.setBkApproverName(bookingsRequest.getBookingsModel().getBkApproverName());
 			bookingsModel.setQuantity(bookingsRequest.getBookingsModel().getQuantity());
+			bookingsModel.setBkSector(bookingsRequest.getBookingsModel().getBkSector());
+			bookingsModel.setBkType(bookingsRequest.getBookingsModel().getBkType());
+			bookingsModel.setBkHouseNo(bookingsRequest.getBookingsModel().getBkHouseNo());
+			bookingsModel.setBkCompleteAddress(bookingsRequest.getBookingsModel().getBkCompleteAddress());
 			if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel().getBkPaymentStatus())) {
 				bookingsModel.setBkPaymentStatus(bookingsRequest.getBookingsModel().getBkPaymentStatus());
 			}
@@ -1148,15 +1152,17 @@ public class EnrichmentService {
 
 	public Set<Date> checkTimeslotsAvailabilty(BookingsRequest bookingsRequest, Set<BookingsModel> bookingsModelSet,
 			SortedSet<Date> bookedDates) {
+		System.out.println("Inside checkTimeslotsAvailabilty() method");
 		List<BookingsModel> bookingsModelList = new ArrayList<>(bookingsModelSet);
-
 		List<TimeslotsModel> extractedTimeSlots = extractTimeSlots(bookingsModelList, bookingsRequest);
-		
 		for (TimeslotsModel timeslots1 : extractedTimeSlots) {
 			for (TimeslotsModel timeslots : bookingsRequest.getBookingsModel().getTimeslots()) {
+				System.out.println("timeslots are "+timeslots1.getSlot() +"="+timeslots.getSlot()+" from date is="+bookingsRequest.getBookingsModel().getBkFromDate());
 				if (timeslots1.getSlot().equals(timeslots.getSlot())) {
+					System.out.println("both the timeslots are "+timeslots1.getSlot() +"="+timeslots.getSlot()+" from date is="+bookingsRequest.getBookingsModel().getBkFromDate());
 //					bookedDates.add(Date.valueOf(LocalDate.now()));
 					bookedDates.add(bookingsRequest.getBookingsModel().getBkFromDate());
+					System.out.println("Booked date size is "+bookedDates.size());
 					return bookedDates;
 				}
 			}
@@ -1169,7 +1175,8 @@ public class EnrichmentService {
 			BookingsRequest bookingsRequest) {
 		List<TimeslotsModel> extractedTimeSlots = new ArrayList<>();
 		for (BookingsModel model : bookingsModelList) {
-			if(bookingsRequest.getBookingsModel().getBkFromDate() == model.getBkFromDate()) {
+		//	if(bookingsRequest.getBookingsModel().getBkFromDate() == model.getBkFromDate()) {
+			if(bookingsRequest.getBookingsModel().getBkFromDate().equals(model.getBkFromDate())) {	
 				extractedTimeSlots.addAll(model.getTimeslots());
 			}
 		}

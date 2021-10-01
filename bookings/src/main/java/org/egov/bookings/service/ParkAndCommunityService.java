@@ -37,6 +37,11 @@ public interface ParkAndCommunityService {
 	BookingsModel updateParkAndCommunityBooking(BookingsRequest bookingsRequest);
 
 	/**
+	 * Update Park and Community Booking without workflow
+	 */
+	BookingsModel updateParkAndCommunityBookingData(BookingsRequest bookingsRequest);
+	
+	/**
 	 * Fetch park community master.
 	 *
 	 * @param parkCommunityFeeMasterRequest the park community fee master request

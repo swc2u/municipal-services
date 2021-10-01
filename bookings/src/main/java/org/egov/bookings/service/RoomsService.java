@@ -47,6 +47,7 @@ public interface RoomsService {
 	 * @return the bookings model
 	 */
 	BookingsModel updateRoomForCommunityBooking(BookingsRequest bookingsRequest);
+	BookingsModel updateRoomForCommunityBookingData(BookingsRequest bookingsRequest);
 	
 	/**
 	 * Community center room availbility fetch.

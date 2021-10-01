@@ -1325,6 +1325,13 @@ public class BookingsServiceImpl implements BookingsService {
 					else if (!BookingsFieldsValidator.isNullOrEmpty(fromDate) && !BookingsFieldsValidator.isNullOrEmpty(fromDate)) {
 						bookingsSet.addAll(roomsRepository.getEmployeeCommunityCenterRoomBooking(applicationStatus, typeOfRoom, applicationNumber, fromDate, toDate, uuid));
 					}
+				}else if (BookingsConstants.CLERK.equals(role.getCode())) { //This section is added to show rooms details SANJAY
+					if (BookingsFieldsValidator.isNullOrEmpty(fromDate) && BookingsFieldsValidator.isNullOrEmpty(fromDate)) {
+						bookingsSet.addAll(roomsRepository.getEmployeeCommunityCenterRoomBooking(applicationStatus, typeOfRoom, applicationNumber));
+					} 
+					else if (!BookingsFieldsValidator.isNullOrEmpty(fromDate) && !BookingsFieldsValidator.isNullOrEmpty(fromDate)) {
+						bookingsSet.addAll(roomsRepository.getEmployeeCommunityCenterRoomBooking(applicationStatus, typeOfRoom, applicationNumber, fromDate, toDate));
+					}
 				}
 			}
 			bookingsList.addAll(bookingsSet);

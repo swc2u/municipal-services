@@ -85,36 +85,36 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 	/** The booking service. */
 	@Autowired
 	private BookingsService bookingService;
-	
+
 	/** The lock. */
 	private Lock lock = new ReentrantLock();
 
 	/** The bookings producer. */
 	@Autowired
 	private BookingsProducer bookingsProducer;
-	
+
 	/** The user service. */
 	@Autowired
 	private UserService userService;
-	
+
 	/** The bookings fields validator. */
 	@Autowired
 	private BookingsFieldsValidator bookingsFieldsValidator;
-	
+
 	/** The commercial grnd availability repo. */
 	@Autowired
 	private CommercialGrndAvailabilityRepository commercialGrndAvailabilityRepo;
-	
+
 	/** The bookings utils. */
 	@Autowired
 	private BookingsUtils bookingsUtils;
-	
+
 	@Autowired
 	private BookingLockService bookingLockService;
-	
+
 	@Autowired
 	BookingsServiceImpl bookingsServiceImpl;
-	
+
 	/**
 	 * Creates the park and community booking.
 	 *
@@ -134,7 +134,7 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 		boolean flag = bookingService.isBookingExists(bookingsRequest.getBookingsModel().getBkApplicationNumber());
 		enrichmentService.enrichReInitiatedRequest(bookingsRequest,flag);
 		if(BookingsConstants.EMPLOYEE.equals(bookingsRequest.getRequestInfo().getUserInfo().getType()))
-		userService.createUser(bookingsRequest, false);
+			userService.createUser(bookingsRequest, false);
 		if (!flag) {
 			enrichmentService.enrichParkCommunityCreateRequest(bookingsRequest);
 			enrichmentService.enrichBookingsDetails(bookingsRequest);
@@ -143,31 +143,31 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 
 		if (config.getIsExternalWorkFlowEnabled()) {
 			if (!flag || bookingsRequest.getBookingsModel().isReInitiateStatus())
-			workflowIntegrator.callWorkFlow(bookingsRequest);
+				workflowIntegrator.callWorkFlow(bookingsRequest);
 		}
 		try {
-		BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
-		if (!flag)
-		bookingsProducer.push(config.getSaveBookingTopic(), kafkaBookingRequest);
-		else
-			bookingsProducer.push(config.getUpdateBookingTopic(), kafkaBookingRequest);
+			BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+			if (!flag)
+				bookingsProducer.push(config.getSaveBookingTopic(), kafkaBookingRequest);
+			else
+				bookingsProducer.push(config.getUpdateBookingTopic(), kafkaBookingRequest);
 		}catch (Exception e) {
 			throw new CustomException("PARK_COMMUNITY_CREATE_ERROR",e.getLocalizedMessage());
 		}
 		//parkAndCommunityRepository.save(bookingsRequest.getBookingsModel());
 		if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel())) {
-//			Map<String, MdmsJsonFields> mdmsJsonFieldsMap = bookingsServiceImpl.mdmsJsonField(bookingsRequest);
-//			if (!BookingsFieldsValidator.isNullOrEmpty(mdmsJsonFieldsMap)) {
-//				bookingsRequest.getBookingsModel().setBkBookingType(
-//						mdmsJsonFieldsMap.get(bookingsRequest.getBookingsModel().getBkBookingType()).getModifiedName());
-//				String applicantName = bookingsRequest.getBookingsModel().getBkApplicantName().trim();
-//				if (!BookingsFieldsValidator.isNullOrEmpty(applicantName)) {
-//					bookingsRequest.getBookingsModel().setBkApplicantName(applicantName.split(" ")[0]);
-//				}
-				if(!BookingsFieldsValidator.isNullOrEmpty(bookingObject) && !BookingsConstants.INITIATED.equals(bookingObject.getBkApplicationStatus())) {
-					bookingsProducer.push(config.getSaveBookingSMSTopic(), bookingsRequest);
-				}
-//			}
+			//			Map<String, MdmsJsonFields> mdmsJsonFieldsMap = bookingsServiceImpl.mdmsJsonField(bookingsRequest);
+			//			if (!BookingsFieldsValidator.isNullOrEmpty(mdmsJsonFieldsMap)) {
+			//				bookingsRequest.getBookingsModel().setBkBookingType(
+			//						mdmsJsonFieldsMap.get(bookingsRequest.getBookingsModel().getBkBookingType()).getModifiedName());
+			//				String applicantName = bookingsRequest.getBookingsModel().getBkApplicantName().trim();
+			//				if (!BookingsFieldsValidator.isNullOrEmpty(applicantName)) {
+			//					bookingsRequest.getBookingsModel().setBkApplicantName(applicantName.split(" ")[0]);
+			//				}
+			if(!BookingsFieldsValidator.isNullOrEmpty(bookingObject) && !BookingsConstants.INITIATED.equals(bookingObject.getBkApplicationStatus())) {
+				bookingsProducer.push(config.getSaveBookingSMSTopic(), bookingsRequest);
+			}
+			//			}
 		}
 		return bookingsRequest.getBookingsModel();
 	}
@@ -190,7 +190,7 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 		/*if(BookingsConstants.APPLY.equals(bookingsRequest.getBookingsModel().getBkAction()))
 			enrichmentService.enrichBookingsAssignee(bookingsRequest);*/
 		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
-			bookingsRequest.getBookingsModel().setLastModifiedDate(formatter.format(new java.util.Date()));
+		bookingsRequest.getBookingsModel().setLastModifiedDate(formatter.format(new java.util.Date()));
 		String businessService = bookingsRequest.getBookingsModel().getBusinessService();
 		bookingLockService.deleteLockDates(bookingsRequest.getBookingsModel().getBkApplicationNumber());
 		bookingsFieldsValidator.validateRefundAmount(bookingsRequest);
@@ -215,19 +215,76 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 			//bookingsModel = parkAndCommunityRepository.save(bookingsRequest.getBookingsModel());
 		}
 		if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel())) {
-//			Map<String, MdmsJsonFields> mdmsJsonFieldsMap = bookingsServiceImpl.mdmsJsonField(bookingsRequest);
-//			if (!BookingsFieldsValidator.isNullOrEmpty(mdmsJsonFieldsMap)) {
-//				bookingsRequest.getBookingsModel()
-//						.setBkBookingType(mdmsJsonFieldsMap.get(bookingsRequest.getBookingsModel().getBkBookingType()).getModifiedName());
-//				String applicantName = bookingsRequest.getBookingsModel().getBkApplicantName().trim();
-//				if (!BookingsFieldsValidator.isNullOrEmpty(applicantName)) {
-//					bookingsRequest.getBookingsModel().setBkApplicantName(applicantName.split(" ")[0]);
-//				}
-				bookingsProducer.push(config.getUpdateBookingSMSTopic(), bookingsRequest);
-//			}
+			//			Map<String, MdmsJsonFields> mdmsJsonFieldsMap = bookingsServiceImpl.mdmsJsonField(bookingsRequest);
+			//			if (!BookingsFieldsValidator.isNullOrEmpty(mdmsJsonFieldsMap)) {
+			//				bookingsRequest.getBookingsModel()
+			//						.setBkBookingType(mdmsJsonFieldsMap.get(bookingsRequest.getBookingsModel().getBkBookingType()).getModifiedName());
+			//				String applicantName = bookingsRequest.getBookingsModel().getBkApplicantName().trim();
+			//				if (!BookingsFieldsValidator.isNullOrEmpty(applicantName)) {
+			//					bookingsRequest.getBookingsModel().setBkApplicantName(applicantName.split(" ")[0]);
+			//				}
+			bookingsProducer.push(config.getUpdateBookingSMSTopic(), bookingsRequest);
+			//			}
 		}
 		return bookingsRequest.getBookingsModel();
 	}
+
+	/**
+	 * Update park and community booking without running workflow.
+	 *
+	 * @param bookingsRequest the bookings request
+	 * @return the bookings model
+	 */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.egov.bookings.service.ParkAndCommunityService#
+	 * updateParkAndCommunityBooking(org.egov.bookings.web.models.BookingsRequest)
+	 */
+	@Override
+	public BookingsModel updateParkAndCommunityBookingData(BookingsRequest bookingsRequest) {
+
+		/*if(BookingsConstants.APPLY.equals(bookingsRequest.getBookingsModel().getBkAction()))
+			enrichmentService.enrichBookingsAssignee(bookingsRequest);*/
+		DateFormat formatter = bookingsUtils.getSimpleDateFormat();
+		bookingsRequest.getBookingsModel().setLastModifiedDate(formatter.format(new java.util.Date()));
+		String businessService = bookingsRequest.getBookingsModel().getBusinessService();
+		//		bookingLockService.deleteLockDates(bookingsRequest.getBookingsModel().getBkApplicationNumber());
+		bookingsFieldsValidator.validateRefundAmount(bookingsRequest);
+		//		if (config.getIsExternalWorkFlowEnabled())
+		//			workflowIntegrator.callWorkFlow(bookingsRequest);
+
+		BookingsModel bookingsModel = null;
+		if (!BookingsConstants.APPLY.equals(bookingsRequest.getBookingsModel().getBkAction())
+				&& !BookingsConstants.OFFLINE_APPLY.equals(bookingsRequest.getBookingsModel().getBkAction())
+				&& BookingsConstants.BUSINESS_SERVICE_PACC.equals(businessService)
+				&& !BookingsConstants.PACC_ACTION_CANCEL.equals(bookingsRequest.getBookingsModel().getBkAction())
+				&& !BookingsConstants.PACC_ACTION_MODIFY.equals(bookingsRequest.getBookingsModel().getBkAction())) {
+			bookingsModel = enrichmentService.enrichPaccDetails(bookingsRequest);
+			bookingsRequest.setBookingsModel(bookingsModel);
+			//	BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+			//	bookingsProducer.push(config.getUpdateBookingTopic(), kafkaBookingRequest);
+			bookingsModel = parkAndCommunityRepository.save(bookingsModel);
+		} else {
+			enrichmentService.enrichPaccPaymentDetails(bookingsRequest);
+			//	BookingsRequestKafka kafkaBookingRequest = enrichmentService.enrichForKafka(bookingsRequest);
+			//	bookingsProducer.push(config.getUpdateBookingTopic(), kafkaBookingRequest);
+			bookingsModel = parkAndCommunityRepository.save(bookingsRequest.getBookingsModel());
+		}
+		//	if (!BookingsFieldsValidator.isNullOrEmpty(bookingsRequest.getBookingsModel())) {
+		//			Map<String, MdmsJsonFields> mdmsJsonFieldsMap = bookingsServiceImpl.mdmsJsonField(bookingsRequest);
+		//			if (!BookingsFieldsValidator.isNullOrEmpty(mdmsJsonFieldsMap)) {
+		//				bookingsRequest.getBookingsModel()
+		//						.setBkBookingType(mdmsJsonFieldsMap.get(bookingsRequest.getBookingsModel().getBkBookingType()).getModifiedName());
+		//				String applicantName = bookingsRequest.getBookingsModel().getBkApplicantName().trim();
+		//				if (!BookingsFieldsValidator.isNullOrEmpty(applicantName)) {
+		//					bookingsRequest.getBookingsModel().setBkApplicantName(applicantName.split(" ")[0]);
+		//				}
+		//		bookingsProducer.push(config.getUpdateBookingSMSTopic(), bookingsRequest);
+		//			}
+		//	}
+		return bookingsRequest.getBookingsModel();
+	}	
 
 	/**
 	 * Fetch park community master.
@@ -282,10 +339,10 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 					parkAndCommunitySearchCriteria.getApplicationNumber());
 		}
 		else {
-				bookingsModel = parkAndCommunityRepository.fetchBookedDatesOfParkAndCommunity(
-				parkAndCommunitySearchCriteria.getBookingVenue(), parkAndCommunitySearchCriteria.getBookingType(),
-				parkAndCommunitySearchCriteria.getSector(), date1, BookingsConstants.PAYMENT_SUCCESS_STATUS,
-				parkAndCommunitySearchCriteria.getApplicationNumber());
+			bookingsModel = parkAndCommunityRepository.fetchBookedDatesOfParkAndCommunity(
+					parkAndCommunitySearchCriteria.getBookingVenue(), parkAndCommunitySearchCriteria.getBookingType(),
+					parkAndCommunitySearchCriteria.getSector(), date1, BookingsConstants.PAYMENT_SUCCESS_STATUS,
+					parkAndCommunitySearchCriteria.getApplicationNumber());
 		}
 		if (null != bookingsModel) {
 			for (BookingsModel bkModel : bookingsModel) {
@@ -320,7 +377,6 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 	 */
 	@Override
 	public Set<Date> fetchBookedDates(BookingsRequest bookingsRequest) {
-
 		enrichmentService.enrichLockDates(bookingsRequest);
 		// Date date = commercialGroundAvailabiltySearchCriteria.getDate();
 		LocalDate date = LocalDate.now();
@@ -336,7 +392,6 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 			//lock.lock();
 			Set<LocalDate> toBeBooked = enrichmentService.extractAllDatesBetweenTwoDates(bookingsRequest);
 			if (config.isParkAndCommunityLock()) {
-		
 				if(bookingsRequest.getBookingsModel().getBkBookingType().equals(BookingsConstants.COMMUNITY_CENTER)) {
 					bookingsModelSet = parkAndCommunityRepository.fetchBookedDatesOfCommunity(
 							bookingsRequest.getBookingsModel().getBkBookingType(),
@@ -344,29 +399,29 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 							bookingsRequest.getBookingsModel().getBkApplicationNumber());
 				}
 				else {
-				bookingsModelSet = parkAndCommunityRepository.fetchBookedDatesOfParkAndCommunity(
-						bookingsRequest.getBookingsModel().getBkBookingVenue(),
-						bookingsRequest.getBookingsModel().getBkBookingType(),
-						bookingsRequest.getBookingsModel().getBkSector(), date1, BookingsConstants.PAYMENT_SUCCESS_STATUS, bookingsRequest.getBookingsModel().getBkApplicationNumber());
+					bookingsModelSet = parkAndCommunityRepository.fetchBookedDatesOfParkAndCommunity(
+							bookingsRequest.getBookingsModel().getBkBookingVenue(),
+							bookingsRequest.getBookingsModel().getBkBookingType(),
+							bookingsRequest.getBookingsModel().getBkSector(), date1, BookingsConstants.PAYMENT_SUCCESS_STATUS, bookingsRequest.getBookingsModel().getBkApplicationNumber());
 				}
 				Set<LocalDate> fetchBookedDates = enrichmentService.enrichBookedDates(bookingsModelSet);
 				List<CommercialGrndAvailabilityModel> lockList = commercialGrndAvailabilityRepo
 						.findLockedDatesFromNowTo6Months(currentDate, sixMonthsFromNowSql);
-
 				for (LocalDate toBeBooked1 : toBeBooked) {
-
 					for (LocalDate fetchBookedDates1 : fetchBookedDates) {
-						
 						if(bookingsRequest.getBookingsModel().getBkBookingType().equals(BookingsConstants.COMMUNITY_CENTER)) {
 							if(bookingsRequest.getBookingsModel().getTimeslots() != null && toBeBooked1.equals(fetchBookedDates1)) {
+								boolean istimeslt= bookingsRequest.getBookingsModel().getTimeslots().get(0).getSlot().contains("00"); //This checks 00 occurence in the timeslot booked by citizen
 								Set<Date> timeslotDate =  enrichmentService.checkTimeslotsAvailabilty(bookingsRequest, bookingsModelSet,
 										bookedDates);
 								if(BookingsFieldsValidator.isNullOrEmpty(timeslotDate)) {
-//								    bookedDates.add(Date.valueOf(toBeBooked1));
-									bookedDates.add(Date.valueOf(LocalDate.now()));
-								    return bookedDates;
+									if(istimeslt) {
+										bookedDates.add(Date.valueOf(toBeBooked1));
+									}else {
+										bookedDates.add(Date.valueOf(LocalDate.now()));
+									}
+									return bookedDates;
 								}
-									
 							}
 							else {
 								if (toBeBooked1.equals(fetchBookedDates1)) {
@@ -375,7 +430,7 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 								}
 							}
 						}
-						else {
+						else {//This condition applied for PARK and others
 							if (toBeBooked1.equals(fetchBookedDates1)) {
 								bookedDates.add(Date.valueOf(toBeBooked1));
 								return bookedDates;
@@ -389,9 +444,9 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 								.equals(bookingsRequest.getBookingsModel().getBkBookingType())
 								&& commGrndAvailModel.isLocked()
 								&& bookingsRequest.getBookingsModel().getBkSector()
-										.equals(commGrndAvailModel.getSector())
+								.equals(commGrndAvailModel.getSector())
 								&& bookingsRequest.getBookingsModel().getBkBookingVenue()
-										.equals(commGrndAvailModel.getBookingVenue())) {
+								.equals(commGrndAvailModel.getBookingVenue())) {
 							if (toBeBooked1.equals(commGrndAvailModel.getFromDate().toLocalDate())) {
 								bookedDates.add(commGrndAvailModel.getFromDate());
 								return bookedDates;
@@ -400,7 +455,9 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 								.equals(bookingsRequest.getBookingsModel().getBkBookingType())
 								&& commGrndAvailModel.isLocked()
 								&& bookingsRequest.getBookingsModel().getBkSector()
-										.equals(commGrndAvailModel.getSector())) {
+								.equals(commGrndAvailModel.getSector())
+								&& bookingsRequest.getBookingsModel().getBkBookingVenue()
+								.equals(commGrndAvailModel.getBookingVenue())) {
 							if (toBeBooked1.equals(commGrndAvailModel.getFromDate().toLocalDate())) {
 								bookedDates.add(commGrndAvailModel.getFromDate());
 								return bookedDates;
@@ -464,13 +521,13 @@ public class ParkAndCommunityServiceImpl implements ParkAndCommunityService {
 				ParkCommunityFeeMasterResponse parkCommunityFeeMasterResponse= enrichmentService.enrichParkCommunityAmount(parkCommunityHallFee);
 				return parkCommunityFeeMasterResponse;
 			}
-			
+
 		} catch (Exception e) {
 			throw new CustomException("DATABASE_ERROR", e.getLocalizedMessage());
 		}
 	}
 
-	
+
 	/**
 	 * Fetch sector.
 	 *
